@@ -1,0 +1,46 @@
+name: photobooth_flutter
+description: "AI Photobooth application built with Flutter"
+publish_to: "none"
+version: 0.1.0
+
+environment:
+  sdk: ^3.6.0
+
+dependencies:
+  camera: ^0.11.1
+  file_picker: ^9.2.1
+  flutter:
+    sdk: flutter
+  provider: ^6.1.2
+  qr_flutter: ^4.1.0
+  shared_preferences: ^2.5.2
+
+dev_dependencies:
+  flutter_lints: ^5.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/fonts/
+    - assets/images/
+    - assets/characters/
+    - assets/videos/
+
+  fonts:
+    - family: Satoshi
+      fonts:
+        - asset: assets/fonts/Satoshi-Black.otf
+          weight: 900
+        - asset: assets/fonts/Satoshi-Bold.otf
+          weight: 700
+        - asset: assets/fonts/Satoshi-Italic.otf
+          weight: 500
+        - asset: assets/fonts/Satoshi-Light.otf
+          weight: 400
+        - asset: assets/fonts/Satoshi-Medium.otf
+          weight: 600
+        - asset: assets/fonts/Satoshi-Regular.otf
+          weight: 500
