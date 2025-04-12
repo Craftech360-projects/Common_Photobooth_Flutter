@@ -1,9 +1,9 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:photobooth_flutter/core/themes/app_colors.dart';
-import 'package:photobooth_flutter/providers/admin_settings_provider.dart';
 import 'package:photobooth_flutter/providers/app_provider.dart';
+import 'package:photobooth_flutter/providers/global_settings_provider.dart';
+import 'package:photobooth_flutter/providers/registration_screen_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
 import 'package:provider/provider.dart';
 
@@ -17,11 +17,28 @@ class ParticipantDetailsScreen extends StatefulWidget {
 
 class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _emailController = TextEditingController();
+  final Map<String, TextEditingController> _controllers = {};
   final List<int> _secretPattern = [];
   final List<int> _correctPattern = [1, 2];
   DateTime? _lastTapTime;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final registrationSettings = context.read<RegistrationScreenProvider>();
+
+      // If registration screen is disabled, navigate directly to gender selection
+      if (!registrationSettings.showRegistrationScreen) {
+        Navigator.pushReplacementNamed(context, AppRoutes.genderSelection);
+      }
+
+      // Initialize controllers for each field
+      for (var field in registrationSettings.textFields) {
+        _controllers[field.id] = TextEditingController();
+      }
+    });
+  }
 
   // FOR NAVIGATING TO ADMIN SCREEN
   void _handleSecretTap(int position) {
@@ -49,28 +66,27 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
 
   @override
   void dispose() {
-    _nameController.dispose();
-    _emailController.dispose();
+    // Dispose all controllers
+    for (var controller in _controllers.values) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final adminSettings = context.watch<AdminSettingsProvider>();
+    final registrationSettings = context.watch<RegistrationScreenProvider>();
+    final globalSettings = context.watch<GlobalSettingsProvider>();
 
     return Scaffold(
+      appBar: AppBar(),
       body: Stack(children: [
         Container(
           width: double.infinity,
           height: double.infinity,
           decoration: BoxDecoration(
             image: DecorationImage(
-              image: adminSettings.backgroundImage != null
-                  ? (adminSettings.isAssetImage
-                          ? AssetImage(adminSettings.backgroundImage!)
-                          : FileImage(File(adminSettings.backgroundImage!)))
-                      as ImageProvider
-                  : const AssetImage('assets/images/background.jpg'),
+              image: _getBackgroundImage(registrationSettings, globalSettings),
               fit: BoxFit.cover,
             ),
           ),
@@ -80,69 +96,79 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  ...adminSettings.formFields.map((field) => Column(
-                        children: [
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.35,
-                            child: TextFormField(
-                              // CONTROLLER IS MISSING
-                              style: TextStyle(
-                                color: field.textColor,
-                              ),
-                              decoration: InputDecoration(
-                                hintText: field.hintText,
-                                filled: true,
-                                fillColor: field.fillColor,
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(
-                                    adminSettings.borderRadius,
+                  ...registrationSettings.textFields
+                      .where((field) => field.isEnabled)
+                      .map((field) => Column(
+                            children: [
+                              SizedBox(
+                                width: MediaQuery.of(context).size.width *
+                                    field.width,
+                                height: field.height,
+                                child: TextFormField(
+                                  controller: _controllers[field.id],
+                                  style: TextStyle(
+                                    color: field.textColor,
+                                    fontSize: field.fontSize,
                                   ),
+                                  decoration: InputDecoration(
+                                    labelText: field.label,
+                                    labelStyle: TextStyle(
+                                      color: field.labelColor,
+                                    ),
+                                    hintText: field.hintText,
+                                    filled: true,
+                                    fillColor: field.fillColor,
+                                    border: field.hasBorder
+                                        ? OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              registrationSettings.borderRadius,
+                                            ),
+                                            borderSide: BorderSide(
+                                              color: field.borderColor,
+                                              width: field.borderWidth,
+                                            ),
+                                          )
+                                        : InputBorder.none,
+                                    enabledBorder: field.hasBorder
+                                        ? OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              registrationSettings.borderRadius,
+                                            ),
+                                            borderSide: BorderSide(
+                                              color: field.borderColor,
+                                              width: field.borderWidth,
+                                            ),
+                                          )
+                                        : InputBorder.none,
+                                    focusedBorder: field.hasBorder
+                                        ? OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              registrationSettings.borderRadius,
+                                            ),
+                                            borderSide: BorderSide(
+                                              color: field.borderColor,
+                                              width: field.borderWidth,
+                                            ),
+                                          )
+                                        : InputBorder.none,
+                                  ),
+                                  validator: (value) {
+                                    if (field.isRequired &&
+                                        (value?.isEmpty ?? true)) {
+                                      return 'Please enter ${field.label.toLowerCase()}';
+                                    }
+                                    return null;
+                                  },
                                 ),
                               ),
-                              validator: (value) {
-                                if (field.isRequired &&
-                                    (value?.isEmpty ?? true)) {
-                                  return 'Please enter ${field.label.toLowerCase()}';
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                          SizedBox(height: adminSettings.fieldSpacing),
-                        ],
-                      )),
-                  SizedBox(height: adminSettings.buttonSpacing),
-                  ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState?.validate() ?? false) {
-                        context.read<PhotoboothProvider>().setUserDetails(
-                              _nameController.text,
-                              _emailController.text,
-                            );
-                        Navigator.pushNamed(context, AppRoutes.genderSelection);
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.goldenYellow,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 30,
-                        vertical: 15,
-                      ),
-                      side: const BorderSide(
-                        color: AppColors.white,
-                        width: 1.0,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                          adminSettings.borderRadius,
-                        ),
-                      ),
-                    ),
-                    child: Text(
-                      adminSettings.submitButtonText,
-                      style: adminSettings.buttonTextStyle,
-                    ),
-                  ),
+                              SizedBox(
+                                  height: registrationSettings.fieldSpacing),
+                            ],
+                          )),
+                  SizedBox(height: registrationSettings.buttonSpacing),
+                  registrationSettings.useImageButton
+                      ? _buildImageButton(registrationSettings)
+                      : _buildTextButton(registrationSettings),
                 ],
               ),
             ),
@@ -174,5 +200,131 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
         )
       ]),
     );
+  }
+
+  Widget _buildTextButton(RegistrationScreenProvider settings) {
+    return Container(
+      margin: settings.buttonMargin,
+      child: ElevatedButton(
+        onPressed: _handleSubmit,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: settings.submitButtonColor,
+          foregroundColor: settings.submitButtonTextColor,
+          padding: settings.buttonPadding,
+          minimumSize: Size(settings.buttonWidth, settings.buttonHeight),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
+            side: settings.buttonHasBorder
+                ? BorderSide(
+                    color: settings.buttonBorderColor,
+                    width: settings.buttonBorderWidth,
+                  )
+                : BorderSide.none,
+          ),
+        ),
+        child: Text(
+          settings.submitButtonText,
+          style: TextStyle(
+            fontSize: settings.buttonFontSize,
+            fontWeight: FontWeight.bold,
+            color: settings.submitButtonTextColor,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildImageButton(RegistrationScreenProvider settings) {
+    if (settings.buttonImagePath == null) {
+      // Fallback to text button if no image is selected
+      return _buildTextButton(settings);
+    }
+
+    return GestureDetector(
+      onTap: _handleSubmit,
+      child: Container(
+        margin: settings.buttonMargin,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
+          child: Container(
+            width: settings.buttonWidth,
+            height: settings.buttonHeight,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
+              image: DecorationImage(
+                image: settings.isButtonImageAsset
+                    ? AssetImage(settings.buttonImagePath!)
+                    : FileImage(File(settings.buttonImagePath!))
+                        as ImageProvider,
+                fit: BoxFit.cover,
+              ),
+              border: settings.buttonHasBorder
+                  ? Border.all(
+                      color: settings.buttonBorderColor,
+                      width: settings.buttonBorderWidth,
+                    )
+                  : null,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _handleSubmit() {
+    if (_formKey.currentState?.validate() ?? false) {
+      // Get the name and email fields if they exist
+      String? name;
+      String? email;
+      String? contact;
+
+      for (var field in context.read<RegistrationScreenProvider>().textFields) {
+        if (field.isEnabled) {
+          final value = _controllers[field.id]?.text;
+          if (field.label.toLowerCase().contains('name')) {
+            name = value;
+          } else if (field.label.toLowerCase().contains('email')) {
+            email = value;
+          } else if (field.label.toLowerCase().contains('contact')) {
+            contact = value;
+          }
+        }
+      }
+
+      // Set user details in the provider
+      context.read<PhotoboothProvider>().setUserDetails(
+            name ?? '',
+            email ?? '',
+          );
+
+      // Navigate to the next screen
+      Navigator.pushNamed(context, AppRoutes.genderSelection);
+    }
+  }
+
+  ImageProvider _getBackgroundImage(
+      RegistrationScreenProvider registrationSettings,
+      GlobalSettingsProvider globalSettings) {
+    // First try to use registration screen specific background
+    if (registrationSettings.registrationScreenBackground != null) {
+      if (registrationSettings.isRegistrationScreenBackgroundAsset) {
+        return AssetImage(registrationSettings.registrationScreenBackground!);
+      } else {
+        return FileImage(
+            File(registrationSettings.registrationScreenBackground!));
+      }
+    }
+
+    // Fall back to global background if available
+    if (globalSettings.backgroundImage != null) {
+      if (globalSettings.isAssetImage) {
+        return AssetImage(globalSettings.backgroundImage!);
+      } else {
+        return FileImage(File(globalSettings.backgroundImage!));
+      }
+    }
+
+    // Default background
+    return const AssetImage('assets/images/background.jpg');
   }
 }

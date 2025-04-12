@@ -26,7 +26,7 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
   Future<void> _processImage() async {
     try {
       final provider = Provider.of<PhotoboothProvider>(context, listen: false);
-      final capturedImagePath = provider.capturedImage;
+      final capturedImagePath = provider.faceImagePath;
 
       if (capturedImagePath == null) {
         throw Exception('No captured image found');
@@ -124,7 +124,7 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(17),
                 child: Image.file(
-                  File(provider.capturedImage!),
+                  File(provider.faceImagePath!),
                   fit: BoxFit.cover,
                 ),
               ),

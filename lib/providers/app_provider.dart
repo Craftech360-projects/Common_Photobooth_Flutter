@@ -4,9 +4,13 @@ class PhotoboothProvider extends ChangeNotifier {
   String? name;
   String? email;
   String? gender;
-  String? selectedCharacter;
-  String? capturedImage;
+  String? selectedCharacterId;
+  String? characterImagePath;
+  bool? isCharacterAsset;
+  String? faceImagePath;
   String? swappedImageUrl;
+
+  String get selectedGender => gender ?? 'male'; // Default to male if not set
 
   void setUserDetails(String name, String email) {
     this.name = name;
@@ -19,15 +23,22 @@ class PhotoboothProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setSelectedCharacter(String character) {
-    selectedCharacter = character;
+  void setCharacter(String id, String imagePath, bool isAsset) {
+    selectedCharacterId = id;
+    characterImagePath = imagePath;
+    isCharacterAsset = isAsset;
     notifyListeners();
   }
 
-  void setCapturedImage(String imagePath) {
-    capturedImage = imagePath;
+  void setFaceImagePath(String imagePath) {
+    faceImagePath = imagePath;
     notifyListeners();
   }
+
+  // void setCapturedImage(String imagePath) {
+  //   capturedImage = imagePath;
+  //   notifyListeners();
+  // }
 
   void setSwappedImage(String imageUrl) {
     swappedImageUrl = imageUrl;
@@ -38,8 +49,11 @@ class PhotoboothProvider extends ChangeNotifier {
     name = null;
     email = null;
     gender = null;
-    selectedCharacter = null;
-    capturedImage = null;
+    selectedCharacterId = null;
+    characterImagePath = null;
+    isCharacterAsset = null;
+    // capturedImage = null;
+    faceImagePath = null;
     swappedImageUrl = null;
     notifyListeners();
   }
