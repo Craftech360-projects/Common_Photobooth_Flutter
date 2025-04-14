@@ -79,7 +79,13 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
     final globalSettings = context.watch<GlobalSettingsProvider>();
 
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () =>
+              Navigator.pushNamed(context, AppRoutes.registrationScreenSettings),
+          icon: const Icon(Icons.star),
+        ),
+      ),
       body: Stack(children: [
         Container(
           width: double.infinity,

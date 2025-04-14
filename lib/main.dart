@@ -7,6 +7,7 @@ import 'package:photobooth_flutter/providers/face_capture_provider.dart';
 import 'package:photobooth_flutter/providers/gender_selection_provider.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/providers/loading_screen_provider.dart';
+import 'package:photobooth_flutter/providers/output_screen_provider.dart';
 import 'package:photobooth_flutter/providers/registration_screen_provider.dart';
 import 'package:photobooth_flutter/providers/welcome_screen_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
@@ -40,6 +41,9 @@ void main() async {
   final loadingScreenProvider = LoadingScreenProvider();
   await loadingScreenProvider.init();
 
+  final outputScreenProvider = OutputScreenProvider();
+  await outputScreenProvider.init();
+
   runApp(
     MultiProvider(
       providers: [
@@ -51,7 +55,8 @@ void main() async {
         ChangeNotifierProvider.value(value: genderSettings),
         ChangeNotifierProvider.value(value: characterSettings),
         ChangeNotifierProvider.value(value: faceCaptureProvider),
-        ChangeNotifierProvider.value(value: LoadingScreenProvider()),
+        ChangeNotifierProvider.value(value: loadingScreenProvider),
+        ChangeNotifierProvider.value(value: outputScreenProvider),
       ],
       child: const MyApp(),
     ),
@@ -68,7 +73,7 @@ class MyApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
       onGenerateRoute: AppRoutes.onGenerateRoute,
       initialRoute: AppRoutes.welcomeScreen,
-      // home: const CharacterSelectionScreen(),
+      // home: const SwappedFaceScreen(),
       debugShowCheckedModeBanner: false,
     );
   }

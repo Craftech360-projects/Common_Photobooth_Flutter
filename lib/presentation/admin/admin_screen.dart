@@ -175,7 +175,7 @@ class _ScreenSettingsSection extends StatelessWidget {
           'Output Screen',
           'Configure output screen appearance and content',
           Icons.print_rounded,
-          () => Navigator.pushNamed(context, AppRoutes.swappedFace),
+          () => Navigator.pushNamed(context, AppRoutes.outputScreenSettings),
         ),
       ],
     );

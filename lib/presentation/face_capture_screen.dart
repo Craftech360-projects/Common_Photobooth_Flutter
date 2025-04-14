@@ -82,26 +82,28 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
 
   Future<void> _initializeOtherPlatformCamera() async {
     try {
-      _cameras = await availableCameras();
-      if (_cameras.isEmpty) {
-        debugPrint('No cameras available');
-        return;
+      if (!Platform.isMacOS) {
+        _cameras = await availableCameras();
+        if (_cameras.isEmpty) {
+          debugPrint('No cameras available');
+          return;
+        }
+
+        final settings = context.read<FaceCaptureProvider>();
+        final selectedIndex = settings.selectedCameraIndex < _cameras.length
+            ? settings.selectedCameraIndex
+            : 0;
+
+        _controller = CameraController(
+          _cameras[selectedIndex],
+          ResolutionPreset.medium,
+          enableAudio: false,
+          imageFormatGroup: ImageFormatGroup.bgra8888,
+        );
+
+        _initializeControllerFuture = _controller?.initialize();
+        await _initializeControllerFuture;
       }
-
-      final settings = context.read<FaceCaptureProvider>();
-      final selectedIndex = settings.selectedCameraIndex < _cameras.length
-          ? settings.selectedCameraIndex
-          : 0;
-
-      _controller = CameraController(
-        _cameras[selectedIndex],
-        ResolutionPreset.medium,
-        enableAudio: false,
-        imageFormatGroup: ImageFormatGroup.bgra8888,
-      );
-
-      _initializeControllerFuture = _controller?.initialize();
-      await _initializeControllerFuture;
 
       setState(() {
         _cameraInitialized = true;
@@ -184,12 +186,10 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
         width: double.infinity,
         height: double.infinity,
         decoration: BoxDecoration(
-          image: settings.showBackground && settings.backgroundImagePath != null
-              ? DecorationImage(
-                  image: _getBackgroundImage(settings, globalSettings),
-                  fit: BoxFit.cover,
-                )
-              : null,
+          image: DecorationImage(
+            image: _getBackgroundImage(settings, globalSettings),
+            fit: BoxFit.cover,
+          ),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -355,16 +355,25 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
           ? AssetImage(settings.backgroundImagePath!)
           : FileImage(File(settings.backgroundImagePath!)) as ImageProvider;
     }
+
     // Fall back to global background if available
-    else if (globalSettings.backgroundImagePath != null) {
-      return globalSettings.isBackgroundImageAsset
-          ? AssetImage(globalSettings.backgroundImagePath!)
-          : FileImage(File(globalSettings.backgroundImagePath!))
-              as ImageProvider;
+    else if (globalSettings.backgroundImage != null) {
+      if (globalSettings.isAssetImage) {
+        return AssetImage(globalSettings.backgroundImage!);
+      } else {
+        final file = File(globalSettings.backgroundImage!);
+        if (file.existsSync()) {
+          return FileImage(file);
+        } else {
+          debugPrint('Global background image file does not exist: ${globalSettings.backgroundImage}');
+          return const AssetImage('assets/images/background.jpg');
+        }
+      }
     }
+
     // Use default background as last resort
     else {
-      return const AssetImage('assets/images/default_background.jpg');
+      return const AssetImage('assets/images/background.jpg');
     }
   }
 }

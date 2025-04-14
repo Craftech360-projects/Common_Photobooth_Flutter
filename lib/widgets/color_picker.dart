@@ -57,9 +57,7 @@ class _ColorPickerState extends State<ColorPicker> {
           ],
         ),
         const SizedBox(height: 16),
-        // Current color display
         Container(
-          width: double.infinity,
           height: 50,
           decoration: BoxDecoration(
             color: _currentColor,

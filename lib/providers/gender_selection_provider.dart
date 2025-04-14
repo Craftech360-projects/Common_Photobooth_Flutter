@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -120,18 +121,24 @@ class GenderSelectionProvider extends ChangeNotifier {
     _saveSettings();
   }
 
-  void setMaleImage(String? path, {required bool isAsset}) {
-    _maleImagePath = path;
+  void setMaleImage(String? imagePath, {required bool isAsset}) {
+    _maleImagePath = imagePath;
     _isMaleImageAsset = isAsset;
     notifyListeners();
     _saveSettings();
+
+    // Debug output
+    debugPrint('Set male image: path=$imagePath, isAsset=$isAsset');
   }
 
-  void setFemaleImage(String? path, {required bool isAsset}) {
-    _femaleImagePath = path;
+  void setFemaleImage(String? imagePath, {required bool isAsset}) {
+    _femaleImagePath = imagePath;
     _isFemaleImageAsset = isAsset;
     notifyListeners();
     _saveSettings();
+
+    // Debug output
+    debugPrint('Set female image: path=$imagePath, isAsset=$isAsset');
   }
 
   void setImageDimensions(double width, double height) {
@@ -256,6 +263,22 @@ class GenderSelectionProvider extends ChangeNotifier {
     _saveSettings();
   }
 
+  // Add this method to validate file paths before using them
+  Future<bool> _isFileAccessible(String? filePath) async {
+    if (filePath == null) return false;
+
+    // For asset paths, we can't check directly
+    if (filePath.startsWith('assets/')) return true;
+
+    try {
+      final file = File(filePath);
+      return await file.exists();
+    } catch (e) {
+      debugPrint('Error checking file accessibility: $e');
+      return false;
+    }
+  }
+
   // Initialize provider from SharedPreferences
   Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
@@ -272,12 +295,37 @@ class GenderSelectionProvider extends ChangeNotifier {
           .values[settings['titleFontWeight'] ?? _titleFontWeight.index];
       _titlePadding = settings['titlePadding'] ?? _titlePadding;
 
-      // Gender images settings
-      _maleImagePath = settings['maleImagePath'];
-      _femaleImagePath = settings['femaleImagePath'];
-      _isMaleImageAsset = settings['isMaleImageAsset'] ?? _isMaleImageAsset;
-      _isFemaleImageAsset =
-          settings['isFemaleImageAsset'] ?? _isFemaleImageAsset;
+      // Gender images settings - with validation
+      if (settings.containsKey('maleImagePath')) {
+        final path = settings['maleImagePath'] as String?;
+        final isAsset = settings['isMaleImageAsset'] ?? true;
+
+        if (isAsset || await _isFileAccessible(path)) {
+          _maleImagePath = path;
+          _isMaleImageAsset = isAsset;
+        } else {
+          // Fallback to default if file not accessible
+          _maleImagePath = 'assets/images/male_avatar.png';
+          _isMaleImageAsset = true;
+          debugPrint('Male image file not accessible, using default: $path');
+        }
+      }
+
+      if (settings.containsKey('femaleImagePath')) {
+        final path = settings['femaleImagePath'] as String?;
+        final isAsset = settings['isFemaleImageAsset'] ?? true;
+
+        if (isAsset || await _isFileAccessible(path)) {
+          _femaleImagePath = path;
+          _isFemaleImageAsset = isAsset;
+        } else {
+          // Fallback to default if file not accessible
+          _femaleImagePath = 'assets/images/female_avatar.png';
+          _isFemaleImageAsset = true;
+          debugPrint('Female image file not accessible, using default: $path');
+        }
+      }
+
       _imageWidth = settings['imageWidth'] ?? _imageWidth;
       _imageHeight = settings['imageHeight'] ?? _imageHeight;
       _imageSpacing = settings['imageSpacing'] ?? _imageSpacing;
@@ -333,60 +381,67 @@ class GenderSelectionProvider extends ChangeNotifier {
 
   // Save settings to SharedPreferences
   Future<void> _saveSettings() async {
-    final prefs = await SharedPreferences.getInstance();
+    try {
+      final prefs = await SharedPreferences.getInstance();
 
-    final Map<String, dynamic> settings = {
-      // Title settings
-      'titleText': _titleText,
-      'titleFontSize': _titleFontSize,
-      'titleColor': _titleColor.value,
-      'titleFontWeight': _titleFontWeight.index,
-      'titlePadding': _titlePadding,
+      final Map<String, dynamic> settings = {
+        // Title settings
+        'titleText': _titleText,
+        'titleFontSize': _titleFontSize,
+        'titleColor': _titleColor.value,
+        'titleFontWeight': _titleFontWeight.index,
+        'titlePadding': _titlePadding,
 
-      // Gender images settings
-      'maleImagePath': _maleImagePath,
-      'femaleImagePath': _femaleImagePath,
-      'isMaleImageAsset': _isMaleImageAsset,
-      'isFemaleImageAsset': _isFemaleImageAsset,
-      'imageWidth': _imageWidth,
-      'imageHeight': _imageHeight,
-      'imageSpacing': _imageSpacing,
-      'imageBorderRadius': _imageBorderRadius,
-      'showImageBorder': _showImageBorder,
-      'imageBorderWidth': _imageBorderWidth,
-      'imageBorderColor': _imageBorderColor.value,
+        // Gender images settings
+        'maleImagePath': _maleImagePath,
+        'femaleImagePath': _femaleImagePath,
+        'isMaleImageAsset': _isMaleImageAsset,
+        'isFemaleImageAsset': _isFemaleImageAsset,
+        'imageWidth': _imageWidth,
+        'imageHeight': _imageHeight,
+        'imageSpacing': _imageSpacing,
+        'imageBorderRadius': _imageBorderRadius,
+        'showImageBorder': _showImageBorder,
+        'imageBorderWidth': _imageBorderWidth,
+        'imageBorderColor': _imageBorderColor.value,
 
-      // Selection effect settings
-      'useSelectionEffect': _useSelectionEffect,
-      'selectedImageScale': _selectedImageScale,
-      'useSelectionGlow': _useSelectionGlow,
-      'selectionGlowColor': _selectionGlowColor.value,
-      'selectionGlowIntensity': _selectionGlowIntensity,
-      'selectionGlowSpread': _selectionGlowSpread,
+        // Selection effect settings
+        'useSelectionEffect': _useSelectionEffect,
+        'selectedImageScale': _selectedImageScale,
+        'useSelectionGlow': _useSelectionGlow,
+        'selectionGlowColor': _selectionGlowColor.value,
+        'selectionGlowIntensity': _selectionGlowIntensity,
+        'selectionGlowSpread': _selectionGlowSpread,
 
-      // Button settings
-      'buttonText': _buttonText,
-      'buttonWidth': _buttonWidth,
-      'buttonHeight': _buttonHeight,
-      'buttonFontSize': _buttonFontSize,
-      'buttonColor': _buttonColor.value,
-      'buttonTextColor': _buttonTextColor.value,
-      'buttonBorderRadius': _buttonBorderRadius,
-      'buttonHasBorder': _buttonHasBorder,
-      'buttonBorderWidth': _buttonBorderWidth,
-      'buttonBorderColor': _buttonBorderColor.value,
-      'buttonMarginTop': _buttonMarginTop,
-      'useImageButton': _useImageButton,
-      'buttonImagePath': _buttonImagePath,
-      'isButtonImageAsset': _isButtonImageAsset,
+        // Button settings
+        'buttonText': _buttonText,
+        'buttonWidth': _buttonWidth,
+        'buttonHeight': _buttonHeight,
+        'buttonFontSize': _buttonFontSize,
+        'buttonColor': _buttonColor.value,
+        'buttonTextColor': _buttonTextColor.value,
+        'buttonBorderRadius': _buttonBorderRadius,
+        'buttonHasBorder': _buttonHasBorder,
+        'buttonBorderWidth': _buttonBorderWidth,
+        'buttonBorderColor': _buttonBorderColor.value,
+        'buttonMarginTop': _buttonMarginTop,
+        'useImageButton': _useImageButton,
+        'buttonImagePath': _buttonImagePath,
+        'isButtonImageAsset': _isButtonImageAsset,
 
-      // Layout settings
-      'screenPadding': _screenPadding,
-      'showBackground': _showBackground,
-      'backgroundImagePath': _backgroundImagePath,
-      'isBackgroundImageAsset': _isBackgroundImageAsset,
-    };
+        // Layout settings
+        'screenPadding': _screenPadding,
+        'showBackground': _showBackground,
+        'backgroundImagePath': _backgroundImagePath,
+        'isBackgroundImageAsset': _isBackgroundImageAsset,
+      };
 
-    await prefs.setString('gender_selection_settings', jsonEncode(settings));
+      debugPrint(
+          'Saving gender selection settings: maleImagePath=$_maleImagePath, femaleImagePath=$_femaleImagePath');
+
+      await prefs.setString('gender_selection_settings', jsonEncode(settings));
+    } catch (e) {
+      debugPrint('Error saving gender selection settings: $e');
+    }
   }
 }

@@ -266,6 +266,14 @@ class LoadingScreenSettings extends StatelessWidget {
     required String value,
     required Function(String) onChanged,
   }) {
+    // Create a TextEditingController with the initial value
+    final controller = TextEditingController(text: value);
+    
+    // Set the cursor position at the end of the text
+    controller.selection = TextSelection.fromPosition(
+      TextPosition(offset: controller.text.length),
+    );
+    
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: Column(
@@ -274,11 +282,16 @@ class LoadingScreenSettings extends StatelessWidget {
           Text(label),
           const SizedBox(height: 8),
           TextField(
-            controller: TextEditingController(text: value),
-            onChanged: onChanged,
+            controller: controller,
+            textDirection: TextDirection.ltr,
+            textAlign: TextAlign.left,
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
+              isDense: true,
             ),
+            onChanged: onChanged,
+            keyboardType: TextInputType.text,
+            textInputAction: TextInputAction.done,
           ),
         ],
       ),

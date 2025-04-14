@@ -26,6 +26,15 @@ class _FaceCaptureSettingsState extends State<FaceCaptureSettings> {
 
   Future<void> _loadCameras() async {
     try {
+      if (Platform.isMacOS) {
+        // On macOS, we use camera_macos plugin instead
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
+      
+      // For other platforms, use the standard camera plugin
       _cameras = await availableCameras();
     } on Exception catch (e) {
       debugPrint('Error loading cameras: $e');
@@ -121,18 +130,19 @@ class _FaceCaptureSettingsState extends State<FaceCaptureSettings> {
 
                   // Camera Preview Settings
                   _buildSectionTitle('Camera Preview Settings'),
-                  _buildDropdown<int>(
-                    label: 'Select Camera',
-                    value: settings.selectedCameraIndex < _cameras.length
-                        ? settings.selectedCameraIndex
-                        : 0,
-                    items: {
-                      for (int i = 0; i < _cameras.length; i++)
-                        i: 'Camera ${i + 1} (${_cameras[i].name})',
-                    },
-                    onChanged: (value) =>
-                        settings.setSelectedCameraIndex(value!),
-                  ),
+                  if (!Platform.isMacOS && _cameras.isNotEmpty)
+                    _buildDropdown<int>(
+                      label: 'Select Camera',
+                      value: settings.selectedCameraIndex < _cameras.length
+                          ? settings.selectedCameraIndex
+                          : 0,
+                      items: {
+                        for (int i = 0; i < _cameras.length; i++)
+                          i: 'Camera ${i + 1} (${_cameras[i].name})',
+                      },
+                      onChanged: (value) =>
+                          settings.setSelectedCameraIndex(value!),
+                    ),
                   _buildSlider(
                     label: 'Preview Width',
                     value: settings.previewWidth,

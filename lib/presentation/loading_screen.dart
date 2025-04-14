@@ -24,10 +24,21 @@ class _LoadingScreenState extends State<LoadingScreen> {
   @override
   void initState() {
     super.initState();
-    VideoPlayerMediaKit.ensureInitialized(
-      macOS: true,
-      windows: true,
-    );
+
+    // Try to initialize the video player, but handle errors gracefully
+    try {
+      if (Platform.isMacOS) {
+        // On macOS, we need to check if the framework is available
+        VideoPlayerMediaKit.ensureInitialized(
+          macOS: true,
+          windows: false,
+        );
+      }
+    } catch (e) {
+      debugPrint('Error initializing VideoPlayerMediaKit: $e');
+      // Continue without video support if initialization fails
+    }
+
     _startLoading();
   }
 
@@ -35,8 +46,15 @@ class _LoadingScreenState extends State<LoadingScreen> {
     final settings = Provider.of<LoadingScreenProvider>(context, listen: false);
 
     // Initialize video controller if needed
-    if (settings.loaderFileType == 'mp4' || settings.loaderFileType == 'mov') {
-      await _initializeVideoPlayer(settings);
+    if ((settings.loaderFileType == 'mp4' ||
+            settings.loaderFileType == 'mov') &&
+        settings.loaderFilePath != null) {
+      try {
+        await _initializeVideoPlayer(settings);
+      } catch (e) {
+        debugPrint('Error initializing video player: $e');
+        // Continue without video if initialization fails
+      }
     }
 
     setState(() {
@@ -54,26 +72,27 @@ class _LoadingScreenState extends State<LoadingScreen> {
   Future<void> _initializeVideoPlayer(LoadingScreenProvider settings) async {
     if (settings.loaderFilePath == null) return;
 
-    if (settings.isLoaderFileAsset) {
-      // For asset videos
-      _videoController = VideoPlayerController.asset(
-        settings.loaderFilePath!,
-        videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
-      );
-    } else {
-      // For file videos
-      _videoController = VideoPlayerController.file(
-        File(settings.loaderFilePath!),
-        videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
-      );
-    }
-
     try {
+      if (settings.isLoaderFileAsset) {
+        // For asset videos
+        _videoController = VideoPlayerController.asset(
+          settings.loaderFilePath!,
+          videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
+        );
+      } else {
+        // For file videos
+        _videoController = VideoPlayerController.file(
+          File(settings.loaderFilePath!),
+          videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
+        );
+      }
+
       await _videoController!.initialize();
       await _videoController!.setLooping(true);
       await _videoController!.play();
-    } on Exception catch (e) {
+    } catch (e) {
       debugPrint('Error initializing video player: $e');
+      _videoController = null; // Set to null so we can show fallback
     }
   }
 
@@ -153,45 +172,63 @@ class _LoadingScreenState extends State<LoadingScreen> {
     }
 
     // Based on the file type, show the appropriate loader
-    switch (settings.loaderFileType) {
-      case 'gif':
-        return settings.isLoaderFileAsset
-            ? Image.asset(
-                settings.loaderFilePath!,
-                fit: BoxFit.contain,
-              )
-            : Image.file(
-                File(settings.loaderFilePath!),
-                fit: BoxFit.contain,
-              );
+    try {
+      switch (settings.loaderFileType) {
+        case 'gif':
+          return settings.isLoaderFileAsset
+              ? Image.asset(
+                  settings.loaderFilePath!,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) {
+                    debugPrint('Error loading GIF: $error');
+                    return _buildFallbackLoader();
+                  },
+                )
+              : Image.file(
+                  File(settings.loaderFilePath!),
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) {
+                    debugPrint('Error loading GIF file: $error');
+                    return _buildFallbackLoader();
+                  },
+                );
 
-      case 'json':
-        return Lottie.asset(
-          settings.loaderFilePath!,
-          fit: BoxFit.contain,
-        );
-
-      case 'mp4':
-      case 'mov':
-        if (_videoController != null && _videoController!.value.isInitialized) {
-          return AspectRatio(
-            aspectRatio: _videoController!.value.aspectRatio,
-            child: VideoPlayer(_videoController!),
+        case 'json':
+          return Lottie.asset(
+            settings.loaderFilePath!,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) {
+              debugPrint('Error loading Lottie animation: $error');
+              return _buildFallbackLoader();
+            },
           );
-        }
-        return const Center(
-          child: CircularProgressIndicator(
-            color: AppColors.goldenYellow,
-          ),
-        );
 
-      default:
-        return const Center(
-          child: CircularProgressIndicator(
-            color: AppColors.goldenYellow,
-          ),
-        );
+        case 'mp4':
+        case 'mov':
+          if (_videoController != null &&
+              _videoController!.value.isInitialized) {
+            return AspectRatio(
+              aspectRatio: _videoController!.value.aspectRatio,
+              child: VideoPlayer(_videoController!),
+            );
+          }
+          return _buildFallbackLoader();
+
+        default:
+          return _buildFallbackLoader();
+      }
+    } catch (e) {
+      debugPrint('Error building loader: $e');
+      return _buildFallbackLoader();
     }
+  }
+
+  Widget _buildFallbackLoader() {
+    return const Center(
+      child: CircularProgressIndicator(
+        color: AppColors.goldenYellow,
+      ),
+    );
   }
 
   DecorationImage? _getBackgroundImage(
