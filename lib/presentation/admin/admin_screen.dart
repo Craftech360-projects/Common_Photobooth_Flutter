@@ -14,6 +14,27 @@ class AdminScreen extends StatefulWidget {
 }
 
 class _AdminScreenState extends State<AdminScreen> {
+  final _supabaseUrlController = TextEditingController();
+  final _supabaseAnonKeyController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final globalSettings =
+          Provider.of<GlobalSettingsProvider>(context, listen: false);
+      _supabaseUrlController.text = globalSettings.supabaseUrl ?? '';
+      _supabaseAnonKeyController.text = globalSettings.supabaseAnonKey ?? '';
+    });
+  }
+
+  @override
+  void dispose() {
+    _supabaseUrlController.dispose();
+    _supabaseAnonKeyController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,7 +51,10 @@ class _AdminScreenState extends State<AdminScreen> {
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            _GlobalSettingsSection(),
+            _GlobalSettingsSection(
+              supabaseUrlController: _supabaseUrlController,
+              supabaseAnonKeyController: _supabaseAnonKeyController,
+            ),
             const Divider(height: 32),
             const Text(
               'Screen Settings',
@@ -38,14 +62,83 @@ class _AdminScreenState extends State<AdminScreen> {
             ),
             const SizedBox(height: 16),
             _ScreenSettingsSection(),
+            const Divider(height: 32),
+            const Text(
+              'Advanced Settings',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            _buildAdvancedSettings(),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildAdvancedSettings() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.red,
+            foregroundColor: Colors.white,
+          ),
+          onPressed: () => _showResetConfirmationDialog(),
+          child: const Text('Reset All Preferences'),
+        ),
+      ],
+    );
+  }
+
+  void _showResetConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Reset All Preferences'),
+        content: const Text(
+            'This will reset all settings to their default values. This action cannot be undone. Are you sure you want to continue?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.red,
+            ),
+            onPressed: () async {
+              Navigator.pop(context);
+
+              // Reset all providers
+              final globalSettings =
+                  Provider.of<GlobalSettingsProvider>(context, listen: false);
+
+              await globalSettings.clearAllPreferences();
+
+              // Update text controllers
+              _supabaseUrlController.text = '';
+              _supabaseAnonKeyController.text = '';
+
+              showSnackBar(context, 'All preferences have been reset');
+            },
+            child: const Text('Reset'),
+          ),
+        ],
       ),
     );
   }
 }
 
 class _GlobalSettingsSection extends StatelessWidget {
+  final TextEditingController supabaseUrlController;
+  final TextEditingController supabaseAnonKeyController;
+
+  const _GlobalSettingsSection({
+    required this.supabaseUrlController,
+    required this.supabaseAnonKeyController,
+  });
+
   @override
   Widget build(BuildContext context) {
     final globalSettings = context.watch<GlobalSettingsProvider>();
@@ -117,6 +210,35 @@ class _GlobalSettingsSection extends StatelessWidget {
             padding: const EdgeInsets.only(top: 8.0),
             child: Text('Selected: ${globalSettings.backgroundImage}'),
           ),
+        const SizedBox(height: 24),
+        const Text(
+          'Supabase Configuration',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        Constants.h8,
+        TextFormField(
+          controller: supabaseUrlController,
+          decoration: const InputDecoration(
+            labelText: 'Supabase URL',
+            border: OutlineInputBorder(),
+            hintText: 'https://your-project.supabase.co',
+          ),
+          onChanged: (value) {
+            globalSettings.setSupabaseUrl(value);
+          },
+        ),
+        const SizedBox(height: 12),
+        TextFormField(
+          controller: supabaseAnonKeyController,
+          decoration: const InputDecoration(
+            labelText: 'Supabase Anon Key',
+            border: OutlineInputBorder(),
+            hintText: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9........',
+          ),
+          onChanged: (value) {
+            globalSettings.setSupabaseAnonKey(value);
+          },
+        ),
       ],
     );
   }
@@ -210,28 +332,3 @@ class _ScreenSettingsSection extends StatelessWidget {
     );
   }
 }
-
-// class _SettingsCard extends StatelessWidget {
-//   final String title;
-//   final IconData icon;
-//   final VoidCallback onTap;
-
-//   const _SettingsCard({
-//     required this.title,
-//     required this.icon,
-//     required this.onTap,
-//   });
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Card(
-//       margin: const EdgeInsets.only(bottom: 12),
-//       child: ListTile(
-//         leading: Icon(icon, color: AppColors.goldenYellow),
-//         title: Text(title),
-//         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-//         onTap: onTap,
-//       ),
-//     );
-//   }
-// }

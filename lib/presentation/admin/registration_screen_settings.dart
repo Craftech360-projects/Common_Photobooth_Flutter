@@ -4,6 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/providers/registration_screen_provider.dart';
+import 'package:photobooth_flutter/widgets/improved_color_picker.dart';
 import 'package:provider/provider.dart';
 
 class RegistrationScreenSettings extends StatefulWidget {
@@ -218,6 +219,134 @@ class _RegistrationScreenSettingsState
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 16.0, bottom: 8.0),
+      child: Text(
+        title,
+        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+
+  Widget _buildSliderWithLabel({
+    required String label,
+    required double value,
+    required double min,
+    required double max,
+    required int divisions,
+    required Function(double) onChanged,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(label),
+            Text(value.toStringAsFixed(1)),
+          ],
+        ),
+        Slider(
+          value: value,
+          min: min,
+          max: max,
+          divisions: divisions,
+          onChanged: onChanged,
+        ),
+      ],
+    );
+  }
+
+  Future<Color?> _buildColorPickerWithLabel(BuildContext context, Color color,
+      {String label = 'Color'}) async {
+    Color? selectedColor;
+
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Select $label'),
+        content: SingleChildScrollView(
+          child: ImprovedColorPicker(
+            pickerColor: color,
+            onColorChanged: (color) {
+              selectedColor = color;
+            },
+            colorPalette: [
+              Colors.white,
+              Colors.black,
+              AppColors.yellow,
+              AppColors.goldenYellow,
+              AppColors.blue,
+              AppColors.darkBlue,
+              AppColors.red,
+              AppColors.green,
+              AppColors.orange,
+              AppColors.purple,
+              AppColors.deepPurple,
+              AppColors.purpleBright,
+              AppColors.grey,
+              AppColors.lightGrey,
+              AppColors.darkGrey,
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Done'),
+          ),
+        ],
+      ),
+    );
+
+    return selectedColor;
+  }
+
+  Widget _buildSwitchWithLabel({
+    required String label,
+    required bool value,
+    required Function(bool) onChanged,
+  }) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label),
+        Switch(
+          value: value,
+          onChanged: onChanged,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDropdownWithLabel<T>({
+    required String label,
+    required T value,
+    required Map<T, String> items,
+    required Function(T?) onChanged,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label),
+          DropdownButton<T>(
+            value: value,
+            onChanged: onChanged,
+            items: items.entries.map((entry) {
+              return DropdownMenuItem<T>(
+                value: entry.key,
+                child: Text(entry.value),
+              );
+            }).toList(),
+          ),
+        ],
       ),
     );
   }
@@ -461,8 +590,8 @@ class _RegistrationScreenSettingsState
                       ),
                     ),
                     onTap: () async {
-                      final color =
-                          await _showColorPicker(context, field.fillColor);
+                      final color = await _buildColorPickerWithLabel(
+                          context, field.fillColor);
                       if (color != null) {
                         final updatedField = CustomTextField(
                           id: field.id,
@@ -497,8 +626,8 @@ class _RegistrationScreenSettingsState
                       ),
                     ),
                     onTap: () async {
-                      final color =
-                          await _showColorPicker(context, field.textColor);
+                      final color = await _buildColorPickerWithLabel(
+                          context, field.textColor);
                       if (color != null) {
                         final updatedField = CustomTextField(
                           id: field.id,
@@ -538,8 +667,8 @@ class _RegistrationScreenSettingsState
                       ),
                     ),
                     onTap: () async {
-                      final color =
-                          await _showColorPicker(context, field.labelColor);
+                      final color = await _buildColorPickerWithLabel(
+                          context, field.labelColor);
                       if (color != null) {
                         final updatedField = CustomTextField(
                           id: field.id,
@@ -640,7 +769,7 @@ class _RegistrationScreenSettingsState
                             ),
                           ),
                           onTap: () async {
-                            final color = await _showColorPicker(
+                            final color = await _buildColorPickerWithLabel(
                                 context, field.borderColor);
                             if (color != null) {
                               final updatedField = CustomTextField(
@@ -668,6 +797,214 @@ class _RegistrationScreenSettingsState
                   ),
                 ],
               ),
+            _buildSectionHeader('Text Field Styling'),
+
+            // Font Weight
+            _buildDropdownWithLabel<FontWeight>(
+              label: 'Font Weight',
+              value: field.fontWeight,
+              items: {
+                FontWeight.w100: 'Thin',
+                FontWeight.w300: 'Light',
+                FontWeight.w400: 'Regular',
+                FontWeight.w500: 'Medium',
+                FontWeight.w700: 'Bold',
+                FontWeight.w900: 'Black',
+              },
+              onChanged: (value) {
+                if (value != null) {
+                  settings.updateTextFieldStyle(
+                    id: field.id,
+                    fontWeight: value,
+                  );
+                }
+              },
+            ),
+
+            // Font Style (Italic)
+            _buildSwitchWithLabel(
+              label: 'Italic',
+              value: field.isItalic,
+              onChanged: (value) {
+                settings.updateTextFieldStyle(
+                  id: field.id,
+                  isItalic: value,
+                );
+              },
+            ),
+
+            // Border Radius
+            _buildSliderWithLabel(
+              label: 'Border Radius',
+              value: field.borderRadius,
+              min: 0,
+              max: 30,
+              divisions: 30,
+              onChanged: (value) {
+                settings.updateTextFieldStyle(
+                  id: field.id,
+                  borderRadius: value,
+                );
+              },
+            ),
+
+            // Margins
+            _buildSectionHeader('Margins'),
+
+            _buildSliderWithLabel(
+              label: 'Top Margin',
+              value: field.margin.top,
+              min: 0,
+              max: 50,
+              divisions: 50,
+              onChanged: (value) {
+                settings.updateTextFieldStyle(
+                  id: field.id,
+                  margin: EdgeInsets.fromLTRB(
+                    field.margin.left,
+                    value,
+                    field.margin.right,
+                    field.margin.bottom,
+                  ),
+                );
+              },
+            ),
+
+            _buildSliderWithLabel(
+              label: 'Bottom Margin',
+              value: field.margin.bottom,
+              min: 0,
+              max: 50,
+              divisions: 50,
+              onChanged: (value) {
+                settings.updateTextFieldStyle(
+                  id: field.id,
+                  margin: EdgeInsets.fromLTRB(
+                    field.margin.left,
+                    field.margin.top,
+                    field.margin.right,
+                    value,
+                  ),
+                );
+              },
+            ),
+
+            _buildSliderWithLabel(
+              label: 'Left Margin',
+              value: field.margin.left,
+              min: 0,
+              max: 50,
+              divisions: 50,
+              onChanged: (value) {
+                settings.updateTextFieldStyle(
+                  id: field.id,
+                  margin: EdgeInsets.fromLTRB(
+                    value,
+                    field.margin.top,
+                    field.margin.right,
+                    field.margin.bottom,
+                  ),
+                );
+              },
+            ),
+
+            _buildSliderWithLabel(
+              label: 'Right Margin',
+              value: field.margin.right,
+              min: 0,
+              max: 50,
+              divisions: 50,
+              onChanged: (value) {
+                settings.updateTextFieldStyle(
+                  id: field.id,
+                  margin: EdgeInsets.fromLTRB(
+                    field.margin.left,
+                    field.margin.top,
+                    value,
+                    field.margin.bottom,
+                  ),
+                );
+              },
+            ),
+
+            // Padding
+            _buildSectionHeader('Padding'),
+
+            _buildSliderWithLabel(
+              label: 'Top Padding',
+              value: field.padding.top,
+              min: 0,
+              max: 30,
+              divisions: 30,
+              onChanged: (value) {
+                settings.updateTextFieldStyle(
+                  id: field.id,
+                  padding: EdgeInsets.fromLTRB(
+                    field.padding.left,
+                    value,
+                    field.padding.right,
+                    field.padding.bottom,
+                  ),
+                );
+              },
+            ),
+
+            _buildSliderWithLabel(
+              label: 'Bottom Padding',
+              value: field.padding.bottom,
+              min: 0,
+              max: 30,
+              divisions: 30,
+              onChanged: (value) {
+                settings.updateTextFieldStyle(
+                  id: field.id,
+                  padding: EdgeInsets.fromLTRB(
+                    field.padding.left,
+                    field.padding.top,
+                    field.padding.right,
+                    value,
+                  ),
+                );
+              },
+            ),
+
+            _buildSliderWithLabel(
+              label: 'Left Padding',
+              value: field.padding.left,
+              min: 0,
+              max: 30,
+              divisions: 30,
+              onChanged: (value) {
+                settings.updateTextFieldStyle(
+                  id: field.id,
+                  padding: EdgeInsets.fromLTRB(
+                    value,
+                    field.padding.top,
+                    field.padding.right,
+                    field.padding.bottom,
+                  ),
+                );
+              },
+            ),
+
+            _buildSliderWithLabel(
+              label: 'Right Padding',
+              value: field.padding.right,
+              min: 0,
+              max: 30,
+              divisions: 30,
+              onChanged: (value) {
+                settings.updateTextFieldStyle(
+                  id: field.id,
+                  padding: EdgeInsets.fromLTRB(
+                    field.padding.left,
+                    field.padding.top,
+                    value,
+                    field.padding.bottom,
+                  ),
+                );
+              },
+            ),
           ],
         ),
       ),
@@ -780,10 +1117,10 @@ class _RegistrationScreenSettingsState
                   ),
                 ),
                 onTap: () async {
-                  final color = await _showColorPicker(
-                      context, settings.submitButtonColor);
+                  final color = await _buildColorPickerWithLabel(
+                      context, settings.submitButtonTextColor);
                   if (color != null) {
-                    settings.setSubmitButtonColor(color);
+                    settings.setSubmitButtonTextColor(color);
                   }
                 },
               ),
@@ -800,8 +1137,9 @@ class _RegistrationScreenSettingsState
                   ),
                 ),
                 onTap: () async {
-                  final color = await _showColorPicker(
-                      context, settings.submitButtonTextColor);
+                  final color = await _buildColorPickerWithLabel(
+                      context, settings.submitButtonTextColor,
+                      label: "Button Text Color");
                   if (color != null) {
                     settings.setSubmitButtonTextColor(color);
                   }
@@ -861,7 +1199,7 @@ class _RegistrationScreenSettingsState
                         ),
                       ),
                       onTap: () async {
-                        final color = await _showColorPicker(
+                        final color = await _buildColorPickerWithLabel(
                             context, settings.buttonBorderColor);
                         if (color != null) {
                           settings.setButtonBorder(
@@ -877,6 +1215,141 @@ class _RegistrationScreenSettingsState
               ),
             ],
           ),
+        _buildSectionHeader('Button Text Styling'),
+        _buildDropdownWithLabel<FontWeight>(
+          label: 'Font Weight',
+          value: settings.buttonFontWeight,
+          items: {
+            FontWeight.w100: 'Thin',
+            FontWeight.w300: 'Light',
+            FontWeight.w400: 'Regular',
+            FontWeight.w500: 'Medium',
+            FontWeight.w700: 'Bold',
+            FontWeight.w900: 'Black',
+          },
+          onChanged: (value) {
+            if (value != null) {
+              settings.setButtonFontWeight(value);
+            }
+          },
+        ),
+        _buildSwitchWithLabel(
+          label: 'Italic',
+          value: settings.buttonIsItalic,
+          onChanged: (value) {
+            settings.setButtonIsItalic(value);
+          },
+        ),
+        _buildSectionHeader('Button Opacity'),
+        _buildSliderWithLabel(
+          label: 'Button Opacity',
+          value: settings.buttonOpacity,
+          min: 0.1,
+          max: 1.0,
+          divisions: 9,
+          onChanged: (value) {
+            settings.setButtonOpacity(value);
+          },
+        ),
+        _buildSliderWithLabel(
+          label: 'Text Opacity',
+          value: settings.buttonTextOpacity,
+          min: 0.1,
+          max: 1.0,
+          divisions: 9,
+          onChanged: (value) {
+            settings.setButtonTextOpacity(value);
+          },
+        ),
+        _buildSectionHeader('Button Margins'),
+        _buildSliderWithLabel(
+          label: 'Top Margin',
+          value: settings.buttonMargin.top,
+          min: 0,
+          max: 50,
+          divisions: 50,
+          onChanged: (value) {
+            settings.setButtonMargin(EdgeInsets.fromLTRB(
+              settings.buttonMargin.left,
+              value,
+              settings.buttonMargin.right,
+              settings.buttonMargin.bottom,
+            ));
+          },
+        ),
+        _buildSliderWithLabel(
+          label: 'Bottom Margin',
+          value: settings.buttonMargin.bottom,
+          min: 0,
+          max: 50,
+          divisions: 50,
+          onChanged: (value) {
+            settings.setButtonMargin(EdgeInsets.fromLTRB(
+              settings.buttonMargin.left,
+              settings.buttonMargin.top,
+              settings.buttonMargin.right,
+              value,
+            ));
+          },
+        ),
+        _buildSliderWithLabel(
+          label: 'Left Margin',
+          value: settings.buttonMargin.left,
+          min: 0,
+          max: 50,
+          divisions: 50,
+          onChanged: (value) {
+            settings.setButtonMargin(EdgeInsets.fromLTRB(
+              value,
+              settings.buttonMargin.top,
+              settings.buttonMargin.right,
+              settings.buttonMargin.bottom,
+            ));
+          },
+        ),
+        _buildSliderWithLabel(
+          label: 'Right Margin',
+          value: settings.buttonMargin.right,
+          min: 0,
+          max: 50,
+          divisions: 50,
+          onChanged: (value) {
+            settings.setButtonMargin(EdgeInsets.fromLTRB(
+              settings.buttonMargin.left,
+              settings.buttonMargin.top,
+              value,
+              settings.buttonMargin.bottom,
+            ));
+          },
+        ),
+        _buildSectionHeader('Button Padding'),
+        _buildSliderWithLabel(
+          label: 'Vertical Padding',
+          value: settings.buttonPadding.top, // Using top as vertical
+          min: 0,
+          max: 30,
+          divisions: 30,
+          onChanged: (value) {
+            settings.setButtonPadding(EdgeInsets.symmetric(
+              vertical: value,
+              horizontal:
+                  settings.buttonPadding.left, // Using left as horizontal
+            ));
+          },
+        ),
+        _buildSliderWithLabel(
+          label: 'Horizontal Padding',
+          value: settings.buttonPadding.left, // Using left as horizontal
+          min: 0,
+          max: 50,
+          divisions: 50,
+          onChanged: (value) {
+            settings.setButtonPadding(EdgeInsets.symmetric(
+              vertical: settings.buttonPadding.top, // Using top as vertical
+              horizontal: value,
+            ));
+          },
+        ),
       ],
     );
   }
@@ -1040,7 +1513,7 @@ class _RegistrationScreenSettingsState
                         ),
                       ),
                       onTap: () async {
-                        final color = await _showColorPicker(
+                        final color = await _buildColorPickerWithLabel(
                             context, settings.buttonBorderColor);
                         if (color != null) {
                           settings.setButtonBorder(
@@ -1056,109 +1529,79 @@ class _RegistrationScreenSettingsState
               ),
             ],
           ),
-      ],
-    );
-  }
-
-  Future<Color?> _showColorPicker(
-      BuildContext context, Color initialColor) async {
-    Color selectedColor = initialColor;
-
-    return showDialog<Color>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Pick a color'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Simple color picker with predefined colors
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    _colorOption(Colors.white, selectedColor, (color) {
-                      selectedColor = color;
-                    }),
-                    _colorOption(Colors.black, selectedColor, (color) {
-                      selectedColor = color;
-                    }),
-                    _colorOption(Colors.red, selectedColor, (color) {
-                      selectedColor = color;
-                    }),
-                    _colorOption(Colors.green, selectedColor, (color) {
-                      selectedColor = color;
-                    }),
-                    _colorOption(Colors.blue, selectedColor, (color) {
-                      selectedColor = color;
-                    }),
-                    _colorOption(Colors.yellow, selectedColor, (color) {
-                      selectedColor = color;
-                    }),
-                    _colorOption(Colors.orange, selectedColor, (color) {
-                      selectedColor = color;
-                    }),
-                    _colorOption(Colors.purple, selectedColor, (color) {
-                      selectedColor = color;
-                    }),
-                    _colorOption(Colors.pink, selectedColor, (color) {
-                      selectedColor = color;
-                    }),
-                    _colorOption(Colors.teal, selectedColor, (color) {
-                      selectedColor = color;
-                    }),
-                    _colorOption(Colors.grey, selectedColor, (color) {
-                      selectedColor = color;
-                    }),
-                    _colorOption(AppColors.goldenYellow, selectedColor,
-                        (color) {
-                      selectedColor = color;
-                    }),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop(selectedColor);
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _colorOption(
-      Color color, Color selectedColor, Function(Color) onSelect) {
-    final isSelected = color.value == selectedColor.value;
-
-    return GestureDetector(
-      onTap: () {
-        onSelect(color);
-      },
-      child: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          color: color,
-          border: Border.all(
-            color: isSelected ? Colors.blue : Colors.grey,
-            width: isSelected ? 3 : 1,
-          ),
-          borderRadius: BorderRadius.circular(4),
+        _buildSectionHeader('Image Button Opacity'),
+        _buildSliderWithLabel(
+          label: 'Image Opacity',
+          value: settings.buttonImageOpacity,
+          min: 0.1,
+          max: 1.0,
+          divisions: 9,
+          onChanged: (value) {
+            settings.setButtonImageOpacity(value);
+          },
         ),
-      ),
+        _buildSectionHeader('Image Button Margins'),
+        _buildSliderWithLabel(
+          label: 'Top Margin',
+          value: settings.buttonMargin.top,
+          min: 0,
+          max: 50,
+          divisions: 50,
+          onChanged: (value) {
+            settings.setButtonMargin(EdgeInsets.fromLTRB(
+              settings.buttonMargin.left,
+              value,
+              settings.buttonMargin.right,
+              settings.buttonMargin.bottom,
+            ));
+          },
+        ),
+        _buildSliderWithLabel(
+          label: 'Bottom Margin',
+          value: settings.buttonMargin.bottom,
+          min: 0,
+          max: 50,
+          divisions: 50,
+          onChanged: (value) {
+            settings.setButtonMargin(EdgeInsets.fromLTRB(
+              settings.buttonMargin.left,
+              settings.buttonMargin.top,
+              settings.buttonMargin.right,
+              value,
+            ));
+          },
+        ),
+        _buildSliderWithLabel(
+          label: 'Left Margin',
+          value: settings.buttonMargin.left,
+          min: 0,
+          max: 50,
+          divisions: 50,
+          onChanged: (value) {
+            settings.setButtonMargin(EdgeInsets.fromLTRB(
+              value,
+              settings.buttonMargin.top,
+              settings.buttonMargin.right,
+              settings.buttonMargin.bottom,
+            ));
+          },
+        ),
+        _buildSliderWithLabel(
+          label: 'Right Margin',
+          value: settings.buttonMargin.right,
+          min: 0,
+          max: 50,
+          divisions: 50,
+          onChanged: (value) {
+            settings.setButtonMargin(EdgeInsets.fromLTRB(
+              settings.buttonMargin.left,
+              settings.buttonMargin.top,
+              value,
+              settings.buttonMargin.bottom,
+            ));
+          },
+        ),
+      ],
     );
   }
 }

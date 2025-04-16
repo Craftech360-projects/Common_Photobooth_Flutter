@@ -30,25 +30,15 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
   Future<void> _processImage() async {
     try {
       final provider = Provider.of<PhotoboothProvider>(context, listen: false);
-      final capturedImagePath = provider.faceImagePath;
 
-      if (capturedImagePath == null) {
-        throw Exception('No captured image found');
+      // If we already have a swapped image URL, use it
+      if (provider.swappedImageUrl != null) {
+        setState(() => _isLoading = false);
+        return;
       }
 
-      // TODO: Implement API call to face swap service
-      // const apiUrl = 'YOUR_FACE_SWAP_API_URL';
-      // final response = await processFaceSwap(capturedImagePath, provider.selectedCharacter);
-      // provider.setSwappedImage(response.imageUrl);
-
-      // Temporary mock delay
-      await Future.delayed(const Duration(seconds: 2));
-
-      // Set a dummy swapped image URL if not set
-      if (provider.swappedImageUrl == null) {
-        provider.setSwappedImage('https://example.com/swapped-image.jpg');
-      }
-
+      // Otherwise, this is a fallback for testing
+      provider.setSwappedImage('https://example.com/swapped-image.jpg');
       setState(() => _isLoading = false);
     } on Exception {
       setState(() {
@@ -269,7 +259,14 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
       version: QrVersions.auto,
       size: settings.qrCodeSize,
       backgroundColor: settings.qrCodeBackgroundColor,
-      foregroundColor: settings.qrCodeForegroundColor,
+      eyeStyle: QrEyeStyle(
+        eyeShape: QrEyeShape.square,
+        color: settings.qrCodeForegroundColor,
+      ),
+      dataModuleStyle: QrDataModuleStyle(
+        dataModuleShape: QrDataModuleShape.square,
+        color: settings.qrCodeForegroundColor,
+      ),
     );
 
     final qrText = Text(

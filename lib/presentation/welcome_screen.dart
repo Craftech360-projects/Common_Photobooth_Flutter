@@ -28,6 +28,13 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     }
 
     return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () =>
+              Navigator.pushNamed(context, AppRoutes.welcomeScreenSettings),
+          icon: const Icon(Icons.star),
+        ),
+      ),
       body: Stack(
         children: [
           // Background
@@ -49,23 +56,37 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               children: [
                 // Welcome message
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                  padding: EdgeInsets.fromLTRB(
+                    welcomeSettings.welcomeMessageMarginLeft,
+                    welcomeSettings.welcomeMessageMarginTop,
+                    welcomeSettings.welcomeMessageMarginRight,
+                    welcomeSettings.welcomeMessageMarginBottom,
+                  ),
                   child: Text(
                     welcomeSettings.welcomeMessage,
-                    style: const TextStyle(
-                      fontSize: 36,
-                      fontWeight: FontWeight.bold,
-                      color: Color.fromARGB(255, 255, 255, 255),
+                    style: TextStyle(
+                      fontSize: welcomeSettings.welcomeMessageFontSize,
+                      fontWeight: welcomeSettings.welcomeMessageFontWeight,
+                      color: welcomeSettings.welcomeMessageColor
+                          .withOpacity(welcomeSettings.welcomeMessageOpacity),
+                      fontStyle: welcomeSettings.welcomeMessageItalic
+                          ? FontStyle.italic
+                          : FontStyle.normal,
+                      height: welcomeSettings.welcomeMessageLineHeight,
                     ),
-                    textAlign: TextAlign.center,
+                    textAlign: welcomeSettings.welcomeMessageTextAlign,
                   ),
                 ),
-                const SizedBox(height: 50),
 
-                // Button (either text or image)
-                welcomeSettings.useImageButton
-                    ? _buildImageButton(welcomeSettings)
-                    : _buildTextButton(welcomeSettings),
+                Container(
+                  margin: EdgeInsets.only(
+                    top: welcomeSettings.buttonMarginTop,
+                    bottom: welcomeSettings.buttonMarginBottom,
+                  ),
+                  child: welcomeSettings.useImageButton
+                      ? _buildImageButton(welcomeSettings)
+                      : _buildTextButton(welcomeSettings),
+                ),
               ],
             ),
           ),
@@ -73,7 +94,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           // Admin access button (hidden at bottom)
           Positioned(
             left: 0,
-            right: 0,
             bottom: 0,
             child: GestureDetector(
               onTap: () => Navigator.pushNamed(context, AppRoutes.adminScreen),
@@ -92,23 +112,34 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   }
 
   Widget _buildTextButton(WelcomeScreenProvider settings) {
-    return ElevatedButton(
-      onPressed: () =>
-          Navigator.pushNamed(context, AppRoutes.participantDetails),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: settings.welcomeButtonColor,
-        foregroundColor: settings.welcomeButtonTextColor,
-        minimumSize: Size(settings.buttonWidth, settings.buttonHeight),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
+    return Opacity(
+      opacity: settings.buttonOpacity,
+      child: ElevatedButton(
+        onPressed: () =>
+            Navigator.pushNamed(context, AppRoutes.participantDetails),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: settings.welcomeButtonColor,
+          foregroundColor: settings.welcomeButtonTextColor,
+          minimumSize: Size(settings.buttonWidth, settings.buttonHeight),
+          padding: EdgeInsets.symmetric(
+            vertical: settings.buttonPaddingVertical,
+            horizontal: settings.buttonPaddingHorizontal,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
+          ),
         ),
-      ),
-      child: Text(
-        settings.welcomeButtonText,
-        style: TextStyle(
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-          color: settings.welcomeButtonTextColor,
+        child: Text(
+          settings.welcomeButtonText,
+          style: TextStyle(
+            fontSize: settings.buttonTextFontSize,
+            fontWeight: settings.buttonTextFontWeight,
+            color: settings.welcomeButtonTextColor
+                .withOpacity(settings.buttonTextOpacity),
+            fontStyle:
+                settings.buttonTextItalic ? FontStyle.italic : FontStyle.normal,
+            height: settings.buttonTextLineHeight,
+          ),
         ),
       ),
     );
@@ -120,20 +151,25 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       return _buildTextButton(settings);
     }
 
-    return GestureDetector(
-      onTap: () => Navigator.pushNamed(context, AppRoutes.participantDetails),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
-        child: Container(
-          width: settings.buttonWidth,
-          height: settings.buttonHeight,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
-            image: DecorationImage(
-              image: settings.isButtonImageAsset
-                  ? AssetImage(settings.buttonImagePath!)
-                  : FileImage(File(settings.buttonImagePath!)) as ImageProvider,
-              fit: BoxFit.cover,
+    return Opacity(
+      opacity: settings.buttonOpacity,
+      child: GestureDetector(
+        onTap: () => Navigator.pushNamed(context, AppRoutes.participantDetails),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
+          child: Container(
+            width: settings.buttonWidth,
+            height: settings.buttonHeight,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
+              image: DecorationImage(
+                image: settings.isButtonImageAsset
+                    ? AssetImage(settings.buttonImagePath!)
+                    : FileImage(File(settings.buttonImagePath!))
+                        as ImageProvider,
+                fit: BoxFit.cover,
+                opacity: settings.buttonImageOpacity,
+              ),
             ),
           ),
         ),

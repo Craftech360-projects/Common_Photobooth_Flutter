@@ -1,7 +1,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/providers/loading_screen_provider.dart';
-import 'package:photobooth_flutter/widgets/color_picker.dart';
+import 'package:photobooth_flutter/widgets/improved_color_picker.dart';
 import 'package:provider/provider.dart';
 
 class LoadingScreenSettings extends StatelessWidget {
@@ -268,12 +268,12 @@ class LoadingScreenSettings extends StatelessWidget {
   }) {
     // Create a TextEditingController with the initial value
     final controller = TextEditingController(text: value);
-    
+
     // Set the cursor position at the end of the text
     controller.selection = TextSelection.fromPosition(
       TextPosition(offset: controller.text.length),
     );
-    
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: Column(
@@ -385,7 +385,7 @@ class LoadingScreenSettings extends StatelessWidget {
         children: [
           Text(label),
           const SizedBox(height: 8),
-          ColorPicker(
+          ImprovedColorPicker(
             pickerColor: color,
             onColorChanged: onColorChanged,
           ),

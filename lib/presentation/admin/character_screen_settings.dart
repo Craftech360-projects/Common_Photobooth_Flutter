@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/providers/character_selection_provider.dart';
-import 'package:photobooth_flutter/widgets/color_picker.dart';
+import 'package:photobooth_flutter/widgets/improved_color_picker.dart';
 import 'package:provider/provider.dart';
 
 class CharacterScreenSettings extends StatefulWidget {
@@ -30,6 +30,8 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
           children: [
             // Title Settings
             _buildSectionTitle('Title Settings'),
+
+            // Title Text
             TextFormField(
               initialValue: settings.titleText,
               decoration: const InputDecoration(
@@ -40,45 +42,180 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                 settings.setTitleText(value);
               },
             ),
+
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    initialValue: settings.titleFontSize.toString(),
-                    decoration: const InputDecoration(
-                      labelText: 'Font Size',
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.number,
-                    onChanged: (value) {
-                      final size = double.tryParse(value);
-                      if (size != null) {
-                        settings.setTitleStyle(fontSize: size);
-                      }
-                    },
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: TextFormField(
-                    initialValue: settings.titlePadding.toString(),
-                    decoration: const InputDecoration(
-                      labelText: 'Padding',
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.number,
-                    onChanged: (value) {
-                      final padding = double.tryParse(value);
-                      if (padding != null) {
-                        settings.setTitleStyle(padding: padding);
-                      }
-                    },
-                  ),
-                ),
-              ],
+
+            // Title Font Size
+            _buildSliderWithLabel(
+              label: 'Font Size',
+              value: settings.titleFontSize,
+              min: 16.0,
+              max: 48.0,
+              divisions: 32,
+              onChanged: (value) {
+                settings.setTitleStyle(fontSize: value);
+              },
             ),
+
+            // Title Line Height
+            _buildSliderWithLabel(
+              label: 'Line Height',
+              value: settings.titleLineHeight,
+              min: 0.8,
+              max: 2.0,
+              divisions: 24,
+              onChanged: (value) {
+                settings.setTitleStyle(lineHeight: value);
+              },
+            ),
+
+            // Title Opacity
+            _buildSliderWithLabel(
+              label: 'Text Opacity',
+              value: settings.titleOpacity,
+              min: 0.1,
+              max: 1.0,
+              divisions: 9,
+              onChanged: (value) {
+                settings.setTitleStyle(opacity: value);
+              },
+            ),
+
+            // Title Font Weight
+            _buildSectionSubtitle('Font Style'),
+
+            DropdownButtonFormField<FontWeight>(
+              decoration: const InputDecoration(
+                labelText: 'Font Weight',
+                border: OutlineInputBorder(),
+              ),
+              value: settings.titleFontWeight,
+              items: [
+                const DropdownMenuItem(
+                    value: FontWeight.w300, child: Text('Light')),
+                const DropdownMenuItem(
+                    value: FontWeight.w400, child: Text('Regular')),
+                const DropdownMenuItem(
+                    value: FontWeight.w500, child: Text('Medium')),
+                const DropdownMenuItem(
+                    value: FontWeight.w600, child: Text('SemiBold')),
+                const DropdownMenuItem(
+                    value: FontWeight.w700, child: Text('Bold')),
+                const DropdownMenuItem(
+                    value: FontWeight.w800, child: Text('ExtraBold')),
+                const DropdownMenuItem(
+                    value: FontWeight.w900, child: Text('Black')),
+              ],
+              onChanged: (value) {
+                if (value != null) {
+                  settings.setTitleStyle(fontWeight: value);
+                }
+              },
+            ),
+
             const SizedBox(height: 16),
+
+            // Title Text Style (Italic)
+            SwitchListTile(
+              title: const Text('Italic Text'),
+              value: settings.titleItalic,
+              onChanged: (value) {
+                settings.setTitleStyle(italic: value);
+              },
+            ),
+
+            // Title Text Alignment
+            _buildSectionSubtitle('Text Alignment'),
+
+            SegmentedButton<TextAlign>(
+              segments: const [
+                ButtonSegment(
+                    value: TextAlign.left, icon: Icon(Icons.format_align_left)),
+                ButtonSegment(
+                    value: TextAlign.center,
+                    icon: Icon(Icons.format_align_center)),
+                ButtonSegment(
+                    value: TextAlign.right,
+                    icon: Icon(Icons.format_align_right)),
+              ],
+              selected: {settings.titleAlignment},
+              onSelectionChanged: (Set<TextAlign> selection) {
+                if (selection.isNotEmpty) {
+                  settings.setTitleStyle(alignment: selection.first);
+                }
+              },
+            ),
+
+            const SizedBox(height: 16),
+
+            // Title Margin
+            _buildSectionSubtitle('Title Margins'),
+
+            _buildSliderWithLabel(
+              label: 'Top Margin',
+              value: settings.titleMargin.top,
+              min: 0.0,
+              max: 50.0,
+              divisions: 50,
+              onChanged: (value) {
+                settings.setTitleMargin(EdgeInsets.fromLTRB(
+                  settings.titleMargin.left,
+                  value,
+                  settings.titleMargin.right,
+                  settings.titleMargin.bottom,
+                ));
+              },
+            ),
+
+            _buildSliderWithLabel(
+              label: 'Bottom Margin',
+              value: settings.titleMargin.bottom,
+              min: 0.0,
+              max: 50.0,
+              divisions: 50,
+              onChanged: (value) {
+                settings.setTitleMargin(EdgeInsets.fromLTRB(
+                  settings.titleMargin.left,
+                  settings.titleMargin.top,
+                  settings.titleMargin.right,
+                  value,
+                ));
+              },
+            ),
+
+            _buildSliderWithLabel(
+              label: 'Left Margin',
+              value: settings.titleMargin.left,
+              min: 0.0,
+              max: 50.0,
+              divisions: 50,
+              onChanged: (value) {
+                settings.setTitleMargin(EdgeInsets.fromLTRB(
+                  value,
+                  settings.titleMargin.top,
+                  settings.titleMargin.right,
+                  settings.titleMargin.bottom,
+                ));
+              },
+            ),
+
+            _buildSliderWithLabel(
+              label: 'Right Margin',
+              value: settings.titleMargin.right,
+              min: 0.0,
+              max: 50.0,
+              divisions: 50,
+              onChanged: (value) {
+                settings.setTitleMargin(EdgeInsets.fromLTRB(
+                  settings.titleMargin.left,
+                  settings.titleMargin.top,
+                  value,
+                  settings.titleMargin.bottom,
+                ));
+              },
+            ),
+
+            // Title Color
             ListTile(
               title: const Text('Title Color'),
               trailing: Container(
@@ -90,8 +227,11 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                 ),
               ),
               onTap: () async {
-                final color =
-                    await _showColorPicker(context, settings.titleColor);
+                final color = await _showImprovedColorPicker(
+                  context: context,
+                  color: settings.titleColor,
+                  title: 'Select Title Color',
+                );
                 if (color != null) {
                   settings.setTitleStyle(color: color);
                 }
@@ -414,15 +554,146 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                 min: 0.1,
                 max: 0.9,
                 divisions: 8,
-                label: '${(settings.carouselVisibleWidth * 100).toInt()}%',
+                label: settings.carouselVisibleWidth.toStringAsFixed(1),
                 onChanged: (value) {
                   settings.setCarouselSettings(visibleWidth: value);
                 },
               ),
-              const Text('Percentage of side character visible',
-                  textAlign: TextAlign.center, style: TextStyle(fontSize: 14)),
-            ],
 
+              // Carousel Margin
+              _buildSectionSubtitle('Carousel Margins'),
+
+              _buildSliderWithLabel(
+                label: 'Top Margin',
+                value: settings.carouselMargin.top,
+                min: 0.0,
+                max: 50.0,
+                divisions: 50,
+                onChanged: (value) {
+                  settings.setCarouselMargin(EdgeInsets.fromLTRB(
+                    settings.carouselMargin.left,
+                    value,
+                    settings.carouselMargin.right,
+                    settings.carouselMargin.bottom,
+                  ));
+                },
+              ),
+
+              _buildSliderWithLabel(
+                label: 'Bottom Margin',
+                value: settings.carouselMargin.bottom,
+                min: 0.0,
+                max: 50.0,
+                divisions: 50,
+                onChanged: (value) {
+                  settings.setCarouselMargin(EdgeInsets.fromLTRB(
+                    settings.carouselMargin.left,
+                    settings.carouselMargin.top,
+                    settings.carouselMargin.right,
+                    value,
+                  ));
+                },
+              ),
+
+              _buildSliderWithLabel(
+                label: 'Left Margin',
+                value: settings.carouselMargin.left,
+                min: 0.0,
+                max: 50.0,
+                divisions: 50,
+                onChanged: (value) {
+                  settings.setCarouselMargin(EdgeInsets.fromLTRB(
+                    value,
+                    settings.carouselMargin.top,
+                    settings.carouselMargin.right,
+                    settings.carouselMargin.bottom,
+                  ));
+                },
+              ),
+
+              _buildSliderWithLabel(
+                label: 'Right Margin',
+                value: settings.carouselMargin.right,
+                min: 0.0,
+                max: 50.0,
+                divisions: 50,
+                onChanged: (value) {
+                  settings.setCarouselMargin(EdgeInsets.fromLTRB(
+                    settings.carouselMargin.left,
+                    settings.carouselMargin.top,
+                    value,
+                    settings.carouselMargin.bottom,
+                  ));
+                },
+              ),
+
+              // Carousel Padding
+              _buildSectionSubtitle('Carousel Padding'),
+
+              _buildSliderWithLabel(
+                label: 'Top Padding',
+                value: settings.carouselPadding.top,
+                min: 0.0,
+                max: 50.0,
+                divisions: 50,
+                onChanged: (value) {
+                  settings.setCarouselPadding(EdgeInsets.fromLTRB(
+                    settings.carouselPadding.left,
+                    value,
+                    settings.carouselPadding.right,
+                    settings.carouselPadding.bottom,
+                  ));
+                },
+              ),
+
+              _buildSliderWithLabel(
+                label: 'Bottom Padding',
+                value: settings.carouselPadding.bottom,
+                min: 0.0,
+                max: 50.0,
+                divisions: 50,
+                onChanged: (value) {
+                  settings.setCarouselPadding(EdgeInsets.fromLTRB(
+                    settings.carouselPadding.left,
+                    settings.carouselPadding.top,
+                    settings.carouselPadding.right,
+                    value,
+                  ));
+                },
+              ),
+
+              _buildSliderWithLabel(
+                label: 'Left Padding',
+                value: settings.carouselPadding.left,
+                min: 0.0,
+                max: 50.0,
+                divisions: 50,
+                onChanged: (value) {
+                  settings.setCarouselPadding(EdgeInsets.fromLTRB(
+                    value,
+                    settings.carouselPadding.top,
+                    settings.carouselPadding.right,
+                    settings.carouselPadding.bottom,
+                  ));
+                },
+              ),
+
+              _buildSliderWithLabel(
+                label: 'Right Padding',
+                value: settings.carouselPadding.right,
+                min: 0.0,
+                max: 50.0,
+                divisions: 50,
+                onChanged: (value) {
+                  settings.setCarouselPadding(EdgeInsets.fromLTRB(
+                    settings.carouselPadding.left,
+                    settings.carouselPadding.top,
+                    value,
+                    settings.carouselPadding.bottom,
+                  ));
+                },
+              ),
+            ],
             const Divider(height: 32),
 
             // Button Settings
@@ -438,82 +709,181 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
               },
             ),
             const SizedBox(height: 16),
+            // Button dimensions
             Row(
               children: [
                 Expanded(
-                  child: TextFormField(
-                    initialValue: settings.buttonWidth.toString(),
-                    decoration: const InputDecoration(
-                      labelText: 'Button Width',
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.number,
+                  child: _buildSliderWithLabel(
+                    label: 'Button Width',
+                    value: settings.buttonWidth,
+                    min: 100.0,
+                    max: 300.0,
+                    divisions: 20,
                     onChanged: (value) {
-                      final width = double.tryParse(value);
-                      if (width != null) {
-                        settings.setButtonDimensions(
-                            width, settings.buttonHeight);
-                      }
-                    },
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: TextFormField(
-                    initialValue: settings.buttonHeight.toString(),
-                    decoration: const InputDecoration(
-                      labelText: 'Button Height',
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.number,
-                    onChanged: (value) {
-                      final height = double.tryParse(value);
-                      if (height != null) {
-                        settings.setButtonDimensions(
-                            settings.buttonWidth, height);
-                      }
+                      settings.setButtonDimensions(
+                          value, settings.buttonHeight);
                     },
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+
             Row(
               children: [
                 Expanded(
-                  child: TextFormField(
-                    initialValue: settings.buttonFontSize.toString(),
-                    decoration: const InputDecoration(
-                      labelText: 'Font Size',
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.number,
+                  child: _buildSliderWithLabel(
+                    label: 'Button Height',
+                    value: settings.buttonHeight,
+                    min: 40.0,
+                    max: 100.0,
+                    divisions: 12,
                     onChanged: (value) {
-                      final size = double.tryParse(value);
-                      if (size != null) {
-                        settings.setButtonStyle(fontSize: size);
-                      }
-                    },
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: TextFormField(
-                    initialValue: settings.buttonBorderRadius.toString(),
-                    decoration: const InputDecoration(
-                      labelText: 'Border Radius',
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.number,
-                    onChanged: (value) {
-                      final radius = double.tryParse(value);
-                      if (radius != null) {
-                        settings.setButtonStyle(borderRadius: radius);
-                      }
+                      settings.setButtonDimensions(settings.buttonWidth, value);
                     },
                   ),
                 ),
               ],
+            ),
+
+            // Button Font Size and Weight
+            _buildSliderWithLabel(
+              label: 'Button Font Size',
+              value: settings.buttonFontSize,
+              min: 12.0,
+              max: 32.0,
+              divisions: 20,
+              onChanged: (value) {
+                settings.setButtonStyle(fontSize: value);
+              },
+            ),
+
+            DropdownButtonFormField<FontWeight>(
+              decoration: const InputDecoration(
+                labelText: 'Button Font Weight',
+                border: OutlineInputBorder(),
+              ),
+              value: settings.buttonFontWeight,
+              items: [
+                const DropdownMenuItem(
+                    value: FontWeight.w300, child: Text('Light')),
+                const DropdownMenuItem(
+                    value: FontWeight.w400, child: Text('Regular')),
+                const DropdownMenuItem(
+                    value: FontWeight.w500, child: Text('Medium')),
+                const DropdownMenuItem(
+                    value: FontWeight.w600, child: Text('SemiBold')),
+                const DropdownMenuItem(
+                    value: FontWeight.w700, child: Text('Bold')),
+                const DropdownMenuItem(
+                    value: FontWeight.w800, child: Text('ExtraBold')),
+                const DropdownMenuItem(
+                    value: FontWeight.w900, child: Text('Black')),
+              ],
+              onChanged: (value) {
+                if (value != null) {
+                  settings.setButtonStyle(fontWeight: value);
+                }
+              },
+            ),
+
+            const SizedBox(height: 16),
+
+            // Button Margin
+            _buildSectionSubtitle('Button Margins'),
+
+            _buildSliderWithLabel(
+              label: 'Top Margin',
+              value: settings.buttonMargin.top,
+              min: 0.0,
+              max: 50.0,
+              divisions: 50,
+              onChanged: (value) {
+                settings.setButtonMargin(EdgeInsets.fromLTRB(
+                  settings.buttonMargin.left,
+                  value,
+                  settings.buttonMargin.right,
+                  settings.buttonMargin.bottom,
+                ));
+              },
+            ),
+
+            _buildSliderWithLabel(
+              label: 'Bottom Margin',
+              value: settings.buttonMargin.bottom,
+              min: 0.0,
+              max: 50.0,
+              divisions: 50,
+              onChanged: (value) {
+                settings.setButtonMargin(EdgeInsets.fromLTRB(
+                  settings.buttonMargin.left,
+                  settings.buttonMargin.top,
+                  settings.buttonMargin.right,
+                  value,
+                ));
+              },
+            ),
+
+            _buildSliderWithLabel(
+              label: 'Left Margin',
+              value: settings.buttonMargin.left,
+              min: 0.0,
+              max: 50.0,
+              divisions: 50,
+              onChanged: (value) {
+                settings.setButtonMargin(EdgeInsets.fromLTRB(
+                  value,
+                  settings.buttonMargin.top,
+                  settings.buttonMargin.right,
+                  settings.buttonMargin.bottom,
+                ));
+              },
+            ),
+
+            _buildSliderWithLabel(
+              label: 'Right Margin',
+              value: settings.buttonMargin.right,
+              min: 0.0,
+              max: 50.0,
+              divisions: 50,
+              onChanged: (value) {
+                settings.setButtonMargin(EdgeInsets.fromLTRB(
+                  settings.buttonMargin.left,
+                  settings.buttonMargin.top,
+                  value,
+                  settings.buttonMargin.bottom,
+                ));
+              },
+            ),
+
+            // Button Padding
+            _buildSectionSubtitle('Button Padding'),
+
+            _buildSliderWithLabel(
+              label: 'Vertical Padding',
+              value: settings.buttonPadding.top,
+              min: 0.0,
+              max: 30.0,
+              divisions: 30,
+              onChanged: (value) {
+                settings.setButtonPadding(EdgeInsets.symmetric(
+                  vertical: value,
+                  horizontal: settings.buttonPadding.left,
+                ));
+              },
+            ),
+
+            _buildSliderWithLabel(
+              label: 'Horizontal Padding',
+              value: settings.buttonPadding.left,
+              min: 0.0,
+              max: 50.0,
+              divisions: 50,
+              onChanged: (value) {
+                settings.setButtonPadding(EdgeInsets.symmetric(
+                  vertical: settings.buttonPadding.top,
+                  horizontal: value,
+                ));
+              },
             ),
             const SizedBox(height: 16),
             Row(
@@ -694,183 +1064,254 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
     );
   }
 
+  // Helper methods
   Widget _buildSectionTitle(String title) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
+      padding: const EdgeInsets.only(bottom: 8.0, top: 8.0),
       child: Text(
         title,
-        style: const TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-        ),
+        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
       ),
     );
   }
 
-  Widget _buildCharacterList(
-      BuildContext context, CharacterSelectionProvider settings, bool isMale) {
-    final characters =
-        isMale ? settings.maleCharacters : settings.femaleCharacters;
+  Widget _buildSectionSubtitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0, top: 8.0),
+      child: Text(
+        title,
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+      ),
+    );
+  }
 
+  Widget _buildSliderWithLabel({
+    required String label,
+    required double value,
+    required double min,
+    required double max,
+    required ValueChanged<double> onChanged,
+    int? divisions,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('${characters.length} Characters',
-                style: const TextStyle(fontStyle: FontStyle.italic)),
-            ElevatedButton(
-              onPressed: characters.length < 6
-                  ? () async {
-                      final result = await FilePicker.platform.pickFiles(
-                        type: FileType.image,
-                        allowMultiple: false,
-                      );
-                      if (result != null && result.files.isNotEmpty) {
-                        if (isMale) {
-                          settings.addMaleCharacter(
-                            result.files.first.path!,
-                            isAsset: false,
-                          );
-                        } else {
-                          settings.addFemaleCharacter(
-                            result.files.first.path!,
-                            isAsset: false,
-                          );
-                        }
-                      }
-                    }
-                  : null,
-              child: const Text('Add Character'),
-            ),
+            Text(label),
+            Text(value.toStringAsFixed(1)),
           ],
         ),
-        const SizedBox(height: 16),
-        if (characters.isEmpty)
-          const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Text('No characters added yet.'),
-          )
-        else
-          SizedBox(
-            height: 150,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: characters.length,
-              itemBuilder: (context, index) {
-                final character = characters[index];
-                return Padding(
-                  padding: const EdgeInsets.only(right: 16.0),
-                  child: Stack(
-                    children: [
-                      Container(
-                        width: 100,
-                        height: 150,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey),
-                          borderRadius: BorderRadius.circular(
-                              settings.characterBorderRadius),
-                          image: DecorationImage(
-                            image: character.isAsset
-                                ? AssetImage(character.imagePath)
-                                : FileImage(File(character.imagePath))
-                                    as ImageProvider,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        top: 0,
-                        right: 0,
-                        child: IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: characters.length > 3
-                              ? () {
-                                  if (isMale) {
-                                    settings.removeMaleCharacter(character.id);
-                                  } else {
-                                    settings
-                                        .removeFemaleCharacter(character.id);
-                                  }
-                                }
-                              : null,
-                        ),
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.blue),
-                          onPressed: () async {
-                            final result = await FilePicker.platform.pickFiles(
-                              type: FileType.image,
-                              allowMultiple: false,
-                            );
-                            if (result != null && result.files.isNotEmpty) {
-                              if (isMale) {
-                                settings.updateMaleCharacter(
-                                  character.id,
-                                  result.files.first.path!,
-                                  isAsset: false,
-                                );
-                              } else {
-                                settings.updateFemaleCharacter(
-                                  character.id,
-                                  result.files.first.path!,
-                                  isAsset: false,
-                                );
-                              }
-                            }
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
+        Slider(
+          value: value,
+          min: min,
+          max: max,
+          divisions: divisions,
+          onChanged: onChanged,
+        ),
       ],
     );
   }
 
-  Future<Color?> _showColorPicker(
-      BuildContext context, Color initialColor) async {
-    Color selectedColor = initialColor;
+  Future<Color?> _showImprovedColorPicker({
+    required BuildContext context,
+    required Color color,
+    required String title,
+  }) async {
+    Color? selectedColor;
 
     await showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Pick a color'),
-          content: SingleChildScrollView(
-            child: ColorPicker(
-              pickerColor: initialColor,
-              onColorChanged: (Color color) {
-                selectedColor = color;
-              },
-            ),
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: SingleChildScrollView(
+          child: ImprovedColorPicker(
+            pickerColor: color,
+            onColorChanged: (color) {
+              selectedColor = color;
+            },
           ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-                selectedColor = initialColor;
-              },
-            ),
-            TextButton(
-              child: const Text('Select'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, selectedColor),
+            child: const Text('Select'),
+          ),
+        ],
+      ),
     );
 
-    return selectedColor != initialColor ? selectedColor : null;
+    return selectedColor;
   }
+}
+
+Widget _buildCharacterList(
+    BuildContext context, CharacterSelectionProvider settings, bool isMale) {
+  final characters =
+      isMale ? settings.maleCharacters : settings.femaleCharacters;
+
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text('${characters.length} Characters',
+              style: const TextStyle(fontStyle: FontStyle.italic)),
+          ElevatedButton(
+            onPressed: characters.length < 6
+                ? () async {
+                    final result = await FilePicker.platform.pickFiles(
+                      type: FileType.image,
+                      allowMultiple: false,
+                    );
+                    if (result != null && result.files.isNotEmpty) {
+                      if (isMale) {
+                        settings.addMaleCharacter(
+                          result.files.first.path!,
+                          isAsset: false,
+                        );
+                      } else {
+                        settings.addFemaleCharacter(
+                          result.files.first.path!,
+                          isAsset: false,
+                        );
+                      }
+                    }
+                  }
+                : null,
+            child: const Text('Add Character'),
+          ),
+        ],
+      ),
+      const SizedBox(height: 16),
+      if (characters.isEmpty)
+        const Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Text('No characters added yet.'),
+        )
+      else
+        SizedBox(
+          height: 150,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: characters.length,
+            itemBuilder: (context, index) {
+              final character = characters[index];
+              return Padding(
+                padding: const EdgeInsets.only(right: 16.0),
+                child: Stack(
+                  children: [
+                    Container(
+                      width: 100,
+                      height: 150,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey),
+                        borderRadius: BorderRadius.circular(
+                            settings.characterBorderRadius),
+                        image: DecorationImage(
+                          image: character.isAsset
+                              ? AssetImage(character.imagePath)
+                              : FileImage(File(character.imagePath))
+                                  as ImageProvider,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 0,
+                      right: 0,
+                      child: IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        onPressed: characters.length > 3
+                            ? () {
+                                if (isMale) {
+                                  settings.removeMaleCharacter(character.id);
+                                } else {
+                                  settings.removeFemaleCharacter(character.id);
+                                }
+                              }
+                            : null,
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: IconButton(
+                        icon: const Icon(Icons.edit, color: Colors.blue),
+                        onPressed: () async {
+                          final result = await FilePicker.platform.pickFiles(
+                            type: FileType.image,
+                            allowMultiple: false,
+                          );
+                          if (result != null && result.files.isNotEmpty) {
+                            if (isMale) {
+                              settings.updateMaleCharacter(
+                                character.id,
+                                result.files.first.path!,
+                                isAsset: false,
+                              );
+                            } else {
+                              settings.updateFemaleCharacter(
+                                character.id,
+                                result.files.first.path!,
+                                isAsset: false,
+                              );
+                            }
+                          }
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+    ],
+  );
+}
+
+Future<Color?> _showColorPicker(
+    BuildContext context, Color initialColor) async {
+  Color selectedColor = initialColor;
+
+  await showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Pick a color'),
+        content: SingleChildScrollView(
+          child: ImprovedColorPicker(
+            pickerColor: initialColor,
+            onColorChanged: (Color color) {
+              selectedColor = color;
+            },
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('Cancel'),
+            onPressed: () {
+              Navigator.of(context).pop();
+              selectedColor = initialColor;
+            },
+          ),
+          TextButton(
+            child: const Text('Select'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+
+  return selectedColor != initialColor ? selectedColor : null;
 }

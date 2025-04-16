@@ -11,17 +11,44 @@ import 'package:photobooth_flutter/providers/output_screen_provider.dart';
 import 'package:photobooth_flutter/providers/registration_screen_provider.dart';
 import 'package:photobooth_flutter/providers/welcome_screen_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
+import 'package:photobooth_flutter/services/supabase_service.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize providers
   final globalSettings = GlobalSettingsProvider();
-  await globalSettings.init();
+  try {
+    await globalSettings.init();
+
+    // Initialize Supabase if URL and key are available
+    if (globalSettings.supabaseUrl != null &&
+        globalSettings.supabaseAnonKey != null) {
+      try {
+        await SupabaseService.instance.initialize(
+          url: globalSettings.supabaseUrl!,
+          anonKey: globalSettings.supabaseAnonKey!,
+        );
+      } on Exception catch (e) {
+        debugPrint('Failed to initialize Supabase: $e');
+      }
+    }
+  } on Exception catch (e) {
+    debugPrint('Error initializing global settings: $e');
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    await globalSettings.init();
+  }
 
   final welcomeSettings = WelcomeScreenProvider();
-  await welcomeSettings.init();
+  try {
+    await welcomeSettings.init();
+  } on Exception catch (e) {
+    debugPrint('Error initializing welcome settings: $e');
+  }
 
   final adminSettings = AdminSettingsProvider();
   await adminSettings.init();
@@ -33,7 +60,15 @@ void main() async {
   await genderSettings.init();
 
   final characterSettings = CharacterSelectionProvider();
-  await characterSettings.init();
+  try {
+    await characterSettings.init();
+  } on Exception catch (e) {
+    debugPrint('Error initializing character settings: $e');
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('character_selection_settings');
+    await characterSettings.init();
+  }
 
   final faceCaptureProvider = FaceCaptureProvider();
   await faceCaptureProvider.init();
@@ -73,7 +108,7 @@ class MyApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
       onGenerateRoute: AppRoutes.onGenerateRoute,
       initialRoute: AppRoutes.welcomeScreen,
-      // home: const SwappedFaceScreen(),
+      // home: const CharacterSelectionScreen(),
       debugShowCheckedModeBanner: false,
     );
   }

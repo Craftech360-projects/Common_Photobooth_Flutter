@@ -81,8 +81,8 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          onPressed: () =>
-              Navigator.pushNamed(context, AppRoutes.registrationScreenSettings),
+          onPressed: () => Navigator.pushNamed(
+              context, AppRoutes.registrationScreenSettings),
           icon: const Icon(Icons.star),
         ),
       ),
@@ -106,7 +106,8 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
                       .where((field) => field.isEnabled)
                       .map((field) => Column(
                             children: [
-                              SizedBox(
+                              Container(
+                                margin: field.margin,
                                 width: MediaQuery.of(context).size.width *
                                     field.width,
                                 height: field.height,
@@ -115,6 +116,10 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
                                   style: TextStyle(
                                     color: field.textColor,
                                     fontSize: field.fontSize,
+                                    fontWeight: field.fontWeight,
+                                    fontStyle: field.isItalic
+                                        ? FontStyle.italic
+                                        : FontStyle.normal,
                                   ),
                                   decoration: InputDecoration(
                                     labelText: field.label,
@@ -124,10 +129,11 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
                                     hintText: field.hintText,
                                     filled: true,
                                     fillColor: field.fillColor,
+                                    contentPadding: field.padding,
                                     border: field.hasBorder
                                         ? OutlineInputBorder(
                                             borderRadius: BorderRadius.circular(
-                                              registrationSettings.borderRadius,
+                                              field.borderRadius,
                                             ),
                                             borderSide: BorderSide(
                                               color: field.borderColor,
@@ -138,7 +144,7 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
                                     enabledBorder: field.hasBorder
                                         ? OutlineInputBorder(
                                             borderRadius: BorderRadius.circular(
-                                              registrationSettings.borderRadius,
+                                              field.borderRadius,
                                             ),
                                             borderSide: BorderSide(
                                               color: field.borderColor,
@@ -149,7 +155,7 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
                                     focusedBorder: field.hasBorder
                                         ? OutlineInputBorder(
                                             borderRadius: BorderRadius.circular(
-                                              registrationSettings.borderRadius,
+                                              field.borderRadius,
                                             ),
                                             borderSide: BorderSide(
                                               color: field.borderColor,
@@ -209,31 +215,37 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
   }
 
   Widget _buildTextButton(RegistrationScreenProvider settings) {
-    return Container(
-      margin: settings.buttonMargin,
-      child: ElevatedButton(
-        onPressed: _handleSubmit,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: settings.submitButtonColor,
-          foregroundColor: settings.submitButtonTextColor,
-          padding: settings.buttonPadding,
-          minimumSize: Size(settings.buttonWidth, settings.buttonHeight),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
-            side: settings.buttonHasBorder
-                ? BorderSide(
-                    color: settings.buttonBorderColor,
-                    width: settings.buttonBorderWidth,
-                  )
-                : BorderSide.none,
+    return Opacity(
+      opacity: settings.buttonOpacity,
+      child: Container(
+        margin: settings.buttonMargin,
+        child: ElevatedButton(
+          onPressed: _handleSubmit,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: settings.submitButtonColor,
+            foregroundColor: settings.submitButtonTextColor,
+            padding: settings.buttonPadding,
+            minimumSize: Size(settings.buttonWidth, settings.buttonHeight),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
+              side: settings.buttonHasBorder
+                  ? BorderSide(
+                      color: settings.buttonBorderColor,
+                      width: settings.buttonBorderWidth,
+                    )
+                  : BorderSide.none,
+            ),
           ),
-        ),
-        child: Text(
-          settings.submitButtonText,
-          style: TextStyle(
-            fontSize: settings.buttonFontSize,
-            fontWeight: FontWeight.bold,
-            color: settings.submitButtonTextColor,
+          child: Text(
+            settings.submitButtonText,
+            style: TextStyle(
+              fontSize: settings.buttonFontSize,
+              fontWeight: settings.buttonFontWeight,
+              fontStyle:
+                  settings.buttonIsItalic ? FontStyle.italic : FontStyle.normal,
+              color: settings.submitButtonTextColor
+                  .withOpacity(settings.buttonTextOpacity),
+            ),
           ),
         ),
       ),
@@ -246,30 +258,34 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
       return _buildTextButton(settings);
     }
 
-    return GestureDetector(
-      onTap: _handleSubmit,
-      child: Container(
-        margin: settings.buttonMargin,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
-          child: Container(
-            width: settings.buttonWidth,
-            height: settings.buttonHeight,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
-              image: DecorationImage(
-                image: settings.isButtonImageAsset
-                    ? AssetImage(settings.buttonImagePath!)
-                    : FileImage(File(settings.buttonImagePath!))
-                        as ImageProvider,
-                fit: BoxFit.cover,
+    return Opacity(
+      opacity: settings.buttonImageOpacity,
+      child: GestureDetector(
+        onTap: _handleSubmit,
+        child: Container(
+          margin: settings.buttonMargin,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
+            child: Container(
+              width: settings.buttonWidth,
+              height: settings.buttonHeight,
+              decoration: BoxDecoration(
+                borderRadius:
+                    BorderRadius.circular(settings.buttonBorderRadius),
+                image: DecorationImage(
+                  image: settings.isButtonImageAsset
+                      ? AssetImage(settings.buttonImagePath!)
+                      : FileImage(File(settings.buttonImagePath!))
+                          as ImageProvider,
+                  fit: BoxFit.cover,
+                ),
+                border: settings.buttonHasBorder
+                    ? Border.all(
+                        color: settings.buttonBorderColor,
+                        width: settings.buttonBorderWidth,
+                      )
+                    : null,
               ),
-              border: settings.buttonHasBorder
-                  ? Border.all(
-                      color: settings.buttonBorderColor,
-                      width: settings.buttonBorderWidth,
-                    )
-                  : null,
             ),
           ),
         ),

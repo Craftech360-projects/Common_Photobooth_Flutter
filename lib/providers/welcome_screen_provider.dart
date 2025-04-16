@@ -13,6 +13,19 @@ class WelcomeScreenProvider extends ChangeNotifier {
   bool _showWelcomeScreen = true;
   String _welcomeMessage = 'Welcome to the AI Photobooth!';
 
+  // Welcome message styling
+  double _welcomeMessageFontSize = 36.0;
+  FontWeight _welcomeMessageFontWeight = FontWeight.bold;
+  double _welcomeMessageLineHeight = 1.2;
+  TextAlign _welcomeMessageTextAlign = TextAlign.center;
+  Color _welcomeMessageColor = Colors.white;
+  double _welcomeMessageOpacity = 1.0;
+  bool _welcomeMessageItalic = false;
+  double _welcomeMessageMarginTop = 0.0;
+  double _welcomeMessageMarginBottom = 50.0;
+  double _welcomeMessageMarginLeft = 40.0;
+  double _welcomeMessageMarginRight = 40.0;
+
   // Button settings
   bool _useImageButton = false;
   String _welcomeButtonText = 'Get Started';
@@ -22,15 +35,56 @@ class WelcomeScreenProvider extends ChangeNotifier {
   double _buttonHeight = 60.0;
   double _buttonBorderRadius = 4.0;
 
+  // Text button additional styling
+  double _buttonTextFontSize = 24.0;
+  FontWeight _buttonTextFontWeight = FontWeight.bold;
+  double _buttonTextLineHeight = 1.0;
+  bool _buttonTextItalic = false;
+  double _buttonTextOpacity = 1.0;
+  double _buttonOpacity = 1.0;
+  double _buttonMarginTop = 0.0;
+  double _buttonMarginBottom = 0.0;
+  double _buttonPaddingVertical = 8.0;
+  double _buttonPaddingHorizontal = 16.0;
+
   // Image button settings
   String? _buttonImagePath;
   bool _isButtonImageAsset = true;
+  double _buttonImageOpacity = 1.0;
 
   // Background settings
   String? _welcomeScreenBackground;
   bool _isWelcomeScreenBackgroundAsset = true;
 
-  // Getters
+  // Getters for welcome message styling
+  double get welcomeMessageFontSize => _welcomeMessageFontSize;
+  FontWeight get welcomeMessageFontWeight => _welcomeMessageFontWeight;
+  double get welcomeMessageLineHeight => _welcomeMessageLineHeight;
+  TextAlign get welcomeMessageTextAlign => _welcomeMessageTextAlign;
+  Color get welcomeMessageColor => _welcomeMessageColor;
+  double get welcomeMessageOpacity => _welcomeMessageOpacity;
+  bool get welcomeMessageItalic => _welcomeMessageItalic;
+  double get welcomeMessageMarginTop => _welcomeMessageMarginTop;
+  double get welcomeMessageMarginBottom => _welcomeMessageMarginBottom;
+  double get welcomeMessageMarginLeft => _welcomeMessageMarginLeft;
+  double get welcomeMessageMarginRight => _welcomeMessageMarginRight;
+
+  // Getters for button styling
+  double get buttonTextFontSize => _buttonTextFontSize;
+  FontWeight get buttonTextFontWeight => _buttonTextFontWeight;
+  double get buttonTextLineHeight => _buttonTextLineHeight;
+  bool get buttonTextItalic => _buttonTextItalic;
+  double get buttonTextOpacity => _buttonTextOpacity;
+  double get buttonOpacity => _buttonOpacity;
+  double get buttonMarginTop => _buttonMarginTop;
+  double get buttonMarginBottom => _buttonMarginBottom;
+  double get buttonPaddingVertical => _buttonPaddingVertical;
+  double get buttonPaddingHorizontal => _buttonPaddingHorizontal;
+
+  // Getters for image button
+  double get buttonImageOpacity => _buttonImageOpacity;
+
+  // Existing getters
   bool get showWelcomeScreen => _showWelcomeScreen;
   String get welcomeMessage => _welcomeMessage;
   bool get useImageButton => _useImageButton;
@@ -56,7 +110,29 @@ class WelcomeScreenProvider extends ChangeNotifier {
     _welcomeMessage =
         _prefs.getString('welcome_message') ?? 'Welcome to the AI Photobooth!';
 
-    // Load button settings
+    // Load welcome message styling
+    _welcomeMessageFontSize =
+        _prefs.getDouble('welcome_message_font_size') ?? 36.0;
+    _welcomeMessageFontWeight = FontWeight.values[
+        _prefs.getInt('welcome_message_font_weight') ?? 3]; // Bold is index 3
+    _welcomeMessageLineHeight =
+        _prefs.getDouble('welcome_message_line_height') ?? 1.2;
+    _welcomeMessageTextAlign = TextAlign.values[
+        _prefs.getInt('welcome_message_text_align') ?? 2]; // Center is index 2
+    _welcomeMessageColor =
+        Color(_prefs.getInt('welcome_message_color') ?? Colors.white.value);
+    _welcomeMessageOpacity = _prefs.getDouble('welcome_message_opacity') ?? 1.0;
+    _welcomeMessageItalic = _prefs.getBool('welcome_message_italic') ?? false;
+    _welcomeMessageMarginTop =
+        _prefs.getDouble('welcome_message_margin_top') ?? 0.0;
+    _welcomeMessageMarginBottom =
+        _prefs.getDouble('welcome_message_margin_bottom') ?? 50.0;
+    _welcomeMessageMarginLeft =
+        _prefs.getDouble('welcome_message_margin_left') ?? 40.0;
+    _welcomeMessageMarginRight =
+        _prefs.getDouble('welcome_message_margin_right') ?? 40.0;
+
+    /// Load button settings
     _useImageButton = _prefs.getBool('welcome_use_image_button') ?? false;
     _welcomeButtonText =
         _prefs.getString('welcome_button_text') ?? 'Get Started';
@@ -69,10 +145,31 @@ class WelcomeScreenProvider extends ChangeNotifier {
     _buttonBorderRadius =
         _prefs.getDouble('welcome_button_border_radius') ?? 4.0;
 
+    // Load text button additional styling
+    _buttonTextFontSize =
+        _prefs.getDouble('welcome_button_text_font_size') ?? 24.0;
+    _buttonTextFontWeight = FontWeight.values[
+        _prefs.getInt('welcome_button_text_font_weight') ??
+            3]; // Bold is index 3
+    _buttonTextLineHeight =
+        _prefs.getDouble('welcome_button_text_line_height') ?? 1.0;
+    _buttonTextItalic = _prefs.getBool('welcome_button_text_italic') ?? false;
+    _buttonTextOpacity = _prefs.getDouble('welcome_button_text_opacity') ?? 1.0;
+    _buttonOpacity = _prefs.getDouble('welcome_button_opacity') ?? 1.0;
+    _buttonMarginTop = _prefs.getDouble('welcome_button_margin_top') ?? 0.0;
+    _buttonMarginBottom =
+        _prefs.getDouble('welcome_button_margin_bottom') ?? 0.0;
+    _buttonPaddingVertical =
+        _prefs.getDouble('welcome_button_padding_vertical') ?? 8.0;
+    _buttonPaddingHorizontal =
+        _prefs.getDouble('welcome_button_padding_horizontal') ?? 16.0;
+
     // Load image button settings
     _buttonImagePath = _prefs.getString('welcome_button_image_path');
     _isButtonImageAsset =
         _prefs.getBool('welcome_is_button_image_asset') ?? true;
+    _buttonImageOpacity =
+        _prefs.getDouble('welcome_button_image_opacity') ?? 1.0;
 
     // Verify button image file exists if it's not an asset
     if (_buttonImagePath != null && !_isButtonImageAsset) {
@@ -113,10 +210,137 @@ class WelcomeScreenProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Welcome message styling methods
+  void setWelcomeMessageFontSize(double size) async {
+    _welcomeMessageFontSize = size;
+    await _prefs.setDouble('welcome_message_font_size', size);
+    notifyListeners();
+  }
+
+  void setWelcomeMessageFontWeight(FontWeight weight) async {
+    _welcomeMessageFontWeight = weight;
+    await _prefs.setInt('welcome_message_font_weight', weight.index);
+    notifyListeners();
+  }
+
+  void setWelcomeMessageLineHeight(double height) async {
+    _welcomeMessageLineHeight = height;
+    await _prefs.setDouble('welcome_message_line_height', height);
+    notifyListeners();
+  }
+
+  void setWelcomeMessageTextAlign(TextAlign align) async {
+    _welcomeMessageTextAlign = align;
+    await _prefs.setInt('welcome_message_text_align', align.index);
+    notifyListeners();
+  }
+
+  void setWelcomeMessageColor(Color color) async {
+    _welcomeMessageColor = color;
+    await _prefs.setInt('welcome_message_color', color.value);
+    notifyListeners();
+  }
+
+  void setWelcomeMessageOpacity(double opacity) async {
+    _welcomeMessageOpacity = opacity;
+    await _prefs.setDouble('welcome_message_opacity', opacity);
+    notifyListeners();
+  }
+
+  void setWelcomeMessageItalic(bool italic) async {
+    _welcomeMessageItalic = italic;
+    await _prefs.setBool('welcome_message_italic', italic);
+    notifyListeners();
+  }
+
+  void setWelcomeMessageMargins(
+      double top, double bottom, double left, double right) async {
+    _welcomeMessageMarginTop = top;
+    _welcomeMessageMarginBottom = bottom;
+    _welcomeMessageMarginLeft = left;
+    _welcomeMessageMarginRight = right;
+    await _prefs.setDouble('welcome_message_margin_top', top);
+    await _prefs.setDouble('welcome_message_margin_bottom', bottom);
+    await _prefs.setDouble('welcome_message_margin_left', left);
+    await _prefs.setDouble('welcome_message_margin_right', right);
+    notifyListeners();
+  }
+
+  // Button styling methods
+  void setButtonTextFontSize(double size) async {
+    _buttonTextFontSize = size;
+    await _prefs.setDouble('welcome_button_text_font_size', size);
+    notifyListeners();
+  }
+
+  void setButtonTextFontWeight(FontWeight weight) async {
+    _buttonTextFontWeight = weight;
+    await _prefs.setInt('welcome_button_text_font_weight', weight.index);
+    notifyListeners();
+  }
+
+  void setButtonTextLineHeight(double height) async {
+    _buttonTextLineHeight = height;
+    await _prefs.setDouble('welcome_button_text_line_height', height);
+    notifyListeners();
+  }
+
+  void setButtonTextItalic(bool italic) async {
+    _buttonTextItalic = italic;
+    await _prefs.setBool('welcome_button_text_italic', italic);
+    notifyListeners();
+  }
+
+  void setButtonTextOpacity(double opacity) async {
+    _buttonTextOpacity = opacity;
+    await _prefs.setDouble('welcome_button_text_opacity', opacity);
+    notifyListeners();
+  }
+
+  void setButtonOpacity(double opacity) async {
+    _buttonOpacity = opacity;
+    await _prefs.setDouble('welcome_button_opacity', opacity);
+    notifyListeners();
+  }
+
+  void setButtonMargins(double top, double bottom) async {
+    _buttonMarginTop = top;
+    _buttonMarginBottom = bottom;
+    await _prefs.setDouble('welcome_button_margin_top', top);
+    await _prefs.setDouble('welcome_button_margin_bottom', bottom);
+    notifyListeners();
+  }
+
+  void setButtonPadding(double vertical, double horizontal) async {
+    _buttonPaddingVertical = vertical;
+    _buttonPaddingHorizontal = horizontal;
+    await _prefs.setDouble('welcome_button_padding_vertical', vertical);
+    await _prefs.setDouble('welcome_button_padding_horizontal', horizontal);
+    notifyListeners();
+  }
+
   // Button settings methods
   void setUseImageButton(bool use) async {
     _useImageButton = use;
     await _prefs.setBool('welcome_use_image_button', use);
+    notifyListeners();
+  }
+
+  void setButtonWidth(double width) async {
+    _buttonWidth = width;
+    await _prefs.setDouble('welcome_button_width', width);
+    notifyListeners();
+  }
+
+  void setButtonHeight(double height) async {
+    _buttonHeight = height;
+    await _prefs.setDouble('welcome_button_height', height);
+    notifyListeners();
+  }
+
+  void setButtonImageOpacity(double opacity) async {
+    _buttonImageOpacity = opacity;
+    await _prefs.setDouble('welcome_button_image_opacity', opacity);
     notifyListeners();
   }
 

@@ -208,9 +208,9 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen> {
         ],
       ),
       body: Container(
-        padding: const EdgeInsets.symmetric(vertical: 20),
         width: double.infinity,
         height: double.infinity,
+        padding: EdgeInsets.all(settings.screenPadding),
         decoration: BoxDecoration(
           image: DecorationImage(
             image: _getBackgroundImage(settings, globalSettings),
@@ -220,24 +220,34 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Title
-            Padding(
+            // Title with updated styling
+            Container(
+              margin: settings.titleMargin,
               padding: EdgeInsets.only(bottom: settings.titlePadding),
               child: Text(
                 settings.titleText,
                 style: TextStyle(
                   fontSize: settings.titleFontSize,
                   fontWeight: settings.titleFontWeight,
-                  color: settings.titleColor,
+                  color: settings.titleColor.withOpacity(settings.titleOpacity),
+                  fontStyle: settings.titleItalic
+                      ? FontStyle.italic
+                      : FontStyle.normal,
+                  height: settings.titleLineHeight,
                 ),
+                textAlign: settings.titleAlignment,
               ),
             ),
 
             // Character Selection
             Expanded(
-              child: characters.length <= 3 || !settings.useCarousel
-                  ? _buildRowSelection(characters, settings)
-                  : _buildCarouselSelection(characters, settings),
+              child: characters.length > 3 && settings.useCarousel
+                  ? Container(
+                      margin: settings.carouselMargin,
+                      padding: settings.carouselPadding,
+                      child: _buildCarouselSelection(characters, settings),
+                    )
+                  : _buildGridSelection(characters, settings),
             ),
 
             // Error message
@@ -254,31 +264,23 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen> {
               ),
 
             // Continue Button
-            SizedBox(height: settings.buttonMarginTop),
-            _buildButton(settings, appProvider, characters),
+            Container(
+              margin: settings.buttonMargin,
+              child: _buildButton(settings, appProvider),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildRowSelection(
-      List<CharacterModel> characters, CharacterSelectionProvider settings) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: characters.take(3).map((character) {
-        return _buildCharacterOption(character, settings);
-      }).toList(),
-    );
-  }
-
   Widget _buildCharacterOption(
       CharacterModel character, CharacterSelectionProvider settings,
-      {bool isCenter = true}) {
-    final bool isSelected = _selectedCharacterId == character.id;
-
-    // For carousel, apply fade effect to non-center items
-    final opacity = isCenter ? 1.0 : settings.carouselVisibleWidth;
+      {bool isCenter = false}) {
+    final isSelected = character.id == _selectedCharacterId;
+    final scale = isSelected && settings.useSelectionEffect
+        ? settings.selectedCharacterScale
+        : 1.0;
 
     return GestureDetector(
       onTap: () {
@@ -287,62 +289,94 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen> {
           _showError = false;
         });
       },
-      child: Opacity(
-        opacity: opacity,
-        child: Container(
-          width: settings.characterWidth,
-          height: settings.characterHeight,
-
-          // margin:
-          //     EdgeInsets.symmetric(horizontal: settings.characterSpacing / 1),
-          decoration: BoxDecoration(
-            borderRadius:
-                BorderRadius.circular(settings.characterBorderRadius + 4),
-            border: settings.showCharacterBorder
-                ? Border.all(
-                    color: settings.characterBorderColor,
-                    width: settings.characterBorderWidth + 0.5,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        width: settings.characterWidth,
+        height: settings.characterHeight,
+        margin: EdgeInsets.all(settings.characterSpacing),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(settings.characterBorderRadius),
+          border: settings.showCharacterBorder
+              ? Border.all(
+                  color: isSelected
+                      ? settings.characterBorderColor
+                      : Colors.transparent,
+                  width: settings.characterBorderWidth,
+                )
+              : null,
+          boxShadow: isSelected && settings.useSelectionGlow
+              ? [
+                  BoxShadow(
+                    color: settings.selectionGlowColor
+                        .withOpacity(settings.selectionGlowIntensity),
+                    blurRadius: settings.selectionGlowSpread,
+                    spreadRadius: settings.selectionGlowSpread / 2,
                   )
-                : null,
-            boxShadow: isSelected &&
-                    settings.useSelectionEffect &&
-                    settings.useSelectionGlow
-                ? [
-                    BoxShadow(
-                      color: settings.selectionGlowColor
-                          .withValues(alpha: settings.selectionGlowIntensity),
-                      blurRadius: settings.selectionGlowSpread,
-                      spreadRadius: settings.selectionGlowSpread / 2,
-                    )
-                  ]
-                : null,
-          ),
-          // Use ClipRRect to ensure the image respects the border radius
+                ]
+              : null,
+        ),
+        child: Transform.scale(
+          scale: scale,
           child: ClipRRect(
             borderRadius: BorderRadius.circular(settings.characterBorderRadius),
-            child: Image(
-              image: character.isAsset
-                  ? AssetImage(character.imagePath)
-                  : FileImage(File(character.imagePath)) as ImageProvider,
-              fit: BoxFit.cover,
-              width: settings.characterWidth,
-              height: settings.characterHeight,
-            ),
+            child: character.isAsset
+                ? Image.asset(
+                    character.imagePath,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      // Handle missing asset files
+                      return Container(
+                        color: Colors.grey[300],
+                        child: const Center(
+                          child: Icon(Icons.broken_image,
+                              size: 50, color: Colors.grey),
+                        ),
+                      );
+                    },
+                  )
+                : File(character.imagePath).existsSync()
+                    ? Image.file(
+                        File(character.imagePath),
+                        fit: BoxFit.contain,
+                      )
+                    : Container(
+                        color: Colors.grey[300],
+                        child: const Center(
+                          child: Icon(Icons.broken_image,
+                              size: 50, color: Colors.grey),
+                        ),
+                      ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildButton(CharacterSelectionProvider settings,
-      PhotoboothProvider appProvider, List<CharacterModel> characters) {
+  // Add the missing _buildGridSelection method
+  Widget _buildGridSelection(
+      List<CharacterModel> characters, CharacterSelectionProvider settings) {
+    return Center(
+      child: Wrap(
+        alignment: WrapAlignment.center,
+        spacing: settings.characterSpacing,
+        runSpacing: settings.characterSpacing,
+        children: characters
+            .map((character) => _buildCharacterOption(character, settings))
+            .toList(),
+      ),
+    );
+  }
+
+  Widget _buildButton(
+      CharacterSelectionProvider settings, PhotoboothProvider appProvider) {
     if (settings.useImageButton && settings.buttonImagePath != null) {
-      // Image Button
+      // Image Button with padding
       return GestureDetector(
-        onTap: () => _validateAndContinue(appProvider, characters),
+        onTap: () => _validateAndContinue(appProvider),
         child: Container(
           width: settings.buttonWidth,
           height: settings.buttonHeight,
+          padding: settings.buttonPadding,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
             border: settings.buttonHasBorder
@@ -355,19 +389,20 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen> {
               image: settings.isButtonImageAsset
                   ? AssetImage(settings.buttonImagePath!)
                   : FileImage(File(settings.buttonImagePath!)) as ImageProvider,
-              fit: BoxFit.fitHeight,
+              fit: BoxFit.cover,
             ),
           ),
         ),
       );
     } else {
-      // Text Button
+      // Text Button with padding
       return ElevatedButton(
-        onPressed: () => _validateAndContinue(appProvider, characters),
+        onPressed: () => _validateAndContinue(appProvider),
         style: ElevatedButton.styleFrom(
           backgroundColor: settings.buttonColor,
           foregroundColor: settings.buttonTextColor,
           minimumSize: Size(settings.buttonWidth, settings.buttonHeight),
+          padding: settings.buttonPadding,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
             side: settings.buttonHasBorder
@@ -382,14 +417,19 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen> {
           settings.buttonText,
           style: TextStyle(
             fontSize: settings.buttonFontSize,
+            fontWeight: settings.buttonFontWeight,
           ),
         ),
       );
     }
   }
 
-  void _validateAndContinue(
-      PhotoboothProvider appProvider, List<CharacterModel> characters) {
+// Fix the _validateAndContinue method to include the characters parameter
+  void _validateAndContinue(PhotoboothProvider appProvider) {
+    final characters = appProvider.selectedGender == 'male'
+        ? context.read<CharacterSelectionProvider>().maleCharacters
+        : context.read<CharacterSelectionProvider>().femaleCharacters;
+
     if (_selectedCharacterId == null) {
       setState(() {
         _showError = true;

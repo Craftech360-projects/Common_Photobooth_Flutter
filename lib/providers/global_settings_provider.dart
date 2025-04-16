@@ -19,9 +19,11 @@ class GlobalSettingsProvider extends ChangeNotifier {
   // Getters
   Size get selectedResolution => _selectedResolution;
   String? get backgroundImage => _backgroundImage;
-  String? get backgroundImagePath => _backgroundImage; // Added for consistency with other providers
+  String? get backgroundImagePath =>
+      _backgroundImage; // Added for consistency with other providers
   bool get isAssetImage => _isAssetImage;
-  bool get isBackgroundImageAsset => _isAssetImage; // Added for consistency with other providers
+  bool get isBackgroundImageAsset =>
+      _isAssetImage; // Added for consistency with other providers
   double get fieldSpacing => _fieldSpacing;
   double get buttonSpacing => _buttonSpacing;
   double get borderRadius => _borderRadius;
@@ -30,6 +32,14 @@ class GlobalSettingsProvider extends ChangeNotifier {
     _prefs = await SharedPreferences.getInstance();
     await loadSettings();
   }
+
+  // Add these properties
+  String? _supabaseUrl;
+  String? _supabaseAnonKey;
+
+  // Add these getters
+  String? get supabaseUrl => _supabaseUrl;
+  String? get supabaseAnonKey => _supabaseAnonKey;
 
   Future<void> loadSettings() async {
     _selectedResolution = Size(
@@ -52,6 +62,10 @@ class GlobalSettingsProvider extends ChangeNotifier {
     _fieldSpacing = _prefs.getDouble('field_spacing') ?? 20.0;
     _buttonSpacing = _prefs.getDouble('button_spacing') ?? 40.0;
     _borderRadius = _prefs.getDouble('border_radius') ?? 4.0;
+
+    // Load Supabase settings
+    _supabaseUrl = _prefs.getString('supabase_url');
+    _supabaseAnonKey = _prefs.getString('supabase_anon_key');
 
     notifyListeners();
   }
@@ -107,6 +121,35 @@ class GlobalSettingsProvider extends ChangeNotifier {
   void setBorderRadius(double radius) async {
     _borderRadius = radius;
     await _prefs.setDouble('border_radius', radius);
+    notifyListeners();
+  }
+
+  // Add these methods
+  void setSupabaseUrl(String url) async {
+    _supabaseUrl = url;
+    await _prefs.setString('supabase_url', url);
+    notifyListeners();
+  }
+
+  void setSupabaseAnonKey(String key) async {
+    _supabaseAnonKey = key;
+    await _prefs.setString('supabase_anon_key', key);
+    notifyListeners();
+  }
+
+  Future<void> clearAllPreferences() async {
+    await _prefs.clear();
+
+    // Reset to default values
+    _selectedResolution = const Size(1920, 1080);
+    _backgroundImage = null;
+    _isAssetImage = true;
+    _fieldSpacing = 20.0;
+    _buttonSpacing = 40.0;
+    _borderRadius = 4.0;
+    _supabaseUrl = null;
+    _supabaseAnonKey = null;
+
     notifyListeners();
   }
 }

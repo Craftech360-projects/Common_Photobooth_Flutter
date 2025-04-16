@@ -44,29 +44,39 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Title
-            Padding(
+            // Title with updated styling
+            Container(
+              margin: settings.titleMargin,
               padding: EdgeInsets.only(bottom: settings.titlePadding),
               child: Text(
                 settings.titleText,
                 style: TextStyle(
                   fontSize: settings.titleFontSize,
                   fontWeight: settings.titleFontWeight,
-                  color: settings.titleColor,
+                  color: settings.titleColor.withOpacity(settings.titleOpacity),
+                  fontStyle: settings.titleItalic
+                      ? FontStyle.italic
+                      : FontStyle.normal,
+                  height: settings.titleLineHeight,
                 ),
+                textAlign: settings.titleAlignment,
               ),
             ),
 
-            // Gender Selection
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Male Option
-                _buildGenderOption('male', settings),
+            // Gender Selection with margins and padding
+            Container(
+              margin: settings.imagesRowMargin,
+              padding: settings.imagesRowPadding,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Male Option
+                  _buildGenderOption('male', settings),
 
-                // Female Option
-                _buildGenderOption('female', settings),
-              ],
+                  // Female Option
+                  _buildGenderOption('female', settings),
+                ],
+              ),
             ),
 
             // Error message
@@ -82,9 +92,11 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
                 ),
               ),
 
-            // Continue Button - always visible
-            SizedBox(height: settings.buttonMarginTop),
-            _buildButton(settings, appProvider),
+            // Continue Button with margins
+            Container(
+              margin: settings.buttonMargin,
+              child: _buildButton(settings, appProvider),
+            ),
           ],
         ),
       ),
@@ -136,7 +148,7 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
               ? [
                   BoxShadow(
                     color: settings.selectionGlowColor
-                        .withValues(alpha: settings.selectionGlowIntensity),
+                        .withOpacity(settings.selectionGlowIntensity),
                     blurRadius: settings.selectionGlowSpread,
                     spreadRadius: settings.selectionGlowSpread / 2,
                   )
@@ -150,12 +162,13 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
   Widget _buildButton(
       GenderSelectionProvider settings, PhotoboothProvider appProvider) {
     if (settings.useImageButton && settings.buttonImagePath != null) {
-      // Image Button
+      // Image Button with padding
       return GestureDetector(
         onTap: () => _validateAndContinue(appProvider),
         child: Container(
           width: settings.buttonWidth,
           height: settings.buttonHeight,
+          padding: settings.buttonPadding,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
             border: settings.buttonHasBorder
@@ -174,13 +187,14 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
         ),
       );
     } else {
-      // Text Button
+      // Text Button with padding
       return ElevatedButton(
         onPressed: () => _validateAndContinue(appProvider),
         style: ElevatedButton.styleFrom(
           backgroundColor: settings.buttonColor,
           foregroundColor: settings.buttonTextColor,
           minimumSize: Size(settings.buttonWidth, settings.buttonHeight),
+          padding: settings.buttonPadding,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
             side: settings.buttonHasBorder

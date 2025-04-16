@@ -17,11 +17,16 @@ class CustomTextField {
   Color textColor;
   Color labelColor;
   double fontSize;
+  FontWeight fontWeight;
+  bool isItalic;
   bool hasBorder;
   double borderWidth;
   Color borderColor;
+  double borderRadius;
   double width;
   double height;
+  EdgeInsets margin;
+  EdgeInsets padding;
 
   CustomTextField({
     required this.id,
@@ -33,11 +38,16 @@ class CustomTextField {
     this.textColor = AppColors.black,
     this.labelColor = AppColors.black,
     this.fontSize = 16.0,
+    this.fontWeight = FontWeight.normal,
+    this.isItalic = false,
     this.hasBorder = true,
     this.borderWidth = 1.0,
     this.borderColor = AppColors.black,
+    this.borderRadius = 4.0,
     this.width = 0.35, // Percentage of screen width
     this.height = 60.0,
+    this.margin = EdgeInsets.zero,
+    this.padding = const EdgeInsets.symmetric(horizontal: 12.0),
   });
 }
 
@@ -60,16 +70,21 @@ class RegistrationScreenProvider extends ChangeNotifier {
   double _buttonHeight = 60.0;
   double _buttonBorderRadius = 4.0;
   double _buttonFontSize = 24.0;
+  FontWeight _buttonFontWeight = FontWeight.bold;
+  bool _buttonIsItalic = false;
   bool _buttonHasBorder = true;
   double _buttonBorderWidth = 1.0;
   Color _buttonBorderColor = AppColors.white;
   EdgeInsets _buttonPadding =
       const EdgeInsets.symmetric(horizontal: 30, vertical: 15);
   EdgeInsets _buttonMargin = EdgeInsets.zero;
+  double _buttonOpacity = 1.0;
+  double _buttonTextOpacity = 1.0;
 
   // Image button settings
   String? _buttonImagePath;
   bool _isButtonImageAsset = true;
+  double _buttonImageOpacity = 1.0;
 
   // Background settings
   String? _registrationScreenBackground;
@@ -81,6 +96,12 @@ class RegistrationScreenProvider extends ChangeNotifier {
   double get buttonSpacing => _buttonSpacing;
   double get borderRadius => _borderRadius;
   List<CustomTextField> get textFields => _textFields;
+
+  FontWeight get buttonFontWeight => _buttonFontWeight;
+  bool get buttonIsItalic => _buttonIsItalic;
+  double get buttonOpacity => _buttonOpacity;
+  double get buttonTextOpacity => _buttonTextOpacity;
+  double get buttonImageOpacity => _buttonImageOpacity;
 
   bool get useImageButton => _useImageButton;
   String get submitButtonText => _submitButtonText;
@@ -115,6 +136,26 @@ class RegistrationScreenProvider extends ChangeNotifier {
     _buttonSpacing = _prefs.getDouble('registration_button_spacing') ?? 40.0;
     _borderRadius = _prefs.getDouble('registration_border_radius') ?? 4.0;
 
+    // Load button margins
+    final double topMargin =
+        _prefs.getDouble('registration_button_margin_top') ?? 0.0;
+    final double bottomMargin =
+        _prefs.getDouble('registration_button_margin_bottom') ?? 0.0;
+    final double leftMargin =
+        _prefs.getDouble('registration_button_margin_left') ?? 0.0;
+    final double rightMargin =
+        _prefs.getDouble('registration_button_margin_right') ?? 0.0;
+    _buttonMargin =
+        EdgeInsets.fromLTRB(leftMargin, topMargin, rightMargin, bottomMargin);
+
+    // Load button padding
+    final double verticalPadding =
+        _prefs.getDouble('registration_button_padding_vertical') ?? 15.0;
+    final double horizontalPadding =
+        _prefs.getDouble('registration_button_padding_horizontal') ?? 30.0;
+    _buttonPadding = EdgeInsets.symmetric(
+        vertical: verticalPadding, horizontal: horizontalPadding);
+
     // Load text fields
     final String? fieldsJson = _prefs.getString('registration_text_fields');
     if (fieldsJson != null) {
@@ -132,11 +173,30 @@ class RegistrationScreenProvider extends ChangeNotifier {
             textColor: Color(field['textColor'] ?? AppColors.black.value),
             labelColor: Color(field['labelColor'] ?? AppColors.black.value),
             fontSize: field['fontSize']?.toDouble() ?? 16.0,
+            fontWeight: FontWeight.values[field['fontWeight'] ?? 0],
+            isItalic: field['isItalic'] ?? false,
             hasBorder: field['hasBorder'] ?? true,
             borderWidth: field['borderWidth']?.toDouble() ?? 1.0,
             borderColor: Color(field['borderColor'] ?? AppColors.black.value),
+            borderRadius: field['borderRadius']?.toDouble() ?? 4.0,
             width: field['width']?.toDouble() ?? 0.35,
             height: field['height']?.toDouble() ?? 60.0,
+            margin: field['margin'] != null
+                ? EdgeInsets.fromLTRB(
+                    field['margin']['left']?.toDouble() ?? 0.0,
+                    field['margin']['top']?.toDouble() ?? 0.0,
+                    field['margin']['right']?.toDouble() ?? 0.0,
+                    field['margin']['bottom']?.toDouble() ?? 0.0,
+                  )
+                : EdgeInsets.zero,
+            padding: field['padding'] != null
+                ? EdgeInsets.fromLTRB(
+                    field['padding']['left']?.toDouble() ?? 12.0,
+                    field['padding']['top']?.toDouble() ?? 0.0,
+                    field['padding']['right']?.toDouble() ?? 12.0,
+                    field['padding']['bottom']?.toDouble() ?? 0.0,
+                  )
+                : const EdgeInsets.symmetric(horizontal: 12.0),
           ),
         ),
       );
@@ -170,12 +230,21 @@ class RegistrationScreenProvider extends ChangeNotifier {
     _buttonBorderRadius =
         _prefs.getDouble('registration_button_border_radius') ?? 4.0;
     _buttonFontSize = _prefs.getDouble('registration_button_font_size') ?? 24.0;
+    _buttonFontWeight = FontWeight.values[
+        _prefs.getInt('registration_button_font_weight') ??
+            3]; // Bold is index 3
+    _buttonIsItalic = _prefs.getBool('registration_button_is_italic') ?? false;
     _buttonHasBorder = _prefs.getBool('registration_button_has_border') ?? true;
     _buttonBorderWidth =
         _prefs.getDouble('registration_button_border_width') ?? 1.0;
     _buttonBorderColor = Color(
         _prefs.getInt('registration_button_border_color') ??
             AppColors.white.value);
+    _buttonOpacity = _prefs.getDouble('registration_button_opacity') ?? 1.0;
+    _buttonTextOpacity =
+        _prefs.getDouble('registration_button_text_opacity') ?? 1.0;
+    _buttonImageOpacity =
+        _prefs.getDouble('registration_button_image_opacity') ?? 1.0;
 
     // Load padding and margin
     final String? paddingJson = _prefs.getString('registration_button_padding');
@@ -230,6 +299,54 @@ class RegistrationScreenProvider extends ChangeNotifier {
       }
     }
 
+    notifyListeners();
+  }
+
+  // Add new methods for button styling
+  void setButtonFontWeight(FontWeight weight) async {
+    _buttonFontWeight = weight;
+    await _prefs.setInt('registration_button_font_weight', weight.index);
+    notifyListeners();
+  }
+
+  void setButtonMargin(EdgeInsets margin) async {
+    _buttonMargin = margin;
+    await _prefs.setDouble('registration_button_margin_top', margin.top);
+    await _prefs.setDouble('registration_button_margin_bottom', margin.bottom);
+    await _prefs.setDouble('registration_button_margin_left', margin.left);
+    await _prefs.setDouble('registration_button_margin_right', margin.right);
+    notifyListeners();
+  }
+
+  void setButtonPadding(EdgeInsets padding) async {
+    _buttonPadding = padding;
+    await _prefs.setDouble('registration_button_padding_vertical', padding.top);
+    await _prefs.setDouble(
+        'registration_button_padding_horizontal', padding.left);
+    notifyListeners();
+  }
+
+  void setButtonIsItalic(bool isItalic) async {
+    _buttonIsItalic = isItalic;
+    await _prefs.setBool('registration_button_is_italic', isItalic);
+    notifyListeners();
+  }
+
+  void setButtonOpacity(double opacity) async {
+    _buttonOpacity = opacity;
+    await _prefs.setDouble('registration_button_opacity', opacity);
+    notifyListeners();
+  }
+
+  void setButtonTextOpacity(double opacity) async {
+    _buttonTextOpacity = opacity;
+    await _prefs.setDouble('registration_button_text_opacity', opacity);
+    notifyListeners();
+  }
+
+  void setButtonImageOpacity(double opacity) async {
+    _buttonImageOpacity = opacity;
+    await _prefs.setDouble('registration_button_image_opacity', opacity);
     notifyListeners();
   }
 
@@ -311,6 +428,7 @@ class RegistrationScreenProvider extends ChangeNotifier {
     }
   }
 
+  // Update the _saveTextFields method to include new properties
   Future<void> _saveTextFields() async {
     final List<Map<String, dynamic>> fieldsMap = _textFields
         .map((field) => {
@@ -323,14 +441,50 @@ class RegistrationScreenProvider extends ChangeNotifier {
               'textColor': field.textColor.value,
               'labelColor': field.labelColor.value,
               'fontSize': field.fontSize,
+              'fontWeight': field.fontWeight.index,
+              'isItalic': field.isItalic,
               'hasBorder': field.hasBorder,
               'borderWidth': field.borderWidth,
               'borderColor': field.borderColor.value,
+              'borderRadius': field.borderRadius,
               'width': field.width,
               'height': field.height,
+              'margin': {
+                'left': field.margin.left,
+                'top': field.margin.top,
+                'right': field.margin.right,
+                'bottom': field.margin.bottom,
+              },
+              'padding': {
+                'left': field.padding.left,
+                'top': field.padding.top,
+                'right': field.padding.right,
+                'bottom': field.padding.bottom,
+              },
             })
         .toList();
     await _prefs.setString('registration_text_fields', jsonEncode(fieldsMap));
+  }
+
+  // Add method to update text field with new properties
+  void updateTextFieldStyle({
+    required String id,
+    FontWeight? fontWeight,
+    bool? isItalic,
+    double? borderRadius,
+    EdgeInsets? margin,
+    EdgeInsets? padding,
+  }) async {
+    final index = _textFields.indexWhere((field) => field.id == id);
+    if (index != -1) {
+      if (fontWeight != null) _textFields[index].fontWeight = fontWeight;
+      if (isItalic != null) _textFields[index].isItalic = isItalic;
+      if (borderRadius != null) _textFields[index].borderRadius = borderRadius;
+      if (margin != null) _textFields[index].margin = margin;
+      if (padding != null) _textFields[index].padding = padding;
+      await _saveTextFields();
+      notifyListeners();
+    }
   }
 
   // Button settings methods
@@ -388,30 +542,30 @@ class RegistrationScreenProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setButtonPadding(EdgeInsets padding) async {
-    _buttonPadding = padding;
-    final paddingMap = {
-      'left': padding.left,
-      'top': padding.top,
-      'right': padding.right,
-      'bottom': padding.bottom,
-    };
-    await _prefs.setString(
-        'registration_button_padding', jsonEncode(paddingMap));
-    notifyListeners();
-  }
+  // void setButtonPadding(EdgeInsets padding) async {
+  //   _buttonPadding = padding;
+  //   final paddingMap = {
+  //     'left': padding.left,
+  //     'top': padding.top,
+  //     'right': padding.right,
+  //     'bottom': padding.bottom,
+  //   };
+  //   await _prefs.setString(
+  //       'registration_button_padding', jsonEncode(paddingMap));
+  //   notifyListeners();
+  // }
 
-  void setButtonMargin(EdgeInsets margin) async {
-    _buttonMargin = margin;
-    final marginMap = {
-      'left': margin.left,
-      'top': margin.top,
-      'right': margin.right,
-      'bottom': margin.bottom,
-    };
-    await _prefs.setString('registration_button_margin', jsonEncode(marginMap));
-    notifyListeners();
-  }
+  // void setButtonMargin(EdgeInsets margin) async {
+  //   _buttonMargin = margin;
+  //   final marginMap = {
+  //     'left': margin.left,
+  //     'top': margin.top,
+  //     'right': margin.right,
+  //     'bottom': margin.bottom,
+  //   };
+  //   await _prefs.setString('registration_button_margin', jsonEncode(marginMap));
+  //   notifyListeners();
+  // }
 
   // Image button methods
   Future<void> setButtonImage(String? sourcePath, {bool isAsset = true}) async {

@@ -4,7 +4,7 @@ import 'package:camera/camera.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/providers/face_capture_provider.dart';
-import 'package:photobooth_flutter/widgets/color_picker.dart';
+import 'package:photobooth_flutter/widgets/improved_color_picker.dart';
 import 'package:provider/provider.dart';
 
 class FaceCaptureSettings extends StatefulWidget {
@@ -33,7 +33,7 @@ class _FaceCaptureSettingsState extends State<FaceCaptureSettings> {
         });
         return;
       }
-      
+
       // For other platforms, use the standard camera plugin
       _cameras = await availableCameras();
     } on Exception catch (e) {
@@ -482,7 +482,7 @@ class _FaceCaptureSettingsState extends State<FaceCaptureSettings> {
         return AlertDialog(
           title: const Text('Pick a color'),
           content: SingleChildScrollView(
-            child: ColorPicker(
+            child: ImprovedColorPicker(
               pickerColor: initialColor,
               onColorChanged: (Color color) {
                 selectedColor = color;

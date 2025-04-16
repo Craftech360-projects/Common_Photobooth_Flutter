@@ -30,29 +30,24 @@ class PhotoboothProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setFaceImagePath(String imagePath) {
-    faceImagePath = imagePath;
+  void setFaceImage(String path) {
+    faceImagePath = path;
     notifyListeners();
   }
 
-  // void setCapturedImage(String imagePath) {
-  //   capturedImage = imagePath;
-  //   notifyListeners();
-  // }
-
-  void setSwappedImage(String imageUrl) {
-    swappedImageUrl = imageUrl;
+  void setSwappedImage(String url) {
+    swappedImageUrl = url;
     notifyListeners();
   }
 
-  void reset() {
+  // Add method to clear all user data
+  void clearUserData() async {
     name = null;
     email = null;
     gender = null;
     selectedCharacterId = null;
     characterImagePath = null;
     isCharacterAsset = null;
-    // capturedImage = null;
     faceImagePath = null;
     swappedImageUrl = null;
     notifyListeners();

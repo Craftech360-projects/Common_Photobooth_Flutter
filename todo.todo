@@ -1,3 +1,13 @@
 1. Add Grid View in Character Selection.
 2. Store User Details locally.
 3. Give option to display available cameras and select one.
+4. Option for offline or online data storage.
+5. Check platform specific camera APIs.
+6. Platform specific directory access.
+7. Check Image Button loading in all screens.
+8. Check asset loading in Loading Screen across platforms.
+9. Change App Font.
+10. Implement Proper Validations.
+11. Need more control with widgets positioning.
+12. Button customization needs more control like adding transparent background with border or no border.
+13. Controllers needs to be added for textfields.

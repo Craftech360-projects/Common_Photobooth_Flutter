@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,6 +11,12 @@ class CharacterSelectionProvider extends ChangeNotifier {
   Color _titleColor = Colors.white;
   FontWeight _titleFontWeight = FontWeight.bold;
   double _titlePadding = 20.0;
+  // New title properties
+  EdgeInsets _titleMargin = const EdgeInsets.all(0);
+  double _titleLineHeight = 1.2;
+  bool _titleItalic = false;
+  double _titleOpacity = 1.0;
+  TextAlign _titleAlignment = TextAlign.center;
 
   // Character settings
   List<CharacterModel> _maleCharacters = [
@@ -28,11 +35,11 @@ class CharacterSelectionProvider extends ChangeNotifier {
       imagePath: 'assets/characters/m3.png',
       isAsset: true,
     ),
-    CharacterModel(
-      id: 'm4',
-      imagePath: 'assets/characters/m4.png',
-      isAsset: true,
-    ),
+    // CharacterModel(
+    //   id: 'm4',
+    //   imagePath: 'assets/characters/m4.png',
+    //   isAsset: true,
+    // ),
   ];
 
   List<CharacterModel> _femaleCharacters = [
@@ -78,6 +85,9 @@ class CharacterSelectionProvider extends ChangeNotifier {
   // Carousel settings
   bool _useCarousel = true;
   double _carouselVisibleWidth = 0.5; // Percentage of side character visible
+  // New carousel properties
+  EdgeInsets _carouselMargin = const EdgeInsets.all(0);
+  EdgeInsets _carouselPadding = const EdgeInsets.all(0);
 
   // Button settings
   String _buttonText = 'Next';
@@ -94,6 +104,11 @@ class CharacterSelectionProvider extends ChangeNotifier {
   bool _useImageButton = false;
   String? _buttonImagePath;
   bool _isButtonImageAsset = true;
+  // New button properties
+  FontWeight _buttonFontWeight = FontWeight.w500;
+  EdgeInsets _buttonMargin = const EdgeInsets.only(top: 30.0);
+  EdgeInsets _buttonPadding =
+      const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0);
 
   // Layout settings
   double _screenPadding = 20.0;
@@ -107,6 +122,21 @@ class CharacterSelectionProvider extends ChangeNotifier {
   Color get titleColor => _titleColor;
   FontWeight get titleFontWeight => _titleFontWeight;
   double get titlePadding => _titlePadding;
+  // New getters for title
+  EdgeInsets get titleMargin => _titleMargin;
+  double get titleLineHeight => _titleLineHeight;
+  bool get titleItalic => _titleItalic;
+  double get titleOpacity => _titleOpacity;
+  TextAlign get titleAlignment => _titleAlignment;
+
+  // New getters for carousel
+  EdgeInsets get carouselMargin => _carouselMargin;
+  EdgeInsets get carouselPadding => _carouselPadding;
+
+  // New getters for button
+  FontWeight get buttonFontWeight => _buttonFontWeight;
+  EdgeInsets get buttonMargin => _buttonMargin;
+  EdgeInsets get buttonPadding => _buttonPadding;
 
   List<CharacterModel> get maleCharacters => _maleCharacters;
   List<CharacterModel> get femaleCharacters => _femaleCharacters;
@@ -160,11 +190,39 @@ class CharacterSelectionProvider extends ChangeNotifier {
     Color? color,
     FontWeight? fontWeight,
     double? padding,
+    double? lineHeight,
+    bool? italic,
+    double? opacity,
+    TextAlign? alignment,
   }) {
     if (fontSize != null) _titleFontSize = fontSize;
     if (color != null) _titleColor = color;
     if (fontWeight != null) _titleFontWeight = fontWeight;
     if (padding != null) _titlePadding = padding;
+    if (lineHeight != null) _titleLineHeight = lineHeight;
+    if (italic != null) _titleItalic = italic;
+    if (opacity != null) _titleOpacity = opacity;
+    if (alignment != null) _titleAlignment = alignment;
+    notifyListeners();
+    _saveSettings();
+  }
+
+  // New setter for title margin
+  void setTitleMargin(EdgeInsets margin) {
+    _titleMargin = margin;
+    notifyListeners();
+    _saveSettings();
+  }
+
+  // New setters for carousel
+  void setCarouselMargin(EdgeInsets margin) {
+    _carouselMargin = margin;
+    notifyListeners();
+    _saveSettings();
+  }
+
+  void setCarouselPadding(EdgeInsets padding) {
+    _carouselPadding = padding;
     notifyListeners();
     _saveSettings();
   }
@@ -305,11 +363,26 @@ class CharacterSelectionProvider extends ChangeNotifier {
     Color? buttonColor,
     Color? textColor,
     double? borderRadius,
+    FontWeight? fontWeight,
   }) {
     if (fontSize != null) _buttonFontSize = fontSize;
     if (buttonColor != null) _buttonColor = buttonColor;
     if (textColor != null) _buttonTextColor = textColor;
     if (borderRadius != null) _buttonBorderRadius = borderRadius;
+    if (fontWeight != null) _buttonFontWeight = fontWeight;
+    notifyListeners();
+    _saveSettings();
+  }
+
+  // New setters for button margin and padding
+  void setButtonMargin(EdgeInsets margin) {
+    _buttonMargin = margin;
+    notifyListeners();
+    _saveSettings();
+  }
+
+  void setButtonPadding(EdgeInsets padding) {
+    _buttonPadding = padding;
     notifyListeners();
     _saveSettings();
   }
@@ -372,29 +445,95 @@ class CharacterSelectionProvider extends ChangeNotifier {
     if (settingsJson != null) {
       final Map<String, dynamic> settings = jsonDecode(settingsJson);
 
-      // Title settings
+// Title settings
       _titleText = settings['titleText'] ?? _titleText;
       _titleFontSize = settings['titleFontSize'] ?? _titleFontSize;
       _titleColor = Color(settings['titleColor'] ?? _titleColor.value);
       _titleFontWeight = FontWeight
           .values[settings['titleFontWeight'] ?? _titleFontWeight.index];
       _titlePadding = settings['titlePadding'] ?? _titlePadding;
+      _titleLineHeight = settings['titleLineHeight'] ?? _titleLineHeight;
+      _titleItalic = settings['titleItalic'] ?? _titleItalic;
+      _titleOpacity = settings['titleOpacity'] ?? _titleOpacity;
+      _titleAlignment =
+          TextAlign.values[settings['titleAlignment'] ?? _titleAlignment.index];
 
-      // Character settings
-      if (settings['maleCharacters'] != null) {
-        _maleCharacters = List<CharacterModel>.from(
-          (settings['maleCharacters'] as List).map(
-            (x) => CharacterModel.fromJson(x),
-          ),
+      // Load title margin
+      if (settings.containsKey('titleMarginTop')) {
+        _titleMargin = EdgeInsets.fromLTRB(
+          settings['titleMarginLeft'] ?? 0.0,
+          settings['titleMarginTop'] ?? 0.0,
+          settings['titleMarginRight'] ?? 0.0,
+          settings['titleMarginBottom'] ?? 0.0,
         );
       }
 
-      if (settings['femaleCharacters'] != null) {
-        _femaleCharacters = List<CharacterModel>.from(
-          (settings['femaleCharacters'] as List).map(
-            (x) => CharacterModel.fromJson(x),
-          ),
+      // Load carousel margin and padding
+      if (settings.containsKey('carouselMarginTop')) {
+        _carouselMargin = EdgeInsets.fromLTRB(
+          settings['carouselMarginLeft'] ?? 0.0,
+          settings['carouselMarginTop'] ?? 0.0,
+          settings['carouselMarginRight'] ?? 0.0,
+          settings['carouselMarginBottom'] ?? 0.0,
         );
+      }
+
+      if (settings.containsKey('carouselPaddingTop')) {
+        _carouselPadding = EdgeInsets.fromLTRB(
+          settings['carouselPaddingLeft'] ?? 0.0,
+          settings['carouselPaddingTop'] ?? 0.0,
+          settings['carouselPaddingRight'] ?? 0.0,
+          settings['carouselPaddingBottom'] ?? 0.0,
+        );
+      }
+
+      // Character settings
+      if (settings['maleCharacters'] != null) {
+        try {
+          final List<CharacterModel> loadedMaleCharacters =
+              List<CharacterModel>.from(
+            (settings['maleCharacters'] as List).map(
+              (x) => CharacterModel.fromJson(x),
+            ),
+          );
+
+          // Keep only characters that have valid assets
+          _maleCharacters = loadedMaleCharacters.where((character) {
+            if (!character.isAsset) {
+              // For file system files, check if they exist
+              return File(character.imagePath).existsSync();
+            }
+            // For asset files, we'll keep them as they should be in the assets folder
+            return true;
+          }).toList();
+        }on Exception catch (e) {
+          debugPrint('Error loading male characters: $e');
+          // Keep default characters if there's an error
+        }
+      }
+
+      if (settings['femaleCharacters'] != null) {
+        try {
+          final List<CharacterModel> loadedFemaleCharacters =
+              List<CharacterModel>.from(
+            (settings['femaleCharacters'] as List).map(
+              (x) => CharacterModel.fromJson(x),
+            ),
+          );
+
+          // Keep only characters that have valid assets
+          _femaleCharacters = loadedFemaleCharacters.where((character) {
+            if (!character.isAsset) {
+              // For file system files, check if they exist
+              return File(character.imagePath).existsSync();
+            }
+            // For asset files, we'll keep them as they should be in the assets folder
+            return true;
+          }).toList();
+        } on Exception catch (e) {
+          debugPrint('Error loading female characters: $e');
+          // Keep default characters if there's an error
+        }
       }
 
       // Character display settings
@@ -433,6 +572,8 @@ class CharacterSelectionProvider extends ChangeNotifier {
       _buttonWidth = settings['buttonWidth'] ?? _buttonWidth;
       _buttonHeight = settings['buttonHeight'] ?? _buttonHeight;
       _buttonFontSize = settings['buttonFontSize'] ?? _buttonFontSize;
+      _buttonFontWeight = FontWeight
+          .values[settings['buttonFontWeight'] ?? _buttonFontWeight.index];
       _buttonColor = Color(settings['buttonColor'] ?? _buttonColor.value);
       _buttonTextColor =
           Color(settings['buttonTextColor'] ?? _buttonTextColor.value);
@@ -454,6 +595,24 @@ class CharacterSelectionProvider extends ChangeNotifier {
       _backgroundImagePath = settings['backgroundImagePath'];
       _isBackgroundImageAsset =
           settings['isBackgroundImageAsset'] ?? _isBackgroundImageAsset;
+
+      // Load button margin
+      if (settings.containsKey('buttonMarginTop')) {
+        _buttonMargin = EdgeInsets.fromLTRB(
+          settings['buttonMarginLeft'] ?? 0.0,
+          settings['buttonMarginTop'] ?? _buttonMarginTop,
+          settings['buttonMarginRight'] ?? 0.0,
+          settings['buttonMarginBottom'] ?? 0.0,
+        );
+      }
+
+      // Load button padding
+      if (settings.containsKey('buttonPaddingVertical')) {
+        _buttonPadding = EdgeInsets.symmetric(
+          vertical: settings['buttonPaddingVertical'] ?? 10.0,
+          horizontal: settings['buttonPaddingHorizontal'] ?? 20.0,
+        );
+      }
     }
 
     notifyListeners();
@@ -470,6 +629,14 @@ class CharacterSelectionProvider extends ChangeNotifier {
       'titleColor': _titleColor.value,
       'titleFontWeight': _titleFontWeight.index,
       'titlePadding': _titlePadding,
+      'titleLineHeight': _titleLineHeight,
+      'titleItalic': _titleItalic,
+      'titleOpacity': _titleOpacity,
+      'titleAlignment': _titleAlignment.index,
+      'titleMarginTop': _titleMargin.top,
+      'titleMarginBottom': _titleMargin.bottom,
+      'titleMarginLeft': _titleMargin.left,
+      'titleMarginRight': _titleMargin.right,
 
       // Character settings
       'maleCharacters': _maleCharacters.map((e) => e.toJson()).toList(),
@@ -495,12 +662,21 @@ class CharacterSelectionProvider extends ChangeNotifier {
       // Carousel settings
       'useCarousel': _useCarousel,
       'carouselVisibleWidth': _carouselVisibleWidth,
+      'carouselMarginTop': _carouselMargin.top,
+      'carouselMarginBottom': _carouselMargin.bottom,
+      'carouselMarginLeft': _carouselMargin.left,
+      'carouselMarginRight': _carouselMargin.right,
+      'carouselPaddingTop': _carouselPadding.top,
+      'carouselPaddingBottom': _carouselPadding.bottom,
+      'carouselPaddingLeft': _carouselPadding.left,
+      'carouselPaddingRight': _carouselPadding.right,
 
       // Button settings
       'buttonText': _buttonText,
       'buttonWidth': _buttonWidth,
       'buttonHeight': _buttonHeight,
       'buttonFontSize': _buttonFontSize,
+      'buttonFontWeight': _buttonFontWeight.index,
       'buttonColor': _buttonColor.value,
       'buttonTextColor': _buttonTextColor.value,
       'buttonBorderRadius': _buttonBorderRadius,
@@ -508,6 +684,11 @@ class CharacterSelectionProvider extends ChangeNotifier {
       'buttonBorderWidth': _buttonBorderWidth,
       'buttonBorderColor': _buttonBorderColor.value,
       'buttonMarginTop': _buttonMarginTop,
+      'buttonMarginLeft': _buttonMargin.left,
+      'buttonMarginRight': _buttonMargin.right,
+      'buttonMarginBottom': _buttonMargin.bottom,
+      'buttonPaddingVertical': _buttonPadding.top,
+      'buttonPaddingHorizontal': _buttonPadding.left,
       'useImageButton': _useImageButton,
       'buttonImagePath': _buttonImagePath,
       'isButtonImageAsset': _isButtonImageAsset,

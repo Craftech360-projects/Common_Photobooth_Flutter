@@ -7,6 +7,7 @@ import 'package:photobooth_flutter/providers/app_provider.dart';
 import 'package:photobooth_flutter/providers/face_capture_provider.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
+import 'package:photobooth_flutter/services/supabase_service.dart';
 import 'package:provider/provider.dart';
 
 class FaceCaptureScreen extends StatefulWidget {
@@ -115,42 +116,61 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
 
   Future<void> _takePicture() async {
     try {
-      late final String imagePath;
-
-      if (_isMacOS) {
-        if (_macOSController == null) {
-          debugPrint('macOS controller is null');
-          return;
-        }
-
-        // Fix the takePicture method call
-        final image = await _macOSController!.takePicture();
-
-        if (image == null) {
-          debugPrint('Failed to take picture on macOS');
-          return;
-        }
-
-        // Fix the path access
-        imagePath = image.url ?? '';
-      } else {
-        if (_controller == null || !_controller!.value.isInitialized) {
-          debugPrint('Camera controller not initialized');
-          return;
-        }
-
-        final image = await _controller!.takePicture();
-        imagePath = image.path;
+      if (_controller == null || !_cameraInitialized) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Camera not initialized')),
+        );
+        return;
       }
 
-      if (mounted) {
-        final appProvider = context.read<PhotoboothProvider>();
-        appProvider.setFaceImagePath(imagePath);
+      final image = await _controller!.takePicture();
+      final provider = context.read<PhotoboothProvider>();
 
-        await Navigator.pushNamed(context, AppRoutes.loadingScreen);
+      // Set the face image path in the provider
+      provider.setFaceImage(image.path);
+
+      // Navigate to loading screen
+      await Navigator.pushNamed(context, AppRoutes.loadingScreen);
+
+      // Get participant details from provider
+      final name = provider.name ?? '';
+      final email = provider.email ?? '';
+      final gender = provider.selectedGender;
+      final characterId = provider.selectedCharacterId;
+
+      // Check if Supabase is initialized
+      if (SupabaseService.instance.isInitialized) {
+        try {
+          // Upload image to Supabase
+          final imageFile = File(image.path);
+          final userId = DateTime.now().millisecondsSinceEpoch.toString();
+          final imageUrl =
+              await SupabaseService.instance.uploadImage(imageFile, userId);
+
+          if (imageUrl != null) {
+            // Store participant details with image URL
+            await SupabaseService.instance.storeParticipantDetails(
+              name: name,
+              email: email,
+              gender: gender,
+              characterId: characterId,
+              imageUrl: imageUrl,
+            );
+
+            // Set the swapped image URL (using the uploaded image URL for now)
+            provider.setSwappedImage(imageUrl);
+          } else {
+            debugPrint('Failed to upload image to Supabase');
+          }
+        } catch (e) {
+          debugPrint('Error during Supabase operations: $e');
+        }
+      } else {
+        debugPrint('Supabase not initialized, skipping upload');
+        // For testing without Supabase, set a dummy URL
+        provider.setSwappedImage('https://example.com/dummy-image.jpg');
       }
     } on Exception catch (e) {
-      debugPrint('Error taking picture: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to take picture: $e')),
       );
@@ -365,7 +385,8 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
         if (file.existsSync()) {
           return FileImage(file);
         } else {
-          debugPrint('Global background image file does not exist: ${globalSettings.backgroundImage}');
+          debugPrint(
+              'Global background image file does not exist: ${globalSettings.backgroundImage}');
           return const AssetImage('assets/images/background.jpg');
         }
       }
