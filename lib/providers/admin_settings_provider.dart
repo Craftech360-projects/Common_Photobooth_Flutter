@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -46,14 +45,14 @@ class AdminSettingsProvider extends ChangeNotifier {
   bool _isWelcomeScreenBackgroundAsset = true;
 
   // PARTICIPANT DETAILS SCREEN SETTINGS
-  String _submitButtonText = 'SUBMIT';
-  TextStyle _buttonTextStyle = const TextStyle(
+  final String _submitButtonText = 'SUBMIT';
+  final TextStyle _buttonTextStyle = const TextStyle(
     letterSpacing: 0.5,
     fontSize: 24,
     fontWeight: FontWeight.bold,
     color: AppColors.black,
   );
-  List<CustomFormField> _formFields = [];
+  final List<CustomFormField> _formFields = [];
 
   // GETTERS
   // Global settings
@@ -129,57 +128,57 @@ class AdminSettingsProvider extends ChangeNotifier {
       }
     }
 
-    // LOAD PARTICIPANT DETAILS SCREEN SETTINGS
-    _submitButtonText = _prefs.getString('submit_button_text') ?? 'SUBMIT';
+    //   // LOAD PARTICIPANT DETAILS SCREEN SETTINGS
+    //   _submitButtonText = _prefs.getString('submit_button_text') ?? 'SUBMIT';
 
-    // LOAD FORM FIELDS
-    final String? fieldsJson = _prefs.getString('form_fields');
-    if (fieldsJson != null) {
-      final List<dynamic> fields = jsonDecode(fieldsJson);
-      _formFields.clear();
-      _formFields.addAll(
-        fields.map(
-          (field) => CustomFormField(
-            id: field['id'],
-            label: field['label'],
-            hintText: field['hintText'],
-            fillColor: Color(field['fillColor']),
-            isRequired: field['isRequired'] ?? true,
-            textColor: Color(field['textColor'] ?? 0xFF000000),
-          ),
-        ),
-      );
-    } else {
-      // Default form fields
-      _formFields = [
-        CustomFormField(
-          id: 'name',
-          label: 'Full Name',
-          hintText: 'Enter full name',
-          fillColor: Colors.white,
-        ),
-        CustomFormField(
-          id: 'email',
-          label: 'Email',
-          hintText: 'Enter email address',
-          fillColor: Colors.white,
-        ),
-      ];
-    }
+    //   // LOAD FORM FIELDS
+    //   final String? fieldsJson = _prefs.getString('form_fields');
+    //   if (fieldsJson != null) {
+    //     final List<dynamic> fields = jsonDecode(fieldsJson);
+    //     _formFields.clear();
+    //     _formFields.addAll(
+    //       fields.map(
+    //         (field) => CustomFormField(
+    //           id: field['id'],
+    //           label: field['label'],
+    //           hintText: field['hintText'],
+    //           fillColor: Color(field['fillColor']),
+    //           isRequired: field['isRequired'] ?? true,
+    //           textColor: Color(field['textColor'] ?? 0xFF000000),
+    //         ),
+    //       ),
+    //     );
+    //   } else {
+    //     // Default form fields
+    //     _formFields = [
+    //       CustomFormField(
+    //         id: 'name',
+    //         label: 'Full Name',
+    //         hintText: 'Enter full name',
+    //         fillColor: Colors.white,
+    //       ),
+    //       CustomFormField(
+    //         id: 'email',
+    //         label: 'Email',
+    //         hintText: 'Enter email address',
+    //         fillColor: Colors.white,
+    //       ),
+    //     ];
+    //   }
 
-    // LOAD BUTTON TEXT STYLE
-    final String? styleJson = _prefs.getString('button_text_style');
-    if (styleJson != null) {
-      final style = jsonDecode(styleJson);
-      _buttonTextStyle = TextStyle(
-        letterSpacing: style['letterSpacing']?.toDouble() ?? 0.5,
-        fontSize: style['fontSize']?.toDouble() ?? 24,
-        fontWeight: FontWeight.values[style['fontWeight'] ?? 6],
-        color: Color(style['color'] ?? 0xFF000000),
-      );
-    }
+    //   // LOAD BUTTON TEXT STYLE
+    //   final String? styleJson = _prefs.getString('button_text_style');
+    //   if (styleJson != null) {
+    //     final style = jsonDecode(styleJson);
+    //     _buttonTextStyle = TextStyle(
+    //       letterSpacing: style['letterSpacing']?.toDouble() ?? 0.5,
+    //       fontSize: style['fontSize']?.toDouble() ?? 24,
+    //       fontWeight: FontWeight.values[style['fontWeight'] ?? 6],
+    //       color: Color(style['color'] ?? 0xFF000000),
+    //     );
+    //   }
 
-    notifyListeners();
+    //   notifyListeners();
   }
 
   // GLOBAL SETTINGS METHODS
@@ -308,63 +307,63 @@ class AdminSettingsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // PARTICIPANT DETAILS SCREEN METHODS
-  void setSubmitButtonText(String text) async {
-    _submitButtonText = text;
-    await _prefs.setString('submit_button_text', text);
-    notifyListeners();
-  }
+  // // PARTICIPANT DETAILS SCREEN METHODS
+  // void setSubmitButtonText(String text) async {
+  //   _submitButtonText = text;
+  //   await _prefs.setString('submit_button_text', text);
+  //   notifyListeners();
+  // }
 
-  void setButtonTextStyle(TextStyle style) async {
-    _buttonTextStyle = style;
-    final styleMap = {
-      'letterSpacing': style.letterSpacing,
-      'fontSize': style.fontSize,
-      'fontWeight': style.fontWeight?.index,
-      'color': style.color?.value,
-    };
-    await _prefs.setString('button_text_style', jsonEncode(styleMap));
-    notifyListeners();
-  }
+  // void setButtonTextStyle(TextStyle style) async {
+  //   _buttonTextStyle = style;
+  //   final styleMap = {
+  //     'letterSpacing': style.letterSpacing,
+  //     'fontSize': style.fontSize,
+  //     'fontWeight': style.fontWeight?.index,
+  //     'color': style.color?.value,
+  //   };
+  //   await _prefs.setString('button_text_style', jsonEncode(styleMap));
+  //   notifyListeners();
+  // }
 
-  void addFormField() async {
-    final newField = CustomFormField(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      label: 'New Field',
-      hintText: 'Enter value',
-      fillColor: Colors.white,
-    );
-    _formFields.add(newField);
-    await _saveFormFields();
-    notifyListeners();
-  }
+  // void addFormField() async {
+  //   final newField = CustomFormField(
+  //     id: DateTime.now().millisecondsSinceEpoch.toString(),
+  //     label: 'New Field',
+  //     hintText: 'Enter value',
+  //     fillColor: Colors.white,
+  //   );
+  //   _formFields.add(newField);
+  //   await _saveFormFields();
+  //   notifyListeners();
+  // }
 
-  void updateFormField(String id, CustomFormField updatedField) async {
-    final index = _formFields.indexWhere((field) => field.id == id);
-    if (index != -1) {
-      _formFields[index] = updatedField;
-      await _saveFormFields();
-      notifyListeners();
-    }
-  }
+  // void updateFormField(String id, CustomFormField updatedField) async {
+  //   final index = _formFields.indexWhere((field) => field.id == id);
+  //   if (index != -1) {
+  //     _formFields[index] = updatedField;
+  //     await _saveFormFields();
+  //     notifyListeners();
+  //   }
+  // }
 
-  void removeFormField(String id) async {
-    _formFields.removeWhere((field) => field.id == id);
-    await _saveFormFields();
-    notifyListeners();
-  }
+  // void removeFormField(String id) async {
+  //   _formFields.removeWhere((field) => field.id == id);
+  //   await _saveFormFields();
+  //   notifyListeners();
+  // }
 
-  Future<void> _saveFormFields() async {
-    final List<Map<String, dynamic>> fieldsMap = _formFields
-        .map((field) => {
-              'id': field.id,
-              'label': field.label,
-              'hintText': field.hintText,
-              'fillColor': field.fillColor.value,
-              'isRequired': field.isRequired,
-              'textColor': field.textColor.value,
-            })
-        .toList();
-    await _prefs.setString('form_fields', jsonEncode(fieldsMap));
-  }
+  // Future<void> _saveFormFields() async {
+  //   final List<Map<String, dynamic>> fieldsMap = _formFields
+  //       .map((field) => {
+  //             'id': field.id,
+  //             'label': field.label,
+  //             'hintText': field.hintText,
+  //             'fillColor': field.fillColor.value,
+  //             'isRequired': field.isRequired,
+  //             'textColor': field.textColor.value,
+  //           })
+  //       .toList();
+  //   await _prefs.setString('form_fields', jsonEncode(fieldsMap));
+  // }
 }

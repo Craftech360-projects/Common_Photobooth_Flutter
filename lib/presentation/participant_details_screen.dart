@@ -36,6 +36,7 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
       // Initialize controllers for each field
       for (var field in registrationSettings.textFields) {
         _controllers[field.id] = TextEditingController();
+        debugPrint('Created controller for field: ${field.id}');
       }
     });
   }
@@ -294,32 +295,24 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
   }
 
   void _handleSubmit() {
-    if (_formKey.currentState?.validate() ?? false) {
-      // Get the name and email fields if they exist
-      String? name;
-      String? email;
-      String? contact;
-
-      for (var field in context.read<RegistrationScreenProvider>().textFields) {
-        if (field.isEnabled) {
-          final value = _controllers[field.id]?.text;
-          if (field.label.toLowerCase().contains('name')) {
-            name = value;
-          } else if (field.label.toLowerCase().contains('email')) {
-            email = value;
-          } else if (field.label.toLowerCase().contains('contact')) {
-            contact = value;
-          }
-        }
-      }
-
-      // Set user details in the provider
-      context.read<PhotoboothProvider>().setUserDetails(
-            name ?? '',
-            email ?? '',
-          );
-
-      // Navigate to the next screen
+    if (_formKey.currentState!.validate()) {
+      final provider = Provider.of<PhotoboothProvider>(context, listen: false);
+    
+      // Get values from controllers and log all controllers for debugging
+      _controllers.forEach((key, controller) {
+        debugPrint('Controller $key has value: ${controller.text}');
+      });
+      
+      // Make sure we're using the correct field IDs
+      final name = _controllers['name']?.text ?? '';
+      final email = _controllers['email']?.text ?? '';
+      
+      debugPrint('Submitting - Name: "$name", Email: "$email"');
+      
+      // Set user details in provider
+      provider.setUserDetails(name, email);
+      
+      // Navigate to gender selection screen
       Navigator.pushNamed(context, AppRoutes.genderSelection);
     }
   }

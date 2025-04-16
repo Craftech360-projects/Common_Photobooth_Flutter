@@ -5,10 +5,8 @@ import 'package:lottie/lottie.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/providers/loading_screen_provider.dart';
-import 'package:photobooth_flutter/routes/routes.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
-import 'package:video_player_media_kit/video_player_media_kit.dart';
 
 class LoadingScreen extends StatefulWidget {
   const LoadingScreen({super.key});
@@ -25,24 +23,10 @@ class _LoadingScreenState extends State<LoadingScreen> {
   void initState() {
     super.initState();
 
-    // Try to initialize the video player, but handle errors gracefully
-    try {
-      if (Platform.isMacOS) {
-        // On macOS, we need to check if the framework is available
-        VideoPlayerMediaKit.ensureInitialized(
-          macOS: true,
-          windows: false,
-        );
-      }
-    } catch (e) {
-      debugPrint('Error initializing VideoPlayerMediaKit: $e');
-      // Continue without video support if initialization fails
-    }
-
-    _startLoading();
+    _initializeLoader();
   }
 
-  Future<void> _startLoading() async {
+  Future<void> _initializeLoader() async {
     final settings = Provider.of<LoadingScreenProvider>(context, listen: false);
 
     // Initialize video controller if needed
@@ -61,12 +45,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
       _isInitialized = true;
     });
 
-    // Navigate to the swapped face screen after the specified duration
-    Future.delayed(Duration(seconds: settings.loaderDurationSeconds), () {
-      if (mounted) {
-        Navigator.pushReplacementNamed(context, AppRoutes.swappedFace);
-      }
-    });
+    // Note: We no longer use a fixed duration timer here
+    // The face_capture_screen will handle navigation when processing is complete
   }
 
   Future<void> _initializeVideoPlayer(LoadingScreenProvider settings) async {
@@ -242,16 +222,17 @@ class _LoadingScreenState extends State<LoadingScreen> {
         fit: BoxFit.cover,
       );
     }
+
     // Fall back to global background if available
-    else if (globalSettings.backgroundImagePath != null) {
+    else if (globalSettings.backgroundImage != null) {
       return DecorationImage(
-        image: globalSettings.isBackgroundImageAsset
-            ? AssetImage(globalSettings.backgroundImagePath!)
-            : FileImage(File(globalSettings.backgroundImagePath!))
-                as ImageProvider,
+        image: globalSettings.isAssetImage
+            ? AssetImage(globalSettings.backgroundImage!)
+            : FileImage(File(globalSettings.backgroundImage!)) as ImageProvider,
         fit: BoxFit.cover,
       );
     }
+
     // Use default background as last resort
     else {
       return const DecorationImage(

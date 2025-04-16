@@ -96,6 +96,10 @@ class SupabaseService {
       // Create a unique ID for the participant
       final userId = DateTime.now().millisecondsSinceEpoch.toString();
 
+      // Debug log to verify data before insertion
+      debugPrint(
+          'Storing participant details - Name: $name, Email: $email, Gender: $gender, CharacterId: $characterId');
+
       // Insert data into the 'users' table
       final response = await _client.from('users').insert({
         'id': userId,

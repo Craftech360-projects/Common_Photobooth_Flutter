@@ -75,8 +75,11 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => const LoadingScreen());
 
       case swappedFace:
-        return MaterialPageRoute(builder: (_) => const SwappedFaceScreen());
-
+        return MaterialPageRoute(
+            builder: (_) => const SwappedFaceScreen(),
+            settings: settings,
+          );
+          
 
       // Admin screens
       case adminScreen:

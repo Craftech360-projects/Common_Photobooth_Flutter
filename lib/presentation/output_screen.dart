@@ -30,20 +30,26 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
   Future<void> _processImage() async {
     try {
       final provider = Provider.of<PhotoboothProvider>(context, listen: false);
-
-      // If we already have a swapped image URL, use it
-      if (provider.swappedImageUrl != null) {
+    
+      // Debug log to check if URL is available
+      debugPrint('Output screen - Captured image URL: ${provider.capturedImageUrl}');
+  
+      // If we already have a captured image URL, use it
+      if (provider.capturedImageUrl != null) {
         setState(() => _isLoading = false);
         return;
       }
-
+  
       // Otherwise, this is a fallback for testing
-      provider.setSwappedImage('https://example.com/swapped-image.jpg');
-      setState(() => _isLoading = false);
-    } on Exception {
       setState(() {
         _isLoading = false;
-        _errorMessage = 'Failed to process image';
+        _errorMessage = 'No image URL available';
+      });
+    } on Exception catch (e) {
+      debugPrint('Error processing image: $e');
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'Failed to process image: $e';
       });
     }
   }
@@ -207,9 +213,11 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
 
   Widget _buildOutputImage() {
     final provider = Provider.of<PhotoboothProvider>(context);
-    final swappedImageUrl = provider.swappedImageUrl;
+    final capturedImageUrl = provider.capturedImageUrl;
+  
+    debugPrint('Building output image with URL: $capturedImageUrl');
 
-    if (swappedImageUrl == null) {
+    if (capturedImageUrl == null) {
       return const Center(
         child: Text(
           'No image available',
@@ -218,44 +226,42 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
       );
     }
 
-    // For now, just show a placeholder
-    return Container(
-      color: Colors.grey[300],
-      child: const Center(
-        child: Text('Swapped Image Placeholder'),
-      ),
+    // Display the captured image from Supabase
+    return Image.network(
+      capturedImageUrl,
+      fit: BoxFit.cover,
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        return Center(
+          child: CircularProgressIndicator(
+            value: loadingProgress.expectedTotalBytes != null
+                ? loadingProgress.cumulativeBytesLoaded /
+                    loadingProgress.expectedTotalBytes!
+                : null,
+            color: AppColors.goldenYellow,
+          ),
+        );
+      },
+      errorBuilder: (context, error, stackTrace) {
+        debugPrint('Error loading image: $error');
+        return Center(
+          child: Text(
+            'Failed to load image: $error',
+            style: const TextStyle(color: Colors.white),
+          ),
+        );
+      },
     );
-
-    // TODO: Implement actual image loading
-    // return Image.network(
-    //   swappedImageUrl,
-    //   fit: BoxFit.cover,
-    //   loadingBuilder: (context, child, loadingProgress) {
-    //     if (loadingProgress == null) return child;
-    //     return Center(
-    //       child: CircularProgressIndicator(
-    //         value: loadingProgress.expectedTotalBytes != null
-    //             ? loadingProgress.cumulativeBytesLoaded /
-    //                 loadingProgress.expectedTotalBytes!
-    //             : null,
-    //         color: AppColors.goldenYellow,
-    //       ),
-    //     );
-    //   },
-    //   errorBuilder: (context, error, stackTrace) {
-    //     return const Center(
-    //       child: Text(
-    //         'Failed to load image',
-    //         style: TextStyle(color: Colors.white),
-    //       ),
-    //     );
-    //   },
-    // );
   }
 
   Widget _buildQrCodeWithText(OutputScreenProvider settings) {
+    final provider = Provider.of<PhotoboothProvider>(context);
+    final capturedImageUrl = provider.capturedImageUrl;
+  
+    debugPrint('Building QR code with URL: $capturedImageUrl');
+    
     final qrCode = QrImageView(
-      data: 'https://example.com/download-image',
+      data: capturedImageUrl ?? 'https://example.com/download-image',
       version: QrVersions.auto,
       size: settings.qrCodeSize,
       backgroundColor: settings.qrCodeBackgroundColor,

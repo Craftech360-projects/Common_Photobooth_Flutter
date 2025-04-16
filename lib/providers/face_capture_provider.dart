@@ -19,8 +19,13 @@ class FaceCaptureProvider extends ChangeNotifier {
   Color _previewBorderColor = Colors.amber;
   double _previewBorderWidth = 5.0;
   bool _showPreviewBorder = true;
-  String _pictureFormat = 'jpeg'; // or 'tiff', 'heic'
-  String _pictureResolution = 'max'; // or 'medium', 'low'
+  // Replace macOS-specific settings with Windows-specific settings
+  // String _pictureFormat = 'jpeg'; // or 'tiff', 'heic'
+  // String _pictureResolution = 'max'; // or 'medium', 'low'
+
+  // Windows camera settings
+  String _pictureFormat = 'jpeg'; // Windows camera typically uses jpeg
+  final String _pictureQuality = 'high'; // high, medium, low
 
   // Button settings
   String _buttonText = 'CAPTURE';
@@ -83,8 +88,9 @@ class FaceCaptureProvider extends ChangeNotifier {
   String? get backgroundImagePath => _backgroundImagePath;
   bool get isBackgroundImageAsset => _isBackgroundImageAsset;
 
+  // Update getters
   String get pictureFormat => _pictureFormat;
-  String get pictureResolution => _pictureResolution;
+  String get pictureQuality => _pictureQuality;
   int get selectedCameraIndex => _selectedCameraIndex;
 
   // Setters
@@ -108,12 +114,6 @@ class FaceCaptureProvider extends ChangeNotifier {
 
   void setPictureFormat(String format) {
     _pictureFormat = format;
-    notifyListeners();
-    _saveSettings();
-  }
-
-  void setPictureResolution(String resolution) {
-    _pictureResolution = resolution;
     notifyListeners();
     _saveSettings();
   }

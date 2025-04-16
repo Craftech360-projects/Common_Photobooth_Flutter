@@ -80,27 +80,17 @@ class _FaceCaptureSettingsState extends State<FaceCaptureSettings> {
                       max: 48.0,
                       onChanged: (value) => settings.setTitleFontSize(value),
                     ),
-                    if (Platform.isMacOS) ...[
+                    // Replace macOS-specific settings with Windows-specific settings
+                    // if (Platform.isMacOS) ...[
+                    if (Platform.isWindows) ...[
                       _buildDropdown<String>(
                         label: 'Picture Format',
                         value: settings.pictureFormat,
                         items: {
                           'jpeg': 'JPEG',
-                          'tiff': 'TIFF',
-                          'heic': 'HEIC',
+                          'png': 'PNG',
                         },
                         onChanged: (value) => settings.setPictureFormat(value!),
-                      ),
-                      _buildDropdown<String>(
-                        label: 'Picture Resolution',
-                        value: settings.pictureResolution,
-                        items: {
-                          'max': 'Maximum',
-                          'medium': 'Medium',
-                          'low': 'Low',
-                        },
-                        onChanged: (value) =>
-                            settings.setPictureResolution(value!),
                       ),
                     ],
                     _buildDropdown<FontWeight>(

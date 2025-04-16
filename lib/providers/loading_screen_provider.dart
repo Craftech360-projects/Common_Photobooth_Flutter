@@ -33,7 +33,8 @@ class LoadingScreenProvider extends ChangeNotifier {
   String _loaderFileType = 'gif'; // gif, json, mp4, mov
 
   // Duration settings
-  int _loaderDurationSeconds = 10;
+  // Remove the loaderDurationSeconds property since we're now waiting for the actual response
+  // int _loaderDurationSeconds = 10;
 
   // Getters
   String get titleText => _titleText;
@@ -58,7 +59,15 @@ class LoadingScreenProvider extends ChangeNotifier {
   bool get isLoaderFileAsset => _isLoaderFileAsset;
   String get loaderFileType => _loaderFileType;
 
-  int get loaderDurationSeconds => _loaderDurationSeconds;
+  // Remove the getter
+  // int get loaderDurationSeconds => _loaderDurationSeconds;
+
+  // Remove the setter
+  // void setLoaderDuration(int seconds) {
+  //   _loaderDurationSeconds = seconds;
+  //   notifyListeners();
+  //   _saveSettings();
+  // }
 
   // Setters
   void setTitleText(String text) {
@@ -154,17 +163,12 @@ class LoadingScreenProvider extends ChangeNotifier {
     _saveSettings();
   }
 
-  void setLoaderDuration(int seconds) {
-    _loaderDurationSeconds = seconds;
-    notifyListeners();
-    _saveSettings();
-  }
-
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
     await _loadSettings();
   }
 
+  // Update the _loadSettings and _saveSettings methods to remove the duration
   Future<void> _loadSettings() async {
     final settingsJson = _prefs.getString('loading_screen_settings');
     if (settingsJson != null) {
@@ -179,20 +183,24 @@ class LoadingScreenProvider extends ChangeNotifier {
 
       _loaderWidth = settings['loaderWidth'] ?? _loaderWidth;
       _loaderHeight = settings['loaderHeight'] ?? _loaderHeight;
-      _loaderBorderRadius = settings['loaderBorderRadius'] ?? _loaderBorderRadius;
-      _loaderBorderColor = Color(settings['loaderBorderColor'] ?? _loaderBorderColor.value);
+      _loaderBorderRadius =
+          settings['loaderBorderRadius'] ?? _loaderBorderRadius;
+      _loaderBorderColor =
+          Color(settings['loaderBorderColor'] ?? _loaderBorderColor.value);
       _loaderBorderWidth = settings['loaderBorderWidth'] ?? _loaderBorderWidth;
       _showLoaderBorder = settings['showLoaderBorder'] ?? _showLoaderBorder;
 
       _showBackground = settings['showBackground'] ?? _showBackground;
       _backgroundImagePath = settings['backgroundImagePath'];
-      _isBackgroundImageAsset = settings['isBackgroundImageAsset'] ?? _isBackgroundImageAsset;
+      _isBackgroundImageAsset =
+          settings['isBackgroundImageAsset'] ?? _isBackgroundImageAsset;
 
       _loaderFilePath = settings['loaderFilePath'];
       _isLoaderFileAsset = settings['isLoaderFileAsset'] ?? _isLoaderFileAsset;
       _loaderFileType = settings['loaderFileType'] ?? _loaderFileType;
 
-      _loaderDurationSeconds = settings['loaderDurationSeconds'] ?? _loaderDurationSeconds;
+      // Remove this line
+      // _loaderDurationSeconds = settings['loaderDurationSeconds'] ?? _loaderDurationSeconds;
     }
     notifyListeners();
   }
@@ -221,7 +229,8 @@ class LoadingScreenProvider extends ChangeNotifier {
       'isLoaderFileAsset': _isLoaderFileAsset,
       'loaderFileType': _loaderFileType,
 
-      'loaderDurationSeconds': _loaderDurationSeconds,
+      // Remove this line
+      // 'loaderDurationSeconds': _loaderDurationSeconds,
     };
 
     await _prefs.setString('loading_screen_settings', jsonEncode(settings));
@@ -249,8 +258,6 @@ class LoadingScreenProvider extends ChangeNotifier {
     _loaderFilePath = null;
     _isLoaderFileAsset = true;
     _loaderFileType = 'gif';
-
-    _loaderDurationSeconds = 10;
 
     notifyListeners();
     _saveSettings();

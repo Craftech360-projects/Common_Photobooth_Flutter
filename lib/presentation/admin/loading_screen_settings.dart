@@ -118,15 +118,16 @@ class LoadingScreenSettings extends StatelessWidget {
                 ],
 
                 const SizedBox(height: 16),
-                _buildSlider(
-                  label: 'Loading Duration (seconds)',
-                  value: settings.loaderDurationSeconds.toDouble(),
-                  min: 3,
-                  max: 20,
-                  divisions: 17,
-                  onChanged: (value) =>
-                      settings.setLoaderDuration(value.toInt()),
-                ),
+                // Remove the duration slider
+                // _buildSlider(
+                //   label: 'Loading Duration (seconds)',
+                //   value: settings.loaderDurationSeconds.toDouble(),
+                //   min: 3,
+                //   max: 20,
+                //   divisions: 17,
+                //   onChanged: (value) =>
+                //       settings.setLoaderDuration(value.toInt()),
+                // ),
 
                 const Divider(height: 32),
 
