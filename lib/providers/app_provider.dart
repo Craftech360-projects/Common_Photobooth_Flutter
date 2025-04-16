@@ -16,7 +16,7 @@ class PhotoboothProvider extends ChangeNotifier {
   void setUserDetails(String name, String email) {
     this.name = name;
     this.email = email;
-    debugPrint('User details set in provider - Name: $name, Email: $email');
+
     notifyListeners();
   }
 
@@ -44,7 +44,7 @@ class PhotoboothProvider extends ChangeNotifier {
 
   void setCapturedImageUrl(String url) {
     capturedImageUrl = url;
-    debugPrint('Setting captured image URL in provider: $url');
+
     notifyListeners();
   }
 

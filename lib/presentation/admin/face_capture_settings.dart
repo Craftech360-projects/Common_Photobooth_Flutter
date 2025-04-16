@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:camera/camera.dart';
+import 'package:camera_platform_interface/camera_platform_interface.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/providers/face_capture_provider.dart';
@@ -26,16 +26,7 @@ class _FaceCaptureSettingsState extends State<FaceCaptureSettings> {
 
   Future<void> _loadCameras() async {
     try {
-      if (Platform.isMacOS) {
-        // On macOS, we use camera_macos plugin instead
-        setState(() {
-          _isLoading = false;
-        });
-        return;
-      }
-
-      // For other platforms, use the standard camera plugin
-      _cameras = await availableCameras();
+      _cameras = await CameraPlatform.instance.availableCameras();
     } on Exception catch (e) {
       debugPrint('Error loading cameras: $e');
     } finally {

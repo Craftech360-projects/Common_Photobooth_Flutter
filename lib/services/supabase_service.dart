@@ -70,7 +70,6 @@ class SupabaseService {
 
       // Get public URL
       final imageUrl = _client.storage.from('faces').getPublicUrl(fileName);
-      debugPrint('Image uploaded successfully: $imageUrl');
 
       return imageUrl;
     } catch (e) {
@@ -96,10 +95,6 @@ class SupabaseService {
       // Create a unique ID for the participant
       final userId = DateTime.now().millisecondsSinceEpoch.toString();
 
-      // Debug log to verify data before insertion
-      debugPrint(
-          'Storing participant details - Name: $name, Email: $email, Gender: $gender, CharacterId: $characterId');
-
       // Insert data into the 'users' table
       final response = await _client.from('users').insert({
         'id': userId,
@@ -112,7 +107,6 @@ class SupabaseService {
         'created_at': DateTime.now().toIso8601String(),
       }).select();
 
-      debugPrint('Participant details stored successfully: $response');
       return userId;
     } catch (e) {
       debugPrint('Error storing participant details: $e');

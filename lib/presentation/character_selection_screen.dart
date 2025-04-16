@@ -194,19 +194,19 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          onPressed: () =>
-              Navigator.pushNamed(context, AppRoutes.characterScreenSettings),
-          icon: const Icon(Icons.star),
-        ),
-        actions: [
-          IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.arrow_back),
-          ),
-        ],
-      ),
+      // appBar: AppBar(
+      //   leading: IconButton(
+      //     onPressed: () =>
+      //         Navigator.pushNamed(context, AppRoutes.characterScreenSettings),
+      //     icon: const Icon(Icons.star),
+      //   ),
+      //   actions: [
+      //     IconButton(
+      //       onPressed: () => Navigator.pop(context),
+      //       icon: const Icon(Icons.arrow_back),
+      //     ),
+      //   ],
+      // ),
       body: Container(
         width: double.infinity,
         height: double.infinity,

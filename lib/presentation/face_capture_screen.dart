@@ -22,6 +22,7 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
   Future<void>? _initializeControllerFuture;
   List<CameraDescription> _cameras = [];
   bool _cameraInitialized = false;
+  bool _isDisposingCamera = false;
 
   @override
   void initState() {
@@ -33,8 +34,10 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
     try {
       // First, dispose of any existing controller
       if (_controller != null) {
+        _isDisposingCamera = true;
         await _controller!.dispose();
         _controller = null;
+        _isDisposingCamera = false;
       }
 
       _cameras = await availableCameras();
@@ -88,8 +91,12 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
       final image = await _controller!.takePicture();
 
       // Dispose the camera controller after taking the picture
-      await _controller!.dispose();
-      _controller = null;
+      if (_controller != null) {
+        _isDisposingCamera = true;
+        await _controller!.dispose();
+        _controller = null;
+        _isDisposingCamera = false;
+      }
       _cameraInitialized = false;
 
       final provider = context.read<PhotoboothProvider>();

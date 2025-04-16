@@ -7,12 +7,12 @@ import 'package:photobooth_flutter/presentation/admin/loading_screen_settings.da
 import 'package:photobooth_flutter/presentation/admin/output_screen_settings.dart';
 import 'package:photobooth_flutter/presentation/admin/registration_screen_settings.dart';
 import 'package:photobooth_flutter/presentation/admin/welcome_screen_settings.dart';
+import 'package:photobooth_flutter/presentation/camera.dart';
 import 'package:photobooth_flutter/presentation/character_selection_screen.dart';
-import 'package:photobooth_flutter/presentation/face_capture_screen.dart';
 import 'package:photobooth_flutter/presentation/gender_selection_screen.dart';
 import 'package:photobooth_flutter/presentation/loading_screen.dart';
-import 'package:photobooth_flutter/presentation/participant_details_screen.dart';
 import 'package:photobooth_flutter/presentation/output_screen.dart';
+import 'package:photobooth_flutter/presentation/participant_details_screen.dart';
 import 'package:photobooth_flutter/presentation/welcome_screen.dart';
 
 class AppRoutes {
@@ -31,25 +31,24 @@ class AppRoutes {
 
   static const String loadingScreen = '/loading_screen';
 
-
   // Admin screens
   static const String adminScreen = '/admin_screen';
 
   static const String welcomeScreenSettings = '/admin/welcome_screen_settings';
 
-  static const String registrationScreenSettings = '/admin/registration_screen_settings';
+  static const String registrationScreenSettings =
+      '/admin/registration_screen_settings';
 
   static const String genderScreenSettings = '/admin/gender_screen_settings';
 
-  static const String characterScreenSettings = '/admin/character_screen_settings';
+  static const String characterScreenSettings =
+      '/admin/character_screen_settings';
 
   static const String faceCaptureSettings = '/face_capture_settings';
 
   static const String loadingScreenSettings = '/admin/loading_screen_settings';
 
   static const String outputScreenSettings = '/admin/output_screen_settings';
-
-
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -76,10 +75,9 @@ class AppRoutes {
 
       case swappedFace:
         return MaterialPageRoute(
-            builder: (_) => const SwappedFaceScreen(),
-            settings: settings,
-          );
-          
+          builder: (_) => const SwappedFaceScreen(),
+          settings: settings,
+        );
 
       // Admin screens
       case adminScreen:
@@ -106,9 +104,7 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => const LoadingScreenSettings());
 
       case outputScreenSettings:
-        return MaterialPageRoute(
-            builder: (_) =>
-                const OutputScreenSettings());
+        return MaterialPageRoute(builder: (_) => const OutputScreenSettings());
 
       // Add more routes as needed
       default:

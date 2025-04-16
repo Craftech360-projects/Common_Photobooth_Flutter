@@ -60,13 +60,13 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
     final globalSettings = Provider.of<GlobalSettingsProvider>(context);
 
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          onPressed: () =>
-              Navigator.pushNamed(context, AppRoutes.outputScreenSettings),
-          icon: const Icon(Icons.star),
-        ),
-      ),
+      // appBar: AppBar(
+      //   leading: IconButton(
+      //     onPressed: () =>
+      //         Navigator.pushNamed(context, AppRoutes.outputScreenSettings),
+      //     icon: const Icon(Icons.star),
+      //   ),
+      // ),
       body: Container(
         width: double.infinity,
         height: double.infinity,

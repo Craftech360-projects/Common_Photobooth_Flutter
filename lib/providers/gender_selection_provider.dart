@@ -187,9 +187,6 @@ class GenderSelectionProvider extends ChangeNotifier {
     _isMaleImageAsset = isAsset;
     notifyListeners();
     _saveSettings();
-
-    // Debug output
-    debugPrint('Set male image: path=$imagePath, isAsset=$isAsset');
   }
 
   void setFemaleImage(String? imagePath, {required bool isAsset}) {
@@ -197,9 +194,6 @@ class GenderSelectionProvider extends ChangeNotifier {
     _isFemaleImageAsset = isAsset;
     notifyListeners();
     _saveSettings();
-
-    // Debug output
-    debugPrint('Set female image: path=$imagePath, isAsset=$isAsset');
   }
 
   void setImageDimensions(double width, double height) {
@@ -571,9 +565,6 @@ class GenderSelectionProvider extends ChangeNotifier {
         'backgroundImagePath': _backgroundImagePath,
         'isBackgroundImageAsset': _isBackgroundImageAsset,
       };
-
-      debugPrint(
-          'Saving gender selection settings: maleImagePath=$_maleImagePath, femaleImagePath=$_femaleImagePath');
 
       await prefs.setString('gender_selection_settings', jsonEncode(settings));
     } catch (e) {

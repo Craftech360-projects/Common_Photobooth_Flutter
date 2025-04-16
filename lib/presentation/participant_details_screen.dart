@@ -31,7 +31,6 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
 
     for (var field in registrationSettings.textFields) {
       _controllers[field.id] = TextEditingController();
-      debugPrint('Created controller for field: ${field.id}');
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -81,13 +80,13 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
     final globalSettings = context.watch<GlobalSettingsProvider>();
 
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          onPressed: () => Navigator.pushNamed(
-              context, AppRoutes.registrationScreenSettings),
-          icon: const Icon(Icons.star),
-        ),
-      ),
+      // appBar: AppBar(
+      //   leading: IconButton(
+      //     onPressed: () => Navigator.pushNamed(
+      //         context, AppRoutes.registrationScreenSettings),
+      //     icon: const Icon(Icons.star),
+      //   ),
+      // ),
       body: Stack(children: [
         Container(
           width: double.infinity,
@@ -301,10 +300,7 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
       final registrationSettings = context.read<RegistrationScreenProvider>();
 
       // Log controllers (optional debugging)
-      _controllers.forEach((key, controller) {
-        debugPrint(
-            'Controller $key (${controller.hashCode}) has value: ${controller.text}');
-      });
+      _controllers.forEach((key, controller) {});
 
       // --- MODIFICATION START ---
       // Find field IDs based on their type
@@ -328,7 +324,6 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
       String name = '';
       if (nameFieldId.isNotEmpty && _controllers.containsKey(nameFieldId)) {
         name = _controllers[nameFieldId]!.text;
-        debugPrint('Retrieved name using ID: $nameFieldId (Type: Name)');
       } else {
         debugPrint('Could not find enabled Name field or its controller.');
       }
@@ -336,7 +331,6 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
       String email = '';
       if (emailFieldId.isNotEmpty && _controllers.containsKey(emailFieldId)) {
         email = _controllers[emailFieldId]!.text;
-        debugPrint('Retrieved email using ID: $emailFieldId (Type: Email)');
       } else {
         debugPrint('Could not find enabled Email field or its controller.');
       }
@@ -345,13 +339,10 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
       String phone = '';
       if (_controllers.containsKey(phoneFieldId)) {
         phone = _controllers[phoneFieldId]!.text;
-        debugPrint('Retrieved phone using ID: $phoneFieldId (Type: Phone)');
       } else {
         debugPrint('Could not find enabled Phone field or its controller.');
       }
       // --- MODIFICATION END ---
-
-      debugPrint('Submitting - Name: "$name", Email: "$email"');
 
       // Set user details in provider
       provider.setUserDetails(name, email);

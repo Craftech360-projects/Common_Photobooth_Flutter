@@ -28,13 +28,13 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          onPressed: () =>
-              Navigator.pushNamed(context, AppRoutes.welcomeScreenSettings),
-          icon: const Icon(Icons.star),
-        ),
-      ),
+      // appBar: AppBar(
+      //   leading: IconButton(
+      //     onPressed: () =>
+      //         Navigator.pushNamed(context, AppRoutes.welcomeScreenSettings),
+      //     icon: const Icon(Icons.star),
+      //   ),
+      // ),
       body: Stack(
         children: [
           // Background

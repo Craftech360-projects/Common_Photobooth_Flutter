@@ -25,12 +25,12 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
     final appProvider = context.watch<PhotoboothProvider>();
 
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-            onPressed: () =>
-                Navigator.pushNamed(context, AppRoutes.genderScreenSettings),
-            icon: const Icon(Icons.star)),
-      ),
+      // appBar: AppBar(
+      //   leading: IconButton(
+      //       onPressed: () =>
+      //           Navigator.pushNamed(context, AppRoutes.genderScreenSettings),
+      //       icon: const Icon(Icons.star)),
+      // ),
       body: Container(
         width: double.infinity,
         height: double.infinity,
