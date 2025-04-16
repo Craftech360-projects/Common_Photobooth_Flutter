@@ -389,6 +389,43 @@ class _RegistrationScreenSettingsState
               ],
             ),
             const SizedBox(height: 16),
+            _buildDropdownWithLabel<TextFieldType>(
+              label: 'Field Type',
+              value: field.fieldType,
+              items: TextFieldType.values.asMap().map((key, value) => MapEntry(
+                  value,
+                  value
+                      .toString())), // Convert enum to Map<TextFieldType, String>
+              onChanged: (TextFieldType? newValue) {
+                if (newValue != null) {
+                  // Create a new field object with the updated type
+                  final updatedField = CustomTextField(
+                    id: field.id,
+                    label: field.label, // Keep existing values
+                    hintText: field.hintText,
+                    isEnabled: field.isEnabled,
+                    isRequired: field.isRequired,
+                    fillColor: field.fillColor,
+                    textColor: field.textColor,
+                    labelColor: field.labelColor,
+                    fontSize: field.fontSize,
+                    fontWeight: field.fontWeight,
+                    isItalic: field.isItalic,
+                    hasBorder: field.hasBorder,
+                    borderWidth: field.borderWidth,
+                    borderColor: field.borderColor,
+                    borderRadius: field.borderRadius,
+                    width: field.width,
+                    height: field.height,
+                    margin: field.margin,
+                    padding: field.padding,
+                    fieldType: newValue, // Set the new type
+                  );
+                  settings.updateTextField(field.id, updatedField);
+                }
+              },
+            ),
+            const SizedBox(height: 16),
             TextFormField(
               initialValue: field.label,
               decoration: const InputDecoration(
@@ -398,7 +435,7 @@ class _RegistrationScreenSettingsState
               onChanged: (value) {
                 final updatedField = CustomTextField(
                   id: field.id,
-                  label: value,
+                  label: value, // Updated value
                   hintText: field.hintText,
                   isEnabled: field.isEnabled,
                   isRequired: field.isRequired,
@@ -406,11 +443,17 @@ class _RegistrationScreenSettingsState
                   textColor: field.textColor,
                   labelColor: field.labelColor,
                   fontSize: field.fontSize,
+                  fontWeight: field.fontWeight,
+                  isItalic: field.isItalic,
                   hasBorder: field.hasBorder,
                   borderWidth: field.borderWidth,
                   borderColor: field.borderColor,
+                  borderRadius: field.borderRadius,
                   width: field.width,
                   height: field.height,
+                  margin: field.margin,
+                  padding: field.padding,
+                  fieldType: field.fieldType, // Preserve existing type
                 );
                 settings.updateTextField(field.id, updatedField);
               },
@@ -423,21 +466,28 @@ class _RegistrationScreenSettingsState
                 border: OutlineInputBorder(),
               ),
               onChanged: (value) {
+                // IMPORTANT: Preserve fieldType
                 final updatedField = CustomTextField(
                   id: field.id,
                   label: field.label,
-                  hintText: value,
+                  hintText: value, // Updated value
                   isEnabled: field.isEnabled,
                   isRequired: field.isRequired,
                   fillColor: field.fillColor,
                   textColor: field.textColor,
                   labelColor: field.labelColor,
                   fontSize: field.fontSize,
+                  fontWeight: field.fontWeight,
+                  isItalic: field.isItalic,
                   hasBorder: field.hasBorder,
                   borderWidth: field.borderWidth,
                   borderColor: field.borderColor,
+                  borderRadius: field.borderRadius,
                   width: field.width,
                   height: field.height,
+                  margin: field.margin,
+                  padding: field.padding,
+                  fieldType: field.fieldType, // Preserve existing type
                 );
                 settings.updateTextField(field.id, updatedField);
               },
@@ -460,6 +510,7 @@ class _RegistrationScreenSettingsState
                           id: field.id,
                           label: field.label,
                           hintText: field.hintText,
+                          fieldType: field.fieldType,
                           isEnabled: field.isEnabled,
                           isRequired: field.isRequired,
                           fillColor: field.fillColor,
@@ -493,6 +544,7 @@ class _RegistrationScreenSettingsState
                           id: field.id,
                           label: field.label,
                           hintText: field.hintText,
+                          fieldType: field.fieldType,
                           isEnabled: field.isEnabled,
                           isRequired: field.isRequired,
                           fillColor: field.fillColor,
@@ -530,6 +582,7 @@ class _RegistrationScreenSettingsState
                           id: field.id,
                           label: field.label,
                           hintText: field.hintText,
+                          fieldType: field.fieldType,
                           isEnabled: field.isEnabled,
                           isRequired: field.isRequired,
                           fillColor: field.fillColor,
@@ -557,6 +610,7 @@ class _RegistrationScreenSettingsState
                         id: field.id,
                         label: field.label,
                         hintText: field.hintText,
+                        fieldType: field.fieldType,
                         isEnabled: field.isEnabled,
                         isRequired: value,
                         fillColor: field.fillColor,
@@ -597,6 +651,7 @@ class _RegistrationScreenSettingsState
                           id: field.id,
                           label: field.label,
                           hintText: field.hintText,
+                          fieldType: field.fieldType,
                           isEnabled: field.isEnabled,
                           isRequired: field.isRequired,
                           fillColor: color,
@@ -633,6 +688,7 @@ class _RegistrationScreenSettingsState
                           id: field.id,
                           label: field.label,
                           hintText: field.hintText,
+                          fieldType: field.fieldType,
                           isEnabled: field.isEnabled,
                           isRequired: field.isRequired,
                           fillColor: field.fillColor,
@@ -674,6 +730,7 @@ class _RegistrationScreenSettingsState
                           id: field.id,
                           label: field.label,
                           hintText: field.hintText,
+                          fieldType: field.fieldType,
                           isEnabled: field.isEnabled,
                           isRequired: field.isRequired,
                           fillColor: field.fillColor,
@@ -700,6 +757,7 @@ class _RegistrationScreenSettingsState
                         id: field.id,
                         label: field.label,
                         hintText: field.hintText,
+                        fieldType: field.fieldType,
                         isEnabled: field.isEnabled,
                         isRequired: field.isRequired,
                         fillColor: field.fillColor,
@@ -739,6 +797,7 @@ class _RegistrationScreenSettingsState
                                 id: field.id,
                                 label: field.label,
                                 hintText: field.hintText,
+                                fieldType: field.fieldType,
                                 isEnabled: field.isEnabled,
                                 isRequired: field.isRequired,
                                 fillColor: field.fillColor,
@@ -776,6 +835,7 @@ class _RegistrationScreenSettingsState
                                 id: field.id,
                                 label: field.label,
                                 hintText: field.hintText,
+                                fieldType: field.fieldType,
                                 isEnabled: field.isEnabled,
                                 isRequired: field.isRequired,
                                 fillColor: field.fillColor,

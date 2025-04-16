@@ -7,6 +7,14 @@ import 'package:path_provider/path_provider.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+// --- NEW ENUM ---
+enum TextFieldType {
+  name,
+  email,
+  phone, // Added phone as an example
+  custom, // For generic fields
+}
+
 class CustomTextField {
   String id;
   String label;
@@ -27,6 +35,7 @@ class CustomTextField {
   double height;
   EdgeInsets margin;
   EdgeInsets padding;
+  TextFieldType fieldType;
 
   CustomTextField({
     required this.id,
@@ -48,7 +57,92 @@ class CustomTextField {
     this.height = 60.0,
     this.margin = EdgeInsets.zero,
     this.padding = const EdgeInsets.symmetric(horizontal: 12.0),
+    this.fieldType = TextFieldType.custom,
   });
+
+  // Helper method for serialization (optional but good practice)
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'label': label,
+        'hintText': hintText,
+        'isEnabled': isEnabled,
+        'isRequired': isRequired,
+        'fillColor': fillColor.value,
+        'textColor': textColor.value,
+        'labelColor': labelColor.value,
+        'fontSize': fontSize,
+        'fontWeight': fontWeight.index,
+        'isItalic': isItalic,
+        'hasBorder': hasBorder,
+        'borderWidth': borderWidth,
+        'borderColor': borderColor.value,
+        'borderRadius': borderRadius,
+        'width': width,
+        'height': height,
+        'margin': {
+          'left': margin.left,
+          'top': margin.top,
+          'right': margin.right,
+          'bottom': margin.bottom,
+        },
+        'padding': {
+          'left': padding.left,
+          'top': padding.top,
+          'right': padding.right,
+          'bottom': padding.bottom,
+        },
+        'fieldType': fieldType.name, // --- SERIALIZE ENUM NAME ---
+      };
+// Helper method for deserialization (optional but good practice)
+  factory CustomTextField.fromJson(Map<String, dynamic> json) {
+    // Helper to safely get enum from name
+    TextFieldType getTextFieldTypeFromName(String? name) {
+      if (name == null) return TextFieldType.custom;
+      return TextFieldType.values.firstWhere(
+        (e) => e.name == name,
+        orElse: () => TextFieldType.custom, // Default if name doesn't match
+      );
+    }
+
+    return CustomTextField(
+      id: json['id'],
+      label: json['label'],
+      hintText: json['hintText'],
+      isEnabled: json['isEnabled'] ?? true,
+      isRequired: json['isRequired'] ?? true,
+      fillColor: Color(json['fillColor'] ?? Colors.white.value),
+      textColor: Color(json['textColor'] ?? AppColors.black.value),
+      labelColor: Color(json['labelColor'] ?? AppColors.black.value),
+      fontSize: json['fontSize']?.toDouble() ?? 16.0,
+      fontWeight:
+          FontWeight.values[json['fontWeight'] ?? FontWeight.normal.index],
+      isItalic: json['isItalic'] ?? false,
+      hasBorder: json['hasBorder'] ?? true,
+      borderWidth: json['borderWidth']?.toDouble() ?? 1.0,
+      borderColor: Color(json['borderColor'] ?? AppColors.black.value),
+      borderRadius: json['borderRadius']?.toDouble() ?? 4.0,
+      width: json['width']?.toDouble() ?? 0.35,
+      height: json['height']?.toDouble() ?? 60.0,
+      margin: json['margin'] != null
+          ? EdgeInsets.fromLTRB(
+              json['margin']['left']?.toDouble() ?? 0.0,
+              json['margin']['top']?.toDouble() ?? 0.0,
+              json['margin']['right']?.toDouble() ?? 0.0,
+              json['margin']['bottom']?.toDouble() ?? 0.0,
+            )
+          : EdgeInsets.zero,
+      padding: json['padding'] != null
+          ? EdgeInsets.fromLTRB(
+              json['padding']['left']?.toDouble() ?? 12.0,
+              json['padding']['top']?.toDouble() ?? 0.0,
+              json['padding']['right']?.toDouble() ?? 12.0,
+              json['padding']['bottom']?.toDouble() ?? 0.0,
+            )
+          : const EdgeInsets.symmetric(horizontal: 12.0),
+      fieldType: getTextFieldTypeFromName(
+          json['fieldType']), // --- DESERIALIZE ENUM NAME ---
+    );
+  }
 }
 
 class RegistrationScreenProvider extends ChangeNotifier {
@@ -159,61 +253,20 @@ class RegistrationScreenProvider extends ChangeNotifier {
     // Load text fields
     final String? fieldsJson = _prefs.getString('registration_text_fields');
     if (fieldsJson != null) {
-      final List<dynamic> fields = jsonDecode(fieldsJson);
-      _textFields.clear();
-      _textFields.addAll(
-        fields.map(
-          (field) => CustomTextField(
-            id: field['id'],
-            label: field['label'],
-            hintText: field['hintText'],
-            isEnabled: field['isEnabled'] ?? true,
-            isRequired: field['isRequired'] ?? true,
-            fillColor: Color(field['fillColor'] ?? Colors.white.value),
-            textColor: Color(field['textColor'] ?? AppColors.black.value),
-            labelColor: Color(field['labelColor'] ?? AppColors.black.value),
-            fontSize: field['fontSize']?.toDouble() ?? 16.0,
-            fontWeight: FontWeight.values[field['fontWeight'] ?? 0],
-            isItalic: field['isItalic'] ?? false,
-            hasBorder: field['hasBorder'] ?? true,
-            borderWidth: field['borderWidth']?.toDouble() ?? 1.0,
-            borderColor: Color(field['borderColor'] ?? AppColors.black.value),
-            borderRadius: field['borderRadius']?.toDouble() ?? 4.0,
-            width: field['width']?.toDouble() ?? 0.35,
-            height: field['height']?.toDouble() ?? 60.0,
-            margin: field['margin'] != null
-                ? EdgeInsets.fromLTRB(
-                    field['margin']['left']?.toDouble() ?? 0.0,
-                    field['margin']['top']?.toDouble() ?? 0.0,
-                    field['margin']['right']?.toDouble() ?? 0.0,
-                    field['margin']['bottom']?.toDouble() ?? 0.0,
-                  )
-                : EdgeInsets.zero,
-            padding: field['padding'] != null
-                ? EdgeInsets.fromLTRB(
-                    field['padding']['left']?.toDouble() ?? 12.0,
-                    field['padding']['top']?.toDouble() ?? 0.0,
-                    field['padding']['right']?.toDouble() ?? 12.0,
-                    field['padding']['bottom']?.toDouble() ?? 0.0,
-                  )
-                : const EdgeInsets.symmetric(horizontal: 12.0),
-          ),
-        ),
-      );
+      try {
+        // Add try-catch for robust parsing
+        final List<dynamic> fields = jsonDecode(fieldsJson);
+        _textFields.clear();
+        _textFields.addAll(
+          fields.map((field) =>
+              CustomTextField.fromJson(field)), // Use factory constructor
+        );
+      } catch (e) {
+        debugPrint("Error decoding text fields JSON: $e. Using defaults.");
+        _setDefaultTextFields(); // Fallback to defaults on error
+      }
     } else {
-      // Default text fields
-      _textFields = [
-        CustomTextField(
-          id: 'name',
-          label: 'Full Name',
-          hintText: 'Enter full name',
-        ),
-        CustomTextField(
-          id: 'email',
-          label: 'Email',
-          hintText: 'Enter email address',
-        ),
-      ];
+      _setDefaultTextFields(); // Use default text fields
     }
 
     // Load button settings
@@ -302,6 +355,23 @@ class RegistrationScreenProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void _setDefaultTextFields() {
+    _textFields = [
+      CustomTextField(
+        id: 'name', // Keep original IDs for backward compatibility if needed
+        label: 'Full Name',
+        hintText: 'Enter full name',
+        fieldType: TextFieldType.name, // --- SET TYPE ---
+      ),
+      CustomTextField(
+        id: 'email', // Keep original IDs
+        label: 'Email',
+        hintText: 'Enter email address',
+        fieldType: TextFieldType.email, // --- SET TYPE ---
+      ),
+    ];
+  }
+
   // Add new methods for button styling
   void setButtonFontWeight(FontWeight weight) async {
     _buttonFontWeight = weight;
@@ -380,11 +450,12 @@ class RegistrationScreenProvider extends ChangeNotifier {
     if (_textFields.length >= 3) {
       return; // Maximum 3 fields allowed
     }
-
     final newField = CustomTextField(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
-      label: 'Contact Number',
+      label: 'Contact Number', // Example label
       hintText: 'Enter contact number',
+      fieldType: TextFieldType
+          .phone, // --- SET TYPE FOR NEW FIELD --- (Example: phone)
     );
     _textFields.add(newField);
     await _saveTextFields();
@@ -394,6 +465,8 @@ class RegistrationScreenProvider extends ChangeNotifier {
   void updateTextField(String id, CustomTextField updatedField) async {
     final index = _textFields.indexWhere((field) => field.id == id);
     if (index != -1) {
+      // Ensure the type isn't accidentally overwritten if not explicitly set
+      // Or, ensure the UI passes the correct type in updatedField
       _textFields[index] = updatedField;
       await _saveTextFields();
       notifyListeners();
@@ -430,39 +503,9 @@ class RegistrationScreenProvider extends ChangeNotifier {
 
   // Update the _saveTextFields method to include new properties
   Future<void> _saveTextFields() async {
-    final List<Map<String, dynamic>> fieldsMap = _textFields
-        .map((field) => {
-              'id': field.id,
-              'label': field.label,
-              'hintText': field.hintText,
-              'isEnabled': field.isEnabled,
-              'isRequired': field.isRequired,
-              'fillColor': field.fillColor.value,
-              'textColor': field.textColor.value,
-              'labelColor': field.labelColor.value,
-              'fontSize': field.fontSize,
-              'fontWeight': field.fontWeight.index,
-              'isItalic': field.isItalic,
-              'hasBorder': field.hasBorder,
-              'borderWidth': field.borderWidth,
-              'borderColor': field.borderColor.value,
-              'borderRadius': field.borderRadius,
-              'width': field.width,
-              'height': field.height,
-              'margin': {
-                'left': field.margin.left,
-                'top': field.margin.top,
-                'right': field.margin.right,
-                'bottom': field.margin.bottom,
-              },
-              'padding': {
-                'left': field.padding.left,
-                'top': field.padding.top,
-                'right': field.padding.right,
-                'bottom': field.padding.bottom,
-              },
-            })
-        .toList();
+    // Use the toJson helper method from CustomTextField
+    final List<Map<String, dynamic>> fieldsMap =
+        _textFields.map((field) => field.toJson()).toList();
     await _prefs.setString('registration_text_fields', jsonEncode(fieldsMap));
   }
 
@@ -474,20 +517,41 @@ class RegistrationScreenProvider extends ChangeNotifier {
     double? borderRadius,
     EdgeInsets? margin,
     EdgeInsets? padding,
+    // Add other style properties if needed
   }) async {
     final index = _textFields.indexWhere((field) => field.id == id);
     if (index != -1) {
-      if (fontWeight != null) _textFields[index].fontWeight = fontWeight;
-      if (isItalic != null) _textFields[index].isItalic = isItalic;
-      if (borderRadius != null) _textFields[index].borderRadius = borderRadius;
-      if (margin != null) _textFields[index].margin = margin;
-      if (padding != null) _textFields[index].padding = padding;
+      // Create a copy with updated styles, preserving other properties like fieldType
+      final currentField = _textFields[index];
+      _textFields[index] = CustomTextField(
+        id: currentField.id,
+        label: currentField.label,
+        hintText: currentField.hintText,
+        isEnabled: currentField.isEnabled,
+        isRequired: currentField.isRequired,
+        fillColor: currentField.fillColor,
+        textColor: currentField.textColor,
+        labelColor: currentField.labelColor,
+        fontSize: currentField.fontSize,
+        hasBorder: currentField.hasBorder,
+        borderWidth: currentField.borderWidth,
+        borderColor: currentField.borderColor,
+        width: currentField.width,
+        height: currentField.height,
+        fieldType: currentField.fieldType, // Preserve field type
+        // Apply updates
+        fontWeight: fontWeight ?? currentField.fontWeight,
+        isItalic: isItalic ?? currentField.isItalic,
+        borderRadius: borderRadius ?? currentField.borderRadius,
+        margin: margin ?? currentField.margin,
+        padding: padding ?? currentField.padding,
+      );
+
       await _saveTextFields();
       notifyListeners();
     }
   }
 
-  // Button settings methods
   void setUseImageButton(bool use) async {
     _useImageButton = use;
     await _prefs.setBool('registration_use_image_button', use);
@@ -541,31 +605,6 @@ class RegistrationScreenProvider extends ChangeNotifier {
     await _prefs.setInt('registration_button_border_color', color.value);
     notifyListeners();
   }
-
-  // void setButtonPadding(EdgeInsets padding) async {
-  //   _buttonPadding = padding;
-  //   final paddingMap = {
-  //     'left': padding.left,
-  //     'top': padding.top,
-  //     'right': padding.right,
-  //     'bottom': padding.bottom,
-  //   };
-  //   await _prefs.setString(
-  //       'registration_button_padding', jsonEncode(paddingMap));
-  //   notifyListeners();
-  // }
-
-  // void setButtonMargin(EdgeInsets margin) async {
-  //   _buttonMargin = margin;
-  //   final marginMap = {
-  //     'left': margin.left,
-  //     'top': margin.top,
-  //     'right': margin.right,
-  //     'bottom': margin.bottom,
-  //   };
-  //   await _prefs.setString('registration_button_margin', jsonEncode(marginMap));
-  //   notifyListeners();
-  // }
 
   // Image button methods
   Future<void> setButtonImage(String? sourcePath, {bool isAsset = true}) async {

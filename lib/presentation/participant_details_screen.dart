@@ -25,18 +25,19 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final registrationSettings = context.read<RegistrationScreenProvider>();
+    // --- FIX: Initialize controllers here, before the first build ---
+    final registrationSettings =
+        Provider.of<RegistrationScreenProvider>(context, listen: false);
 
+    for (var field in registrationSettings.textFields) {
+      _controllers[field.id] = TextEditingController();
+      debugPrint('Created controller for field: ${field.id}');
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       // If registration screen is disabled, navigate directly to gender selection
       if (!registrationSettings.showRegistrationScreen) {
         Navigator.pushReplacementNamed(context, AppRoutes.genderSelection);
-      }
-
-      // Initialize controllers for each field
-      for (var field in registrationSettings.textFields) {
-        _controllers[field.id] = TextEditingController();
-        debugPrint('Created controller for field: ${field.id}');
       }
     });
   }
@@ -297,21 +298,64 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
   void _handleSubmit() {
     if (_formKey.currentState!.validate()) {
       final provider = Provider.of<PhotoboothProvider>(context, listen: false);
-    
-      // Get values from controllers and log all controllers for debugging
+      final registrationSettings = context.read<RegistrationScreenProvider>();
+
+      // Log controllers (optional debugging)
       _controllers.forEach((key, controller) {
-        debugPrint('Controller $key has value: ${controller.text}');
+        debugPrint(
+            'Controller $key (${controller.hashCode}) has value: ${controller.text}');
       });
-      
-      // Make sure we're using the correct field IDs
-      final name = _controllers['name']?.text ?? '';
-      final email = _controllers['email']?.text ?? '';
-      
+
+      // --- MODIFICATION START ---
+      // Find field IDs based on their type
+      String? nameFieldId = registrationSettings.textFields
+          .firstWhere((f) => f.isEnabled && f.fieldType == TextFieldType.name,
+              orElse: () => CustomTextField(
+                  id: '', label: '', hintText: '')) // Provide a dummy default
+          .id;
+      String? emailFieldId = registrationSettings.textFields
+          .firstWhere((f) => f.isEnabled && f.fieldType == TextFieldType.email,
+              orElse: () => CustomTextField(id: '', label: '', hintText: ''))
+          .id;
+
+      // Example for phone:
+      String? phoneFieldId = registrationSettings.textFields
+          .firstWhere((f) => f.isEnabled && f.fieldType == TextFieldType.phone,
+              orElse: () => CustomTextField(id: '', label: '', hintText: ''))
+          .id;
+
+      // Retrieve text using the found IDs
+      String name = '';
+      if (nameFieldId.isNotEmpty && _controllers.containsKey(nameFieldId)) {
+        name = _controllers[nameFieldId]!.text;
+        debugPrint('Retrieved name using ID: $nameFieldId (Type: Name)');
+      } else {
+        debugPrint('Could not find enabled Name field or its controller.');
+      }
+
+      String email = '';
+      if (emailFieldId.isNotEmpty && _controllers.containsKey(emailFieldId)) {
+        email = _controllers[emailFieldId]!.text;
+        debugPrint('Retrieved email using ID: $emailFieldId (Type: Email)');
+      } else {
+        debugPrint('Could not find enabled Email field or its controller.');
+      }
+
+      // Example for phone:
+      String phone = '';
+      if (_controllers.containsKey(phoneFieldId)) {
+        phone = _controllers[phoneFieldId]!.text;
+        debugPrint('Retrieved phone using ID: $phoneFieldId (Type: Phone)');
+      } else {
+        debugPrint('Could not find enabled Phone field or its controller.');
+      }
+      // --- MODIFICATION END ---
+
       debugPrint('Submitting - Name: "$name", Email: "$email"');
-      
+
       // Set user details in provider
       provider.setUserDetails(name, email);
-      
+
       // Navigate to gender selection screen
       Navigator.pushNamed(context, AppRoutes.genderSelection);
     }
