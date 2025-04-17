@@ -7,7 +7,7 @@ import 'package:photobooth_flutter/presentation/admin/loading_screen_settings.da
 import 'package:photobooth_flutter/presentation/admin/output_screen_settings.dart';
 import 'package:photobooth_flutter/presentation/admin/registration_screen_settings.dart';
 import 'package:photobooth_flutter/presentation/admin/welcome_screen_settings.dart';
-import 'package:photobooth_flutter/presentation/camera.dart';
+import 'package:photobooth_flutter/presentation/face_capture_screen.dart';
 import 'package:photobooth_flutter/presentation/character_selection_screen.dart';
 import 'package:photobooth_flutter/presentation/gender_selection_screen.dart';
 import 'package:photobooth_flutter/presentation/loading_screen.dart';

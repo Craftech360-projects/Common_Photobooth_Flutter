@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:photobooth_flutter/providers/app_provider.dart';
+import 'package:photobooth_flutter/providers/photobooth_provider.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/providers/registration_screen_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
@@ -314,11 +314,11 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
               orElse: () => CustomTextField(id: '', label: '', hintText: ''))
           .id;
 
-      // Example for phone:
-      String? phoneFieldId = registrationSettings.textFields
-          .firstWhere((f) => f.isEnabled && f.fieldType == TextFieldType.phone,
-              orElse: () => CustomTextField(id: '', label: '', hintText: ''))
-          .id;
+      // // Example for phone:
+      // String? phoneFieldId = registrationSettings.textFields
+      //     .firstWhere((f) => f.isEnabled && f.fieldType == TextFieldType.phone,
+      //         orElse: () => CustomTextField(id: '', label: '', hintText: ''))
+      //     .id;
 
       // Retrieve text using the found IDs
       String name = '';
@@ -335,13 +335,13 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
         debugPrint('Could not find enabled Email field or its controller.');
       }
 
-      // Example for phone:
-      String phone = '';
-      if (_controllers.containsKey(phoneFieldId)) {
-        phone = _controllers[phoneFieldId]!.text;
-      } else {
-        debugPrint('Could not find enabled Phone field or its controller.');
-      }
+      // // Example for phone:
+      // String phone = '';
+      // if (_controllers.containsKey(phoneFieldId)) {
+      //   phone = _controllers[phoneFieldId]!.text;
+      // } else {
+      //   debugPrint('Could not find enabled Phone field or its controller.');
+      // }
       // --- MODIFICATION END ---
 
       // Set user details in provider

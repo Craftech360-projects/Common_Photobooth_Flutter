@@ -2,15 +2,14 @@ import 'package:camera_platform_interface/camera_platform_interface.dart';
 import 'package:camera_windows/camera_windows.dart';
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/core/themes/app_theme.dart';
-import 'package:photobooth_flutter/presentation/camera.dart';
 import 'package:photobooth_flutter/providers/admin_settings_provider.dart';
-import 'package:photobooth_flutter/providers/app_provider.dart';
 import 'package:photobooth_flutter/providers/character_selection_provider.dart';
 import 'package:photobooth_flutter/providers/face_capture_provider.dart';
 import 'package:photobooth_flutter/providers/gender_selection_provider.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/providers/loading_screen_provider.dart';
 import 'package:photobooth_flutter/providers/output_screen_provider.dart';
+import 'package:photobooth_flutter/providers/photobooth_provider.dart';
 import 'package:photobooth_flutter/providers/registration_screen_provider.dart';
 import 'package:photobooth_flutter/providers/welcome_screen_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
@@ -112,8 +111,8 @@ class MyApp extends StatelessWidget {
       title: 'Photobooth App',
       theme: AppTheme.lightTheme,
       onGenerateRoute: AppRoutes.onGenerateRoute,
-      // initialRoute: AppRoutes.welcomeScreen,
-      home: const FaceCaptureScreen(),
+      initialRoute: AppRoutes.welcomeScreen,
+      // home: const FaceCaptureScreen(),
       debugShowCheckedModeBanner: false,
     );
   }

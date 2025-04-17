@@ -2,9 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
-import 'package:photobooth_flutter/providers/app_provider.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/providers/output_screen_provider.dart';
+import 'package:photobooth_flutter/providers/photobooth_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
@@ -30,16 +30,17 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
   Future<void> _processImage() async {
     try {
       final provider = Provider.of<PhotoboothProvider>(context, listen: false);
-    
+
       // Debug log to check if URL is available
-      debugPrint('Output screen - Captured image URL: ${provider.capturedImageUrl}');
-  
+      debugPrint(
+          'Output screen - Captured image URL: ${provider.capturedImageUrl}');
+
       // If we already have a captured image URL, use it
       if (provider.capturedImageUrl != null) {
         setState(() => _isLoading = false);
         return;
       }
-  
+
       // Otherwise, this is a fallback for testing
       setState(() {
         _isLoading = false;
@@ -214,7 +215,7 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
   Widget _buildOutputImage() {
     final provider = Provider.of<PhotoboothProvider>(context);
     final capturedImageUrl = provider.capturedImageUrl;
-  
+
     debugPrint('Building output image with URL: $capturedImageUrl');
 
     if (capturedImageUrl == null) {
@@ -257,9 +258,9 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
   Widget _buildQrCodeWithText(OutputScreenProvider settings) {
     final provider = Provider.of<PhotoboothProvider>(context);
     final capturedImageUrl = provider.capturedImageUrl;
-  
+
     debugPrint('Building QR code with URL: $capturedImageUrl');
-    
+
     final qrCode = QrImageView(
       data: capturedImageUrl ?? 'https://example.com/download-image',
       version: QrVersions.auto,

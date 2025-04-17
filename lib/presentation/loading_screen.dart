@@ -5,6 +5,9 @@ import 'package:lottie/lottie.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/providers/loading_screen_provider.dart';
+import 'package:photobooth_flutter/providers/photobooth_provider.dart';
+import 'package:photobooth_flutter/routes/routes.dart';
+import 'package:photobooth_flutter/services/supabase_service.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 
@@ -18,12 +21,17 @@ class LoadingScreen extends StatefulWidget {
 class _LoadingScreenState extends State<LoadingScreen> {
   VideoPlayerController? _videoController;
   bool _isInitialized = false;
+  bool _isProcessing = true;
+  String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
-
     _initializeLoader();
+    // Start processing the image after the loader is initialized
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _processImage();
+    });
   }
 
   Future<void> _initializeLoader() async {
@@ -44,9 +52,113 @@ class _LoadingScreenState extends State<LoadingScreen> {
     setState(() {
       _isInitialized = true;
     });
+  }
 
-    // Note: We no longer use a fixed duration timer here
-    // The face_capture_screen will handle navigation when processing is complete
+  Future<void> _processImage() async {
+    try {
+      final provider = Provider.of<PhotoboothProvider>(context, listen: false);
+
+      // Check if we have a face image path
+      if (provider.faceImagePath == null) {
+        setState(() {
+          _isProcessing = false;
+          _errorMessage = 'No face image captured';
+        });
+        return;
+      }
+
+      // Get the image file
+      final imageFile = File(provider.faceImagePath!);
+
+      // Verify file exists
+      if (!imageFile.existsSync()) {
+        debugPrint(
+            'Image file does not exist at path: ${provider.faceImagePath}');
+        setState(() {
+          _isProcessing = false;
+          _errorMessage = 'Image file not found';
+        });
+        return;
+      }
+
+      debugPrint('Processing image: ${provider.faceImagePath}');
+      debugPrint('File size: ${imageFile.lengthSync()} bytes');
+
+      // Get participant details from provider
+      final name = provider.name ?? '';
+      final email = provider.email ?? '';
+      final gender = provider.selectedGender;
+      final characterId = provider.selectedCharacterId;
+
+      debugPrint(
+          'User details - Name: "$name", Email: "$email", Gender: "$gender", CharacterId: "$characterId"');
+
+      // Check if Supabase is initialized
+      if (SupabaseService.instance.isInitialized) {
+        // Generate a unique user ID
+        final userId = DateTime.now().millisecondsSinceEpoch.toString();
+
+        // Upload image to Supabase
+        debugPrint('Uploading image to Supabase...');
+        final imageUrl =
+            await SupabaseService.instance.uploadImage(imageFile, userId);
+
+        if (imageUrl != null) {
+          debugPrint('Image uploaded successfully. URL: $imageUrl');
+
+          // Store participant details
+          debugPrint('Storing participant details...');
+          final participantId =
+              await SupabaseService.instance.storeParticipantDetails(
+            name: name,
+            email: email,
+            gender: gender,
+            characterId: characterId,
+            imageUrl: imageUrl,
+          );
+
+          if (participantId != null) {
+            debugPrint('Participant details stored with ID: $participantId');
+
+            // Store the captured image URL in the provider
+            provider.setCapturedImageUrl(imageUrl);
+
+            // Navigate to the output screen
+            if (mounted) {
+              Navigator.pushReplacementNamed(context, AppRoutes.swappedFace);
+            }
+          } else {
+            setState(() {
+              _isProcessing = false;
+              _errorMessage = 'Failed to store participant details';
+            });
+          }
+        } else {
+          setState(() {
+            _isProcessing = false;
+            _errorMessage = 'Failed to upload image';
+          });
+        }
+      } else {
+        debugPrint('Supabase not initialized, using dummy URL');
+        // For testing without Supabase, set a dummy URL
+        provider.setCapturedImageUrl('https://example.com/dummy-image.jpg');
+
+        // Add a short delay to simulate processing
+        await Future.delayed(const Duration(seconds: 2));
+
+        // Navigate to the output screen
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, AppRoutes.swappedFace);
+        }
+      }
+    } catch (e) {
+      debugPrint('Error processing image: $e');
+      setState(() {
+        _isProcessing = false;
+        _errorMessage = 'Error: $e';
+      });
+    }
   }
 
   Future<void> _initializeVideoPlayer(LoadingScreenProvider settings) async {
@@ -129,7 +241,9 @@ class _LoadingScreenState extends State<LoadingScreen> {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(
                           loadingSettings.loaderBorderRadius),
-                      child: _buildLoader(loadingSettings),
+                      child: _errorMessage != null
+                          ? _buildErrorWidget()
+                          : _buildLoader(loadingSettings),
                     ),
                   ),
                 ],
@@ -138,6 +252,28 @@ class _LoadingScreenState extends State<LoadingScreen> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildErrorWidget() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.error_outline, color: Colors.red, size: 48),
+          SizedBox(height: 16),
+          Text(
+            _errorMessage!,
+            style: TextStyle(color: Colors.white),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text('Go Back'),
+          ),
+        ],
+      ),
     );
   }
 

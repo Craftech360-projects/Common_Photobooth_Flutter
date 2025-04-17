@@ -36,6 +36,20 @@ class _FaceCaptureSettingsState extends State<FaceCaptureSettings> {
     }
   }
 
+  // Add method to switch camera in settings
+  void _switchCamera(int newIndex, FaceCaptureProvider settings) {
+    if (newIndex >= 0 && newIndex < _cameras.length) {
+      settings.setSelectedCameraIndex(newIndex);
+      // Show confirmation to user
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Camera switched to: ${_cameras[newIndex].name}'),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final settings = context.watch<FaceCaptureProvider>();
@@ -71,8 +85,6 @@ class _FaceCaptureSettingsState extends State<FaceCaptureSettings> {
                       max: 48.0,
                       onChanged: (value) => settings.setTitleFontSize(value),
                     ),
-                    // Replace macOS-specific settings with Windows-specific settings
-                    // if (Platform.isMacOS) ...[
                     if (Platform.isWindows) ...[
                       _buildDropdown<String>(
                         label: 'Picture Format',
@@ -111,7 +123,8 @@ class _FaceCaptureSettingsState extends State<FaceCaptureSettings> {
 
                   // Camera Preview Settings
                   _buildSectionTitle('Camera Preview Settings'),
-                  if (!Platform.isMacOS && _cameras.isNotEmpty)
+                  // Update the camera dropdown to use the _switchCamera method
+                  if (_cameras.isNotEmpty)
                     _buildDropdown<int>(
                       label: 'Select Camera',
                       value: settings.selectedCameraIndex < _cameras.length
@@ -121,8 +134,7 @@ class _FaceCaptureSettingsState extends State<FaceCaptureSettings> {
                         for (int i = 0; i < _cameras.length; i++)
                           i: 'Camera ${i + 1} (${_cameras[i].name})',
                       },
-                      onChanged: (value) =>
-                          settings.setSelectedCameraIndex(value!),
+                      onChanged: (value) => _switchCamera(value!, settings),
                     ),
                   _buildSlider(
                     label: 'Preview Width',
@@ -409,7 +421,15 @@ class _FaceCaptureSettingsState extends State<FaceCaptureSettings> {
               items: items.entries.map((entry) {
                 return DropdownMenuItem<T>(
                   value: entry.key,
-                  child: Text(entry.value),
+                  child: Text(
+                    softWrap: true,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    entry.value,
+                    style: const TextStyle(
+                      fontSize: 13,
+                    ),
+                  ),
                 );
               }).toList(),
               onChanged: onChanged,
