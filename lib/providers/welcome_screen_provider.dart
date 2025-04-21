@@ -14,17 +14,17 @@ class WelcomeScreenProvider extends ChangeNotifier {
   String _welcomeMessage = 'Welcome to the AI Photobooth!';
 
   // Welcome message styling
-  double _welcomeMessageFontSize = 36.0;
-  FontWeight _welcomeMessageFontWeight = FontWeight.bold;
+  double _welcomeMessageFontSize = 22.0;
+  FontWeight _welcomeMessageFontWeight = FontWeight.w500;
   double _welcomeMessageLineHeight = 1.2;
   TextAlign _welcomeMessageTextAlign = TextAlign.center;
-  Color _welcomeMessageColor = Colors.white;
+  Color _welcomeMessageColor = AppColors.white;
   double _welcomeMessageOpacity = 1.0;
   bool _welcomeMessageItalic = false;
   double _welcomeMessageMarginTop = 0.0;
   double _welcomeMessageMarginBottom = 50.0;
-  double _welcomeMessageMarginLeft = 40.0;
-  double _welcomeMessageMarginRight = 40.0;
+  double _welcomeMessageMarginLeft = 0.0;
+  double _welcomeMessageMarginRight = 0.0;
 
   // Button settings
   bool _useImageButton = false;
@@ -32,13 +32,13 @@ class WelcomeScreenProvider extends ChangeNotifier {
   Color _welcomeButtonColor = AppColors.goldenYellow;
   Color _welcomeButtonTextColor = AppColors.black;
   double _buttonWidth = 200.0;
-  double _buttonHeight = 60.0;
+  double _buttonHeight = 50.0;
   double _buttonBorderRadius = 4.0;
 
   // Text button additional styling
-  double _buttonTextFontSize = 24.0;
-  FontWeight _buttonTextFontWeight = FontWeight.bold;
-  double _buttonTextLineHeight = 1.0;
+  double _buttonTextFontSize = 18.0;
+  FontWeight _buttonTextFontWeight = FontWeight.w500;
+  double _buttonTextLineHeight = 1.2;
   bool _buttonTextItalic = false;
   double _buttonTextOpacity = 1.0;
   double _buttonOpacity = 1.0;
@@ -111,65 +111,82 @@ class WelcomeScreenProvider extends ChangeNotifier {
         _prefs.getString('welcome_message') ?? 'Welcome to the AI Photobooth!';
 
     // Load welcome message styling
-    _welcomeMessageFontSize =
-        _prefs.getDouble('welcome_message_font_size') ?? 36.0;
+    _welcomeMessageFontSize = _prefs.getDouble('welcome_message_font_size') ??
+        _welcomeMessageFontSize;
     _welcomeMessageFontWeight = FontWeight.values[
-        _prefs.getInt('welcome_message_font_weight') ?? 3]; // Bold is index 3
+        _prefs.getInt('welcome_message_font_weight') ??
+            _welcomeMessageFontWeight.index]; // Bold is index 3
     _welcomeMessageLineHeight =
-        _prefs.getDouble('welcome_message_line_height') ?? 1.2;
+        _prefs.getDouble('welcome_message_line_height') ??
+            _welcomeMessageLineHeight;
     _welcomeMessageTextAlign = TextAlign.values[
-        _prefs.getInt('welcome_message_text_align') ?? 2]; // Center is index 2
-    _welcomeMessageColor =
-        Color(_prefs.getInt('welcome_message_color') ?? Colors.white.value);
-    _welcomeMessageOpacity = _prefs.getDouble('welcome_message_opacity') ?? 1.0;
-    _welcomeMessageItalic = _prefs.getBool('welcome_message_italic') ?? false;
-    _welcomeMessageMarginTop =
-        _prefs.getDouble('welcome_message_margin_top') ?? 0.0;
+        _prefs.getInt('welcome_message_text_align') ??
+            _welcomeMessageTextAlign.index]; // Center is index 2
+    _welcomeMessageColor = Color(
+        _prefs.getInt('welcome_message_color') ?? _welcomeMessageColor.value);
+    _welcomeMessageOpacity =
+        _prefs.getDouble('welcome_message_opacity') ?? _welcomeMessageOpacity;
+    _welcomeMessageItalic =
+        _prefs.getBool('welcome_message_italic') ?? _welcomeMessageItalic;
+    _welcomeMessageMarginTop = _prefs.getDouble('welcome_message_margin_top') ??
+        _welcomeMessageMarginTop;
     _welcomeMessageMarginBottom =
-        _prefs.getDouble('welcome_message_margin_bottom') ?? 50.0;
+        _prefs.getDouble('welcome_message_margin_bottom') ??
+            _welcomeMessageMarginBottom;
     _welcomeMessageMarginLeft =
-        _prefs.getDouble('welcome_message_margin_left') ?? 40.0;
+        _prefs.getDouble('welcome_message_margin_left') ??
+            _welcomeMessageMarginLeft;
     _welcomeMessageMarginRight =
-        _prefs.getDouble('welcome_message_margin_right') ?? 40.0;
+        _prefs.getDouble('welcome_message_margin_right') ??
+            _welcomeMessageMarginRight;
 
     /// Load button settings
-    _useImageButton = _prefs.getBool('welcome_use_image_button') ?? false;
+    _useImageButton =
+        _prefs.getBool('welcome_use_image_button') ?? _useImageButton;
     _welcomeButtonText =
-        _prefs.getString('welcome_button_text') ?? 'Get Started';
+        _prefs.getString('welcome_button_text') ?? _welcomeButtonText;
     _welcomeButtonColor = Color(
-        _prefs.getInt('welcome_button_color') ?? AppColors.goldenYellow.value);
+        _prefs.getInt('welcome_button_color') ?? _welcomeButtonColor.value);
     _welcomeButtonTextColor = Color(
-        _prefs.getInt('welcome_button_text_color') ?? AppColors.black.value);
-    _buttonWidth = _prefs.getDouble('welcome_button_width') ?? 200.0;
-    _buttonHeight = _prefs.getDouble('welcome_button_height') ?? 60.0;
+        _prefs.getInt('welcome_button_text_color') ??
+            _welcomeButtonTextColor.value);
+    _buttonWidth = _prefs.getDouble('welcome_button_width') ?? _buttonWidth;
+    _buttonHeight = _prefs.getDouble('welcome_button_height') ?? _buttonHeight;
     _buttonBorderRadius =
-        _prefs.getDouble('welcome_button_border_radius') ?? 4.0;
+        _prefs.getDouble('welcome_button_border_radius') ?? _buttonBorderRadius;
 
     // Load text button additional styling
-    _buttonTextFontSize =
-        _prefs.getDouble('welcome_button_text_font_size') ?? 24.0;
+    _buttonTextFontSize = _prefs.getDouble('welcome_button_text_font_size') ??
+        _buttonTextFontSize;
     _buttonTextFontWeight = FontWeight.values[
         _prefs.getInt('welcome_button_text_font_weight') ??
-            3]; // Bold is index 3
+            _buttonTextFontWeight.index];
     _buttonTextLineHeight =
-        _prefs.getDouble('welcome_button_text_line_height') ?? 1.0;
-    _buttonTextItalic = _prefs.getBool('welcome_button_text_italic') ?? false;
-    _buttonTextOpacity = _prefs.getDouble('welcome_button_text_opacity') ?? 1.0;
-    _buttonOpacity = _prefs.getDouble('welcome_button_opacity') ?? 1.0;
-    _buttonMarginTop = _prefs.getDouble('welcome_button_margin_top') ?? 0.0;
+        _prefs.getDouble('welcome_button_text_line_height') ??
+            _buttonTextLineHeight;
+    _buttonTextItalic =
+        _prefs.getBool('welcome_button_text_italic') ?? _buttonTextItalic;
+    _buttonTextOpacity =
+        _prefs.getDouble('welcome_button_text_opacity') ?? _buttonTextOpacity;
+    _buttonOpacity =
+        _prefs.getDouble('welcome_button_opacity') ?? _buttonOpacity;
+    _buttonMarginTop =
+        _prefs.getDouble('welcome_button_margin_top') ?? _buttonMarginTop;
     _buttonMarginBottom =
-        _prefs.getDouble('welcome_button_margin_bottom') ?? 0.0;
+        _prefs.getDouble('welcome_button_margin_bottom') ?? _buttonMarginBottom;
     _buttonPaddingVertical =
-        _prefs.getDouble('welcome_button_padding_vertical') ?? 8.0;
+        _prefs.getDouble('welcome_button_padding_vertical') ??
+            _buttonPaddingVertical;
     _buttonPaddingHorizontal =
-        _prefs.getDouble('welcome_button_padding_horizontal') ?? 16.0;
+        _prefs.getDouble('welcome_button_padding_horizontal') ??
+            _buttonPaddingHorizontal;
 
     // Load image button settings
     _buttonImagePath = _prefs.getString('welcome_button_image_path');
     _isButtonImageAsset =
-        _prefs.getBool('welcome_is_button_image_asset') ?? true;
+        _prefs.getBool('welcome_is_button_image_asset') ?? _isButtonImageAsset;
     _buttonImageOpacity =
-        _prefs.getDouble('welcome_button_image_opacity') ?? 1.0;
+        _prefs.getDouble('welcome_button_image_opacity') ?? _buttonImageOpacity;
 
     // Verify button image file exists if it's not an asset
     if (_buttonImagePath != null && !_isButtonImageAsset) {
@@ -183,7 +200,8 @@ class WelcomeScreenProvider extends ChangeNotifier {
     // Load background settings
     _welcomeScreenBackground = _prefs.getString('welcome_screen_background');
     _isWelcomeScreenBackgroundAsset =
-        _prefs.getBool('welcome_is_screen_background_asset') ?? true;
+        _prefs.getBool('welcome_is_screen_background_asset') ??
+            _isWelcomeScreenBackgroundAsset;
 
     // Verify background image file exists if it's not an asset
     if (_welcomeScreenBackground != null && !_isWelcomeScreenBackgroundAsset) {

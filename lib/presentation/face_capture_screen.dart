@@ -248,43 +248,45 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
 
   Future<void> _takePicture() async {
     try {
-      debugPrint('Taking picture...');
-      final XFile file = await CameraPlatform.instance.takePicture(_cameraId);
-      
-      debugPrint('File path: ${file.path}');
-      
-      // Verify file exists
-      final imageFile = File(file.path);
-      if (imageFile.existsSync()) {
-        debugPrint('File size: ${imageFile.lengthSync()} bytes');
-      } else {
-        debugPrint('File does not exist at path: ${file.path}');
-      }
-
-      // Temporarily dispose the camera controller before navigation
-      await _disposeCurrentCamera();
-
-      final provider = context.read<PhotoboothProvider>();
-
-      // Set the face image path in the provider
-      provider.setFaceImage(file.path);
-      
-      debugPrint('File path after setting: ${provider.faceImagePath}');
-
-      // Navigate to loading screen - the loading screen will handle the rest
-      if (mounted) {
-        Navigator.pushNamed(context, AppRoutes.loadingScreen);
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to take picture: $e')),
-        );
-        // Try to reinitialize camera on error
-        _initializeCamera();
-      }
+      await Navigator.pushNamed(context, AppRoutes.swappedFace);
+    } on Exception {
+      debugPrint('Error taking picture');
     }
   }
+
+  // Future<void> _takePicture() async {
+  //   try {
+  //     final XFile file = await CameraPlatform.instance.takePicture(_cameraId);
+
+  //     // Verify file exists
+  //     final imageFile = File(file.path);
+  //     if (imageFile.existsSync()) {
+  //     } else {
+  //       debugPrint('File does not exist at path: ${file.path}');
+  //     }
+
+  //     // Temporarily dispose the camera controller before navigation
+  //     await _disposeCurrentCamera();
+
+  //     final provider = context.read<PhotoboothProvider>();
+
+  //     // Set the face image path in the provider
+  //     provider.setFaceImage(file.path);
+
+  //     // Navigate to loading screen - the loading screen will handle the rest
+  //     if (mounted) {
+  //       Navigator.pushNamed(context, AppRoutes.loadingScreen);
+  //     }
+  //   } catch (e) {
+  //     if (mounted) {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text('Failed to take picture: $e')),
+  //       );
+  //       // Try to reinitialize camera on error
+  //       _initializeCamera();
+  //     }
+  //   }
+  // }
 
   void _onCameraError(CameraErrorEvent event) {
     if (mounted) {
@@ -318,26 +320,26 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
     final globalSettings = context.watch<GlobalSettingsProvider>();
 
     return Scaffold(
-      // appBar: AppBar(
-      //   leading: IconButton(
-      //     onPressed: () =>
-      //         Navigator.pushNamed(context, AppRoutes.faceCaptureSettings),
-      //     icon: const Icon(Icons.star),
-      //   ),
-      //   // actions: [
-      //   //   // Add camera switch button if there are multiple cameras
-      //   //   if (_cameras.length > 1)
-      //   //     IconButton(
-      //   //       onPressed: _switchCamera,
-      //   //       icon: const Icon(Icons.switch_camera),
-      //   //       tooltip: 'Switch Camera',
-      //   //     ),
-      //   //   IconButton(
-      //   //     onPressed: () => Navigator.pop(context),
-      //   //     icon: const Icon(Icons.arrow_back),
-      //   //   ),
-      //   // ],
-      // ),
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () =>
+              Navigator.pushNamed(context, AppRoutes.faceCaptureSettings),
+          icon: const Icon(Icons.star),
+        ),
+        //   // actions: [
+        //   //   // Add camera switch button if there are multiple cameras
+        //   //   if (_cameras.length > 1)
+        //   //     IconButton(
+        //   //       onPressed: _switchCamera,
+        //   //       icon: const Icon(Icons.switch_camera),
+        //   //       tooltip: 'Switch Camera',
+        //   //     ),
+        //   //   IconButton(
+        //   //     onPressed: () => Navigator.pop(context),
+        //   //     icon: const Icon(Icons.arrow_back),
+        //   //   ),
+        //   // ],
+      ),
       body: Container(
         width: double.infinity,
         height: double.infinity,

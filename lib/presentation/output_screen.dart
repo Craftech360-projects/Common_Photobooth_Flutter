@@ -31,10 +31,6 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
     try {
       final provider = Provider.of<PhotoboothProvider>(context, listen: false);
 
-      // Debug log to check if URL is available
-      debugPrint(
-          'Output screen - Captured image URL: ${provider.capturedImageUrl}');
-
       // If we already have a captured image URL, use it
       if (provider.capturedImageUrl != null) {
         setState(() => _isLoading = false);
@@ -61,13 +57,13 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
     final globalSettings = Provider.of<GlobalSettingsProvider>(context);
 
     return Scaffold(
-      // appBar: AppBar(
-      //   leading: IconButton(
-      //     onPressed: () =>
-      //         Navigator.pushNamed(context, AppRoutes.outputScreenSettings),
-      //     icon: const Icon(Icons.star),
-      //   ),
-      // ),
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () =>
+              Navigator.pushNamed(context, AppRoutes.outputScreenSettings),
+          icon: const Icon(Icons.star),
+        ),
+      ),
       body: Container(
         width: double.infinity,
         height: double.infinity,
@@ -216,8 +212,6 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
     final provider = Provider.of<PhotoboothProvider>(context);
     final capturedImageUrl = provider.capturedImageUrl;
 
-    debugPrint('Building output image with URL: $capturedImageUrl');
-
     if (capturedImageUrl == null) {
       return const Center(
         child: Text(
@@ -258,8 +252,6 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
   Widget _buildQrCodeWithText(OutputScreenProvider settings) {
     final provider = Provider.of<PhotoboothProvider>(context);
     final capturedImageUrl = provider.capturedImageUrl;
-
-    debugPrint('Building QR code with URL: $capturedImageUrl');
 
     final qrCode = QrImageView(
       data: capturedImageUrl ?? 'https://example.com/download-image',

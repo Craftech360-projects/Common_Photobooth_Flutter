@@ -1,9 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:photobooth_flutter/providers/photobooth_provider.dart';
+import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/providers/character_selection_provider.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
+import 'package:photobooth_flutter/providers/photobooth_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
 import 'package:provider/provider.dart';
 
@@ -170,6 +171,99 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen> {
     super.dispose();
   }
 
+  // Update the _buildGridSelection method to use the new grid layout settings
+  Widget _buildGridSelection(
+      List<CharacterModel> characters, CharacterSelectionProvider settings) {
+    // Calculate total characters to display
+    final totalCharacters = characters.length;
+
+    // Get row distribution
+    final rowDistribution = settings.gridRowDistribution;
+
+    // Create a list to hold rows of characters
+    final List<Widget> rows = [];
+
+    // Track the current character index
+    int characterIndex = 0;
+
+    // For each row in the distribution
+    for (int rowIndex = 0; rowIndex < settings.gridRowCount; rowIndex++) {
+      // Get how many characters should be in this row
+      int charactersInRow =
+          rowIndex < rowDistribution.length ? rowDistribution[rowIndex] : 1;
+
+      // Ensure we don't exceed the total number of characters
+      if (characterIndex + charactersInRow > totalCharacters) {
+        charactersInRow = totalCharacters - characterIndex;
+      }
+
+      // If we've used all characters, break
+      if (charactersInRow <= 0) break;
+
+      // Create a list of character widgets for this row
+      final List<Widget> rowChildren = [];
+
+      // Add characters to this row
+      for (int i = 0; i < charactersInRow; i++) {
+        if (characterIndex < totalCharacters) {
+          final character = characters[characterIndex];
+          final isSelected = character.id == _selectedCharacterId;
+
+          rowChildren.add(
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: settings.gridHorizontalSpacing / 2,
+                ),
+                child: _buildCharacterOption(character, settings,
+                    isCenter: isSelected),
+              ),
+            ),
+          );
+
+          characterIndex++;
+        }
+      }
+
+      // Center the last row if needed
+      if (rowIndex == settings.gridRowCount - 1 &&
+          settings.gridCenterLastRow &&
+          charactersInRow <
+              (rowDistribution.isNotEmpty ? rowDistribution.first : 1)) {
+        // Add spacers at the beginning and end to center the row
+        final spacerWidth = (rowDistribution.first - charactersInRow) / 2;
+        if (spacerWidth > 0) {
+          rowChildren.insert(0, Spacer(flex: (spacerWidth * 100).toInt()));
+          rowChildren.add(Spacer(flex: (spacerWidth * 100).toInt()));
+        }
+      }
+
+      // Add the row to our list of rows
+      rows.add(
+        Padding(
+          padding: EdgeInsets.only(
+            bottom: rowIndex < settings.gridRowCount - 1
+                ? settings.gridVerticalSpacing
+                : 0,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: rowChildren,
+          ),
+        ),
+      );
+    }
+
+    // Return the grid layout
+    return Padding(
+      padding: settings.gridMargin,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: rows,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final settings = context.watch<CharacterSelectionProvider>();
@@ -194,23 +288,23 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen> {
     }
 
     return Scaffold(
-      // appBar: AppBar(
-      //   leading: IconButton(
-      //     onPressed: () =>
-      //         Navigator.pushNamed(context, AppRoutes.characterScreenSettings),
-      //     icon: const Icon(Icons.star),
-      //   ),
-      //   actions: [
-      //     IconButton(
-      //       onPressed: () => Navigator.pop(context),
-      //       icon: const Icon(Icons.arrow_back),
-      //     ),
-      //   ],
-      // ),
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () =>
+              Navigator.pushNamed(context, AppRoutes.characterScreenSettings),
+          icon: const Icon(Icons.star),
+        ),
+        actions: [
+          IconButton(
+            onPressed: () => Navigator.pop(context),
+            icon: const Icon(Icons.arrow_back),
+          ),
+        ],
+      ),
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        padding: EdgeInsets.all(settings.screenPadding),
+        padding: EdgeInsets.zero,
         decoration: BoxDecoration(
           image: DecorationImage(
             image: _getBackgroundImage(settings, globalSettings),
@@ -223,13 +317,14 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen> {
             // Title with updated styling
             Container(
               margin: settings.titleMargin,
-              padding: EdgeInsets.only(bottom: settings.titlePadding),
+              padding: EdgeInsets.zero,
               child: Text(
                 settings.titleText,
                 style: TextStyle(
                   fontSize: settings.titleFontSize,
                   fontWeight: settings.titleFontWeight,
-                  color: settings.titleColor.withOpacity(settings.titleOpacity),
+                  color: settings.titleColor
+                      .withValues(alpha: settings.titleOpacity),
                   fontStyle: settings.titleItalic
                       ? FontStyle.italic
                       : FontStyle.normal,
@@ -253,20 +348,63 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen> {
             // Error message
             if (_showError)
               Padding(
-                padding: const EdgeInsets.only(top: 16.0),
+                padding: const EdgeInsets.only(top: 8.0),
                 child: Text(
                   'Please select a character to continue',
                   style: TextStyle(
-                    color: Colors.red[400],
+                    color: Colors.red[700],
                     fontSize: 16,
                   ),
                 ),
               ),
 
-            // Continue Button
-            Container(
-              margin: settings.buttonMargin,
-              child: _buildButton(settings, appProvider),
+            // Next button
+            Padding(
+              padding: const EdgeInsets.only(bottom: 20.0),
+              child: ElevatedButton(
+                onPressed: () {
+                  if (_selectedCharacterId != null) {
+                    // Get the selected character from the list
+                    final characters = appProvider.selectedGender == 'male'
+                        ? context
+                            .read<CharacterSelectionProvider>()
+                            .maleCharacters
+                        : context
+                            .read<CharacterSelectionProvider>()
+                            .femaleCharacters;
+
+                    final selectedCharacter = characters.firstWhere(
+                      (character) => character.id == _selectedCharacterId,
+                      orElse: () => characters.first,
+                    );
+
+                    // Set the selected character in the provider with all required arguments
+                    appProvider.setCharacter(
+                      selectedCharacter.id,
+                      selectedCharacter.imagePath,
+                      selectedCharacter.isAsset,
+                    );
+
+                    // Navigate to the next screen
+                    Navigator.pushNamed(context, AppRoutes.faceCapture);
+                  } else {
+                    setState(() {
+                      _showError = true;
+                    });
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.yellow,
+                  minimumSize: const Size(200, 50),
+                ),
+                child: const Text(
+                  'Next',
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
             ),
           ],
         ),
@@ -289,80 +427,72 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen> {
           _showError = false;
         });
       },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
+      child: Container(
         width: settings.characterWidth,
         height: settings.characterHeight,
         margin: EdgeInsets.all(settings.characterSpacing),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(settings.characterBorderRadius),
-          border: settings.showCharacterBorder
-              ? Border.all(
-                  color: isSelected
-                      ? settings.characterBorderColor
-                      : Colors.transparent,
-                  width: settings.characterBorderWidth,
-                )
-              : null,
-          boxShadow: isSelected && settings.useSelectionGlow
-              ? [
-                  BoxShadow(
-                    color: settings.selectionGlowColor
-                        .withOpacity(settings.selectionGlowIntensity),
-                    blurRadius: settings.selectionGlowSpread,
-                    spreadRadius: settings.selectionGlowSpread / 2,
-                  )
-                ]
-              : null,
-        ),
-        child: Transform.scale(
-          scale: scale,
-          child: ClipRRect(
+        // Add padding to give space for the glow effect
+        padding: isSelected && settings.useSelectionGlow
+            ? EdgeInsets.all(settings.selectionGlowSpread / 2)
+            : EdgeInsets.zero,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(settings.characterBorderRadius),
-            child: character.isAsset
-                ? Image.asset(
-                    character.imagePath,
-                    fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) {
-                      // Handle missing asset files
-                      return Container(
-                        color: Colors.grey[300],
-                        child: const Center(
-                          child: Icon(Icons.broken_image,
-                              size: 50, color: Colors.grey),
-                        ),
-                      );
-                    },
+            border: settings.showCharacterBorder
+                ? Border.all(
+                    color: isSelected
+                        ? settings.characterBorderColor
+                        : Colors.transparent,
+                    width: settings.characterBorderWidth,
                   )
-                : File(character.imagePath).existsSync()
-                    ? Image.file(
-                        File(character.imagePath),
-                        fit: BoxFit.contain,
-                      )
-                    : Container(
-                        color: Colors.grey[300],
-                        child: const Center(
-                          child: Icon(Icons.broken_image,
-                              size: 50, color: Colors.grey),
+                : null,
+            boxShadow: isSelected && settings.useSelectionGlow
+                ? [
+                    BoxShadow(
+                      color: settings.selectionGlowColor
+                          .withValues(alpha: settings.selectionGlowIntensity),
+                      blurRadius: settings.selectionGlowSpread,
+                      spreadRadius: settings.selectionGlowSpread / 2,
+                    )
+                  ]
+                : null,
+          ),
+          child: Transform.scale(
+            scale: scale,
+            child: ClipRRect(
+              borderRadius:
+                  BorderRadius.circular(settings.characterBorderRadius),
+              child: character.isAsset
+                  ? Image.asset(
+                      character.imagePath,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        // Handle missing asset files
+                        return Container(
+                          color: AppColors.greyOffWhite,
+                          child: const Center(
+                            child: Icon(Icons.broken_image,
+                                size: 50, color: AppColors.grey),
+                          ),
+                        );
+                      },
+                    )
+                  : File(character.imagePath).existsSync()
+                      ? Image.file(
+                          File(character.imagePath),
+                          fit: BoxFit.contain,
+                        )
+                      : Container(
+                          color: AppColors.greyOffWhite,
+                          child: const Center(
+                            child: Icon(Icons.broken_image,
+                                size: 50, color: AppColors.grey),
+                          ),
                         ),
-                      ),
+            ),
           ),
         ),
-      ),
-    );
-  }
-
-  // Add the missing _buildGridSelection method
-  Widget _buildGridSelection(
-      List<CharacterModel> characters, CharacterSelectionProvider settings) {
-    return Center(
-      child: Wrap(
-        alignment: WrapAlignment.center,
-        spacing: settings.characterSpacing,
-        runSpacing: settings.characterSpacing,
-        children: characters
-            .map((character) => _buildCharacterOption(character, settings))
-            .toList(),
       ),
     );
   }
@@ -424,28 +554,40 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen> {
     }
   }
 
-// Fix the _validateAndContinue method to include the characters parameter
   void _validateAndContinue(PhotoboothProvider appProvider) {
-    final characters = appProvider.selectedGender == 'male'
-        ? context.read<CharacterSelectionProvider>().maleCharacters
-        : context.read<CharacterSelectionProvider>().femaleCharacters;
-
     if (_selectedCharacterId == null) {
       setState(() {
         _showError = true;
       });
     } else {
-      _continueToNextScreen(appProvider, characters);
+      _continueToNextScreen(appProvider);
     }
   }
 
-  void _continueToNextScreen(
-      PhotoboothProvider appProvider, List<CharacterModel> characters) {
-    final selectedCharacter =
-        characters.firstWhere((c) => c.id == _selectedCharacterId);
-    appProvider.setCharacter(selectedCharacter.id, selectedCharacter.imagePath,
-        selectedCharacter.isAsset);
-    Navigator.pushNamed(context, AppRoutes.faceCapture);
+  void _continueToNextScreen(PhotoboothProvider appProvider) {
+    // Fix: Pass all three required arguments to setCharacterz
+    if (_selectedCharacterId != null) {
+      final characters = appProvider.selectedGender == 'male'
+          ? context.read<CharacterSelectionProvider>().maleCharacters
+          : context.read<CharacterSelectionProvider>().femaleCharacters;
+
+      final selectedCharacter = characters.firstWhere(
+        (character) => character.id == _selectedCharacterId,
+        orElse: () => characters.first,
+      );
+
+      appProvider.setCharacter(
+        selectedCharacter.id,
+        selectedCharacter.imagePath,
+        selectedCharacter.isAsset,
+      );
+
+      Navigator.pushNamed(context, AppRoutes.faceCapture);
+    } else {
+      setState(() {
+        _showError = true;
+      });
+    }
   }
 
   ImageProvider _getBackgroundImage(CharacterSelectionProvider settings,

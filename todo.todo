@@ -1,17 +1,58 @@
-1. Add Grid View in Character Selection.
-2. Store User Details locally.
-3. Give option to display available cameras and select one.
-4. Option for offline or online data storage.
-5. Check platform specific camera APIs.
-6. Platform specific directory access.
-7. Check Image Button loading in all screens.
-8. Check asset loading in Loading Screen across platforms.
-9. Change App Font.
-10. Implement Proper Validations.
-11. Need more control with widgets positioning.
-12. Button customization needs more control like adding transparent background with border or no border.
-13. Controllers needs to be added for textfields.
-14. Title is missing in participant details.
-15. Button font weight is missing in gender screen.
-16. Title positioning in Character Screen.
-17. Btn FW is missing in capture screen.
+. Add Grid View in Character Selection.
+. Store User Details locally.
+. Give option to display available cameras and select one.
+. Option for offline or online data storage.
+. Check platform specific camera APIs.
+. Platform specific directory access.
+. Check Image Button loading in all screens.
+. Check asset loading in Loading Screen across platforms.
+. 
+. 
+. Need more control with widgets positioning.
+. Button customization needs more control like adding transparent background with border or no border.
+. Controllers needs to be added for textfields.
+. Check for adding controls for MainAxis and CrossAxis Alignment.
+. 
+. 
+. No need of title paddings in any screens
+
+
+
+Global Settings
+* Change App Font.
+* Set default font size of titles as 22 and line height as 1 and FW as Regular
+
+Participant Details Screen
+* Title is missing in participant details. ✅
+* For Text Fields in Participant Details, BR is not getting applied when border is disabled. ✅
+* Implement Proper Validations. ✅
+
+Gender Screen
+* Button font weight is missing in gender screen. ✅
+
+Character screen
+* Title positioning in Character Screen. ✅
+* Border Radius not properly getting applied. ✅
+* Add GridView Layout. ✅
+* Add Button Margins.
+* Add Controls for Main Axis Alignment.
+* Set default padding for button.
+* Button BR is missing.
+
+Capture Screen
+* Btn FW, is missing in capture screen.
+* Not able to choose precise 22.0 for title size
+* More controls for Title is needed FW, Line Height, Text Opacity, Text Align, Margins
+* Add Main Axis Alignment control
+* Margin Properties needed for Camera Preview
+
+Loading Screen
+* Not able to choose 22.0 for Title FSize
+* Add FW variations, Line Height, Text Align, Opacity, Margins for title
+* Properly display the Color Picker as Dialog
+* Add Loader Margins
+
+Output Screen
+* Title Margins, FW, LH, Txt Align
+* Show Color Picker in Modal
+* Image Margins and Padding

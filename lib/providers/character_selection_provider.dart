@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CharacterSelectionProvider extends ChangeNotifier {
@@ -35,11 +36,11 @@ class CharacterSelectionProvider extends ChangeNotifier {
       imagePath: 'assets/characters/m3.png',
       isAsset: true,
     ),
-    // CharacterModel(
-    //   id: 'm4',
-    //   imagePath: 'assets/characters/m4.png',
-    //   isAsset: true,
-    // ),
+    CharacterModel(
+      id: 'm4',
+      imagePath: 'assets/characters/m4.png',
+      isAsset: true,
+    ),
   ];
 
   List<CharacterModel> _femaleCharacters = [
@@ -72,7 +73,7 @@ class CharacterSelectionProvider extends ChangeNotifier {
   double _characterBorderRadius = 20.0;
   bool _showCharacterBorder = true;
   double _characterBorderWidth = 3.0;
-  Color _characterBorderColor = const Color(0xFFFFD700); // Golden yellow
+  Color _characterBorderColor = AppColors.yellow; // Golden yellow
 
   // Selection effect settings
   bool _useSelectionEffect = true;
@@ -89,12 +90,20 @@ class CharacterSelectionProvider extends ChangeNotifier {
   EdgeInsets _carouselMargin = const EdgeInsets.all(0);
   EdgeInsets _carouselPadding = const EdgeInsets.all(0);
 
+  // Grid layout settings
+  int _gridRowCount = 1;
+  List<int> _gridRowDistribution = [3]; // Default: all characters in one row
+  double _gridHorizontalSpacing = 20.0;
+  double _gridVerticalSpacing = 20.0;
+  EdgeInsets _gridMargin = const EdgeInsets.all(20.0);
+  bool _gridCenterLastRow = true;
+
   // Button settings
   String _buttonText = 'Next';
   double _buttonWidth = 200.0;
   double _buttonHeight = 50.0;
   double _buttonFontSize = 18.0;
-  Color _buttonColor = const Color(0xFFFFD700);
+  Color _buttonColor = AppColors.yellow;
   Color _buttonTextColor = Colors.black;
   double _buttonBorderRadius = 10.0;
   bool _buttonHasBorder = false;
@@ -111,7 +120,7 @@ class CharacterSelectionProvider extends ChangeNotifier {
       const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0);
 
   // Layout settings
-  double _screenPadding = 20.0;
+  double _screenPadding = 0.0;
   bool _showBackground = true;
   String? _backgroundImagePath;
   bool _isBackgroundImageAsset = true;
@@ -132,6 +141,14 @@ class CharacterSelectionProvider extends ChangeNotifier {
   // New getters for carousel
   EdgeInsets get carouselMargin => _carouselMargin;
   EdgeInsets get carouselPadding => _carouselPadding;
+
+  // Grid layout getters
+  int get gridRowCount => _gridRowCount;
+  List<int> get gridRowDistribution => _gridRowDistribution;
+  double get gridHorizontalSpacing => _gridHorizontalSpacing;
+  double get gridVerticalSpacing => _gridVerticalSpacing;
+  EdgeInsets get gridMargin => _gridMargin;
+  bool get gridCenterLastRow => _gridCenterLastRow;
 
   // New getters for button
   FontWeight get buttonFontWeight => _buttonFontWeight;
@@ -221,8 +238,84 @@ class CharacterSelectionProvider extends ChangeNotifier {
     _saveSettings();
   }
 
+  void setUseCarousel(bool value) {
+    _useCarousel = value;
+    notifyListeners();
+    _saveSettings();
+  }
+
+  // You might also want to add a method to set the carousel visible width
+  void setCarouselVisibleWidth(double width) {
+    _carouselVisibleWidth = width;
+    notifyListeners();
+    _saveSettings();
+  }
+
   void setCarouselPadding(EdgeInsets padding) {
     _carouselPadding = padding;
+    notifyListeners();
+    _saveSettings();
+  }
+
+  // Grid layout setters
+  void setGridRowCount(int count) {
+    if (count < 1) count = 1;
+    _gridRowCount = count;
+
+    // Reset row distribution when row count changes
+    _gridRowDistribution = List.filled(count, 1);
+
+    // If only one row, put all characters in that row
+    if (count == 1) {
+      _gridRowDistribution = [3]; // Minimum 3 characters
+    }
+
+    notifyListeners();
+    _saveSettings();
+  }
+
+  void setGridRowDistribution(List<int> distribution) {
+    if (distribution.length != _gridRowCount) {
+      // Ensure distribution length matches row count
+      if (distribution.length < _gridRowCount) {
+        // Add missing rows with 1 character each
+        distribution
+            .addAll(List.filled(_gridRowCount - distribution.length, 1));
+      } else {
+        // Truncate extra rows
+        distribution = distribution.sublist(0, _gridRowCount);
+      }
+    }
+
+    _gridRowDistribution = distribution;
+    notifyListeners();
+    _saveSettings();
+  }
+
+  void updateRowDistributionAt(int index, int value) {
+    if (index >= 0 && index < _gridRowDistribution.length) {
+      if (value < 1) value = 1;
+      _gridRowDistribution[index] = value;
+      notifyListeners();
+      _saveSettings();
+    }
+  }
+
+  void setGridSpacing({double? horizontal, double? vertical}) {
+    if (horizontal != null) _gridHorizontalSpacing = horizontal;
+    if (vertical != null) _gridVerticalSpacing = vertical;
+    notifyListeners();
+    _saveSettings();
+  }
+
+  void setGridMargin(EdgeInsets margin) {
+    _gridMargin = margin;
+    notifyListeners();
+    _saveSettings();
+  }
+
+  void setGridCenterLastRow(bool center) {
+    _gridCenterLastRow = center;
     notifyListeners();
     _saveSettings();
   }
@@ -445,7 +538,7 @@ class CharacterSelectionProvider extends ChangeNotifier {
     if (settingsJson != null) {
       final Map<String, dynamic> settings = jsonDecode(settingsJson);
 
-// Title settings
+      // Title settings
       _titleText = settings['titleText'] ?? _titleText;
       _titleFontSize = settings['titleFontSize'] ?? _titleFontSize;
       _titleColor = Color(settings['titleColor'] ?? _titleColor.value);
@@ -506,7 +599,7 @@ class CharacterSelectionProvider extends ChangeNotifier {
             // For asset files, we'll keep them as they should be in the assets folder
             return true;
           }).toList();
-        }on Exception catch (e) {
+        } on Exception catch (e) {
           debugPrint('Error loading male characters: $e');
           // Keep default characters if there's an error
         }
@@ -615,6 +708,27 @@ class CharacterSelectionProvider extends ChangeNotifier {
       }
     }
 
+    // Load grid layout settings
+    _gridRowCount = prefs.getInt('grid_row_count') ?? 1;
+    final gridRowDistStr = prefs.getString('grid_row_distribution');
+    if (gridRowDistStr != null) {
+      final List<dynamic> list = jsonDecode(gridRowDistStr);
+      _gridRowDistribution = list.map((e) => e as int).toList();
+    }
+    _gridHorizontalSpacing = prefs.getDouble('grid_horizontal_spacing') ?? 20.0;
+    _gridVerticalSpacing = prefs.getDouble('grid_vertical_spacing') ?? 20.0;
+    final gridMarginStr = prefs.getString('grid_margin');
+    if (gridMarginStr != null) {
+      final Map<String, dynamic> map = jsonDecode(gridMarginStr);
+      _gridMargin = EdgeInsets.fromLTRB(
+        map['left'] ?? 20.0,
+        map['top'] ?? 20.0,
+        map['right'] ?? 20.0,
+        map['bottom'] ?? 20.0,
+      );
+    }
+    _gridCenterLastRow = prefs.getBool('grid_center_last_row') ?? true;
+
     notifyListeners();
   }
 
@@ -699,6 +813,22 @@ class CharacterSelectionProvider extends ChangeNotifier {
       'backgroundImagePath': _backgroundImagePath,
       'isBackgroundImageAsset': _isBackgroundImageAsset,
     };
+
+    // Save grid layout settings
+    await prefs.setInt('grid_row_count', _gridRowCount);
+    await prefs.setString(
+        'grid_row_distribution', jsonEncode(_gridRowDistribution));
+    await prefs.setDouble('grid_horizontal_spacing', _gridHorizontalSpacing);
+    await prefs.setDouble('grid_vertical_spacing', _gridVerticalSpacing);
+    await prefs.setString(
+        'grid_margin',
+        jsonEncode({
+          'top': _gridMargin.top,
+          'bottom': _gridMargin.bottom,
+          'left': _gridMargin.left,
+          'right': _gridMargin.right,
+        }));
+    await prefs.setBool('grid_center_last_row', _gridCenterLastRow);
 
     await prefs.setString('character_selection_settings', jsonEncode(settings));
   }

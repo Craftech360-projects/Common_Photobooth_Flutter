@@ -43,17 +43,17 @@ class CustomTextField {
     required this.hintText,
     this.isEnabled = true,
     this.isRequired = true,
-    this.fillColor = Colors.white,
+    this.fillColor = AppColors.white,
     this.textColor = AppColors.black,
     this.labelColor = AppColors.black,
     this.fontSize = 16.0,
-    this.fontWeight = FontWeight.normal,
+    this.fontWeight = FontWeight.w500,
     this.isItalic = false,
     this.hasBorder = true,
     this.borderWidth = 1.0,
     this.borderColor = AppColors.black,
     this.borderRadius = 4.0,
-    this.width = 0.35, // Percentage of screen width
+    this.width = 0.55, // Percentage of screen width
     this.height = 60.0,
     this.margin = EdgeInsets.zero,
     this.padding = const EdgeInsets.symmetric(horizontal: 12.0),
@@ -110,7 +110,7 @@ class CustomTextField {
       hintText: json['hintText'],
       isEnabled: json['isEnabled'] ?? true,
       isRequired: json['isRequired'] ?? true,
-      fillColor: Color(json['fillColor'] ?? Colors.white.value),
+      fillColor: Color(json['fillColor'] ?? AppColors.white.value),
       textColor: Color(json['textColor'] ?? AppColors.black.value),
       labelColor: Color(json['labelColor'] ?? AppColors.black.value),
       fontSize: json['fontSize']?.toDouble() ?? 16.0,
@@ -121,7 +121,7 @@ class CustomTextField {
       borderWidth: json['borderWidth']?.toDouble() ?? 1.0,
       borderColor: Color(json['borderColor'] ?? AppColors.black.value),
       borderRadius: json['borderRadius']?.toDouble() ?? 4.0,
-      width: json['width']?.toDouble() ?? 0.35,
+      width: json['width']?.toDouble() ?? 0.55,
       height: json['height']?.toDouble() ?? 60.0,
       margin: json['margin'] != null
           ? EdgeInsets.fromLTRB(
@@ -150,10 +150,20 @@ class RegistrationScreenProvider extends ChangeNotifier {
 
   // Registration screen settings
   bool _showRegistrationScreen = true;
-  double _fieldSpacing = 20.0;
-  double _buttonSpacing = 40.0;
+  double _fieldSpacing = 10.0;
+  double _buttonSpacing = 20.0;
   double _borderRadius = 4.0;
   List<CustomTextField> _textFields = [];
+
+  // Title settings
+  bool _showTitle = true;
+  String _titleText = "Enter Details";
+  double _titleFontSize = 22.0;
+  FontWeight _titleFontWeight = FontWeight.w500;
+  double _titleLineHeight = 1.2;
+  TextAlign _titleTextAlign = TextAlign.center;
+  Color _titleTextColor = AppColors.black;
+  EdgeInsets _titleMargin = const EdgeInsets.only(bottom: 20.0);
 
   // Button settings
   bool _useImageButton = false;
@@ -161,12 +171,12 @@ class RegistrationScreenProvider extends ChangeNotifier {
   Color _submitButtonColor = AppColors.goldenYellow;
   Color _submitButtonTextColor = AppColors.black;
   double _buttonWidth = 200.0;
-  double _buttonHeight = 60.0;
+  double _buttonHeight = 50.0;
   double _buttonBorderRadius = 4.0;
-  double _buttonFontSize = 24.0;
-  FontWeight _buttonFontWeight = FontWeight.bold;
+  double _buttonFontSize = 18.0;
+  FontWeight _buttonFontWeight = FontWeight.w500;
   bool _buttonIsItalic = false;
-  bool _buttonHasBorder = true;
+  bool _buttonHasBorder = false;
   double _buttonBorderWidth = 1.0;
   Color _buttonBorderColor = AppColors.white;
   EdgeInsets _buttonPadding =
@@ -190,6 +200,16 @@ class RegistrationScreenProvider extends ChangeNotifier {
   double get buttonSpacing => _buttonSpacing;
   double get borderRadius => _borderRadius;
   List<CustomTextField> get textFields => _textFields;
+
+  // Title getters
+  bool get showTitle => _showTitle;
+  String get titleText => _titleText;
+  double get titleFontSize => _titleFontSize;
+  FontWeight get titleFontWeight => _titleFontWeight;
+  double get titleLineHeight => _titleLineHeight;
+  TextAlign get titleTextAlign => _titleTextAlign;
+  Color get titleTextColor => _titleTextColor;
+  EdgeInsets get titleMargin => _titleMargin;
 
   FontWeight get buttonFontWeight => _buttonFontWeight;
   bool get buttonIsItalic => _buttonIsItalic;
@@ -225,10 +245,41 @@ class RegistrationScreenProvider extends ChangeNotifier {
   Future<void> loadSettings() async {
     // Load registration screen settings
     _showRegistrationScreen =
-        _prefs.getBool('registration_show_screen') ?? true;
-    _fieldSpacing = _prefs.getDouble('registration_field_spacing') ?? 20.0;
-    _buttonSpacing = _prefs.getDouble('registration_button_spacing') ?? 40.0;
-    _borderRadius = _prefs.getDouble('registration_border_radius') ?? 4.0;
+        _prefs.getBool('registration_show_screen') ?? _showRegistrationScreen;
+    _fieldSpacing =
+        _prefs.getDouble('registration_field_spacing') ?? _fieldSpacing;
+    _buttonSpacing =
+        _prefs.getDouble('registration_button_spacing') ?? _buttonSpacing;
+    _borderRadius =
+        _prefs.getDouble('registration_border_radius') ?? _borderRadius;
+
+    // Load title settings
+    _showTitle = _prefs.getBool('registration_show_title') ?? _showTitle;
+    _titleText = _prefs.getString('registration_title_text') ?? _titleText;
+    _titleFontSize =
+        _prefs.getDouble('registration_title_font_size') ?? _titleFontSize;
+    _titleFontWeight = FontWeight.values[
+        _prefs.getInt('registration_title_font_weight') ??
+            _titleFontWeight.index];
+    _titleLineHeight =
+        _prefs.getDouble('registration_title_line_height') ?? _titleLineHeight;
+    _titleTextAlign = TextAlign.values[
+        _prefs.getInt('registration_title_text_align') ??
+            _titleTextAlign.index];
+    _titleTextColor = Color(_prefs.getInt('registration_title_text_color') ??
+        _titleTextColor.value);
+
+    // Load title margins
+    final double titleTopMargin =
+        _prefs.getDouble('registration_title_margin_top') ?? 0.0;
+    final double titleBottomMargin =
+        _prefs.getDouble('registration_title_margin_bottom') ?? 0.0;
+    final double titleLeftMargin =
+        _prefs.getDouble('registration_title_margin_left') ?? 0.0;
+    final double titleRightMargin =
+        _prefs.getDouble('registration_title_margin_right') ?? 0.0;
+    _titleMargin = EdgeInsets.fromLTRB(
+        titleLeftMargin, titleTopMargin, titleRightMargin, titleBottomMargin);
 
     // Load button margins
     final double topMargin =
@@ -270,34 +321,43 @@ class RegistrationScreenProvider extends ChangeNotifier {
     }
 
     // Load button settings
-    _useImageButton = _prefs.getBool('registration_use_image_button') ?? false;
+    _useImageButton =
+        _prefs.getBool('registration_use_image_button') ?? _useImageButton;
     _submitButtonText =
-        _prefs.getString('registration_button_text') ?? 'SUBMIT';
-    _submitButtonColor = Color(_prefs.getInt('registration_button_color') ??
-        AppColors.goldenYellow.value);
+        _prefs.getString('registration_button_text') ?? _submitButtonText;
+    _submitButtonColor = Color(
+        _prefs.getInt('registration_button_color') ?? _submitButtonColor.value);
     _submitButtonTextColor = Color(
         _prefs.getInt('registration_button_text_color') ??
-            AppColors.black.value);
-    _buttonWidth = _prefs.getDouble('registration_button_width') ?? 200.0;
-    _buttonHeight = _prefs.getDouble('registration_button_height') ?? 60.0;
+            _submitButtonTextColor.value);
+    _buttonWidth =
+        _prefs.getDouble('registration_button_width') ?? _buttonWidth;
+    _buttonHeight =
+        _prefs.getDouble('registration_button_height') ?? _buttonHeight;
     _buttonBorderRadius =
-        _prefs.getDouble('registration_button_border_radius') ?? 4.0;
-    _buttonFontSize = _prefs.getDouble('registration_button_font_size') ?? 24.0;
+        _prefs.getDouble('registration_button_border_radius') ??
+            _buttonBorderRadius;
+    _buttonFontSize =
+        _prefs.getDouble('registration_button_font_size') ?? _buttonFontSize;
     _buttonFontWeight = FontWeight.values[
         _prefs.getInt('registration_button_font_weight') ??
-            3]; // Bold is index 3
-    _buttonIsItalic = _prefs.getBool('registration_button_is_italic') ?? false;
-    _buttonHasBorder = _prefs.getBool('registration_button_has_border') ?? true;
-    _buttonBorderWidth =
-        _prefs.getDouble('registration_button_border_width') ?? 1.0;
+            _buttonFontWeight.index];
+    _buttonIsItalic =
+        _prefs.getBool('registration_button_is_italic') ?? _buttonIsItalic;
+    _buttonHasBorder =
+        _prefs.getBool('registration_button_has_border') ?? _buttonHasBorder;
+    _buttonBorderWidth = _prefs.getDouble('registration_button_border_width') ??
+        _buttonBorderWidth;
     _buttonBorderColor = Color(
         _prefs.getInt('registration_button_border_color') ??
-            AppColors.white.value);
-    _buttonOpacity = _prefs.getDouble('registration_button_opacity') ?? 1.0;
-    _buttonTextOpacity =
-        _prefs.getDouble('registration_button_text_opacity') ?? 1.0;
+            _buttonBorderColor.value);
+    _buttonOpacity =
+        _prefs.getDouble('registration_button_opacity') ?? _buttonOpacity;
+    _buttonTextOpacity = _prefs.getDouble('registration_button_text_opacity') ??
+        _buttonTextOpacity;
     _buttonImageOpacity =
-        _prefs.getDouble('registration_button_image_opacity') ?? 1.0;
+        _prefs.getDouble('registration_button_image_opacity') ??
+            _buttonImageOpacity;
 
     // Load padding and margin
     final String? paddingJson = _prefs.getString('registration_button_padding');
@@ -325,7 +385,8 @@ class RegistrationScreenProvider extends ChangeNotifier {
     // Load image button settings
     _buttonImagePath = _prefs.getString('registration_button_image_path');
     _isButtonImageAsset =
-        _prefs.getBool('registration_is_button_image_asset') ?? true;
+        _prefs.getBool('registration_is_button_image_asset') ??
+            _isButtonImageAsset;
 
     // Verify button image file exists if it's not an asset
     if (_buttonImagePath != null && !_isButtonImageAsset) {
@@ -340,7 +401,8 @@ class RegistrationScreenProvider extends ChangeNotifier {
     _registrationScreenBackground =
         _prefs.getString('registration_screen_background');
     _isRegistrationScreenBackgroundAsset =
-        _prefs.getBool('registration_is_screen_background_asset') ?? true;
+        _prefs.getBool('registration_is_screen_background_asset') ??
+            _isRegistrationScreenBackgroundAsset;
 
     // Verify background image file exists if it's not an asset
     if (_registrationScreenBackground != null &&
@@ -352,6 +414,58 @@ class RegistrationScreenProvider extends ChangeNotifier {
       }
     }
 
+    notifyListeners();
+  }
+
+  // Title setters
+  void setShowTitle(bool show) {
+    _showTitle = show;
+    _prefs.setBool('registration_show_title', show);
+    notifyListeners();
+  }
+
+  void setTitleText(String text) {
+    _titleText = text;
+    _prefs.setString('registration_title_text', text);
+    notifyListeners();
+  }
+
+  void setTitleFontSize(double size) {
+    _titleFontSize = size;
+    _prefs.setDouble('registration_title_font_size', size);
+    notifyListeners();
+  }
+
+  void setTitleFontWeight(FontWeight weight) {
+    _titleFontWeight = weight;
+    _prefs.setInt('registration_title_font_weight', weight.index);
+    notifyListeners();
+  }
+
+  void setTitleLineHeight(double height) {
+    _titleLineHeight = height;
+    _prefs.setDouble('registration_title_line_height', height);
+    notifyListeners();
+  }
+
+  void setTitleTextAlign(TextAlign align) {
+    _titleTextAlign = align;
+    _prefs.setInt('registration_title_text_align', align.index);
+    notifyListeners();
+  }
+
+  void setTitleTextColor(Color color) {
+    _titleTextColor = color;
+    _prefs.setInt('registration_title_text_color', color.value);
+    notifyListeners();
+  }
+
+  void setTitleMargin(EdgeInsets margin) {
+    _titleMargin = margin;
+    _prefs.setDouble('registration_title_margin_top', margin.top);
+    _prefs.setDouble('registration_title_margin_bottom', margin.bottom);
+    _prefs.setDouble('registration_title_margin_left', margin.left);
+    _prefs.setDouble('registration_title_margin_right', margin.right);
     notifyListeners();
   }
 

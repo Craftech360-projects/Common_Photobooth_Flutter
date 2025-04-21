@@ -47,6 +47,271 @@ class _RegistrationScreenSettingsState
 
               const Divider(),
 
+              // Title Settings
+              const Text(
+                'Title Settings',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+
+              // Enable/Disable Title
+              SwitchListTile(
+                title: const Text('Show Title'),
+                subtitle: const Text('Enable or disable the title'),
+                value: settings.showTitle,
+                onChanged: (value) {
+                  settings.setShowTitle(value);
+                },
+              ),
+
+              if (settings.showTitle) ...[
+                // Title Text
+                TextFormField(
+                  initialValue: settings.titleText,
+                  decoration: const InputDecoration(
+                    labelText: 'Title Text',
+                    border: OutlineInputBorder(),
+                  ),
+                  onChanged: (value) {
+                    settings.setTitleText(value);
+                  },
+                ),
+                const SizedBox(height: 16),
+
+                // Font Size
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        initialValue: settings.titleFontSize.toString(),
+                        decoration: const InputDecoration(
+                          labelText: 'Font Size',
+                          border: OutlineInputBorder(),
+                        ),
+                        keyboardType: TextInputType.number,
+                        onChanged: (value) {
+                          final size = double.tryParse(value);
+                          if (size != null) {
+                            settings.setTitleFontSize(size);
+                          }
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: TextFormField(
+                        initialValue: settings.titleLineHeight.toString(),
+                        decoration: const InputDecoration(
+                          labelText: 'Line Height',
+                          border: OutlineInputBorder(),
+                        ),
+                        keyboardType: TextInputType.number,
+                        onChanged: (value) {
+                          final height = double.tryParse(value);
+                          if (height != null) {
+                            settings.setTitleLineHeight(height);
+                          }
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // Font Weight
+                DropdownButtonFormField<FontWeight>(
+                  value: settings.titleFontWeight,
+                  decoration: const InputDecoration(
+                    labelText: 'Font Weight',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: [
+                    const DropdownMenuItem(
+                      value: FontWeight.normal,
+                      child: Text('Normal'),
+                    ),
+                    const DropdownMenuItem(
+                      value: FontWeight.bold,
+                      child: Text('Bold'),
+                    ),
+                    const DropdownMenuItem(
+                      value: FontWeight.w100,
+                      child: Text('Thin'),
+                    ),
+                    const DropdownMenuItem(
+                      value: FontWeight.w300,
+                      child: Text('Light'),
+                    ),
+                    const DropdownMenuItem(
+                      value: FontWeight.w500,
+                      child: Text('Medium'),
+                    ),
+                    const DropdownMenuItem(
+                      value: FontWeight.w900,
+                      child: Text('Black'),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) {
+                      settings.setTitleFontWeight(value);
+                    }
+                  },
+                ),
+                const SizedBox(height: 16),
+
+                // Text Align
+                DropdownButtonFormField<TextAlign>(
+                  value: settings.titleTextAlign,
+                  decoration: const InputDecoration(
+                    labelText: 'Text Align',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: [
+                    const DropdownMenuItem(
+                      value: TextAlign.left,
+                      child: Text('Left'),
+                    ),
+                    const DropdownMenuItem(
+                      value: TextAlign.center,
+                      child: Text('Center'),
+                    ),
+                    const DropdownMenuItem(
+                      value: TextAlign.right,
+                      child: Text('Right'),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) {
+                      settings.setTitleTextAlign(value);
+                    }
+                  },
+                ),
+                const SizedBox(height: 16),
+
+                // Text Color
+                ListTile(
+                  title: const Text('Title Text Color'),
+                  trailing: Container(
+                    width: 24,
+                    height: 24,
+                    decoration: BoxDecoration(
+                      color: settings.titleTextColor,
+                      border: Border.all(color: Colors.grey),
+                    ),
+                  ),
+                  onTap: () async {
+                    final color = await _buildColorPickerWithLabel(
+                      context,
+                      settings.titleTextColor,
+                      label: 'Title Text Color',
+                    );
+                    if (color != null) {
+                      settings.setTitleTextColor(color);
+                    }
+                  },
+                ),
+
+                // Title Margins
+                _buildSectionHeader('Title Margins'),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        initialValue: settings.titleMargin.top.toString(),
+                        decoration: const InputDecoration(
+                          labelText: 'Top',
+                          border: OutlineInputBorder(),
+                        ),
+                        keyboardType: TextInputType.number,
+                        onChanged: (value) {
+                          final top = double.tryParse(value);
+                          if (top != null) {
+                            settings.setTitleMargin(EdgeInsets.fromLTRB(
+                              settings.titleMargin.left,
+                              top,
+                              settings.titleMargin.right,
+                              settings.titleMargin.bottom,
+                            ));
+                          }
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: TextFormField(
+                        initialValue: settings.titleMargin.bottom.toString(),
+                        decoration: const InputDecoration(
+                          labelText: 'Bottom',
+                          border: OutlineInputBorder(),
+                        ),
+                        keyboardType: TextInputType.number,
+                        onChanged: (value) {
+                          final bottom = double.tryParse(value);
+                          if (bottom != null) {
+                            settings.setTitleMargin(EdgeInsets.fromLTRB(
+                              settings.titleMargin.left,
+                              settings.titleMargin.top,
+                              settings.titleMargin.right,
+                              bottom,
+                            ));
+                          }
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        initialValue: settings.titleMargin.left.toString(),
+                        decoration: const InputDecoration(
+                          labelText: 'Left',
+                          border: OutlineInputBorder(),
+                        ),
+                        keyboardType: TextInputType.number,
+                        onChanged: (value) {
+                          final left = double.tryParse(value);
+                          if (left != null) {
+                            settings.setTitleMargin(EdgeInsets.fromLTRB(
+                              left,
+                              settings.titleMargin.top,
+                              settings.titleMargin.right,
+                              settings.titleMargin.bottom,
+                            ));
+                          }
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: TextFormField(
+                        initialValue: settings.titleMargin.right.toString(),
+                        decoration: const InputDecoration(
+                          labelText: 'Right',
+                          border: OutlineInputBorder(),
+                        ),
+                        keyboardType: TextInputType.number,
+                        onChanged: (value) {
+                          final right = double.tryParse(value);
+                          if (right != null) {
+                            settings.setTitleMargin(EdgeInsets.fromLTRB(
+                              settings.titleMargin.left,
+                              settings.titleMargin.top,
+                              right,
+                              settings.titleMargin.bottom,
+                            ));
+                          }
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+
+              const Divider(),
+
               // Background Image Settings
               const Text(
                 'Background Image',

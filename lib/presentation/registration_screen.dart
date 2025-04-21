@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:photobooth_flutter/providers/photobooth_provider.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
+import 'package:photobooth_flutter/providers/photobooth_provider.dart';
 import 'package:photobooth_flutter/providers/registration_screen_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
 import 'package:provider/provider.dart';
@@ -80,13 +80,13 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
     final globalSettings = context.watch<GlobalSettingsProvider>();
 
     return Scaffold(
-      // appBar: AppBar(
-      //   leading: IconButton(
-      //     onPressed: () => Navigator.pushNamed(
-      //         context, AppRoutes.registrationScreenSettings),
-      //     icon: const Icon(Icons.star),
-      //   ),
-      // ),
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () => Navigator.pushNamed(
+              context, AppRoutes.registrationScreenSettings),
+          icon: const Icon(Icons.star),
+        ),
+      ),
       body: Stack(children: [
         Container(
           width: double.infinity,
@@ -103,6 +103,21 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  // Add the title widget here
+                  if (registrationSettings.showTitle)
+                    Container(
+                      margin: registrationSettings.titleMargin,
+                      child: Text(
+                        registrationSettings.titleText,
+                        style: TextStyle(
+                          fontSize: registrationSettings.titleFontSize,
+                          fontWeight: registrationSettings.titleFontWeight,
+                          color: registrationSettings.titleTextColor,
+                          height: registrationSettings.titleLineHeight,
+                        ),
+                        textAlign: registrationSettings.titleTextAlign,
+                      ),
+                    ),
                   ...registrationSettings.textFields
                       .where((field) => field.isEnabled)
                       .map((field) => Column(
@@ -131,44 +146,75 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
                                     filled: true,
                                     fillColor: field.fillColor,
                                     contentPadding: field.padding,
-                                    border: field.hasBorder
-                                        ? OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              field.borderRadius,
-                                            ),
-                                            borderSide: BorderSide(
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(
+                                        field.borderRadius,
+                                      ),
+                                      borderSide: field.hasBorder
+                                          ? BorderSide(
                                               color: field.borderColor,
                                               width: field.borderWidth,
-                                            ),
-                                          )
-                                        : InputBorder.none,
-                                    enabledBorder: field.hasBorder
-                                        ? OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              field.borderRadius,
-                                            ),
-                                            borderSide: BorderSide(
+                                            )
+                                          : BorderSide.none,
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(
+                                        field.borderRadius,
+                                      ),
+                                      borderSide: field.hasBorder
+                                          ? BorderSide(
                                               color: field.borderColor,
                                               width: field.borderWidth,
-                                            ),
-                                          )
-                                        : InputBorder.none,
-                                    focusedBorder: field.hasBorder
-                                        ? OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              field.borderRadius,
-                                            ),
-                                            borderSide: BorderSide(
+                                            )
+                                          : BorderSide.none,
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(
+                                        field.borderRadius,
+                                      ),
+                                      borderSide: field.hasBorder
+                                          ? BorderSide(
                                               color: field.borderColor,
                                               width: field.borderWidth,
-                                            ),
-                                          )
-                                        : InputBorder.none,
+                                            )
+                                          : BorderSide.none,
+                                    ),
                                   ),
                                   validator: (value) {
                                     if (field.isRequired &&
                                         (value?.isEmpty ?? true)) {
                                       return 'Please enter ${field.label.toLowerCase()}';
+                                    }
+
+                                    // Add type-specific validations
+                                    if (value != null && value.isNotEmpty) {
+                                      switch (field.fieldType) {
+                                        case TextFieldType.email:
+                                          // Email validation using regex
+                                          final emailRegex = RegExp(
+                                              r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                                          if (!emailRegex.hasMatch(value)) {
+                                            return 'Please enter a valid email address';
+                                          }
+                                          break;
+                                        case TextFieldType.phone:
+                                          // Phone validation - allow digits, spaces, and some special chars
+                                          final phoneRegex = RegExp(
+                                              r'^[+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,4}[-\s\.]?[0-9]{1,9}$');
+                                          if (!phoneRegex.hasMatch(value)) {
+                                            return 'Please enter a valid phone number';
+                                          }
+                                          break;
+                                        case TextFieldType.name:
+                                          // Name validation - minimum 2 characters
+                                          if (value.length < 2) {
+                                            return 'Name must be at least 2 characters';
+                                          }
+                                          break;
+                                        default:
+                                          // No additional validation for custom fields
+                                          break;
+                                      }
                                     }
                                     return null;
                                   },
@@ -315,10 +361,10 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
           .id;
 
       // // Example for phone:
-      // String? phoneFieldId = registrationSettings.textFields
-      //     .firstWhere((f) => f.isEnabled && f.fieldType == TextFieldType.phone,
-      //         orElse: () => CustomTextField(id: '', label: '', hintText: ''))
-      //     .id;
+      String? phoneFieldId = registrationSettings.textFields
+          .firstWhere((f) => f.isEnabled && f.fieldType == TextFieldType.phone,
+              orElse: () => CustomTextField(id: '', label: '', hintText: ''))
+          .id;
 
       // Retrieve text using the found IDs
       String name = '';
@@ -335,13 +381,12 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
         debugPrint('Could not find enabled Email field or its controller.');
       }
 
-      // // Example for phone:
-      // String phone = '';
-      // if (_controllers.containsKey(phoneFieldId)) {
-      //   phone = _controllers[phoneFieldId]!.text;
-      // } else {
-      //   debugPrint('Could not find enabled Phone field or its controller.');
-      // }
+      String phone = '';
+      if (_controllers.containsKey(phoneFieldId)) {
+        phone = _controllers[phoneFieldId]!.text;
+      } else {
+        debugPrint('Could not find enabled Phone field or its controller.');
+      }
       // --- MODIFICATION END ---
 
       // Set user details in provider

@@ -631,7 +631,9 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
               const SizedBox(height: 16),
               _buildSliderWithLabel(
                 label: 'Border Width',
-                value: settings.imageBorderWidth < 1.0 ? 1.0 : settings.imageBorderWidth,
+                value: settings.imageBorderWidth < 1.0
+                    ? 1.0
+                    : settings.imageBorderWidth,
                 min: 1.0,
                 max: 10.0,
                 divisions: 9,
@@ -827,6 +829,37 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
                 ),
                 onChanged: (value) {
                   settings.setButtonText(value);
+                },
+              ),
+
+              const SizedBox(height: 16),
+
+              DropdownButtonFormField<FontWeight>(
+                decoration: const InputDecoration(
+                  labelText: 'Font Weight',
+                  border: OutlineInputBorder(),
+                ),
+                value: settings.buttonFontWeight,
+                items: [
+                  const DropdownMenuItem(
+                      value: FontWeight.w300, child: Text('Light')),
+                  const DropdownMenuItem(
+                      value: FontWeight.w400, child: Text('Regular')),
+                  const DropdownMenuItem(
+                      value: FontWeight.w500, child: Text('Medium')),
+                  const DropdownMenuItem(
+                      value: FontWeight.w600, child: Text('SemiBold')),
+                  const DropdownMenuItem(
+                      value: FontWeight.w700, child: Text('Bold')),
+                  const DropdownMenuItem(
+                      value: FontWeight.w800, child: Text('ExtraBold')),
+                  const DropdownMenuItem(
+                      value: FontWeight.w900, child: Text('Black')),
+                ],
+                onChanged: (value) {
+                  if (value != null) {
+                    settings.setButtonStyle(fontWeight: value);
+                  }
                 },
               ),
 

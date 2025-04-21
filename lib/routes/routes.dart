@@ -12,7 +12,7 @@ import 'package:photobooth_flutter/presentation/character_selection_screen.dart'
 import 'package:photobooth_flutter/presentation/gender_selection_screen.dart';
 import 'package:photobooth_flutter/presentation/loading_screen.dart';
 import 'package:photobooth_flutter/presentation/output_screen.dart';
-import 'package:photobooth_flutter/presentation/participant_details_screen.dart';
+import 'package:photobooth_flutter/presentation/registration_screen.dart';
 import 'package:photobooth_flutter/presentation/welcome_screen.dart';
 
 class AppRoutes {

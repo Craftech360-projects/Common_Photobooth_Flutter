@@ -2,15 +2,16 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class GenderSelectionProvider extends ChangeNotifier {
   // Title settings
   String _titleText = 'Select Gender';
-  double _titleFontSize = 32.0;
-  Color _titleColor = Colors.white;
-  FontWeight _titleFontWeight = FontWeight.bold;
-  double _titlePadding = 20.0;
+  double _titleFontSize = 22.0;
+  Color _titleColor = AppColors.white;
+  FontWeight _titleFontWeight = FontWeight.w500;
+  double _titlePadding = 0.0;
   double _titleLineHeight = 1.2;
   bool _titleItalic = false;
   double _titleOpacity = 1.0;
@@ -25,10 +26,10 @@ class GenderSelectionProvider extends ChangeNotifier {
   double _imageWidth = 150.0;
   double _imageHeight = 150.0;
   double _imageSpacing = 40.0;
-  double _imageBorderRadius = 20.0;
-  bool _showImageBorder = true;
+  double _imageBorderRadius = 12.0;
+  bool _showImageBorder = false;
   double _imageBorderWidth = 2.0;
-  Color _imageBorderColor = const Color(0xFFFFD700);
+  Color _imageBorderColor = AppColors.yellow;
   EdgeInsets _imagesRowMargin = const EdgeInsets.all(0);
   EdgeInsets _imagesRowPadding = const EdgeInsets.all(0);
 
@@ -45,13 +46,14 @@ class GenderSelectionProvider extends ChangeNotifier {
   double _buttonWidth = 200.0;
   double _buttonHeight = 50.0;
   double _buttonFontSize = 18.0;
-  Color _buttonColor = const Color(0xFFFFD700);
-  Color _buttonTextColor = Colors.black;
+  FontWeight _buttonFontWeight = FontWeight.w500;
+  Color _buttonColor = AppColors.yellow;
+  Color _buttonTextColor = AppColors.black;
   double _buttonBorderRadius = 10.0;
   bool _buttonHasBorder = false;
   double _buttonBorderWidth = 1.0;
-  Color _buttonBorderColor = Colors.black;
-  double _buttonMarginTop = 30.0;
+  Color _buttonBorderColor = AppColors.black;
+  double _buttonMarginTop = 10.0;
   bool _useImageButton = false;
   String? _buttonImagePath;
   bool _isButtonImageAsset = true;
@@ -60,7 +62,7 @@ class GenderSelectionProvider extends ChangeNotifier {
       const EdgeInsets.symmetric(vertical: 10, horizontal: 20);
 
   // Layout settings
-  double _screenPadding = 20.0;
+  double _screenPadding = 0.0;
   bool _showBackground = true;
   String? _backgroundImagePath;
   bool _isBackgroundImageAsset = true;
@@ -94,6 +96,7 @@ class GenderSelectionProvider extends ChangeNotifier {
   double get buttonWidth => _buttonWidth;
   double get buttonHeight => _buttonHeight;
   double get buttonFontSize => _buttonFontSize;
+  FontWeight get buttonFontWeight => _buttonFontWeight;
   Color get buttonColor => _buttonColor;
   Color get buttonTextColor => _buttonTextColor;
   double get buttonBorderRadius => _buttonBorderRadius;
@@ -256,11 +259,13 @@ class GenderSelectionProvider extends ChangeNotifier {
 
   void setButtonStyle({
     double? fontSize,
+    FontWeight? fontWeight,
     Color? buttonColor,
     Color? textColor,
     double? borderRadius,
   }) {
     if (fontSize != null) _buttonFontSize = fontSize;
+    if (fontWeight != null) _buttonFontWeight = fontWeight;
     if (buttonColor != null) _buttonColor = buttonColor;
     if (textColor != null) _buttonTextColor = textColor;
     if (borderRadius != null) _buttonBorderRadius = borderRadius;
@@ -328,7 +333,7 @@ class GenderSelectionProvider extends ChangeNotifier {
     try {
       final file = File(filePath);
       return await file.exists();
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('Error checking file accessibility: $e');
       return false;
     }
@@ -423,6 +428,7 @@ class GenderSelectionProvider extends ChangeNotifier {
       _buttonWidth = settings['buttonWidth'] ?? _buttonWidth;
       _buttonHeight = settings['buttonHeight'] ?? _buttonHeight;
       _buttonFontSize = settings['buttonFontSize'] ?? _buttonFontSize;
+      _buttonFontWeight = FontWeight.values[settings['buttonFontWeight'] ?? _buttonFontWeight.index];
       _buttonColor = Color(settings['buttonColor'] ?? _buttonColor.value);
       _buttonTextColor =
           Color(settings['buttonTextColor'] ?? _buttonTextColor.value);
@@ -548,6 +554,7 @@ class GenderSelectionProvider extends ChangeNotifier {
         'buttonWidth': _buttonWidth,
         'buttonHeight': _buttonHeight,
         'buttonFontSize': _buttonFontSize,
+        'buttonFontWeight': _buttonFontWeight.index,
         'buttonColor': _buttonColor.value,
         'buttonTextColor': _buttonTextColor.value,
         'buttonBorderRadius': _buttonBorderRadius,

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum WidgetPosition {
@@ -49,7 +50,7 @@ class OutputScreenProvider extends ChangeNotifier {
   double _imageWidth = 400.0;
   double _imageHeight = 500.0;
   double _imageBorderRadius = 20.0;
-  Color _imageBorderColor = const Color(0xFFFFD700);
+  Color _imageBorderColor = AppColors.yellow;
   double _imageBorderWidth = 3.0;
   double _imageSpacing = 30.0;
   WidgetPosition _imagePosition = WidgetPosition.center;
@@ -68,7 +69,7 @@ class OutputScreenProvider extends ChangeNotifier {
   // Button settings
   String _buttonText = 'START OVER';
   double _buttonFontSize = 24.0;
-  Color _buttonColor = const Color(0xFFFFD700);
+  Color _buttonColor = AppColors.yellow;
   Color _buttonTextColor = Colors.black;
   double _buttonPaddingHorizontal = 40.0;
   double _buttonPaddingVertical = 15.0;
@@ -228,7 +229,7 @@ class OutputScreenProvider extends ChangeNotifier {
       'qrCodeOffsetY': _qrCodeOffsetY,
       'buttonOffsetX': _buttonOffsetX,
       'buttonOffsetY': _buttonOffsetY,
-      
+
       // Title settings
       'titleText': _titleText,
       'titleFontSize': _titleFontSize,
@@ -284,21 +285,21 @@ class OutputScreenProvider extends ChangeNotifier {
     notifyListeners();
     _saveSettings();
   }
-  
+
   void setImageOffset(double x, double y) {
     _imageOffsetX = x;
     _imageOffsetY = y;
     notifyListeners();
     _saveSettings();
   }
-  
+
   void setQrCodeOffset(double x, double y) {
     _qrCodeOffsetX = x;
     _qrCodeOffsetY = y;
     notifyListeners();
     _saveSettings();
   }
-  
+
   void setButtonOffset(double x, double y) {
     _buttonOffsetX = x;
     _buttonOffsetY = y;
@@ -488,7 +489,7 @@ class OutputScreenProvider extends ChangeNotifier {
     _imageWidth = 400.0;
     _imageHeight = 500.0;
     _imageBorderRadius = 20.0;
-    _imageBorderColor = const Color(0xFFFFD700);
+    _imageBorderColor = AppColors.yellow;
     _imageBorderWidth = 3.0;
     _imageSpacing = 30.0;
     _imagePosition = WidgetPosition.center;
@@ -511,7 +512,7 @@ class OutputScreenProvider extends ChangeNotifier {
     // Button settings
     _buttonText = 'START OVER';
     _buttonFontSize = 24.0;
-    _buttonColor = const Color(0xFFFFD700);
+    _buttonColor = AppColors.yellow;
     _buttonTextColor = Colors.black;
     _buttonPaddingHorizontal = 40.0;
     _buttonPaddingVertical = 15.0;

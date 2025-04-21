@@ -533,63 +533,143 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
 
             const Divider(height: 32),
 
-            // Carousel Settings
-            _buildSectionTitle('Carousel Settings'),
+            // Carousel or Grid View
             SwitchListTile(
-              title: const Text('Use Carousel for 4+ Characters'),
-              subtitle: const Text(
-                  'Display characters in a carousel when more than 3'),
+              title: const Text('Use Carousel View'),
+              subtitle: const Text('Toggle between carousel and grid layout'),
               value: settings.useCarousel,
               onChanged: (value) {
-                settings.setCarouselSettings(useCarousel: value);
+                settings.setUseCarousel(value);
               },
             ),
 
-            if (settings.useCarousel) ...[
-              const SizedBox(height: 16),
-              const Text('Side Character Visibility',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              Slider(
-                value: settings.carouselVisibleWidth,
-                min: 0.1,
-                max: 0.9,
-                divisions: 8,
-                label: settings.carouselVisibleWidth.toStringAsFixed(1),
+            // Grid Layout Settings (only show when carousel is disabled)
+            if (!settings.useCarousel) ...[
+              _buildSectionSubtitle('Grid Layout Settings'),
+
+              // Row Count
+              DropdownButtonFormField<int>(
+                decoration: const InputDecoration(
+                  labelText: 'Number of Rows',
+                  border: OutlineInputBorder(),
+                ),
+                value: settings.gridRowCount,
+                items: List.generate(3, (index) => index + 1)
+                    .map((count) => DropdownMenuItem(
+                          value: count,
+                          child: Text('$count ${count == 1 ? 'Row' : 'Rows'}'),
+                        ))
+                    .toList(),
                 onChanged: (value) {
-                  settings.setCarouselSettings(visibleWidth: value);
+                  if (value != null) {
+                    settings.setGridRowCount(value);
+                  }
                 },
               ),
 
-              // Carousel Margin
-              _buildSectionSubtitle('Carousel Margins'),
+              const SizedBox(height: 16),
+
+              // Row Distribution
+              _buildSectionSubtitle('Characters per Row'),
+
+              // For each row, show a number picker
+              ...List.generate(
+                settings.gridRowCount,
+                (index) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text('Row ${index + 1}:'),
+                      ),
+                      SizedBox(
+                        width: 120,
+                        child: DropdownButtonFormField<int>(
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                          ),
+                          value: index < settings.gridRowDistribution.length
+                              ? settings.gridRowDistribution[index]
+                              : 1,
+                          items: List.generate(5, (i) => i + 1)
+                              .map((count) => DropdownMenuItem(
+                                    value: count,
+                                    child: Text('$count'),
+                                  ))
+                              .toList(),
+                          onChanged: (value) {
+                            if (value != null) {
+                              settings.updateRowDistributionAt(index, value);
+                            }
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // Grid Spacing
+              _buildSectionSubtitle('Grid Spacing'),
 
               _buildSliderWithLabel(
-                label: 'Top Margin',
-                value: settings.carouselMargin.top,
+                label: 'Horizontal Spacing',
+                value: settings.gridHorizontalSpacing,
                 min: 0.0,
                 max: 50.0,
                 divisions: 50,
                 onChanged: (value) {
-                  settings.setCarouselMargin(EdgeInsets.fromLTRB(
-                    settings.carouselMargin.left,
+                  settings.setGridSpacing(horizontal: value);
+                },
+              ),
+
+              _buildSliderWithLabel(
+                label: 'Vertical Spacing',
+                value: settings.gridVerticalSpacing,
+                min: 0.0,
+                max: 50.0,
+                divisions: 50,
+                onChanged: (value) {
+                  settings.setGridSpacing(vertical: value);
+                },
+              ),
+
+              // Grid Margin
+              _buildSectionSubtitle('Grid Margins'),
+
+              _buildSliderWithLabel(
+                label: 'Top Margin',
+                value: settings.gridMargin.top,
+                min: 0.0,
+                max: 50.0,
+                divisions: 50,
+                onChanged: (value) {
+                  settings.setGridMargin(EdgeInsets.fromLTRB(
+                    settings.gridMargin.left,
                     value,
-                    settings.carouselMargin.right,
-                    settings.carouselMargin.bottom,
+                    settings.gridMargin.right,
+                    settings.gridMargin.bottom,
                   ));
                 },
               ),
 
               _buildSliderWithLabel(
                 label: 'Bottom Margin',
-                value: settings.carouselMargin.bottom,
+                value: settings.gridMargin.bottom,
                 min: 0.0,
                 max: 50.0,
                 divisions: 50,
                 onChanged: (value) {
-                  settings.setCarouselMargin(EdgeInsets.fromLTRB(
-                    settings.carouselMargin.left,
-                    settings.carouselMargin.top,
-                    settings.carouselMargin.right,
+                  settings.setGridMargin(EdgeInsets.fromLTRB(
+                    settings.gridMargin.left,
+                    settings.gridMargin.top,
+                    settings.gridMargin.right,
                     value,
                   ));
                 },
@@ -597,100 +677,44 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
 
               _buildSliderWithLabel(
                 label: 'Left Margin',
-                value: settings.carouselMargin.left,
+                value: settings.gridMargin.left,
                 min: 0.0,
                 max: 50.0,
                 divisions: 50,
                 onChanged: (value) {
-                  settings.setCarouselMargin(EdgeInsets.fromLTRB(
+                  settings.setGridMargin(EdgeInsets.fromLTRB(
                     value,
-                    settings.carouselMargin.top,
-                    settings.carouselMargin.right,
-                    settings.carouselMargin.bottom,
+                    settings.gridMargin.top,
+                    settings.gridMargin.right,
+                    settings.gridMargin.bottom,
                   ));
                 },
               ),
 
               _buildSliderWithLabel(
                 label: 'Right Margin',
-                value: settings.carouselMargin.right,
+                value: settings.gridMargin.right,
                 min: 0.0,
                 max: 50.0,
                 divisions: 50,
                 onChanged: (value) {
-                  settings.setCarouselMargin(EdgeInsets.fromLTRB(
-                    settings.carouselMargin.left,
-                    settings.carouselMargin.top,
+                  settings.setGridMargin(EdgeInsets.fromLTRB(
+                    settings.gridMargin.left,
+                    settings.gridMargin.top,
                     value,
-                    settings.carouselMargin.bottom,
+                    settings.gridMargin.bottom,
                   ));
                 },
               ),
 
-              // Carousel Padding
-              _buildSectionSubtitle('Carousel Padding'),
-
-              _buildSliderWithLabel(
-                label: 'Top Padding',
-                value: settings.carouselPadding.top,
-                min: 0.0,
-                max: 50.0,
-                divisions: 50,
+              // Center Last Row
+              SwitchListTile(
+                title: const Text('Center Last Row'),
+                subtitle:
+                    const Text('Center characters if last row is not full'),
+                value: settings.gridCenterLastRow,
                 onChanged: (value) {
-                  settings.setCarouselPadding(EdgeInsets.fromLTRB(
-                    settings.carouselPadding.left,
-                    value,
-                    settings.carouselPadding.right,
-                    settings.carouselPadding.bottom,
-                  ));
-                },
-              ),
-
-              _buildSliderWithLabel(
-                label: 'Bottom Padding',
-                value: settings.carouselPadding.bottom,
-                min: 0.0,
-                max: 50.0,
-                divisions: 50,
-                onChanged: (value) {
-                  settings.setCarouselPadding(EdgeInsets.fromLTRB(
-                    settings.carouselPadding.left,
-                    settings.carouselPadding.top,
-                    settings.carouselPadding.right,
-                    value,
-                  ));
-                },
-              ),
-
-              _buildSliderWithLabel(
-                label: 'Left Padding',
-                value: settings.carouselPadding.left,
-                min: 0.0,
-                max: 50.0,
-                divisions: 50,
-                onChanged: (value) {
-                  settings.setCarouselPadding(EdgeInsets.fromLTRB(
-                    value,
-                    settings.carouselPadding.top,
-                    settings.carouselPadding.right,
-                    settings.carouselPadding.bottom,
-                  ));
-                },
-              ),
-
-              _buildSliderWithLabel(
-                label: 'Right Padding',
-                value: settings.carouselPadding.right,
-                min: 0.0,
-                max: 50.0,
-                divisions: 50,
-                onChanged: (value) {
-                  settings.setCarouselPadding(EdgeInsets.fromLTRB(
-                    settings.carouselPadding.left,
-                    settings.carouselPadding.top,
-                    value,
-                    settings.carouselPadding.bottom,
-                  ));
+                  settings.setGridCenterLastRow(value);
                 },
               ),
             ],

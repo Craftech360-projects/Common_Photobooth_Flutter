@@ -81,17 +81,11 @@ class _LoadingScreenState extends State<LoadingScreen> {
         return;
       }
 
-      debugPrint('Processing image: ${provider.faceImagePath}');
-      debugPrint('File size: ${imageFile.lengthSync()} bytes');
-
       // Get participant details from provider
       final name = provider.name ?? '';
       final email = provider.email ?? '';
       final gender = provider.selectedGender;
       final characterId = provider.selectedCharacterId;
-
-      debugPrint(
-          'User details - Name: "$name", Email: "$email", Gender: "$gender", CharacterId: "$characterId"');
 
       // Check if Supabase is initialized
       if (SupabaseService.instance.isInitialized) {
@@ -99,15 +93,10 @@ class _LoadingScreenState extends State<LoadingScreen> {
         final userId = DateTime.now().millisecondsSinceEpoch.toString();
 
         // Upload image to Supabase
-        debugPrint('Uploading image to Supabase...');
         final imageUrl =
             await SupabaseService.instance.uploadImage(imageFile, userId);
 
         if (imageUrl != null) {
-          debugPrint('Image uploaded successfully. URL: $imageUrl');
-
-          // Store participant details
-          debugPrint('Storing participant details...');
           final participantId =
               await SupabaseService.instance.storeParticipantDetails(
             name: name,
@@ -118,8 +107,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
           );
 
           if (participantId != null) {
-            debugPrint('Participant details stored with ID: $participantId');
-
             // Store the captured image URL in the provider
             provider.setCapturedImageUrl(imageUrl);
 
@@ -199,6 +186,13 @@ class _LoadingScreenState extends State<LoadingScreen> {
     return Consumer2<LoadingScreenProvider, GlobalSettingsProvider>(
       builder: (context, loadingSettings, globalSettings, child) {
         return Scaffold(
+          appBar: AppBar(
+            leading: IconButton(
+              onPressed: () =>
+                  Navigator.pushNamed(context, AppRoutes.loadingScreenSettings),
+              icon: const Icon(Icons.star),
+            ),
+          ),
           body: Container(
             width: double.infinity,
             height: double.infinity,
@@ -260,17 +254,17 @@ class _LoadingScreenState extends State<LoadingScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.error_outline, color: Colors.red, size: 48),
-          SizedBox(height: 16),
+          const Icon(Icons.error_outline, color: Colors.red, size: 48),
+          const SizedBox(height: 16),
           Text(
             _errorMessage!,
-            style: TextStyle(color: Colors.white),
+            style: const TextStyle(color: Colors.white),
             textAlign: TextAlign.center,
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text('Go Back'),
+            child: const Text('Go Back'),
           ),
         ],
       ),
