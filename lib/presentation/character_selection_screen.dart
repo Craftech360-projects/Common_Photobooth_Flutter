@@ -347,64 +347,21 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen> {
 
             // Error message
             if (_showError)
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
+              const Padding(
+                padding: EdgeInsets.only(top: 8.0),
                 child: Text(
                   'Please select a character to continue',
                   style: TextStyle(
-                    color: Colors.red[700],
-                    fontSize: 16,
+                    color: Colors.red,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
 
-            // Next button
-            Padding(
-              padding: const EdgeInsets.only(bottom: 20.0),
-              child: ElevatedButton(
-                onPressed: () {
-                  if (_selectedCharacterId != null) {
-                    // Get the selected character from the list
-                    final characters = appProvider.selectedGender == 'male'
-                        ? context
-                            .read<CharacterSelectionProvider>()
-                            .maleCharacters
-                        : context
-                            .read<CharacterSelectionProvider>()
-                            .femaleCharacters;
-
-                    final selectedCharacter = characters.firstWhere(
-                      (character) => character.id == _selectedCharacterId,
-                      orElse: () => characters.first,
-                    );
-
-                    // Set the selected character in the provider with all required arguments
-                    appProvider.setCharacter(
-                      selectedCharacter.id,
-                      selectedCharacter.imagePath,
-                      selectedCharacter.isAsset,
-                    );
-
-                    // Navigate to the next screen
-                    Navigator.pushNamed(context, AppRoutes.faceCapture);
-                  } else {
-                    setState(() {
-                      _showError = true;
-                    });
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.yellow,
-                  minimumSize: const Size(200, 50),
-                ),
-                child: const Text(
-                  'Next',
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: Colors.black,
-                  ),
-                ),
-              ),
+            // Add the button with proper margin
+            Container(
+              margin: settings.buttonMargin,
+              child: _buildButton(settings, appProvider),
             ),
           ],
         ),
@@ -500,13 +457,12 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen> {
   Widget _buildButton(
       CharacterSelectionProvider settings, PhotoboothProvider appProvider) {
     if (settings.useImageButton && settings.buttonImagePath != null) {
-      // Image Button with padding
+      // Image Button
       return GestureDetector(
         onTap: () => _validateAndContinue(appProvider),
         child: Container(
           width: settings.buttonWidth,
           height: settings.buttonHeight,
-          padding: settings.buttonPadding,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
             border: settings.buttonHasBorder

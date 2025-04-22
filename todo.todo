@@ -20,7 +20,8 @@
 
 Global Settings
 * Change App Font.
-* Set default font size of titles as 22 and line height as 1 and FW as Regular
+* Set default font size of titles as 22 and line height as 1.2 and FW as Regular.
+* Set default padding and margins for buttons.
 
 Participant Details Screen
 * Title is missing in participant details. ✅
@@ -34,10 +35,10 @@ Character screen
 * Title positioning in Character Screen. ✅
 * Border Radius not properly getting applied. ✅
 * Add GridView Layout. ✅
-* Add Button Margins.
+* Add Button Margins. ✅
+* Button BR is missing. ✅
+* In Grid Layout 2/1 is not working.
 * Add Controls for Main Axis Alignment.
-* Set default padding for button.
-* Button BR is missing.
 
 Capture Screen
 * Btn FW, is missing in capture screen.

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:camera/camera.dart';
+import 'package:camera_macos/camera_macos.dart';
 import 'package:camera_platform_interface/camera_platform_interface.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -35,26 +36,44 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
     fps: 15,
     videoBitrate: 200000,
     audioBitrate: 32000,
-    enableAudio: true,
+    enableAudio: false,
   );
+
   StreamSubscription<CameraErrorEvent>? _errorStreamSubscription;
   StreamSubscription<CameraClosingEvent>? _cameraClosingStreamSubscription;
+
+  // macOS camera variables
+  final GlobalKey _cameraKey = GlobalKey();
+  CameraMacOSController? _macOSController;
+  List<CameraMacOSDevice> _macOSVideoDevices = [];
+  final List<CameraMacOSDevice> _macOSAudioDevices = [];
+  String? _selectedVideoDeviceId;
+  String? _selectedAudioDeviceId;
+  bool _isMacOS = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsFlutterBinding.ensureInitialized();
+
+    // Check platform
+    _isMacOS = Platform.isMacOS;
+
     // Initialize camera after the widget is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _fetchCameras() // Fetch available cameras on init.
-          .then((_) => _initializeCamera()) // Initialize first camera.
-          .catchError((dynamic error) {
-        if (mounted) {
-          setState(() {
-            _cameraInfo = 'Failed to get cameras: $error';
-          });
-        }
-      });
+      if (_isMacOS) {
+        _initializeMacOSCamera();
+      } else {
+        _fetchCameras() // Fetch available cameras on init.
+            .then((_) => _initializeCamera()) // Initialize first camera.
+            .catchError((dynamic error) {
+          if (mounted) {
+            setState(() {
+              _cameraInfo = 'Failed to get cameras: $error';
+            });
+          }
+        });
+      }
     });
   }
 
@@ -73,6 +92,35 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
         selectedIndex != _cameraIndex) {
       // Switch to the new camera
       _switchCamera(selectedIndex);
+    }
+  }
+
+  // macOS camera initialization
+  Future<void> _initializeMacOSCamera() async {
+    try {
+      // List available video devices
+      _macOSVideoDevices = await CameraMacOS.instance.listDevices(
+        deviceType: CameraMacOSDeviceType.video,
+      );
+
+      if (_macOSVideoDevices.isNotEmpty) {
+        _selectedVideoDeviceId = _macOSVideoDevices.first.deviceId;
+      }
+
+      if (_macOSAudioDevices.isNotEmpty) {
+        _selectedAudioDeviceId = _macOSAudioDevices.first.deviceId;
+      }
+
+      setState(() {
+        _cameraInitialized = true;
+      });
+    } on Exception catch (e) {
+      debugPrint('Error initializing macOS camera: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Camera error: $e')),
+        );
+      }
     }
   }
 
@@ -326,6 +374,7 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
               Navigator.pushNamed(context, AppRoutes.faceCaptureSettings),
           icon: const Icon(Icons.star),
         ),
+
         //   // actions: [
         //   //   // Add camera switch button if there are multiple cameras
         //   //   if (_cameras.length > 1)
@@ -366,32 +415,74 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
                 ),
               ),
 
-            Container(
-              decoration: settings.showPreviewBorder
-                  ? BoxDecoration(
-                      borderRadius:
-                          BorderRadius.circular(settings.previewBorderRadius),
-                      border: Border.all(
-                        color: settings.previewBorderColor,
-                        width: settings.previewBorderWidth,
-                      ),
-                    )
-                  : null,
-              width: settings.previewWidth,
-              height: settings.previewHeight,
-              child: ClipRRect(
-                borderRadius:
-                    BorderRadius.circular(settings.previewBorderRadius),
-                child: AspectRatio(
-                    aspectRatio: settings.previewWidth / settings.previewHeight,
-                    child: _buildPreview()),
-              ),
-            ),
+            // Windows Preview
+            // Container(
+            //   decoration: settings.showPreviewBorder
+            //       ? BoxDecoration(
+            //           borderRadius:
+            //               BorderRadius.circular(settings.previewBorderRadius),
+            //           border: Border.all(
+            //             color: settings.previewBorderColor,
+            //             width: settings.previewBorderWidth,
+            //           ),
+            //         )
+            //       : null,
+            //   width: settings.previewWidth,
+            //   height: settings.previewHeight,
+            //   child: ClipRRect(
+            //     borderRadius:
+            //         BorderRadius.circular(settings.previewBorderRadius),
+            //     child: AspectRatio(
+            //         aspectRatio: settings.previewWidth / settings.previewHeight,
+            //         child: _buildPreview()),
+            //   ),
+            // ),
+
+            // macOS Preview
+            _buildCameraPreview(settings),
 
             // Capture Button
             SizedBox(height: settings.buttonMarginTop),
             _buildCaptureButton(settings),
           ],
+        ),
+      ),
+    );
+  }
+
+  // MacOS Preview
+  Widget _buildCameraPreview(FaceCaptureProvider settings) {
+    if (!_cameraInitialized) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+
+    return Container(
+      width: settings.previewWidth,
+      height: settings.previewHeight,
+      decoration: settings.showPreviewBorder
+          ? BoxDecoration(
+              borderRadius: BorderRadius.circular(settings.previewBorderRadius),
+              border: Border.all(
+                color: settings.previewBorderColor,
+                width: settings.previewBorderWidth,
+              ),
+            )
+          : null,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(settings.previewBorderRadius),
+        child: CameraMacOSView(
+          key: _cameraKey,
+          deviceId: _selectedVideoDeviceId,
+          audioDeviceId: _selectedAudioDeviceId,
+          cameraMode: CameraMacOSMode.photo,
+          fit: BoxFit.cover,
+          onCameraInizialized: (controller) {
+            setState(() {
+              _macOSController = controller;
+            });
+          },
         ),
       ),
     );

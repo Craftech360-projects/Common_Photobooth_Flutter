@@ -780,6 +780,15 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                 settings.setButtonStyle(fontSize: value);
               },
             ),
+            _buildSliderWithLabel(
+              label: 'Button Border Radius',
+              value: settings.buttonBorderRadius,
+              min: 0,
+              max: 50,
+              divisions: 50,
+              onChanged: (value) =>
+                  settings.setButtonStyle(borderRadius: value),
+            ),
 
             DropdownButtonFormField<FontWeight>(
               decoration: const InputDecoration(
@@ -1006,21 +1015,7 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                 ],
               ),
             ],
-            const SizedBox(height: 16),
-            TextFormField(
-              initialValue: settings.buttonMarginTop.toString(),
-              decoration: const InputDecoration(
-                labelText: 'Button Top Margin',
-                border: OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.number,
-              onChanged: (value) {
-                final margin = double.tryParse(value);
-                if (margin != null) {
-                  settings.setButtonMarginTop(margin);
-                }
-              },
-            ),
+
             const SizedBox(height: 16),
             SwitchListTile(
               title: const Text('Use Image Button'),
