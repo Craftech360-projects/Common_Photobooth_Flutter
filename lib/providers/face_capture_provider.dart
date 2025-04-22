@@ -5,12 +5,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class FaceCaptureProvider extends ChangeNotifier {
   // Title settings
-  String _titleText = 'Capture Your Face';
+  String _titleText = 'Smile Please... 😃';
   double _titleFontSize = 32.0;
-  FontWeight _titleFontWeight = FontWeight.bold;
+  FontWeight _titleFontWeight = FontWeight.w500;
   Color _titleColor = Colors.white;
-  double _titlePadding = 20.0;
+  EdgeInsets _titlePadding = const EdgeInsets.all(10.0);
   bool _showTitle = true;
+  double _titleLineHeight = 1.2;
+  double _titleOpacity = 1.0;
+  TextAlign _titleAlignment = TextAlign.center;
 
   // Camera preview settings
   double _previewWidth = 350.0;
@@ -19,23 +22,23 @@ class FaceCaptureProvider extends ChangeNotifier {
   Color _previewBorderColor = Colors.amber;
   double _previewBorderWidth = 5.0;
   bool _showPreviewBorder = true;
-  // Replace macOS-specific settings with Windows-specific settings
-  // String _pictureFormat = 'jpeg'; // or 'tiff', 'heic'
-  // String _pictureResolution = 'max'; // or 'medium', 'low'
+  EdgeInsets _previewMargin = const EdgeInsets.all(0.0);
 
   // Windows camera settings
   String _pictureFormat = 'jpeg'; // Windows camera typically uses jpeg
   final String _pictureQuality = 'high'; // high, medium, low
 
   // Button settings
-  String _buttonText = 'CAPTURE';
-  double _buttonFontSize = 30.0;
+  String _buttonText = 'Capture';
+  double _buttonFontSize = 18.0;
+  FontWeight _buttonFontWeight = FontWeight.w500;
   Color _buttonColor = Colors.white;
   Color _buttonTextColor = Colors.black;
   double _buttonWidth = 200.0;
   double _buttonHeight = 60.0;
   double _buttonBorderRadius = 40.0;
-  double _buttonMarginTop = 40.0;
+  EdgeInsets _buttonMargin = const EdgeInsets.only(top: 40.0);
+  EdgeInsets _buttonPadding = const EdgeInsets.all(16.0);
   bool _buttonHasBorder = false;
   Color _buttonBorderColor = Colors.amber;
   double _buttonBorderWidth = 2.0;
@@ -58,8 +61,14 @@ class FaceCaptureProvider extends ChangeNotifier {
   double get titleFontSize => _titleFontSize;
   FontWeight get titleFontWeight => _titleFontWeight;
   Color get titleColor => _titleColor;
-  double get titlePadding => _titlePadding;
   bool get showTitle => _showTitle;
+  double get titleLineHeight => _titleLineHeight;
+  double get titleOpacity => _titleOpacity;
+  TextAlign get titleAlignment => _titleAlignment;
+  EdgeInsets get titlePadding => _titlePadding;
+  EdgeInsets get previewMargin => _previewMargin;
+  EdgeInsets get buttonMargin => _buttonMargin;
+  EdgeInsets get buttonPadding => _buttonPadding;
 
   double get previewWidth => _previewWidth;
   double get previewHeight => _previewHeight;
@@ -70,12 +79,12 @@ class FaceCaptureProvider extends ChangeNotifier {
 
   String get buttonText => _buttonText;
   double get buttonFontSize => _buttonFontSize;
+  FontWeight get buttonFontWeight => _buttonFontWeight;
   Color get buttonColor => _buttonColor;
   Color get buttonTextColor => _buttonTextColor;
   double get buttonWidth => _buttonWidth;
   double get buttonHeight => _buttonHeight;
   double get buttonBorderRadius => _buttonBorderRadius;
-  double get buttonMarginTop => _buttonMarginTop;
   bool get buttonHasBorder => _buttonHasBorder;
   Color get buttonBorderColor => _buttonBorderColor;
   double get buttonBorderWidth => _buttonBorderWidth;
@@ -124,8 +133,44 @@ class FaceCaptureProvider extends ChangeNotifier {
     _saveSettings();
   }
 
-  void setTitlePadding(double padding) {
+  void setTitleLineHeight(double height) {
+    _titleLineHeight = height;
+    notifyListeners();
+    _saveSettings();
+  }
+
+  void setTitleOpacity(double opacity) {
+    _titleOpacity = opacity;
+    notifyListeners();
+    _saveSettings();
+  }
+
+  void setTitleAlignment(TextAlign alignment) {
+    _titleAlignment = alignment;
+    notifyListeners();
+    _saveSettings();
+  }
+
+  void setTitlePadding(EdgeInsets padding) {
     _titlePadding = padding;
+    notifyListeners();
+    _saveSettings();
+  }
+
+  void setPreviewMargin(EdgeInsets margin) {
+    _previewMargin = margin;
+    notifyListeners();
+    _saveSettings();
+  }
+
+  void setButtonMargin(EdgeInsets margin) {
+    _buttonMargin = margin;
+    notifyListeners();
+    _saveSettings();
+  }
+
+  void setButtonPadding(EdgeInsets padding) {
+    _buttonPadding = padding;
     notifyListeners();
     _saveSettings();
   }
@@ -184,6 +229,12 @@ class FaceCaptureProvider extends ChangeNotifier {
     _saveSettings();
   }
 
+  void setButtonFontWeight(FontWeight weight) {
+    _buttonFontWeight = weight;
+    notifyListeners();
+    _saveSettings();
+  }
+
   void setButtonColor(Color color) {
     _buttonColor = color;
     notifyListeners();
@@ -210,12 +261,6 @@ class FaceCaptureProvider extends ChangeNotifier {
 
   void setButtonBorderRadius(double radius) {
     _buttonBorderRadius = radius;
-    notifyListeners();
-    _saveSettings();
-  }
-
-  void setButtonMarginTop(double margin) {
-    _buttonMarginTop = margin;
     notifyListeners();
     _saveSettings();
   }
@@ -284,8 +329,21 @@ class FaceCaptureProvider extends ChangeNotifier {
       _titleFontWeight = FontWeight
           .values[settings['titleFontWeight'] ?? _titleFontWeight.index];
       _titleColor = Color(settings['titleColor'] ?? _titleColor.value);
-      _titlePadding = settings['titlePadding'] ?? _titlePadding;
+
+      if (settings['titlePadding'] is Map) {
+        final paddingMap = settings['titlePadding'] as Map<String, dynamic>;
+        _titlePadding = EdgeInsets.fromLTRB(
+          (paddingMap['left'] as num?)?.toDouble() ?? 10.0,
+          (paddingMap['top'] as num?)?.toDouble() ?? 10.0,
+          (paddingMap['right'] as num?)?.toDouble() ?? 10.0,
+          (paddingMap['bottom'] as num?)?.toDouble() ?? 10.0,
+        );
+      }
+
       _showTitle = settings['showTitle'] ?? _showTitle;
+      _titleLineHeight = settings['titleLineHeight'] ?? _titleLineHeight;
+      _titleOpacity = settings['titleOpacity'] ?? _titleOpacity;
+      _titleAlignment = TextAlign.values[settings['titleAlignment'] ?? 2];
 
       // Camera preview settings
       _previewWidth = settings['previewWidth'] ?? _previewWidth;
@@ -297,10 +355,21 @@ class FaceCaptureProvider extends ChangeNotifier {
       _previewBorderWidth =
           settings['previewBorderWidth'] ?? _previewBorderWidth;
       _showPreviewBorder = settings['showPreviewBorder'] ?? _showPreviewBorder;
+      if (settings['previewMargin'] is Map) {
+        final marginMap = settings['previewMargin'] as Map<String, dynamic>;
+        _previewMargin = EdgeInsets.fromLTRB(
+          (marginMap['left'] as num?)?.toDouble() ?? 0.0,
+          (marginMap['top'] as num?)?.toDouble() ?? 0.0,
+          (marginMap['right'] as num?)?.toDouble() ?? 0.0,
+          (marginMap['bottom'] as num?)?.toDouble() ?? 0.0,
+        );
+      }
 
       // Button settings
       _buttonText = settings['buttonText'] ?? _buttonText;
       _buttonFontSize = settings['buttonFontSize'] ?? _buttonFontSize;
+      _buttonFontWeight = FontWeight
+         .values[settings['buttonFontWeight']?? _buttonFontWeight.index];
       _buttonColor = Color(settings['buttonColor'] ?? _buttonColor.value);
       _buttonTextColor =
           Color(settings['buttonTextColor'] ?? _buttonTextColor.value);
@@ -308,7 +377,26 @@ class FaceCaptureProvider extends ChangeNotifier {
       _buttonHeight = settings['buttonHeight'] ?? _buttonHeight;
       _buttonBorderRadius =
           settings['buttonBorderRadius'] ?? _buttonBorderRadius;
-      _buttonMarginTop = settings['buttonMarginTop'] ?? _buttonMarginTop;
+      if (settings['buttonMargin'] is Map) {
+        final marginMap = settings['buttonMargin'] as Map<String, dynamic>;
+        _buttonMargin = EdgeInsets.fromLTRB(
+          (marginMap['left'] as num?)?.toDouble() ?? 0.0,
+          (marginMap['top'] as num?)?.toDouble() ?? 20.0,
+          (marginMap['right'] as num?)?.toDouble() ?? 0.0,
+          (marginMap['bottom'] as num?)?.toDouble() ?? 0.0,
+        );
+      }
+
+      // Fix the button padding initialization
+      if (settings['buttonPadding'] is Map) {
+        final paddingMap = settings['buttonPadding'] as Map<String, dynamic>;
+        _buttonPadding = EdgeInsets.fromLTRB(
+          (paddingMap['left'] as num?)?.toDouble() ?? 16.0,
+          (paddingMap['top'] as num?)?.toDouble() ?? 8.0,
+          (paddingMap['right'] as num?)?.toDouble() ?? 16.0,
+          (paddingMap['bottom'] as num?)?.toDouble() ?? 8.0,
+        );
+      }
       _buttonHasBorder = settings['buttonHasBorder'] ?? _buttonHasBorder;
       _buttonBorderColor =
           Color(settings['buttonBorderColor'] ?? _buttonBorderColor.value);
@@ -344,8 +432,16 @@ class FaceCaptureProvider extends ChangeNotifier {
       'titleFontSize': _titleFontSize,
       'titleFontWeight': _titleFontWeight.index,
       'titleColor': _titleColor.value,
-      'titlePadding': _titlePadding,
+      'titlePadding': {
+        'left': _titlePadding.left,
+        'top': _titlePadding.top,
+        'right': _titlePadding.right,
+        'bottom': _titlePadding.bottom,
+      },
       'showTitle': _showTitle,
+      'titleLineHeight': _titleLineHeight,
+      'titleOpacity': _titleOpacity,
+      'titleAlignment': _titleAlignment.index,
 
       // Camera preview settings
       'previewWidth': _previewWidth,
@@ -354,16 +450,34 @@ class FaceCaptureProvider extends ChangeNotifier {
       'previewBorderColor': _previewBorderColor.value,
       'previewBorderWidth': _previewBorderWidth,
       'showPreviewBorder': _showPreviewBorder,
+      'previewMargin': {
+        'left': _previewMargin.left,
+        'top': _previewMargin.top,
+        'right': _previewMargin.right,
+        'bottom': _previewMargin.bottom,
+      },
 
       // Button settings
       'buttonText': _buttonText,
       'buttonFontSize': _buttonFontSize,
+      'buttonFontWeight': _buttonFontWeight.index,
       'buttonColor': _buttonColor.value,
       'buttonTextColor': _buttonTextColor.value,
       'buttonWidth': _buttonWidth,
       'buttonHeight': _buttonHeight,
       'buttonBorderRadius': _buttonBorderRadius,
-      'buttonMarginTop': _buttonMarginTop,
+      'buttonPadding': {
+        'left': _buttonPadding.left,
+        'top': _buttonPadding.top,
+        'right': _buttonPadding.right,
+        'bottom': _buttonPadding.bottom,
+      },
+      'buttonMargin': {
+        'left': _buttonMargin.left,
+        'top': _buttonMargin.top,
+        'right': _buttonMargin.right,
+        'bottom': _buttonMargin.bottom,
+      },
       'buttonHasBorder': _buttonHasBorder,
       'buttonBorderColor': _buttonBorderColor.value,
       'buttonBorderWidth': _buttonBorderWidth,

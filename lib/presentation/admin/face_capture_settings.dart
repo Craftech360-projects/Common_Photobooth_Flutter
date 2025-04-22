@@ -100,22 +100,79 @@ class _FaceCaptureSettingsState extends State<FaceCaptureSettings> {
                       label: 'Title Font Weight',
                       value: settings.titleFontWeight,
                       items: {
-                        FontWeight.normal: 'Normal',
-                        FontWeight.bold: 'Bold',
+                        FontWeight.w100: 'Thin',
+                        FontWeight.w400: 'Regular',
+                        FontWeight.w500: 'Medium',
+                        FontWeight.w700: 'Bold',
+                        FontWeight.w900: 'Extra Bold',
                       },
                       onChanged: (value) => settings.setTitleFontWeight(value!),
+                    ),
+                    _buildSlider(
+                      label: 'Line Height',
+                      value: settings.titleLineHeight,
+                      min: 1.0,
+                      max: 2.0,
+                      onChanged: (value) => settings.setTitleLineHeight(value),
+                    ),
+                    _buildSlider(
+                      label: 'Text Opacity',
+                      value: settings.titleOpacity,
+                      min: 0.0,
+                      max: 1.0,
+                      onChanged: (value) => settings.setTitleOpacity(value),
+                    ),
+                    _buildDropdown<TextAlign>(
+                      label: 'Text Alignment',
+                      value: settings.titleAlignment,
+                      items: {
+                        TextAlign.left: 'Left',
+                        TextAlign.center: 'Center',
+                        TextAlign.right: 'Right',
+                      },
+                      onChanged: (value) => settings.setTitleAlignment(value!),
+                    ),
+                    _buildSectionTitle('Title Padding'),
+                    _buildSlider(
+                      label: 'Left Padding',
+                      value: settings.titlePadding.left,
+                      min: 0.0,
+                      max: 50.0,
+                      onChanged: (value) => settings.setTitlePadding(
+                        settings.titlePadding.copyWith(left: value),
+                      ),
+                    ),
+                    _buildSlider(
+                      label: 'Top Padding',
+                      value: settings.titlePadding.top,
+                      min: 0.0,
+                      max: 50.0,
+                      onChanged: (value) => settings.setTitlePadding(
+                        settings.titlePadding.copyWith(top: value),
+                      ),
+                    ),
+                    _buildSlider(
+                      label: 'Right Padding',
+                      value: settings.titlePadding.right,
+                      min: 0.0,
+                      max: 50.0,
+                      onChanged: (value) => settings.setTitlePadding(
+                        settings.titlePadding.copyWith(right: value),
+                      ),
+                    ),
+                    _buildSlider(
+                      label: 'Bottom Padding',
+                      value: settings.titlePadding.bottom,
+                      min: 0.0,
+                      max: 50.0,
+                      onChanged: (value) => settings.setTitlePadding(
+                        settings.titlePadding.copyWith(bottom: value),
+                      ),
                     ),
                     _buildColorPicker(
                       label: 'Title Color',
                       color: settings.titleColor,
                       onColorChanged: (color) => settings.setTitleColor(color),
-                    ),
-                    _buildSlider(
-                      label: 'Title Padding',
-                      value: settings.titlePadding,
-                      min: 0.0,
-                      max: 50.0,
-                      onChanged: (value) => settings.setTitlePadding(value),
                     ),
                   ],
 
@@ -146,9 +203,17 @@ class _FaceCaptureSettingsState extends State<FaceCaptureSettings> {
                   _buildSlider(
                     label: 'Preview Height',
                     value: settings.previewHeight,
-                    min: 300.0,
-                    max: 800.0,
+                    min: 200.0,
+                    max: 600.0,
                     onChanged: (value) => settings.setPreviewHeight(value),
+                  ),
+                  _buildSlider(
+                    label: 'Border Radius',
+                    value: settings.previewBorderRadius,
+                    min: 0.0,
+                    max: 50.0,
+                    onChanged: (value) =>
+                        settings.setPreviewBorderRadius(value),
                   ),
                   SwitchListTile(
                     title: const Text('Show Preview Border'),
@@ -156,14 +221,6 @@ class _FaceCaptureSettingsState extends State<FaceCaptureSettings> {
                     onChanged: (value) => settings.setShowPreviewBorder(value),
                   ),
                   if (settings.showPreviewBorder) ...[
-                    _buildSlider(
-                      label: 'Preview Border Radius',
-                      value: settings.previewBorderRadius,
-                      min: 0.0,
-                      max: 50.0,
-                      onChanged: (value) =>
-                          settings.setPreviewBorderRadius(value),
-                    ),
                     _buildColorPicker(
                       label: 'Preview Border Color',
                       color: settings.previewBorderColor,
@@ -173,12 +230,50 @@ class _FaceCaptureSettingsState extends State<FaceCaptureSettings> {
                     _buildSlider(
                       label: 'Preview Border Width',
                       value: settings.previewBorderWidth,
-                      min: 1.0,
+                      min: 0.0,
                       max: 10.0,
                       onChanged: (value) =>
                           settings.setPreviewBorderWidth(value),
                     ),
                   ],
+
+                  _buildSectionTitle('Preview Margins'),
+                  _buildSlider(
+                    label: 'Left Margin',
+                    value: settings.previewMargin.left,
+                    min: 0.0,
+                    max: 50.0,
+                    onChanged: (value) => settings.setPreviewMargin(
+                      settings.previewMargin.copyWith(left: value),
+                    ),
+                  ),
+                  _buildSlider(
+                    label: 'Top Margin',
+                    value: settings.previewMargin.top,
+                    min: 0.0,
+                    max: 50.0,
+                    onChanged: (value) => settings.setPreviewMargin(
+                      settings.previewMargin.copyWith(top: value),
+                    ),
+                  ),
+                  _buildSlider(
+                    label: 'Right Margin',
+                    value: settings.previewMargin.right,
+                    min: 0.0,
+                    max: 50.0,
+                    onChanged: (value) => settings.setPreviewMargin(
+                      settings.previewMargin.copyWith(right: value),
+                    ),
+                  ),
+                  _buildSlider(
+                    label: 'Bottom Margin',
+                    value: settings.previewMargin.bottom,
+                    min: 0.0,
+                    max: 50.0,
+                    onChanged: (value) => settings.setPreviewMargin(
+                      settings.previewMargin.copyWith(bottom: value),
+                    ),
+                  ),
 
                   const Divider(),
 
@@ -223,6 +318,19 @@ class _FaceCaptureSettingsState extends State<FaceCaptureSettings> {
                       max: 36.0,
                       onChanged: (value) => settings.setButtonFontSize(value),
                     ),
+                    _buildDropdown<FontWeight>(
+                      label: 'Button Font Weight',
+                      value: settings.buttonFontWeight,
+                      items: {
+                        FontWeight.w100: 'Thin',
+                        FontWeight.w400: 'Regular',
+                        FontWeight.w500: 'Medium',
+                        FontWeight.w700: 'Bold',
+                        FontWeight.w900: 'Extra Bold',
+                      },
+                      onChanged: (value) =>
+                          settings.setButtonFontWeight(value!),
+                    ),
                     _buildColorPicker(
                       label: 'Button Color',
                       color: settings.buttonColor,
@@ -256,12 +364,80 @@ class _FaceCaptureSettingsState extends State<FaceCaptureSettings> {
                     max: 50.0,
                     onChanged: (value) => settings.setButtonBorderRadius(value),
                   ),
+                  _buildSectionTitle('Button Margins'),
                   _buildSlider(
-                    label: 'Button Top Margin',
-                    value: settings.buttonMarginTop,
+                    label: 'Left Margin',
+                    value: settings.buttonMargin.left,
                     min: 0.0,
                     max: 100.0,
-                    onChanged: (value) => settings.setButtonMarginTop(value),
+                    onChanged: (value) => settings.setButtonMargin(
+                      settings.buttonMargin.copyWith(left: value),
+                    ),
+                  ),
+                  _buildSlider(
+                    label: 'Top Margin',
+                    value: settings.buttonMargin.top,
+                    min: 0.0,
+                    max: 100.0,
+                    onChanged: (value) => settings.setButtonMargin(
+                      settings.buttonMargin.copyWith(top: value),
+                    ),
+                  ),
+                  _buildSlider(
+                    label: 'Right Margin',
+                    value: settings.buttonMargin.right,
+                    min: 0.0,
+                    max: 100.0,
+                    onChanged: (value) => settings.setButtonMargin(
+                      settings.buttonMargin.copyWith(right: value),
+                    ),
+                  ),
+                  _buildSlider(
+                    label: 'Bottom Margin',
+                    value: settings.buttonMargin.bottom,
+                    min: 0.0,
+                    max: 100.0,
+                    onChanged: (value) => settings.setButtonMargin(
+                      settings.buttonMargin.copyWith(bottom: value),
+                    ),
+                  ),
+
+                  _buildSectionTitle('Button Padding'),
+                  _buildSlider(
+                    label: 'Left Padding',
+                    value: settings.buttonPadding.left,
+                    min: 0.0,
+                    max: 50.0,
+                    onChanged: (value) => settings.setButtonPadding(
+                      settings.buttonPadding.copyWith(left: value),
+                    ),
+                  ),
+                  _buildSlider(
+                    label: 'Top Padding',
+                    value: settings.buttonPadding.top,
+                    min: 0.0,
+                    max: 50.0,
+                    onChanged: (value) => settings.setButtonPadding(
+                      settings.buttonPadding.copyWith(top: value),
+                    ),
+                  ),
+                  _buildSlider(
+                    label: 'Right Padding',
+                    value: settings.buttonPadding.right,
+                    min: 0.0,
+                    max: 50.0,
+                    onChanged: (value) => settings.setButtonPadding(
+                      settings.buttonPadding.copyWith(right: value),
+                    ),
+                  ),
+                  _buildSlider(
+                    label: 'Bottom Padding',
+                    value: settings.buttonPadding.bottom,
+                    min: 0.0,
+                    max: 50.0,
+                    onChanged: (value) => settings.setButtonPadding(
+                      settings.buttonPadding.copyWith(bottom: value),
+                    ),
                   ),
                   SwitchListTile(
                     title: const Text('Button Has Border'),

@@ -41,17 +41,21 @@ Character screen
 * Add Controls for Main Axis Alignment.
 
 Capture Screen
-* Btn FW, is missing in capture screen.
+* Title Font Weight, Opacity, Line height, Padding Controls, Text Alignment. ✅
+* Margins for Preview. ✅
+* Keep BR out of border for Preview. ✅
+* Btn FW, is missing in capture screen. ✅
+* Button Margins and Padding. ✅
 * Not able to choose precise 22.0 for title size
-* More controls for Title is needed FW, Line Height, Text Opacity, Text Align, Margins
 * Add Main Axis Alignment control
-* Margin Properties needed for Camera Preview
+* Properly dispose camera.
 
 Loading Screen
 * Not able to choose 22.0 for Title FSize
-* Add FW variations, Line Height, Text Align, Opacity, Margins for title
+* Add FW variations, Line Height, Text Align, Opacity, Padding for title
 * Properly display the Color Picker as Dialog
 * Add Loader Margins
+* Make Sure the loader asset is saved to preferences and it will load even when app restarts.
 
 Output Screen
 * Title Margins, FW, LH, Txt Align

@@ -1,12 +1,15 @@
+// ignore_for_file: unused_field
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
-import 'package:photobooth_flutter/core/themes/app_colors.dart';
+import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:photobooth_flutter/api/faceswap_api.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/providers/loading_screen_provider.dart';
 import 'package:photobooth_flutter/providers/photobooth_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
+import 'package:photobooth_flutter/services/comfy_api_service.dart';
 import 'package:photobooth_flutter/services/supabase_service.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
@@ -19,7 +22,7 @@ class LoadingScreen extends StatefulWidget {
 }
 
 class _LoadingScreenState extends State<LoadingScreen> {
-  VideoPlayerController? _videoController;
+  VideoPlayerController? _controller; // Make it nullable
   bool _isInitialized = false;
   bool _isProcessing = true;
   String? _errorMessage;
@@ -28,7 +31,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
   void initState() {
     super.initState();
     _initializeLoader();
-    // Start processing the image after the loader is initialized
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _processImage();
     });
@@ -43,9 +45,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
         settings.loaderFilePath != null) {
       try {
         await _initializeVideoPlayer(settings);
-      } catch (e) {
+      } on Exception catch (e) {
         debugPrint('Error initializing video player: $e');
-        // Continue without video if initialization fails
       }
     }
 
@@ -86,33 +87,117 @@ class _LoadingScreenState extends State<LoadingScreen> {
       final email = provider.email ?? '';
       final gender = provider.selectedGender;
       final characterId = provider.selectedCharacterId;
+      final characterImagePath = provider.characterImagePath;
 
       // Check if Supabase is initialized
       if (SupabaseService.instance.isInitialized) {
         // Generate a unique user ID
         final userId = DateTime.now().millisecondsSinceEpoch.toString();
 
-        // Upload image to Supabase
-        final imageUrl =
+        // Upload face image to Supabase
+        final faceImageUrl =
             await SupabaseService.instance.uploadImage(imageFile, userId);
 
-        if (imageUrl != null) {
+        if (faceImageUrl != null) {
+          // Store participant details in Supabase
           final participantId =
               await SupabaseService.instance.storeParticipantDetails(
             name: name,
             email: email,
             gender: gender,
             characterId: characterId,
-            imageUrl: imageUrl,
+            imageUrl: faceImageUrl,
           );
 
           if (participantId != null) {
-            // Store the captured image URL in the provider
-            provider.setCapturedImageUrl(imageUrl);
+            // Get character image URL
+            String? characterImageUrl;
+            if (provider.isCharacterAsset == true &&
+                characterImagePath != null) {
+              // For asset images, we need to upload them to Supabase first
+              final assetBytes = await rootBundle.load(characterImagePath);
+              final tempDir = await getTemporaryDirectory();
+              final tempFile =
+                  File('${tempDir.path}/character_$characterId.png');
+              await tempFile.writeAsBytes(assetBytes.buffer.asUint8List());
 
-            // Navigate to the output screen
-            if (mounted) {
-              Navigator.pushReplacementNamed(context, AppRoutes.swappedFace);
+              characterImageUrl = await SupabaseService.instance.uploadImage(
+                tempFile,
+                'character_$characterId',
+              );
+            } else if (characterImagePath != null) {
+              // For file images, upload directly
+              characterImageUrl = await SupabaseService.instance.uploadImage(
+                File(characterImagePath),
+                'character_$characterId',
+              );
+            }
+
+            if (characterImageUrl == null) {
+              setState(() {
+                _isProcessing = false;
+                _errorMessage = 'Failed to upload character image';
+              });
+              return;
+            }
+
+            // Initialize ComfyAPI service if not already initialized
+            if (!ComfyApiService.isInitialized) {
+              await ComfyApiService.initialize(
+                apiUrl: "http://213.173.110.102:15539",
+              );
+            }
+
+            // Load and prepare the workflow
+            final workflow = await FaceswapWorkflow.getWorkflow();
+
+            // Update image URLs in the workflow
+            workflow.updateImageUrls(
+              sourceImageUrl: characterImageUrl,
+              targetImageUrl: faceImageUrl,
+            );
+
+            // Update refresh trigger with a random value
+            final refreshTrigger = DateTime.now().millisecondsSinceEpoch;
+            workflow.updateRefreshTrigger(refreshTrigger);
+
+            // Send workflow to backend
+            if (ComfyApiService.isInitialized) {
+              try {
+                final result = await ComfyApiService.instance.sendWorkflow(
+                  workflow: workflow,
+                );
+
+                if (result['status'] == 'success') {
+                  final promptId = result['prompt_id'];
+                  debugPrint(
+                      'Workflow sent successfully with prompt ID: $promptId');
+
+                  // Here you would typically poll for results or wait for a webhook
+                  // For now, we'll just update the UI
+                  provider.setCapturedImageUrl(result['image_url']);
+
+                  // Navigate to output screen
+                  await Navigator.of(context)
+                      .pushReplacementNamed(AppRoutes.swappedFace);
+                } else {
+                  setState(() {
+                    _isProcessing = false;
+                    _errorMessage =
+                        'Failed to process image: ${result['message']}';
+                  });
+                }
+              } on Exception catch (e) {
+                setState(() {
+                  _isProcessing = false;
+                  _errorMessage = 'Error sending workflow: $e';
+                });
+              }
+            } else {
+              setState(() {
+                _isProcessing = false;
+                _errorMessage = 'ComfyAPI service not initialized';
+              });
             }
           } else {
             setState(() {
@@ -136,10 +221,10 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
         // Navigate to the output screen
         if (mounted) {
-          Navigator.pushReplacementNamed(context, AppRoutes.swappedFace);
+          await Navigator.pushReplacementNamed(context, AppRoutes.swappedFace);
         }
       }
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('Error processing image: $e');
       setState(() {
         _isProcessing = false;
@@ -154,30 +239,33 @@ class _LoadingScreenState extends State<LoadingScreen> {
     try {
       if (settings.isLoaderFileAsset) {
         // For asset videos
-        _videoController = VideoPlayerController.asset(
-          settings.loaderFilePath!,
-          videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
-        );
+        _controller = VideoPlayerController.asset(settings.loaderFilePath!,
+            videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true));
+        _controller?.addListener(() {
+          setState(() {});
+        });
+        await _controller?.setLooping(true);
+        await _controller?.initialize().then((_) => setState(() {}));
+        await _controller?.play();
       } else {
         // For file videos
-        _videoController = VideoPlayerController.file(
+        _controller = VideoPlayerController.file(
           File(settings.loaderFilePath!),
           videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
         );
       }
 
-      await _videoController!.initialize();
-      await _videoController!.setLooping(true);
-      await _videoController!.play();
-    } catch (e) {
+      await _controller?.setLooping(true);
+      await _controller?.initialize().then((_) => setState(() {}));
+      await _controller?.play();
+    } on Exception catch (e) {
       debugPrint('Error initializing video player: $e');
-      _videoController = null; // Set to null so we can show fallback
     }
   }
 
   @override
   void dispose() {
-    _videoController?.dispose();
+    _controller?.dispose(); // Add null check
     super.dispose();
   }
 
@@ -186,13 +274,13 @@ class _LoadingScreenState extends State<LoadingScreen> {
     return Consumer2<LoadingScreenProvider, GlobalSettingsProvider>(
       builder: (context, loadingSettings, globalSettings, child) {
         return Scaffold(
-          // appBar: AppBar(
-          //   leading: IconButton(
-          //     onPressed: () =>
-          //         Navigator.pushNamed(context, AppRoutes.loadingScreenSettings),
-          //     icon: const Icon(Icons.star),
-          //   ),
-          // ),
+          appBar: AppBar(
+            leading: IconButton(
+              onPressed: () =>
+                  Navigator.pushNamed(context, AppRoutes.loadingScreenSettings),
+              icon: const Icon(Icons.star),
+            ),
+          ),
           body: Container(
             width: double.infinity,
             height: double.infinity,
@@ -204,41 +292,29 @@ class _LoadingScreenState extends State<LoadingScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // Title
+                  // Update the title widget
                   if (loadingSettings.showTitle)
                     Padding(
-                      padding:
-                          EdgeInsets.only(bottom: loadingSettings.titlePadding),
+                      padding: loadingSettings.titlePadding,
                       child: Text(
                         loadingSettings.titleText,
                         style: TextStyle(
                           fontSize: loadingSettings.titleFontSize,
                           fontWeight: loadingSettings.titleFontWeight,
-                          color: loadingSettings.titleColor,
+                          color: loadingSettings.titleColor
+                              .withOpacity(loadingSettings.titleOpacity),
+                          height: loadingSettings.titleLineHeight,
                         ),
+                        textAlign: TextAlign.center,
                       ),
                     ),
 
-                  // Loader
+                  // Update the loader container
                   Container(
                     width: loadingSettings.loaderWidth,
                     height: loadingSettings.loaderHeight,
-                    decoration: loadingSettings.showLoaderBorder
-                        ? BoxDecoration(
-                            borderRadius: BorderRadius.circular(
-                                loadingSettings.loaderBorderRadius),
-                            border: Border.all(
-                              color: loadingSettings.loaderBorderColor,
-                              width: loadingSettings.loaderBorderWidth,
-                            ),
-                          )
-                        : null,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(
-                          loadingSettings.loaderBorderRadius),
-                      child: _errorMessage != null
-                          ? _buildErrorWidget()
-                          : _buildLoader(loadingSettings),
-                    ),
+                    margin: loadingSettings.loaderMargin,
+                    child: _buildLoader(loadingSettings),
                   ),
                 ],
               ),
@@ -249,96 +325,36 @@ class _LoadingScreenState extends State<LoadingScreen> {
     );
   }
 
-  Widget _buildErrorWidget() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.error_outline, color: Colors.red, size: 48),
-          const SizedBox(height: 16),
-          Text(
-            _errorMessage!,
-            style: const TextStyle(color: Colors.white),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Go Back'),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildLoader(LoadingScreenProvider settings) {
-    // If no loader file is specified, show a default circular progress indicator
-    if (settings.loaderFilePath == null || !_isInitialized) {
-      return const Center(
-        child: CircularProgressIndicator(
-          color: AppColors.goldenYellow,
-        ),
-      );
+    if (settings.loaderFilePath == null) {
+      return const CircularProgressIndicator();
     }
 
-    // Based on the file type, show the appropriate loader
-    try {
-      switch (settings.loaderFileType) {
-        case 'gif':
-          return settings.isLoaderFileAsset
-              ? Image.asset(
-                  settings.loaderFilePath!,
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) {
-                    debugPrint('Error loading GIF: $error');
-                    return _buildFallbackLoader();
-                  },
-                )
-              : Image.file(
-                  File(settings.loaderFilePath!),
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) {
-                    debugPrint('Error loading GIF file: $error');
-                    return _buildFallbackLoader();
-                  },
-                );
-
-        case 'json':
-          return Lottie.asset(
+    switch (settings.loaderFileType) {
+      case 'gif':
+        if (settings.isLoaderFileAsset) {
+          return Image.asset(
             settings.loaderFilePath!,
             fit: BoxFit.contain,
-            errorBuilder: (context, error, stackTrace) {
-              debugPrint('Error loading Lottie animation: $error');
-              return _buildFallbackLoader();
-            },
           );
-
-        case 'mp4':
-        case 'mov':
-          if (_videoController != null &&
-              _videoController!.value.isInitialized) {
-            return AspectRatio(
-              aspectRatio: _videoController!.value.aspectRatio,
-              child: VideoPlayer(_videoController!),
-            );
-          }
-          return _buildFallbackLoader();
-
-        default:
-          return _buildFallbackLoader();
-      }
-    } catch (e) {
-      debugPrint('Error building loader: $e');
-      return _buildFallbackLoader();
+        } else {
+          return Image.file(
+            File(settings.loaderFilePath!),
+            fit: BoxFit.contain,
+          );
+        }
+      case 'mp4':
+      case 'mov':
+        if (_controller != null && _controller!.value.isInitialized) {
+          return AspectRatio(
+            aspectRatio: _controller!.value.aspectRatio,
+            child: VideoPlayer(_controller!),
+          );
+        }
+        return const CircularProgressIndicator();
+      default:
+        return const CircularProgressIndicator();
     }
-  }
-
-  Widget _buildFallbackLoader() {
-    return const Center(
-      child: CircularProgressIndicator(
-        color: AppColors.goldenYellow,
-      ),
-    );
   }
 
   DecorationImage? _getBackgroundImage(

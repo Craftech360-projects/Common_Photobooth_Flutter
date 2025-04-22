@@ -72,7 +72,7 @@ class SupabaseService {
       final imageUrl = _client.storage.from('faces').getPublicUrl(fileName);
 
       return imageUrl;
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('Error uploading image: $e');
       return null;
     }

@@ -3,6 +3,7 @@ import 'package:camera_windows/camera_windows.dart';
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/core/themes/app_theme.dart';
 import 'package:photobooth_flutter/presentation/face_capture_screen.dart';
+import 'package:photobooth_flutter/presentation/loading_screen.dart';
 import 'package:photobooth_flutter/providers/admin_settings_provider.dart';
 import 'package:photobooth_flutter/providers/character_selection_provider.dart';
 import 'package:photobooth_flutter/providers/face_capture_provider.dart';
@@ -112,8 +113,8 @@ class MyApp extends StatelessWidget {
       title: 'Photobooth App',
       theme: AppTheme.lightTheme,
       onGenerateRoute: AppRoutes.onGenerateRoute,
-      // initialRoute: AppRoutes.welcomeScreen,
-      home: const FaceCaptureScreen(),
+      initialRoute: AppRoutes.welcomeScreen,
+      // home: const LoadingScreen(),
       debugShowCheckedModeBanner: false,
     );
   }

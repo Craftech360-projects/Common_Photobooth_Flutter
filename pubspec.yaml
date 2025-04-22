@@ -9,21 +9,22 @@ environment:
 dependencies:
   camera: ^0.11.0+1
   camera_macos: ^0.0.9
-  camera_windows: ^0.2.6+2
   camera_platform_interface: ^2.7.0
-  image: ^4.5.4
+  camera_windows: ^0.2.6+2
   file_picker: ^9.2.1
   flutter:
     sdk: flutter
   flutter_colorpicker: ^1.1.0
+  http: ^1.3.0
+  image: ^4.5.4
+  lottie: ^3.3.1
   path: ^1.9.0
   path_provider: ^2.1.5
   provider: ^6.1.2
-  lottie: ^3.3.1
   qr_flutter: ^4.1.0
   shared_preferences: ^2.5.2
-  supabase_flutter:
-  video_player:
+  supabase_flutter: null
+  video_player: null
   video_player_media_kit: ^1.0.6
 
 dev_dependencies:

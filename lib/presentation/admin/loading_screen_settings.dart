@@ -44,26 +44,124 @@ class LoadingScreenSettings extends StatelessWidget {
                     max: 48,
                     onChanged: (value) => settings.setTitleFontSize(value),
                   ),
+                  _buildSlider(
+                    label: 'Line Height',
+                    value: settings.titleLineHeight,
+                    min: 0.8,
+                    max: 2.0,
+                    divisions: 24,
+                    onChanged: (value) => settings.setTitleLineHeight(value),
+                  ),
+                  _buildSlider(
+                    label: 'Text Opacity',
+                    value: settings.titleOpacity,
+                    min: 0.1,
+                    max: 1.0,
+                    divisions: 9,
+                    onChanged: (value) => settings.setTitleOpacity(value),
+                  ),
                   _buildDropdown<FontWeight>(
                     label: 'Font Weight',
                     value: settings.titleFontWeight,
                     items: {
-                      FontWeight.normal: 'Normal',
-                      FontWeight.bold: 'Bold',
+                      FontWeight.w100: 'Thin',
+                      FontWeight.w300: 'Light',
+                      FontWeight.w400: 'Regular',
+                      FontWeight.w500: 'Medium',
+                      FontWeight.w700: 'Bold',
+                      FontWeight.w900: 'Extra Bold',
                     },
                     onChanged: (value) => settings.setTitleFontWeight(value!),
                   ),
-                  _buildColorPicker(
-                    label: 'Title Color',
-                    color: settings.titleColor,
-                    onColorChanged: (color) => settings.setTitleColor(color),
+                  // Title Color with Dialog
+                  ListTile(
+                    title: const Text('Title Color'),
+                    trailing: Container(
+                      width: 24,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        color: settings.titleColor,
+                        border: Border.all(color: Colors.grey),
+                      ),
+                    ),
+                    onTap: () async {
+                      final color = await _showImprovedColorPicker(
+                        context: context,
+                        color: settings.titleColor,
+                        title: 'Select Title Color',
+                      );
+                      if (color != null) {
+                        settings.setTitleColor(color);
+                      }
+                    },
                   ),
+
+                  // Title Margins
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Title Margins',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+
                   _buildSlider(
-                    label: 'Title Padding',
-                    value: settings.titlePadding,
+                    label: 'Top Margin',
+                    value: settings.titleMargin.top,
                     min: 0,
                     max: 50,
-                    onChanged: (value) => settings.setTitlePadding(value),
+                    onChanged: (value) => settings.setTitleMargin(
+                      EdgeInsets.fromLTRB(
+                        settings.titleMargin.left,
+                        value,
+                        settings.titleMargin.right,
+                        settings.titleMargin.bottom,
+                      ),
+                    ),
+                  ),
+
+                  _buildSlider(
+                    label: 'Bottom Margin',
+                    value: settings.titleMargin.bottom,
+                    min: 0,
+                    max: 50,
+                    onChanged: (value) => settings.setTitleMargin(
+                      EdgeInsets.fromLTRB(
+                        settings.titleMargin.left,
+                        settings.titleMargin.top,
+                        settings.titleMargin.right,
+                        value,
+                      ),
+                    ),
+                  ),
+
+                  _buildSlider(
+                    label: 'Left Margin',
+                    value: settings.titleMargin.left,
+                    min: 0,
+                    max: 50,
+                    onChanged: (value) => settings.setTitleMargin(
+                      EdgeInsets.fromLTRB(
+                        value,
+                        settings.titleMargin.top,
+                        settings.titleMargin.right,
+                        settings.titleMargin.bottom,
+                      ),
+                    ),
+                  ),
+
+                  _buildSlider(
+                    label: 'Right Margin',
+                    value: settings.titleMargin.right,
+                    min: 0,
+                    max: 50,
+                    onChanged: (value) => settings.setTitleMargin(
+                      EdgeInsets.fromLTRB(
+                        settings.titleMargin.left,
+                        settings.titleMargin.top,
+                        value,
+                        settings.titleMargin.bottom,
+                      ),
+                    ),
                   ),
                 ],
 
@@ -89,45 +187,74 @@ class LoadingScreenSettings extends StatelessWidget {
                   max: 400,
                   onChanged: (value) => settings.setLoaderHeight(value),
                 ),
-                _buildSwitch(
-                  label: 'Show Loader Border',
-                  value: settings.showLoaderBorder,
-                  onChanged: (value) => settings.setShowLoaderBorder(value),
-                ),
-                if (settings.showLoaderBorder) ...[
-                  _buildSlider(
-                    label: 'Border Radius',
-                    value: settings.loaderBorderRadius,
-                    min: 0,
-                    max: 50,
-                    onChanged: (value) => settings.setLoaderBorderRadius(value),
-                  ),
-                  _buildColorPicker(
-                    label: 'Border Color',
-                    color: settings.loaderBorderColor,
-                    onColorChanged: (color) =>
-                        settings.setLoaderBorderColor(color),
-                  ),
-                  _buildSlider(
-                    label: 'Border Width',
-                    value: settings.loaderBorderWidth,
-                    min: 1,
-                    max: 10,
-                    onChanged: (value) => settings.setLoaderBorderWidth(value),
-                  ),
-                ],
 
+                // Loader Margins
                 const SizedBox(height: 16),
-                // Remove the duration slider
-                // _buildSlider(
-                //   label: 'Loading Duration (seconds)',
-                //   value: settings.loaderDurationSeconds.toDouble(),
-                //   min: 3,
-                //   max: 20,
-                //   divisions: 17,
-                //   onChanged: (value) =>
-                //       settings.setLoaderDuration(value.toInt()),
-                // ),
+                const Text(
+                  'Loader Margins',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+
+                _buildSlider(
+                  label: 'Top Margin',
+                  value: settings.loaderMargin.top,
+                  min: 0,
+                  max: 50,
+                  onChanged: (value) => settings.setLoaderMargin(
+                    EdgeInsets.fromLTRB(
+                      settings.loaderMargin.left,
+                      value,
+                      settings.loaderMargin.right,
+                      settings.loaderMargin.bottom,
+                    ),
+                  ),
+                ),
+
+                _buildSlider(
+                  label: 'Bottom Margin',
+                  value: settings.loaderMargin.bottom,
+                  min: 0,
+                  max: 50,
+                  onChanged: (value) => settings.setLoaderMargin(
+                    EdgeInsets.fromLTRB(
+                      settings.loaderMargin.left,
+                      settings.loaderMargin.top,
+                      settings.loaderMargin.right,
+                      value,
+                    ),
+                  ),
+                ),
+
+                _buildSlider(
+                  label: 'Left Margin',
+                  value: settings.loaderMargin.left,
+                  min: 0,
+                  max: 50,
+                  onChanged: (value) => settings.setLoaderMargin(
+                    EdgeInsets.fromLTRB(
+                      value,
+                      settings.loaderMargin.top,
+                      settings.loaderMargin.right,
+                      settings.loaderMargin.bottom,
+                    ),
+                  ),
+                ),
+
+                _buildSlider(
+                  label: 'Right Margin',
+                  value: settings.loaderMargin.right,
+                  min: 0,
+                  max: 50,
+                  onChanged: (value) => settings.setLoaderMargin(
+                    EdgeInsets.fromLTRB(
+                      settings.loaderMargin.left,
+                      settings.loaderMargin.top,
+                      value,
+                      settings.loaderMargin.bottom,
+                    ),
+                  ),
+                ),
 
                 const Divider(height: 32),
 
@@ -265,36 +392,17 @@ class LoadingScreenSettings extends StatelessWidget {
   Widget _buildTextField({
     required String label,
     required String value,
-    required Function(String) onChanged,
+    required ValueChanged<String> onChanged,
   }) {
-    // Create a TextEditingController with the initial value
-    final controller = TextEditingController(text: value);
-
-    // Set the cursor position at the end of the text
-    controller.selection = TextSelection.fromPosition(
-      TextPosition(offset: controller.text.length),
-    );
-
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label),
-          const SizedBox(height: 8),
-          TextField(
-            controller: controller,
-            textDirection: TextDirection.ltr,
-            textAlign: TextAlign.left,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              isDense: true,
-            ),
-            onChanged: onChanged,
-            keyboardType: TextInputType.text,
-            textInputAction: TextInputAction.done,
-          ),
-        ],
+      child: TextField(
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+        ),
+        controller: TextEditingController(text: value),
+        onChanged: onChanged,
       ),
     );
   }
@@ -305,7 +413,7 @@ class LoadingScreenSettings extends StatelessWidget {
     required double min,
     required double max,
     int? divisions,
-    required Function(double) onChanged,
+    required ValueChanged<double> onChanged,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
@@ -313,32 +421,18 @@ class LoadingScreenSettings extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('$label: ${value.toStringAsFixed(1)}'),
-          Slider(
-            value: value,
-            min: min,
-            max: max,
-            divisions: divisions,
-            onChanged: onChanged,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSwitch({
-    required String label,
-    required bool value,
-    required Function(bool) onChanged,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label),
-          Switch(
-            value: value,
-            onChanged: onChanged,
+          Row(
+            children: [
+              Expanded(
+                child: Slider(
+                  value: value,
+                  min: min,
+                  max: max,
+                  divisions: divisions,
+                  onChanged: onChanged,
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -349,24 +443,40 @@ class LoadingScreenSettings extends StatelessWidget {
     required String label,
     required T value,
     required Map<T, String> items,
-    required Function(T?) onChanged,
+    required ValueChanged<T?> onChanged,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: DropdownButtonFormField<T>(
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+        ),
+        value: value,
+        items: items.entries
+            .map((e) => DropdownMenuItem<T>(
+                  value: e.key,
+                  child: Text(e.value),
+                ))
+            .toList(),
+        onChanged: onChanged,
+      ),
+    );
+  }
+
+  Widget _buildSwitch({
+    required String label,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: Row(
         children: [
           Text(label),
-          const SizedBox(height: 8),
-          DropdownButton<T>(
+          const Spacer(),
+          Switch(
             value: value,
-            isExpanded: true,
-            items: items.entries.map((entry) {
-              return DropdownMenuItem<T>(
-                value: entry.key,
-                child: Text(entry.value),
-              );
-            }).toList(),
             onChanged: onChanged,
           ),
         ],
@@ -374,24 +484,39 @@ class LoadingScreenSettings extends StatelessWidget {
     );
   }
 
-  Widget _buildColorPicker({
-    required String label,
+  // Remove the direct color picker and add this method for the dialog
+  Future<Color?> _showImprovedColorPicker({
+    required BuildContext context,
     required Color color,
-    required Function(Color) onColorChanged,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label),
-          const SizedBox(height: 8),
-          ImprovedColorPicker(
-            pickerColor: color,
-            onColorChanged: onColorChanged,
+    required String title,
+  }) async {
+    return showDialog<Color>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: SingleChildScrollView(
+            child: ImprovedColorPicker(
+              pickerColor: color,
+              onColorChanged: (color) => color,
+            ),
           ),
-        ],
-      ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Select'),
+              onPressed: () {
+                Navigator.of(context).pop(color);
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

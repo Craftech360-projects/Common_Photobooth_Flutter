@@ -1,0 +1,58 @@
+{
+  "1": {
+    "inputs": {
+      "UNKNOWN": 1,
+      "input_image": [
+        "29",
+        0
+      ],
+      "source_image": [
+        "28",
+        0
+      ]
+    },
+    "_meta": {}
+  },
+  "28": {
+    "inputs": {
+      "supabase_url": "https://your-project.supabase.co",
+      "supabase_key": "your-anon-key",
+      "table_name": "inputimagetable",
+      "image_column": "image_url",
+      "refresh_trigger": 0
+    },
+    "class_type": "SupabaseTableWatcherNode",
+    "_meta": {
+      "title": "Supabase Table Watcher"
+    }
+  },
+  "29": {
+    "inputs": {
+      "supabase_url": "https://your-project.supabase.co",
+      "supabase_key": "your-anon-key",
+      "table_name": "inputimagetable",
+      "image_column": "image_url",
+      "refresh_trigger": 1
+    },
+    "class_type": "SupabaseTableWatcherNode",
+    "_meta": {
+      "title": "Supabase Table Watcher"
+    }
+  },
+  "30": {
+    "inputs": {
+      "supabase_url": "https://your-project.supabase.co",
+      "supabase_key": "your-service-role-key",
+      "bucket": "outputimages",
+      "base_file_name": "image",
+      "image": [
+        "1",
+        0
+      ]
+    },
+    "class_type": "SupabaseImageUploader",
+    "_meta": {
+      "title": "Upload Image to Supabase"
+    }
+  }
+}

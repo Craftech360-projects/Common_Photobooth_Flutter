@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:photobooth_flutter/providers/face_capture_provider.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
+import 'package:photobooth_flutter/providers/photobooth_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
 import 'package:provider/provider.dart';
 
@@ -284,52 +285,39 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
     }
   }
 
-  // camera_windows plugin's preview widget
-  // Widget _buildPreview() {
-  //   return CameraPlatform.instance.buildPreview(_cameraId);
-  // }
-
   Future<void> _takePicture() async {
     try {
-      await Navigator.pushNamed(context, AppRoutes.swappedFace);
-    } on Exception {
-      debugPrint('Error taking picture');
+      final XFile file = await CameraPlatform.instance.takePicture(_cameraId);
+
+      // Verify file exists
+      final imageFile = File(file.path);
+      if (imageFile.existsSync()) {
+      } else {
+        debugPrint('File does not exist at path: ${file.path}');
+      }
+
+      // Temporarily dispose the camera controller before navigation
+      await _disposeCurrentCamera();
+
+      final provider = context.read<PhotoboothProvider>();
+
+      // Set the face image path in the provider
+      provider.setFaceImage(file.path);
+
+      // Navigate to loading screen - the loading screen will handle the rest
+      if (mounted) {
+        await Navigator.pushNamed(context, AppRoutes.loadingScreen);
+      }
+    } on Exception catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to take picture: $e')),
+        );
+        // Try to reinitialize camera on error
+        await _initializeCamera();
+      }
     }
   }
-
-  // Future<void> _takePicture() async {
-  //   try {
-  //     final XFile file = await CameraPlatform.instance.takePicture(_cameraId);
-
-  //     // Verify file exists
-  //     final imageFile = File(file.path);
-  //     if (imageFile.existsSync()) {
-  //     } else {
-  //       debugPrint('File does not exist at path: ${file.path}');
-  //     }
-
-  //     // Temporarily dispose the camera controller before navigation
-  //     await _disposeCurrentCamera();
-
-  //     final provider = context.read<PhotoboothProvider>();
-
-  //     // Set the face image path in the provider
-  //     provider.setFaceImage(file.path);
-
-  //     // Navigate to loading screen - the loading screen will handle the rest
-  //     if (mounted) {
-  //       Navigator.pushNamed(context, AppRoutes.loadingScreen);
-  //     }
-  //   } catch (e) {
-  //     if (mounted) {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(content: Text('Failed to take picture: $e')),
-  //       );
-  //       // Try to reinitialize camera on error
-  //       _initializeCamera();
-  //     }
-  //   }
-  // }
 
   void _onCameraError(CameraErrorEvent event) {
     if (mounted) {
@@ -363,12 +351,13 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
     final globalSettings = context.watch<GlobalSettingsProvider>();
 
     return Scaffold(
-      // appBar: AppBar(
-      //   leading: IconButton(
-      //     onPressed: () =>
-      //         Navigator.pushNamed(context, AppRoutes.faceCaptureSettings),
-      //     icon: const Icon(Icons.star),
-      //   ),
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () =>
+              Navigator.pushNamed(context, AppRoutes.faceCaptureSettings),
+          icon: const Icon(Icons.star),
+        ),
+      ),
 
       //   // actions: [
       //   //   // Add camera switch button if there are multiple cameras
@@ -399,13 +388,16 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
             // Title
             if (settings.showTitle)
               Padding(
-                padding: EdgeInsets.only(bottom: settings.titlePadding),
+                padding: settings.titlePadding,
                 child: Text(
+                  textAlign: settings.titleAlignment,
                   settings.titleText,
                   style: TextStyle(
+                    height: settings.titleLineHeight,
                     fontSize: settings.titleFontSize,
                     fontWeight: settings.titleFontWeight,
-                    color: settings.titleColor,
+                    color: settings.titleColor
+                        .withValues(alpha: settings.titleOpacity),
                   ),
                 ),
               ),
@@ -437,7 +429,7 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
             _buildCameraPreview(settings),
 
             // Capture Button
-            SizedBox(height: settings.buttonMarginTop),
+
             _buildCaptureButton(settings),
           ],
         ),
@@ -455,6 +447,7 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
 
     if (_isMacOS) {
       return Container(
+        margin: settings.previewMargin,
         width: settings.previewWidth,
         height: settings.previewHeight,
         decoration: settings.showPreviewBorder
@@ -532,7 +525,9 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
         ),
       );
     } else {
-      return SizedBox(
+      return Container(
+        margin: settings.buttonMargin,
+        padding: settings.buttonPadding,
         width: settings.buttonWidth,
         height: settings.buttonHeight,
         child: ElevatedButton(
@@ -554,6 +549,7 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
             settings.buttonText,
             style: TextStyle(
               fontSize: settings.buttonFontSize,
+              fontWeight: settings.buttonFontWeight,
             ),
           ),
         ),

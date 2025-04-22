@@ -68,7 +68,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       fontSize: welcomeSettings.welcomeMessageFontSize,
                       fontWeight: welcomeSettings.welcomeMessageFontWeight,
                       color: welcomeSettings.welcomeMessageColor
-                          .withOpacity(welcomeSettings.welcomeMessageOpacity),
+                          .withValues(alpha: welcomeSettings.welcomeMessageOpacity),
                       fontStyle: welcomeSettings.welcomeMessageItalic
                           ? FontStyle.italic
                           : FontStyle.normal,

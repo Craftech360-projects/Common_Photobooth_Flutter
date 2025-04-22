@@ -5,8 +5,12 @@ import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class GlobalSettingsProvider extends ChangeNotifier {
+class GlobalSettingsProvider with ChangeNotifier {
   late SharedPreferences _prefs;
+
+  // Add ComfyAPI URL
+  String? _comfyApiUrl;
+  String? get comfyApiUrl => _comfyApiUrl;
 
   // Global settings
   Size _selectedResolution = const Size(1920, 1080);
@@ -15,8 +19,12 @@ class GlobalSettingsProvider extends ChangeNotifier {
   double _fieldSpacing = 20.0;
   double _buttonSpacing = 40.0;
   double _borderRadius = 4.0;
+  String? _runpodApiUrl;
+  String? _runpodApiKey;
 
   // Getters
+  String? get runpodApiUrl => _runpodApiUrl;
+  String? get runpodApiKey => _runpodApiKey;
   Size get selectedResolution => _selectedResolution;
   String? get backgroundImage => _backgroundImage;
   String? get backgroundImagePath =>
@@ -67,6 +75,22 @@ class GlobalSettingsProvider extends ChangeNotifier {
     _supabaseUrl = _prefs.getString('supabase_url');
     _supabaseAnonKey = _prefs.getString('supabase_anon_key');
 
+    // Load ComfyAPI settings
+    _comfyApiUrl =
+        _prefs.getString('comfy_api_url') ?? 'http://213.173.110.102:15539';
+
+    notifyListeners();
+  }
+
+  void setRunpodApiUrl(String url) async {
+    _runpodApiUrl = url;
+    await _prefs.setString('runpod_api_url', _runpodApiUrl ?? '');
+    notifyListeners();
+  }
+
+  void setRunpodApiKey(String key) async {
+    _runpodApiKey = key;
+    await _prefs.setString('runpod_api_key', _runpodApiKey ?? '');
     notifyListeners();
   }
 
@@ -134,6 +158,12 @@ class GlobalSettingsProvider extends ChangeNotifier {
   void setSupabaseAnonKey(String key) async {
     _supabaseAnonKey = key;
     await _prefs.setString('supabase_anon_key', key);
+    notifyListeners();
+  }
+
+  void setComfyApiUrl(String url) async {
+    _comfyApiUrl = url;
+    await _prefs.setString('comfy_api_url', url);
     notifyListeners();
   }
 
