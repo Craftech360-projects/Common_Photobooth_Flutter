@@ -186,13 +186,13 @@ class _LoadingScreenState extends State<LoadingScreen> {
     return Consumer2<LoadingScreenProvider, GlobalSettingsProvider>(
       builder: (context, loadingSettings, globalSettings, child) {
         return Scaffold(
-          appBar: AppBar(
-            leading: IconButton(
-              onPressed: () =>
-                  Navigator.pushNamed(context, AppRoutes.loadingScreenSettings),
-              icon: const Icon(Icons.star),
-            ),
-          ),
+          // appBar: AppBar(
+          //   leading: IconButton(
+          //     onPressed: () =>
+          //         Navigator.pushNamed(context, AppRoutes.loadingScreenSettings),
+          //     icon: const Icon(Icons.star),
+          //   ),
+          // ),
           body: Container(
             width: double.infinity,
             height: double.infinity,

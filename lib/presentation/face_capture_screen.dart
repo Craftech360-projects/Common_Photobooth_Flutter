@@ -1,3 +1,5 @@
+// ignore_for_file: unused_field
+
 import 'dart:async';
 import 'dart:io';
 
@@ -6,11 +8,9 @@ import 'package:camera_macos/camera_macos.dart';
 import 'package:camera_platform_interface/camera_platform_interface.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:photobooth_flutter/providers/photobooth_provider.dart';
 import 'package:photobooth_flutter/providers/face_capture_provider.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
-import 'package:photobooth_flutter/services/supabase_service.dart';
 import 'package:provider/provider.dart';
 
 /// Example app for Camera Windows plugin.
@@ -25,19 +25,10 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
   String _cameraInfo = 'Unknown';
   List<CameraDescription> _cameras = <CameraDescription>[];
   int _cameraIndex = 0;
-  Size? _previewSize;
   int _cameraId = -1;
   CameraController? _controller;
-  // Future<void>? _initializeControllerFuture;
+  Future<void>? _initializeControllerFuture;
   bool _cameraInitialized = false;
-
-  final MediaSettings _mediaSettings = const MediaSettings(
-    resolutionPreset: ResolutionPreset.high,
-    fps: 15,
-    videoBitrate: 200000,
-    audioBitrate: 32000,
-    enableAudio: false,
-  );
 
   StreamSubscription<CameraErrorEvent>? _errorStreamSubscription;
   StreamSubscription<CameraClosingEvent>? _cameraClosingStreamSubscription;
@@ -46,9 +37,7 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
   final GlobalKey _cameraKey = GlobalKey();
   CameraMacOSController? _macOSController;
   List<CameraMacOSDevice> _macOSVideoDevices = [];
-  final List<CameraMacOSDevice> _macOSAudioDevices = [];
   String? _selectedVideoDeviceId;
-  String? _selectedAudioDeviceId;
   bool _isMacOS = false;
 
   @override
@@ -107,10 +96,6 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
         _selectedVideoDeviceId = _macOSVideoDevices.first.deviceId;
       }
 
-      if (_macOSAudioDevices.isNotEmpty) {
-        _selectedAudioDeviceId = _macOSAudioDevices.first.deviceId;
-      }
-
       setState(() {
         _cameraInitialized = true;
       });
@@ -140,6 +125,7 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
         cameraIndex = settings.selectedCameraIndex < cameras.length
             ? settings.selectedCameraIndex
             : 0;
+
         cameraInfo = 'Found camera: ${cameras[cameraIndex].name}';
       }
     } on PlatformException catch (e) {
@@ -205,10 +191,20 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
       final int cameraIndex = _cameraIndex % _cameras.length;
       final CameraDescription camera = _cameras[cameraIndex];
 
-      cameraId = await CameraPlatform.instance.createCameraWithSettings(
+      // cameraId = await CameraPlatform.instance.createCameraWithSettings(
+      //   camera,
+      //   _mediaSettings,
+      // );
+
+      _controller = CameraController(
         camera,
-        _mediaSettings,
+        ResolutionPreset.high,
+        imageFormatGroup: ImageFormatGroup.bgra8888,
+        enableAudio: false,
       );
+
+      _initializeControllerFuture = _controller?.initialize();
+      await _initializeControllerFuture;
 
       unawaited(_errorStreamSubscription?.cancel());
       _errorStreamSubscription = CameraPlatform.instance
@@ -220,18 +216,18 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
           .onCameraClosing(cameraId)
           .listen(_onCameraClosing);
 
-      final Future<CameraInitializedEvent> initialized =
-          CameraPlatform.instance.onCameraInitialized(cameraId).first;
+      // final Future<CameraInitializedEvent> initialized =
+      //     CameraPlatform.instance.onCameraInitialized(cameraId).first;
 
-      await CameraPlatform.instance.initializeCamera(
-        cameraId,
-      );
+      // await CameraPlatform.instance.initializeCamera(
+      //   cameraId,
+      // );
 
-      final CameraInitializedEvent event = await initialized;
-      _previewSize = Size(
-        event.previewWidth,
-        event.previewHeight,
-      );
+      // final CameraInitializedEvent event = await initialized;
+      // _previewSize = Size(
+      //   event.previewWidth,
+      //   event.previewHeight,
+      // );
 
       if (mounted) {
         setState(() {
@@ -256,7 +252,6 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
           _cameraInitialized = false;
           _cameraId = -1;
           _cameraIndex = 0;
-          _previewSize = null;
           _cameraInfo =
               'Failed to initialize camera: ${e.code}: ${e.description}';
         });
@@ -275,7 +270,6 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
           setState(() {
             _cameraInitialized = false;
             _cameraId = -1;
-            _previewSize = null;
             _cameraInfo = 'Camera disposed';
           });
         }
@@ -290,9 +284,10 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
     }
   }
 
-  Widget _buildPreview() {
-    return CameraPlatform.instance.buildPreview(_cameraId);
-  }
+  // camera_windows plugin's preview widget
+  // Widget _buildPreview() {
+  //   return CameraPlatform.instance.buildPreview(_cameraId);
+  // }
 
   Future<void> _takePicture() async {
     try {
@@ -368,27 +363,27 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
     final globalSettings = context.watch<GlobalSettingsProvider>();
 
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          onPressed: () =>
-              Navigator.pushNamed(context, AppRoutes.faceCaptureSettings),
-          icon: const Icon(Icons.star),
-        ),
+      // appBar: AppBar(
+      //   leading: IconButton(
+      //     onPressed: () =>
+      //         Navigator.pushNamed(context, AppRoutes.faceCaptureSettings),
+      //     icon: const Icon(Icons.star),
+      //   ),
 
-        //   // actions: [
-        //   //   // Add camera switch button if there are multiple cameras
-        //   //   if (_cameras.length > 1)
-        //   //     IconButton(
-        //   //       onPressed: _switchCamera,
-        //   //       icon: const Icon(Icons.switch_camera),
-        //   //       tooltip: 'Switch Camera',
-        //   //     ),
-        //   //   IconButton(
-        //   //     onPressed: () => Navigator.pop(context),
-        //   //     icon: const Icon(Icons.arrow_back),
-        //   //   ),
-        //   // ],
-      ),
+      //   // actions: [
+      //   //   // Add camera switch button if there are multiple cameras
+      //   //   if (_cameras.length > 1)
+      //   //     IconButton(
+      //   //       onPressed: _switchCamera,
+      //   //       icon: const Icon(Icons.switch_camera),
+      //   //       tooltip: 'Switch Camera',
+      //   //     ),
+      //   //   IconButton(
+      //   //     onPressed: () => Navigator.pop(context),
+      //   //     icon: const Icon(Icons.arrow_back),
+      //   //   ),
+      //   // ],
+      // ),
       body: Container(
         width: double.infinity,
         height: double.infinity,
@@ -458,34 +453,58 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
       );
     }
 
-    return Container(
-      width: settings.previewWidth,
-      height: settings.previewHeight,
-      decoration: settings.showPreviewBorder
-          ? BoxDecoration(
-              borderRadius: BorderRadius.circular(settings.previewBorderRadius),
-              border: Border.all(
-                color: settings.previewBorderColor,
-                width: settings.previewBorderWidth,
-              ),
-            )
-          : null,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(settings.previewBorderRadius),
-        child: CameraMacOSView(
-          key: _cameraKey,
-          deviceId: _selectedVideoDeviceId,
-          audioDeviceId: _selectedAudioDeviceId,
-          cameraMode: CameraMacOSMode.photo,
-          fit: BoxFit.cover,
-          onCameraInizialized: (controller) {
-            setState(() {
-              _macOSController = controller;
-            });
-          },
+    if (_isMacOS) {
+      return Container(
+        width: settings.previewWidth,
+        height: settings.previewHeight,
+        decoration: settings.showPreviewBorder
+            ? BoxDecoration(
+                borderRadius:
+                    BorderRadius.circular(settings.previewBorderRadius),
+                border: Border.all(
+                  color: settings.previewBorderColor,
+                  width: settings.previewBorderWidth,
+                ),
+              )
+            : null,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(settings.previewBorderRadius),
+          child: CameraMacOSView(
+            key: _cameraKey,
+            deviceId: _selectedVideoDeviceId,
+            cameraMode: CameraMacOSMode.photo,
+            fit: BoxFit.cover,
+            onCameraInizialized: (controller) {
+              setState(() {
+                _macOSController = controller;
+              });
+            },
+          ),
         ),
-      ),
-    );
+      );
+    } else {
+      return Container(
+        width: settings.previewWidth,
+        height: settings.previewHeight,
+        decoration: settings.showPreviewBorder
+            ? BoxDecoration(
+                borderRadius:
+                    BorderRadius.circular(settings.previewBorderRadius),
+                border: Border.all(
+                  color: settings.previewBorderColor,
+                  width: settings.previewBorderWidth,
+                ),
+              )
+            : null,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(settings.previewBorderRadius),
+          child: _controller != null
+              ? AspectRatio(
+                  aspectRatio: 2 / 6, child: CameraPreview(_controller!))
+              : const Center(child: Text('Camera not available')),
+        ),
+      );
+    }
   }
 
   Widget _buildCaptureButton(FaceCaptureProvider settings) {

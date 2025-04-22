@@ -8,7 +8,6 @@ import 'package:photobooth_flutter/providers/photobooth_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
-import '../routes/routes.dart';
 
 class SwappedFaceScreen extends StatefulWidget {
   const SwappedFaceScreen({super.key});
@@ -57,13 +56,13 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
     final globalSettings = Provider.of<GlobalSettingsProvider>(context);
 
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          onPressed: () =>
-              Navigator.pushNamed(context, AppRoutes.outputScreenSettings),
-          icon: const Icon(Icons.star),
-        ),
-      ),
+      // appBar: AppBar(
+      //   leading: IconButton(
+      //     onPressed: () =>
+      //         Navigator.pushNamed(context, AppRoutes.outputScreenSettings),
+      //     icon: const Icon(Icons.star),
+      //   ),
+      // ),
       body: Container(
         width: double.infinity,
         height: double.infinity,
