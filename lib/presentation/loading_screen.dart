@@ -58,6 +58,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
   Future<void> _processImage() async {
     try {
       final provider = Provider.of<PhotoboothProvider>(context, listen: false);
+      final globalSettings =
+          Provider.of<GlobalSettingsProvider>(context, listen: false);
 
       // Check if we have a face image path
       if (provider.faceImagePath == null) {
@@ -88,6 +90,36 @@ class _LoadingScreenState extends State<LoadingScreen> {
       final gender = provider.selectedGender;
       final characterId = provider.selectedCharacterId;
       final characterImagePath = provider.characterImagePath;
+
+      // Get Supabase credentials from global settings
+      final supabaseUrl = globalSettings.supabaseUrl;
+      final supabaseAnonKey = globalSettings.supabaseAnonKey;
+
+      // Check if Supabase credentials are available
+      if (supabaseUrl == null || supabaseAnonKey == null) {
+        setState(() {
+          _isProcessing = false;
+          _errorMessage =
+              'Supabase credentials not configured. Please set them in the admin screen.';
+        });
+        return;
+      }
+
+      // Initialize Supabase if not already initialized
+      if (!SupabaseService.instance.isInitialized) {
+        try {
+          await SupabaseService.instance.initialize(
+            url: supabaseUrl,
+            anonKey: supabaseAnonKey,
+          );
+        } catch (e) {
+          setState(() {
+            _isProcessing = false;
+            _errorMessage = 'Failed to initialize Supabase: $e';
+          });
+          return;
+        }
+      }
 
       // Check if Supabase is initialized
       if (SupabaseService.instance.isInitialized) {
@@ -144,12 +176,19 @@ class _LoadingScreenState extends State<LoadingScreen> {
             // Initialize ComfyAPI service if not already initialized
             if (!ComfyApiService.isInitialized) {
               await ComfyApiService.initialize(
-                apiUrl: "http://213.173.110.102:15539",
+                apiUrl: globalSettings.comfyApiUrl ??
+                    "http://213.181.111.2:47718",
               );
             }
 
             // Load and prepare the workflow
             final workflow = await FaceswapWorkflow.getWorkflow();
+
+            // Update Supabase credentials in the workflow
+            workflow.updateSupabaseCredentials(
+              supabaseUrl: supabaseUrl,
+              supabaseKey: supabaseAnonKey,
+            );
 
             // Update image URLs in the workflow
             workflow.updateImageUrls(

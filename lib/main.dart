@@ -2,9 +2,8 @@ import 'package:camera_platform_interface/camera_platform_interface.dart';
 import 'package:camera_windows/camera_windows.dart';
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/core/themes/app_theme.dart';
-import 'package:photobooth_flutter/presentation/face_capture_screen.dart';
-import 'package:photobooth_flutter/presentation/loading_screen.dart';
 import 'package:photobooth_flutter/providers/admin_settings_provider.dart';
+import 'package:photobooth_flutter/providers/auth_provider.dart';
 import 'package:photobooth_flutter/providers/character_selection_provider.dart';
 import 'package:photobooth_flutter/providers/face_capture_provider.dart';
 import 'package:photobooth_flutter/providers/gender_selection_provider.dart';
@@ -15,12 +14,18 @@ import 'package:photobooth_flutter/providers/photobooth_provider.dart';
 import 'package:photobooth_flutter/providers/registration_screen_provider.dart';
 import 'package:photobooth_flutter/providers/welcome_screen_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
+import 'package:photobooth_flutter/services/auth_service.dart';
 import 'package:photobooth_flutter/services/supabase_service.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize auth service
+  await AuthService.instance.initialize(
+    apiUrl: 'http://localhost:3000', // Change this to your actual server URL
+  );
 
   // Initialize providers
   final globalSettings = GlobalSettingsProvider();
@@ -46,6 +51,10 @@ void main() async {
     await prefs.clear();
     await globalSettings.init();
   }
+
+  // Initialize auth provider
+  final authProvider = AuthProvider();
+  await authProvider.init();
 
   final welcomeSettings = WelcomeScreenProvider();
   try {
@@ -90,6 +99,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => PhotoboothProvider()),
         ChangeNotifierProvider.value(value: globalSettings),
+        ChangeNotifierProvider.value(value: authProvider),
         ChangeNotifierProvider.value(value: welcomeSettings),
         ChangeNotifierProvider.value(value: adminSettings),
         ChangeNotifierProvider.value(value: registrationSettings),
@@ -109,11 +119,15 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context);
+
     return MaterialApp(
       title: 'Photobooth App',
       theme: AppTheme.lightTheme,
       onGenerateRoute: AppRoutes.onGenerateRoute,
-      initialRoute: AppRoutes.welcomeScreen,
+      initialRoute: authProvider.isAuthenticated
+          ? AppRoutes.welcomeScreen
+          : AppRoutes.authScreen,
       // home: const LoadingScreen(),
       debugShowCheckedModeBanner: false,
     );

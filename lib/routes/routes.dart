@@ -7,8 +7,9 @@ import 'package:photobooth_flutter/presentation/admin/loading_screen_settings.da
 import 'package:photobooth_flutter/presentation/admin/output_screen_settings.dart';
 import 'package:photobooth_flutter/presentation/admin/registration_screen_settings.dart';
 import 'package:photobooth_flutter/presentation/admin/welcome_screen_settings.dart';
-import 'package:photobooth_flutter/presentation/face_capture_screen.dart';
+import 'package:photobooth_flutter/presentation/auth_screen.dart';
 import 'package:photobooth_flutter/presentation/character_selection_screen.dart';
+import 'package:photobooth_flutter/presentation/face_capture_screen.dart';
 import 'package:photobooth_flutter/presentation/gender_selection_screen.dart';
 import 'package:photobooth_flutter/presentation/loading_screen.dart';
 import 'package:photobooth_flutter/presentation/output_screen.dart';
@@ -17,6 +18,8 @@ import 'package:photobooth_flutter/presentation/welcome_screen.dart';
 
 class AppRoutes {
   // Main app flow
+  static const String authScreen = '/auth';
+
   static const String welcomeScreen = '/';
 
   static const String participantDetails = '/participant_details';
@@ -53,6 +56,9 @@ class AppRoutes {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
       // Main app flow
+      case authScreen:
+        return MaterialPageRoute(builder: (_) => const AuthScreen());
+
       case welcomeScreen:
         return MaterialPageRoute(builder: (_) => const WelcomeScreen());
 

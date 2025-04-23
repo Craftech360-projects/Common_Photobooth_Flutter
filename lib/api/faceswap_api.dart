@@ -31,6 +31,30 @@ class FaceswapWorkflow {
     }
   }
 
+  /// Update Supabase credentials in the workflow
+  void updateSupabaseCredentials({
+    required String supabaseUrl,
+    required String supabaseKey,
+  }) {
+    // Update credentials for node 28
+    if (_workflow.containsKey('28') && _workflow['28'].containsKey('inputs')) {
+      _workflow['28']['inputs']['supabase_url'] = supabaseUrl;
+      _workflow['28']['inputs']['supabase_key'] = supabaseKey;
+    }
+
+    // Update credentials for node 29
+    if (_workflow.containsKey('29') && _workflow['29'].containsKey('inputs')) {
+      _workflow['29']['inputs']['supabase_url'] = supabaseUrl;
+      _workflow['29']['inputs']['supabase_key'] = supabaseKey;
+    }
+
+    // Update credentials for node 30
+    if (_workflow.containsKey('30') && _workflow['30'].containsKey('inputs')) {
+      _workflow['30']['inputs']['supabase_url'] = supabaseUrl;
+      _workflow['30']['inputs']['supabase_key'] = supabaseKey;
+    }
+  }
+
   /// Update refresh trigger in the workflow
   void updateRefreshTrigger(int value) {
     if (_workflow.containsKey('28') && _workflow['28'].containsKey('inputs')) {
