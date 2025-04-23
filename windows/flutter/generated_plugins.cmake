@@ -5,6 +5,7 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   app_links
   camera_windows
+  flutter_secure_storage_windows
   media_kit_video
   url_launcher_windows
   volume_controller
