@@ -40,6 +40,7 @@ flutter:
     - assets/images/
     - assets/characters/
     - assets/videos/
+    - lib/api/faceswap_api.json
 
   fonts:
     - family: Satoshi

@@ -8,6 +8,8 @@ import 'package:camera_macos/camera_macos.dart';
 import 'package:camera_platform_interface/camera_platform_interface.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image/image.dart' as img;
+import 'package:path_provider/path_provider.dart';
 import 'package:photobooth_flutter/providers/face_capture_provider.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/providers/photobooth_provider.dart';
@@ -286,36 +288,109 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
   }
 
   Future<void> _takePicture() async {
-    try {
-      final XFile file = await CameraPlatform.instance.takePicture(_cameraId);
+    // Determine which platform logic to use
+    final isMacOS = Platform.isMacOS;
+    XFile? file; // Define file here so it's accessible after the if/else
 
-      // Verify file exists
-      final imageFile = File(file.path);
-      if (imageFile.existsSync()) {
+    // Use try-finally to ensure potential camera re-init happens even on success path if needed
+    try {
+      if (isMacOS) {
+        // --- macOS Picture Taking Logic ---
+        if (_macOSController == null) {
+          throw Exception("macOS controller is not initialized");
+        }
+
+        // Correctly expect CameraMacOSPicture?
+        final CameraMacOSFile? macOSPicture =
+            await _macOSController!.takePicture(); // Renamed for clarity
+
+        if (macOSPicture == null) {
+          // Check the picture object itself
+          throw Exception(
+              "macOS controller failed to take picture (returned null picture object)");
+        }
+        if (macOSPicture.bytes == null) {
+          // Also check if bytes are present
+          throw Exception(
+              "macOS controller failed to take picture (returned null bytes)");
+        }
+
+        // --- Convert Bitmap to File ---
+        // Get temporary directory
+        final Directory tempDir = await getTemporaryDirectory();
+        final String filePath =
+            '${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}.png';
+
+        // Create image directly from the bytes
+        // The CameraMacOSFile doesn't have width/height properties
+        // We need to save the bytes directly
+        await File(filePath).writeAsBytes(macOSPicture.bytes!);
+
+        // Create an XFile object from the saved path
+        file = XFile(filePath);
+        // --- End Bitmap to File ---
+
+        // --- End macOS Logic ---
       } else {
-        debugPrint('File does not exist at path: ${file.path}');
+        // --- Windows/Other Platform Picture Taking Logic ---
+        if (!_cameraInitialized || _controller == null || _cameraId < 0) {
+          throw Exception("Camera not ready or controller not initialized.");
+        }
+        file = await CameraPlatform.instance.takePicture(_cameraId);
+        
+        // --- End Windows/Other Logic ---
       }
 
-      // Temporarily dispose the camera controller before navigation
-      await _disposeCurrentCamera();
+      // Verify file exists (important!)
+      final imageFile = File(file.path); // Use file! (null check above)
+      if (!await imageFile.exists()) {
+        // Use await for async check
+        debugPrint('File does not exist at path: ${file.path}');
+        throw Exception("Captured image file does not exist at ${file.path}.");
+      } else {
+        debugPrint('File verified, exists at path: ${file.path}');
+      }
 
+      // --- Consider removing this disposal ---
+      // await _disposeCurrentCamera(); // Removed as discussed before
+
+      // --- Update Provider ---
+      // Use context safely
+      if (!mounted) return; // Check if widget is still in the tree
       final provider = context.read<PhotoboothProvider>();
+      provider.setFaceImage(file.path); // Use file!
 
-      // Set the face image path in the provider
-      provider.setFaceImage(file.path);
-
-      // Navigate to loading screen - the loading screen will handle the rest
+      // --- Navigate ---
       if (mounted) {
+        // Check again before async gap
         await Navigator.pushNamed(context, AppRoutes.loadingScreen);
       }
+      // --- End Common Logic ---
     } on Exception catch (e) {
+      // --- Error Handling ---
+      debugPrint("Error during _takePicture: $e"); // Log the specific error
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to take picture: $e')),
         );
-        // Try to reinitialize camera on error
-        await _initializeCamera();
+
+        // Ensure camera is disposed *before* trying to re-initialize (only non-macOS here)
+        if (_cameraInitialized && !isMacOS) {
+          debugPrint("Disposing non-macOS camera due to error...");
+          await _disposeCurrentCamera();
+        }
+
+        // Attempt re-initialization
+        if (!isMacOS) {
+          debugPrint("Re-initializing non-macOS camera...");
+          await _initializeCamera();
+        } else {
+          debugPrint("Re-initializing macOS camera...");
+          // Handle macOS re-initialization
+          await _initializeMacOSCamera();
+        }
       }
+      // --- End Error Handling ---
     }
   }
 

@@ -8,7 +8,6 @@ import 'package:photobooth_flutter/providers/photobooth_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
-
 class SwappedFaceScreen extends StatefulWidget {
   const SwappedFaceScreen({super.key});
 
@@ -208,52 +207,56 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
   }
 
   Widget _buildOutputImage() {
-    final provider = Provider.of<PhotoboothProvider>(context);
-    final capturedImageUrl = provider.capturedImageUrl;
+    final provider = Provider.of<PhotoboothProvider>(context, listen: false);
 
-    if (capturedImageUrl == null) {
+    // First try to use swappedImageUrl, then fall back to capturedImageUrl if needed
+    final imageUrl = provider.swappedImageUrl;
+    debugPrint('Attempting to load image from URL: $imageUrl');
+
+    if (imageUrl != null) {
+      return Image.network(
+        imageUrl,
+        fit: BoxFit.cover,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          debugPrint(
+              'Loading progress: ${loadingProgress.cumulativeBytesLoaded}/${loadingProgress.expectedTotalBytes}');
+          return Center(
+            child: CircularProgressIndicator(
+              value: loadingProgress.expectedTotalBytes != null
+                  ? loadingProgress.cumulativeBytesLoaded /
+                      loadingProgress.expectedTotalBytes!
+                  : null,
+            ),
+          );
+        },
+        errorBuilder: (context, error, stackTrace) {
+          debugPrint('Error loading image: $error');
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.error, color: Colors.red, size: 50),
+              const SizedBox(height: 10),
+              Text('Error: $error',
+                  style: const TextStyle(color: Colors.white)),
+            ],
+          );
+        },
+      );
+    } else {
       return const Center(
-        child: Text(
-          'No image available',
-          style: TextStyle(color: Colors.white),
-        ),
+        child:
+            Text('No image available', style: TextStyle(color: Colors.white)),
       );
     }
-
-    // Display the captured image from Supabase
-    return Image.network(
-      capturedImageUrl,
-      fit: BoxFit.cover,
-      loadingBuilder: (context, child, loadingProgress) {
-        if (loadingProgress == null) return child;
-        return Center(
-          child: CircularProgressIndicator(
-            value: loadingProgress.expectedTotalBytes != null
-                ? loadingProgress.cumulativeBytesLoaded /
-                    loadingProgress.expectedTotalBytes!
-                : null,
-            color: AppColors.goldenYellow,
-          ),
-        );
-      },
-      errorBuilder: (context, error, stackTrace) {
-        debugPrint('Error loading image: $error');
-        return Center(
-          child: Text(
-            'Failed to load image: $error',
-            style: const TextStyle(color: Colors.white),
-          ),
-        );
-      },
-    );
   }
 
   Widget _buildQrCodeWithText(OutputScreenProvider settings) {
     final provider = Provider.of<PhotoboothProvider>(context);
-    final capturedImageUrl = provider.capturedImageUrl;
+    final swappedImage = provider.swappedImageUrl;
 
     final qrCode = QrImageView(
-      data: capturedImageUrl ?? 'https://example.com/download-image',
+      data: swappedImage ?? 'https://example.com/download-image',
       version: QrVersions.auto,
       size: settings.qrCodeSize,
       backgroundColor: settings.qrCodeBackgroundColor,

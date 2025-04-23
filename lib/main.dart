@@ -24,7 +24,7 @@ void main() async {
 
   // Initialize auth service
   await AuthService.instance.initialize(
-    apiUrl: 'http://localhost:3000', // Change this to your actual server URL
+    apiUrl: 'http://localhost:3000',
   );
 
   // Initialize providers

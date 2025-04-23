@@ -112,7 +112,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
             url: supabaseUrl,
             anonKey: supabaseAnonKey,
           );
-        } catch (e) {
+        } on Exception catch (e) {
           setState(() {
             _isProcessing = false;
             _errorMessage = 'Failed to initialize Supabase: $e';
@@ -126,9 +126,9 @@ class _LoadingScreenState extends State<LoadingScreen> {
         // Generate a unique user ID
         final userId = DateTime.now().millisecondsSinceEpoch.toString();
 
-        // Upload face image to Supabase
-        final faceImageUrl =
-            await SupabaseService.instance.uploadImage(imageFile, userId);
+        // Upload face image to Supabase using the new method
+        final faceImageUrl = await SupabaseService.instance
+            .uploadUserFaceImage(imageFile, userId);
 
         if (faceImageUrl != null) {
           // Store participant details in Supabase
@@ -153,18 +153,26 @@ class _LoadingScreenState extends State<LoadingScreen> {
                   File('${tempDir.path}/character_$characterId.png');
               await tempFile.writeAsBytes(assetBytes.buffer.asUint8List());
 
-              characterImageUrl = await SupabaseService.instance.uploadImage(
+              characterImageUrl =
+                  await SupabaseService.instance.uploadCharacterImage(
                 tempFile,
                 'character_$characterId',
               );
             } else if (characterImagePath != null) {
               // For file images, upload directly
-              characterImageUrl = await SupabaseService.instance.uploadImage(
+              characterImageUrl =
+                  await SupabaseService.instance.uploadCharacterImage(
                 File(characterImagePath),
                 'character_$characterId',
               );
             }
 
+            // Add this code to store character details in the characters table
+            await SupabaseService.instance.storeCharacterDetails(
+              characterId: characterId!,
+              name: "Character $characterId",
+              imageUrl: characterImageUrl,
+            );
             if (characterImageUrl == null) {
               setState(() {
                 _isProcessing = false;
@@ -177,7 +185,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
             if (!ComfyApiService.isInitialized) {
               await ComfyApiService.initialize(
                 apiUrl: globalSettings.comfyApiUrl ??
-                    "http://213.181.111.2:47718",
+                    "http://213.173.110.140:18891",
               );
             }
 
@@ -185,10 +193,10 @@ class _LoadingScreenState extends State<LoadingScreen> {
             final workflow = await FaceswapWorkflow.getWorkflow();
 
             // Update Supabase credentials in the workflow
-            workflow.updateSupabaseCredentials(
-              supabaseUrl: supabaseUrl,
-              supabaseKey: supabaseAnonKey,
-            );
+            // workflow.updateSupabaseCredentials(
+            //   supabaseUrl: supabaseUrl,
+            //   supabaseKey: supabaseAnonKey,
+            // );
 
             // Update image URLs in the workflow
             workflow.updateImageUrls(
@@ -200,25 +208,51 @@ class _LoadingScreenState extends State<LoadingScreen> {
             final refreshTrigger = DateTime.now().millisecondsSinceEpoch;
             workflow.updateRefreshTrigger(refreshTrigger);
 
+            // In the _processImage method, modify the workflow sending section:
+            
             // Send workflow to backend
             if (ComfyApiService.isInitialized) {
               try {
+                debugPrint('Sending workflow to ComfyAPI...');
                 final result = await ComfyApiService.instance.sendWorkflow(
                   workflow: workflow,
                 );
-
+                
+                debugPrint('ComfyAPI response: $result');
+            
                 if (result['status'] == 'success') {
                   final promptId = result['prompt_id'];
-                  debugPrint(
-                      'Workflow sent successfully with prompt ID: $promptId');
-
-                  // Here you would typically poll for results or wait for a webhook
-                  // For now, we'll just update the UI
-                  provider.setCapturedImageUrl(result['image_url']);
-
+                  final imageUrl = result['image_url'];
+                  debugPrint('Workflow sent successfully with prompt ID: $promptId');
+                  debugPrint('Image URL from ComfyAPI: $imageUrl');
+            
+                  // Set the ComfyAPI URL first (temporary)
+                  provider.setSwappedImage(imageUrl);
+                  
+                  // Also set the captured URL as a fallback
+                  provider.setCapturedImageUrl(imageUrl);
+            
+                  // Wait a moment for the image to be uploaded to Supabase
+                  await Future.delayed(const Duration(seconds: 2));
+            
+                  // Try to get the Supabase URL (permanent)
+                  final supabaseImageUrl = await SupabaseService.instance
+                      .getLatestOutputImage(participantId);
+                      
+                  debugPrint('Supabase image URL: $supabaseImageUrl');
+            
+                  if (supabaseImageUrl != null) {
+                    // Update with the permanent URL
+                    provider.setSwappedImage(supabaseImageUrl);
+                    provider.setCapturedImageUrl(supabaseImageUrl);
+                  }
+            
                   // Navigate to output screen
-                  await Navigator.of(context)
-                      .pushReplacementNamed(AppRoutes.swappedFace);
+                  if (mounted) {
+                    debugPrint('Navigating to output screen...');
+                    await Navigator.of(context)
+                        .pushReplacementNamed(AppRoutes.swappedFace);
+                  }
                 } else {
                   setState(() {
                     _isProcessing = false;
@@ -390,9 +424,9 @@ class _LoadingScreenState extends State<LoadingScreen> {
             child: VideoPlayer(_controller!),
           );
         }
-        return const CircularProgressIndicator();
+        return const Center(child: CircularProgressIndicator());
       default:
-        return const CircularProgressIndicator();
+        return const Center(child: CircularProgressIndicator());
     }
   }
 
