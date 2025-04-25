@@ -2,9 +2,8 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:photobooth_flutter/api/faceswap_api.dart';
+import 'package:photobooth_flutter/api/ghibli_api.dart';
+import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/providers/loading_screen_provider.dart';
 import 'package:photobooth_flutter/providers/photobooth_provider.dart';
@@ -88,8 +87,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
       final name = provider.name ?? '';
       final email = provider.email ?? '';
       final gender = provider.selectedGender;
-      final characterId = provider.selectedCharacterId;
-      final characterImagePath = provider.characterImagePath;
 
       // Get Supabase credentials from global settings
       final supabaseUrl = globalSettings.supabaseUrl;
@@ -137,134 +134,95 @@ class _LoadingScreenState extends State<LoadingScreen> {
             name: name,
             email: email,
             gender: gender,
-            characterId: characterId,
             imageUrl: faceImageUrl,
           );
 
           if (participantId != null) {
-            // Get character image URL
-            String? characterImageUrl;
-            if (provider.isCharacterAsset == true &&
-                characterImagePath != null) {
-              // For asset images, we need to upload them to Supabase first
-              final assetBytes = await rootBundle.load(characterImagePath);
-              final tempDir = await getTemporaryDirectory();
-              final tempFile =
-                  File('${tempDir.path}/character_$characterId.png');
-              await tempFile.writeAsBytes(assetBytes.buffer.asUint8List());
-
-              characterImageUrl =
-                  await SupabaseService.instance.uploadCharacterImage(
-                tempFile,
-                'character_$characterId',
-              );
-            } else if (characterImagePath != null) {
-              // For file images, upload directly
-              characterImageUrl =
-                  await SupabaseService.instance.uploadCharacterImage(
-                File(characterImagePath),
-                'character_$characterId',
-              );
-            }
-
-            // Add this code to store character details in the characters table
-            await SupabaseService.instance.storeCharacterDetails(
-              characterId: characterId!,
-              name: "Character $characterId",
-              imageUrl: characterImageUrl,
-            );
-            if (characterImageUrl == null) {
-              setState(() {
-                _isProcessing = false;
-                _errorMessage = 'Failed to upload character image';
-              });
-              return;
-            }
-
             // Initialize ComfyAPI service if not already initialized
             if (!ComfyApiService.isInitialized) {
               await ComfyApiService.initialize(
                 apiUrl: globalSettings.comfyApiUrl ??
-                    "http://213.173.110.140:18891",
+                    "http://213.173.109.100:12508",
               );
             }
 
-            // Load and prepare the workflow
-            final workflow = await FaceswapWorkflow.getWorkflow();
+            // Load and prepare the Ghibli workflow
+            final workflow = await GhibliWorkflow.getWorkflow();
+            print("workflow: ${workflow.toString()}");
 
-            // Update Supabase credentials in the workflow
-            // workflow.updateSupabaseCredentials(
-            //   supabaseUrl: supabaseUrl,
-            //   supabaseKey: supabaseAnonKey,
-            // );
-
-            // Update image URLs in the workflow
-            workflow.updateImageUrls(
-              sourceImageUrl: characterImageUrl,
-              targetImageUrl: faceImageUrl,
+            // Update face image URL in the workflow
+            workflow.updateFaceImageUrl(
+              faceImageUrl: faceImageUrl,
             );
 
-            // Update refresh trigger with a random value
-            final refreshTrigger = DateTime.now().millisecondsSinceEpoch;
-            workflow.updateRefreshTrigger(refreshTrigger);
-
-            // In the _processImage method, modify the workflow sending section:
+            // Update noise seed for randomization
+            final seed = DateTime.now().millisecondsSinceEpoch;
+            workflow.updateNoiseSeed(seed);
 
             // Send workflow to backend
             if (ComfyApiService.isInitialized) {
               try {
-                debugPrint('Sending workflow to ComfyAPI...');
-                final result = await ComfyApiService.instance.sendWorkflow(
-                  workflow: workflow,
+                debugPrint('Sending Ghibli workflow to ComfyAPI...');
+                // Send the workflow and get the response with sent time
+                final response = await ComfyApiService.instance.sendWorkflow(
+                  ghibliWorkflow: workflow,
                 );
 
-                debugPrint('ComfyAPI response: $result');
+                // Store the workflow sent time in the provider
+                if (response.containsKey('sentTime')) {
+                  final sentTimeStr = response['sentTime'] as String;
+                  final sentTime = DateTime.parse(sentTimeStr);
+                  provider.setWorkflowSentTime(sentTime);
+                  debugPrint('Workflow sent at: $sentTimeStr');
+                } else {
+                  // If no sent time in response, use current time
+                  provider.setWorkflowSentTime(DateTime.now());
+                }
 
-                if (result['status'] == 'success') {
-                  final promptId = result['prompt_id'];
-                  final imageUrl = result['image_url'];
-                  debugPrint(
-                      'Workflow sent successfully with prompt ID: $promptId');
-                  debugPrint('Image URL from ComfyAPI: $imageUrl');
+                // Start polling Supabase for the new image
+                int attempts = 0;
+                const maxAttempts =
+                    30; // 30 attempts with 2 second delay = 1 minute max
+                const pollDelay = Duration(seconds: 2);
 
-                  // Set the ComfyAPI URL first (temporary)
-                  provider.setSwappedImage(imageUrl);
-
-                  // Also set the captured URL as a fallback
-                  provider.setCapturedImageUrl(imageUrl);
-
-                  // Wait a moment for the image to be uploaded to Supabase
-                  await Future.delayed(const Duration(seconds: 2));
-
-                  // Try to get the Supabase URL (permanent)
-                  final supabaseImageUrl = await SupabaseService.instance
-                      .getLatestOutputImage(participantId);
-
-                  debugPrint('Supabase image URL: $supabaseImageUrl');
+                while (attempts < maxAttempts) {
+                  // Check for new image in Supabase, passing the workflow sent time
+                  final supabaseImageUrl =
+                      await SupabaseService.instance.getLatestOutputImage(
+                    participantId,
+                    afterTime: provider.workflowSentTime,
+                  );
 
                   if (supabaseImageUrl != null) {
-                    // Update with the permanent URL
+                    debugPrint(
+                        'Found new image in Supabase: $supabaseImageUrl');
+                    // Update the URLs in the provider
                     provider.setSwappedImage(supabaseImageUrl);
                     provider.setCapturedImageUrl(supabaseImageUrl);
+
+                    // Navigate to output screen
+                    if (mounted) {
+                      debugPrint('Navigating to output screen...');
+                      await Navigator.of(context)
+                          .pushReplacementNamed(AppRoutes.swappedFace);
+                    }
+                    return;
                   }
 
-                  // Navigate to output screen
-                  if (mounted) {
-                    debugPrint('Navigating to output screen...');
-                    await Navigator.of(context)
-                        .pushReplacementNamed(AppRoutes.swappedFace);
-                  }
-                } else {
-                  setState(() {
-                    _isProcessing = false;
-                    _errorMessage =
-                        'Failed to process image: ${result['message']}';
-                  });
+                  // Wait before next attempt
+                  await Future.delayed(pollDelay);
+                  attempts++;
                 }
+
+                // If we get here, we've timed out waiting for the image
+                setState(() {
+                  _isProcessing = false;
+                  _errorMessage = 'Timed out waiting for image processing';
+                });
               } on Exception catch (e) {
                 setState(() {
                   _isProcessing = false;
-                  _errorMessage = 'Error sending workflow: $e';
+                  _errorMessage = 'Error processing image: $e';
                 });
               }
             } else {
@@ -282,21 +240,14 @@ class _LoadingScreenState extends State<LoadingScreen> {
         } else {
           setState(() {
             _isProcessing = false;
-            _errorMessage = 'Failed to upload image';
+            _errorMessage = 'Failed to upload face image';
           });
         }
       } else {
-        debugPrint('Supabase not initialized, using dummy URL');
-        // For testing without Supabase, set a dummy URL
-        provider.setCapturedImageUrl('https://example.com/dummy-image.jpg');
-
-        // Add a short delay to simulate processing
-        await Future.delayed(const Duration(seconds: 2));
-
-        // Navigate to the output screen
-        if (mounted) {
-          await Navigator.pushReplacementNamed(context, AppRoutes.swappedFace);
-        }
+        setState(() {
+          _isProcessing = false;
+          _errorMessage = 'Supabase not initialized';
+        });
       }
     } on Exception catch (e) {
       debugPrint('Error processing image: $e');
@@ -348,13 +299,13 @@ class _LoadingScreenState extends State<LoadingScreen> {
     return Consumer2<LoadingScreenProvider, GlobalSettingsProvider>(
       builder: (context, loadingSettings, globalSettings, child) {
         return Scaffold(
-          appBar: AppBar(
-            leading: IconButton(
-              onPressed: () =>
-                  Navigator.pushNamed(context, AppRoutes.loadingScreenSettings),
-              icon: const Icon(Icons.star),
-            ),
-          ),
+          // appBar: AppBar(
+          //   leading: IconButton(
+          //     onPressed: () =>
+          //         Navigator.pushNamed(context, AppRoutes.loadingScreenSettings),
+          //     icon: const Icon(Icons.star),
+          //   ),
+          // ),
           body: Container(
             width: double.infinity,
             height: double.infinity,
@@ -401,7 +352,10 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
   Widget _buildLoader(LoadingScreenProvider settings) {
     if (settings.loaderFilePath == null) {
-      return const CircularProgressIndicator();
+      return const Center(
+          child: CircularProgressIndicator(
+        color: AppColors.white,
+      ));
     }
 
     switch (settings.loaderFileType) {
@@ -425,9 +379,17 @@ class _LoadingScreenState extends State<LoadingScreen> {
             child: VideoPlayer(_controller!),
           );
         }
-        return const Center(child: CircularProgressIndicator());
+        return const Center(
+            child: Center(
+                child: CircularProgressIndicator(
+          color: AppColors.white,
+        )));
       default:
-        return const Center(child: CircularProgressIndicator());
+        return const Center(
+            child: Center(
+                child: CircularProgressIndicator(
+          color: AppColors.white,
+        )));
     }
   }
 

@@ -156,31 +156,60 @@ class SupabaseService {
   }
 
   // Get the most recent output image for a user
-  Future<String?> getLatestOutputImage(String userId) async {
+  Future<String?> getLatestOutputImage(String participantId,
+      {DateTime? afterTime}) async {
     if (!_isInitialized) {
       throw Exception('Supabase not initialized');
     }
 
     try {
-      // List files in the outputimages bucket, sorted by creation time
-      final response = await _client.storage.from('outputimages').list(
-              searchOptions: const SearchOptions(
-            sortBy: SortBy(
-              column: 'created_at',
-              order: 'desc',
-            ),
-            limit: 1,
-          ));
+      // List files from the 'outputimages' bucket without server-side sorting
+      final fileList = await _client.storage.from('outputimages').list();
 
-      if (response.isNotEmpty) {
-        // Get the public URL of the most recent file
-        final fileName = response.first.name;
-        debugPrint('Found latest output image: $fileName');
-        return _client.storage.from('outputimages').getPublicUrl(fileName);
+      if (fileList.isEmpty) {
+        debugPrint('No images found in the outputimages bucket');
+        return null;
       }
-      
-      debugPrint('No output images found in the bucket');
-      return null;
+
+      // Sort the list manually in Dart based on createdAt (most recent first)
+      fileList.sort((a, b) {
+        final aDate =
+            a.createdAt != null ? DateTime.tryParse(a.createdAt!) : null;
+        final bDate =
+            b.createdAt != null ? DateTime.tryParse(b.createdAt!) : null;
+
+        if (bDate == null) return -1; // Treat nulls as older
+        if (aDate == null) return 1; // Treat nulls as older
+        return bDate.compareTo(aDate); // Compare actual dates (descending)
+      });
+
+      List<FileObject> filesToConsider = fileList;
+
+      // Filter by time if needed
+      if (afterTime != null) {
+        filesToConsider = fileList.where((file) {
+          final fileDate = file.createdAt != null
+              ? DateTime.tryParse(file.createdAt!)
+              : null;
+          // Keep the file if its date is not null and is after the specified time
+          return fileDate != null && fileDate.isAfter(afterTime);
+        }).toList();
+
+        if (filesToConsider.isEmpty) {
+          debugPrint('No images found after: ${afterTime.toIso8601String()}');
+          return null;
+        }
+      }
+
+      // Get the most recent file from the (potentially filtered) list
+      final latestFile = filesToConsider.first;
+      debugPrint(
+          'Found image: ${latestFile.name}, created at: ${latestFile.createdAt}');
+
+      // Get public URL for the file
+      final imageUrl =
+          _client.storage.from('outputimages').getPublicUrl(latestFile.name);
+      return imageUrl;
     } on Exception catch (e) {
       debugPrint('Error getting latest output image: $e');
       return null;

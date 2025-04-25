@@ -42,7 +42,7 @@ flutter:
     - assets/images/
     - assets/characters/
     - assets/videos/
-    - lib/api/faceswap_api.json
+    - lib/api/ghibli.json
 
   fonts:
     - family: Satoshi

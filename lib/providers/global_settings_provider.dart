@@ -77,7 +77,7 @@ class GlobalSettingsProvider with ChangeNotifier {
 
     // Load ComfyAPI settings
     _comfyApiUrl =
-        _prefs.getString('comfy_api_url') ?? 'http://213.173.110.140:18891';
+        _prefs.getString('comfy_api_url') ?? 'http://213.173.109.100:12508';
 
     notifyListeners();
   }

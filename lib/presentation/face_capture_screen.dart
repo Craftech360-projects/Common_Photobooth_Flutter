@@ -425,13 +425,13 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
     final globalSettings = context.watch<GlobalSettingsProvider>();
 
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          onPressed: () =>
-              Navigator.pushNamed(context, AppRoutes.faceCaptureSettings),
-          icon: const Icon(Icons.star),
-        ),
-      ),
+      // appBar: AppBar(
+      //   leading: IconButton(
+      //     onPressed: () =>
+      //         Navigator.pushNamed(context, AppRoutes.faceCaptureSettings),
+      //     icon: const Icon(Icons.star),
+      //   ),
+      // ),
 
       //   // actions: [
       //   //   // Add camera switch button if there are multiple cameras

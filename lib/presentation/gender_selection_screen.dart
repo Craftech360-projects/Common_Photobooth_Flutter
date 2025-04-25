@@ -162,75 +162,60 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
 
   Widget _buildButton(
       GenderSelectionProvider settings, PhotoboothProvider appProvider) {
-    if (settings.useImageButton && settings.buttonImagePath != null) {
-      // Image Button with padding
-      return GestureDetector(
-        onTap: () => _validateAndContinue(appProvider),
-        child: Container(
-          width: settings.buttonWidth,
-          height: settings.buttonHeight,
-          padding: settings.buttonPadding,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
-            border: settings.buttonHasBorder
-                ? Border.all(
-                    color: settings.buttonBorderColor,
-                    width: settings.buttonBorderWidth,
-                  )
-                : null,
-            image: DecorationImage(
-              image: settings.isButtonImageAsset
-                  ? AssetImage(settings.buttonImagePath!)
-                  : FileImage(File(settings.buttonImagePath!)) as ImageProvider,
-              fit: BoxFit.cover,
-            ),
-          ),
-        ),
-      );
-    } else {
-      // Text Button with padding
-      return ElevatedButton(
-        onPressed: () => _validateAndContinue(appProvider),
+    return SizedBox(
+      width: settings.buttonWidth,
+      height: settings.buttonHeight,
+      child: ElevatedButton(
+        onPressed: () {
+          if (_selectedGender == null) {
+            setState(() {
+              _showError = true;
+            });
+            return;
+          }
+
+          // Set the gender in the provider
+          appProvider.setGender(_selectedGender!);
+
+          // Navigate directly to face capture screen instead of character selection
+          Navigator.pushNamed(context, AppRoutes.faceCapture);
+        },
         style: ElevatedButton.styleFrom(
           backgroundColor: settings.buttonColor,
-          foregroundColor: settings.buttonTextColor,
-          minimumSize: Size(settings.buttonWidth, settings.buttonHeight),
-          padding: settings.buttonPadding,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
-            side: settings.buttonHasBorder
-                ? BorderSide(
-                    color: settings.buttonBorderColor,
-                    width: settings.buttonBorderWidth,
-                  )
-                : BorderSide.none,
           ),
         ),
-        child: Text(
-          settings.buttonText,
-          style: TextStyle(
-            fontSize: settings.buttonFontSize,
-            fontWeight: settings.buttonFontWeight,
-          ),
-        ),
-      );
-    }
+        child: settings.useImageButton && settings.buttonImagePath != null
+            ? Image.file(
+                File(settings.buttonImagePath!),
+                fit: BoxFit.contain,
+              )
+            : Text(
+                settings.buttonText,
+                style: TextStyle(
+                  color: settings.buttonTextColor,
+                  fontSize: settings.buttonFontSize,
+                ),
+              ),
+      ),
+    );
   }
 
-  void _validateAndContinue(PhotoboothProvider appProvider) {
-    if (_selectedGender == null) {
-      setState(() {
-        _showError = true;
-      });
-    } else {
-      _continueToNextScreen(appProvider);
-    }
-  }
+  // void _validateAndContinue(PhotoboothProvider appProvider) {
+  //   if (_selectedGender == null) {
+  //     setState(() {
+  //       _showError = true;
+  //     });
+  //   } else {
+  //     _continueToNextScreen(appProvider);
+  //   }
+  // }
 
-  void _continueToNextScreen(PhotoboothProvider appProvider) {
-    appProvider.setGender(_selectedGender!);
-    Navigator.pushNamed(context, AppRoutes.characterSelection);
-  }
+  // void _continueToNextScreen(PhotoboothProvider appProvider) {
+  //   appProvider.setGender(_selectedGender!);
+  //   Navigator.pushNamed(context, AppRoutes.characterSelection);
+  // }
 
   ImageProvider _getBackgroundImage(
       GenderSelectionProvider settings, GlobalSettingsProvider globalSettings) {

@@ -10,6 +10,7 @@ class PhotoboothProvider extends ChangeNotifier {
   String? faceImagePath;
   String? swappedImageUrl;
   String? capturedImageUrl; // Add this property to store the captured image URL
+  DateTime? workflowSentTime; // Add this to track when workflow was sent
 
   String get selectedGender => gender ?? 'male'; // Default to male if not set
 
@@ -44,7 +45,12 @@ class PhotoboothProvider extends ChangeNotifier {
 
   void setCapturedImageUrl(String url) {
     capturedImageUrl = url;
+    notifyListeners();
+  }
 
+  // Add method to set workflow sent time
+  void setWorkflowSentTime(DateTime time) {
+    workflowSentTime = time;
     notifyListeners();
   }
 
@@ -59,6 +65,7 @@ class PhotoboothProvider extends ChangeNotifier {
     faceImagePath = null;
     swappedImageUrl = null;
     capturedImageUrl = null; // Clear this as well
+    workflowSentTime = null; // Clear this as well
     notifyListeners();
   }
 }
