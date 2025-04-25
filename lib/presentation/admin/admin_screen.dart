@@ -1,9 +1,12 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/core/constants/constants.dart';
+import 'package:photobooth_flutter/providers/admin_watermark_provider.dart';
+import 'package:photobooth_flutter/providers/auth_provider.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
 import 'package:photobooth_flutter/widgets/snackbar.dart';
+import 'package:photobooth_flutter/widgets/watermark_overlay.dart';
 import 'package:provider/provider.dart';
 
 class AdminScreen extends StatefulWidget {
@@ -25,49 +28,53 @@ class _AdminScreenState extends State<AdminScreen> {
           Provider.of<GlobalSettingsProvider>(context, listen: false);
       _supabaseUrlController.text = globalSettings.supabaseUrl ?? '';
       _supabaseAnonKeyController.text = globalSettings.supabaseAnonKey ?? '';
+
+      // Set watermark visibility based on authentication status
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final watermarkProvider =
+          Provider.of<AdminWatermarkProvider>(context, listen: false);
+      watermarkProvider.setShowWatermark(!authProvider.isAuthenticated);
     });
   }
 
   @override
-  void dispose() {
-    _supabaseUrlController.dispose();
-    _supabaseAnonKeyController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final watermarkProvider = context.watch<AdminWatermarkProvider>();
+
     return Scaffold(
       appBar: AppBar(),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Global Settings',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            _GlobalSettingsSection(
-              supabaseUrlController: _supabaseUrlController,
-              supabaseAnonKeyController: _supabaseAnonKeyController,
-            ),
-            const Divider(height: 32),
-            const Text(
-              'Screen Settings',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            _ScreenSettingsSection(),
-            const Divider(height: 32),
-            const Text(
-              'Advanced Settings',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            _buildAdvancedSettings(),
-          ],
+      body: WatermarkOverlay(
+        show: watermarkProvider.showWatermark,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Global Settings',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              _GlobalSettingsSection(
+                supabaseUrlController: _supabaseUrlController,
+                supabaseAnonKeyController: _supabaseAnonKeyController,
+              ),
+              const Divider(height: 32),
+              const Text(
+                'Screen Settings',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              _ScreenSettingsSection(),
+              const Divider(height: 32),
+              const Text(
+                'Advanced Settings',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              _buildAdvancedSettings(),
+            ],
+          ),
         ),
       ),
     );

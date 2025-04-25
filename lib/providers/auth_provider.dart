@@ -1,17 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:photobooth_flutter/providers/admin_watermark_provider.dart';
 import 'package:photobooth_flutter/services/auth_service.dart';
 import 'package:photobooth_flutter/services/license_service.dart';
+import 'package:provider/provider.dart';
 
 class AuthProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _error;
   bool _isAuthenticated = false;
+  BuildContext? _context;
 
   bool get isLoading => _isLoading;
   String? get error => _error;
   bool get isAuthenticated => _isAuthenticated;
 
-    void setError(String? errorMessage) {
+  // Set context for accessing other providers
+  void setContext(BuildContext context) {
+    _context = context;
+  }
+
+  void setError(String? errorMessage) {
     _error = errorMessage;
     notifyListeners();
   }
@@ -28,6 +36,9 @@ class AuthProvider extends ChangeNotifier {
       if (!_isAuthenticated) {
         _isAuthenticated = await LicenseService.instance.isLicenseValid();
       }
+
+      // Update watermark visibility based on authentication status
+      _updateWatermarkVisibility();
     } on Exception catch (e) {
       _error = 'Failed to check authentication status: $e';
     } finally {
@@ -37,10 +48,8 @@ class AuthProvider extends ChangeNotifier {
   }
 
   // Existing online verification method
-  Future<bool> verifyAuthCode({
-    required String eventId,
-    required String authCode,
-  }) async {
+  Future<bool> verifyAuthCode(
+      {required String eventId, required String authCode}) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -53,6 +62,7 @@ class AuthProvider extends ChangeNotifier {
 
       if (response.success) {
         _isAuthenticated = true;
+        _updateWatermarkVisibility();
       } else {
         _error = response.message ?? 'Authentication failed';
       }
@@ -78,6 +88,7 @@ class AuthProvider extends ChangeNotifier {
 
       if (result.isValid) {
         _isAuthenticated = true;
+        _updateWatermarkVisibility();
       } else {
         _error = result.message;
       }
@@ -100,11 +111,27 @@ class AuthProvider extends ChangeNotifier {
       await AuthService.instance.logout();
       await LicenseService.instance.logout();
       _isAuthenticated = false;
+      _updateWatermarkVisibility();
     } on Exception catch (e) {
       _error = 'Failed to logout: $e';
     } finally {
       _isLoading = false;
       notifyListeners();
+    }
+  }
+
+  // Helper method to update watermark visibility
+  void _updateWatermarkVisibility() {
+    if (_context != null) {
+      try {
+        final watermarkProvider = Provider.of<AdminWatermarkProvider>(
+          _context!,
+          listen: false,
+        );
+        watermarkProvider.setShowWatermark(!_isAuthenticated);
+      } on Exception catch (e) {
+        debugPrint('Error updating watermark visibility: $e');
+      }
     }
   }
 }

@@ -3,6 +3,7 @@ import 'package:camera_windows/camera_windows.dart';
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/core/themes/app_theme.dart';
 import 'package:photobooth_flutter/providers/admin_settings_provider.dart';
+import 'package:photobooth_flutter/providers/admin_watermark_provider.dart';
 import 'package:photobooth_flutter/providers/auth_provider.dart';
 import 'package:photobooth_flutter/providers/character_selection_provider.dart';
 import 'package:photobooth_flutter/providers/face_capture_provider.dart';
@@ -108,6 +109,7 @@ void main() async {
         ChangeNotifierProvider.value(value: faceCaptureProvider),
         ChangeNotifierProvider.value(value: loadingScreenProvider),
         ChangeNotifierProvider.value(value: outputScreenProvider),
+        ChangeNotifierProvider(create: (_) => AdminWatermarkProvider()),
       ],
       child: const MyApp(),
     ),
@@ -120,6 +122,16 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
+
+    // Set context in AuthProvider for watermark control
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      authProvider.setContext(context);
+
+      // Initialize watermark state based on current authentication
+      final watermarkProvider =
+          Provider.of<AdminWatermarkProvider>(context, listen: false);
+      watermarkProvider.setShowWatermark(!authProvider.isAuthenticated);
+    });
 
     return MaterialApp(
       title: 'Photobooth App',
