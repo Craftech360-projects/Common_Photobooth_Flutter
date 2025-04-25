@@ -80,6 +80,13 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
+  // Add this method to handle license text input
+  // void _handleLicenseTextChange(String value) {
+  //   setState(() {
+  //     _licenseContent = value;
+  //   });
+  // }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
