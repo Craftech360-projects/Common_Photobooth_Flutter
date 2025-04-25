@@ -70,7 +70,7 @@ class AuthService {
           message: 'Server error: ${response.statusCode}',
         );
       }
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('Exception verifying auth code: $e');
       return AuthResponse(
         success: false,

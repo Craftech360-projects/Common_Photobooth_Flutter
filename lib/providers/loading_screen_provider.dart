@@ -278,7 +278,7 @@ class LoadingScreenProvider extends ChangeNotifier {
         _isLoaderFileAsset =
             settings['isLoaderFileAsset'] ?? _isLoaderFileAsset;
         _loaderFileType = settings['loaderFileType'] ?? _loaderFileType;
-      } catch (e) {
+      } on Exception catch (e) {
         debugPrint('Error loading settings: $e');
       }
     }

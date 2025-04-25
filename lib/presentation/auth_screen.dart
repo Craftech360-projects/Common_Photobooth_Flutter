@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:photobooth_flutter/core/constants/constants.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/providers/auth_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
@@ -131,7 +132,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.3),
+                    color: Colors.black.withValues(alpha: 0.3),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                   ),
@@ -165,7 +166,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       fontFamily: 'Satoshi',
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  Constants.h8,
 
                   // Toggle between auth methods
                   Row(
@@ -199,7 +200,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  Constants.h16,
 
                   // Form
                   Form(
@@ -225,7 +226,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             },
                             enabled: !authProvider.isLoading,
                           ),
-                          const SizedBox(height: 16),
+                          Constants.h16,
 
                           // Auth code field
                           TextFormField(
@@ -278,7 +279,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 16),
+                              Constants.h16,
                               const Text(
                                 'OR',
                                 style: TextStyle(
@@ -286,7 +287,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              const SizedBox(height: 16),
+                              Constants.h16,
                               TextFormField(
                                 decoration: InputDecoration(
                                   labelText: 'Paste License Certificate',
@@ -307,7 +308,7 @@ class _AuthScreenState extends State<AuthScreen> {
                           ),
                         ],
                         if (authProvider.error != null) ...[
-                          const SizedBox(height: 16),
+                          Constants.h16,
                           Text(
                             authProvider.error!,
                             style: const TextStyle(
@@ -351,6 +352,33 @@ class _AuthScreenState extends State<AuthScreen> {
                                   ),
                           ),
                         ),
+                        Constants.h8,
+                        RichText(
+                          text: TextSpan(
+                            children: [
+                              const TextSpan(
+                                text: "Checkout application from here: ",
+                                style: TextStyle(color: Colors.black),
+                              ),
+                              WidgetSpan(
+                                alignment: PlaceholderAlignment.middle,
+                                child: InkWell(
+                                  onTap: () {
+                                    Navigator.pushNamed(
+                                        context, AppRoutes.welcomeScreen);
+                                  },
+                                  child: const Text(
+                                    "Click Here",
+                                    style: TextStyle(
+                                      color: Colors.blue,
+                                      decoration: TextDecoration.none,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
                       ],
                     ),
                   ),

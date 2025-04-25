@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:photobooth_flutter/core/constants/constants.dart';
 
 class WatermarkOverlay extends StatelessWidget {
   final Widget child;
@@ -23,9 +24,9 @@ class WatermarkOverlay extends StatelessWidget {
                 Positioned.fill(
                   child: CustomPaint(
                     painter: DiagonalStripePainter(
-                      color: Colors.orange.withValues(alpha: 0.15),
+                      color: Colors.orange.withValues(alpha: 0.2),
                       isTopLeftToBottomRight: true,
-                      stripeWidth: 150,
+                      stripeWidth: 50,
                     ),
                   ),
                 ),
@@ -34,9 +35,9 @@ class WatermarkOverlay extends StatelessWidget {
                 Positioned.fill(
                   child: CustomPaint(
                     painter: DiagonalStripePainter(
-                      color: Colors.orange.withValues(alpha: 0.15),
+                      color: Colors.orange.withValues(alpha: 0.2),
                       isTopLeftToBottomRight: false,
-                      stripeWidth: 150,
+                      stripeWidth: 50,
                     ),
                   ),
                 ),
@@ -51,23 +52,22 @@ class WatermarkOverlay extends StatelessWidget {
                         width: 100,
                         height: 100,
                         decoration: BoxDecoration(
-                          color: Colors.orange.withValues(alpha: 0.3),
+                          color: Colors.orange.withValues(alpha: 0.5),
                           shape: BoxShape.circle,
                         ),
                         child: Center(
                             child: Image.asset(
                           'assets/images/cft_logo.png',
-                          width: 100,
-                          height: 100,
-                          color: Colors.white.withValues(alpha: 0.8),
+                          width: 80,
+                          height: 80,
+                          color: Colors.white.withValues(alpha: 0.6),
                         )),
                       ),
-                      const SizedBox(height: 16),
-                      // Watermark text
+                      Constants.h16,
                       Text(
-                        'CRAFTECH360 TRIAL VERSION',
+                        'CRAFTECH360',
                         style: TextStyle(
-                          fontSize: 24,
+                          fontSize: 22,
                           fontWeight: FontWeight.bold,
                           color: Colors.orange.withValues(alpha: 0.5),
                           letterSpacing: 1.5,

@@ -137,9 +137,10 @@ class MyApp extends StatelessWidget {
       title: 'Photobooth App',
       theme: AppTheme.lightTheme,
       onGenerateRoute: AppRoutes.onGenerateRoute,
-      initialRoute: authProvider.isAuthenticated
-          ? AppRoutes.welcomeScreen
-          : AppRoutes.authScreen,
+      initialRoute: AppRoutes.welcomeScreen,
+      // initialRoute: authProvider.isAuthenticated
+      //     ? AppRoutes.welcomeScreen
+      //     : AppRoutes.authScreen,
       // home: const LoadingScreen(),
       debugShowCheckedModeBanner: false,
     );

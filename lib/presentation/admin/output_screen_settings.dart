@@ -1,5 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:photobooth_flutter/core/constants/constants.dart';
 import 'package:photobooth_flutter/providers/output_screen_provider.dart';
 import 'package:photobooth_flutter/widgets/improved_color_picker.dart';
 import 'package:provider/provider.dart';
@@ -555,7 +556,7 @@ class OutputScreenSettings extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(label),
-          const SizedBox(height: 8),
+          Constants.h8,
           SizedBox(
             width: double.infinity,
             child: ImprovedColorPicker(

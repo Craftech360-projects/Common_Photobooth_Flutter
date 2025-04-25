@@ -574,7 +574,7 @@ class GenderSelectionProvider extends ChangeNotifier {
       };
 
       await prefs.setString('gender_selection_settings', jsonEncode(settings));
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('Error saving gender selection settings: $e');
     }
   }

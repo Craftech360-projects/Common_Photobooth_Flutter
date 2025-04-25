@@ -1,5 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:photobooth_flutter/core/constants/constants.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/providers/admin_watermark_provider.dart';
 import 'package:photobooth_flutter/providers/welcome_screen_provider.dart';
@@ -53,9 +54,9 @@ class WelcomeScreenSettings extends StatelessWidget {
               ),
               const Divider(),
               if (welcomeSettings.showWelcomeScreen) ...[
-                const SizedBox(height: 16),
+                Constants.h16,
                 _buildSectionHeader('Welcome Message'),
-                const SizedBox(height: 8),
+                Constants.h8,
                 TextFormField(
                   initialValue: welcomeSettings.welcomeMessage,
                   decoration: const InputDecoration(
@@ -68,7 +69,7 @@ class WelcomeScreenSettings extends StatelessWidget {
                 ),
 
                 // Welcome Message Styling
-                const SizedBox(height: 16),
+                Constants.h16,
                 _buildSectionHeader('Welcome Message Styling'),
 
                 // Font Size
@@ -157,7 +158,7 @@ class WelcomeScreenSettings extends StatelessWidget {
                 ),
 
                 // Margins
-                const SizedBox(height: 8),
+                Constants.h8,
                 const Text('Margins',
                     style: TextStyle(fontWeight: FontWeight.bold)),
 
@@ -223,7 +224,7 @@ class WelcomeScreenSettings extends StatelessWidget {
 
                 const SizedBox(height: 24),
                 _buildSectionHeader('Welcome Screen Background'),
-                const SizedBox(height: 8),
+                Constants.h8,
                 Row(
                   children: [
                     ElevatedButton(
@@ -276,7 +277,7 @@ class WelcomeScreenSettings extends StatelessWidget {
                   ),
                 const SizedBox(height: 24),
                 _buildSectionHeader('Button Settings'),
-                const SizedBox(height: 8),
+                Constants.h8,
 
                 // Button Type Selection
                 Row(
@@ -371,7 +372,7 @@ class WelcomeScreenSettings extends StatelessWidget {
 
                 // Text Button Settings
                 if (!welcomeSettings.useImageButton) ...[
-                  const SizedBox(height: 16),
+                  Constants.h16,
                   _buildSectionHeader('Text Button Settings'),
 
                   TextFormField(
@@ -383,7 +384,7 @@ class WelcomeScreenSettings extends StatelessWidget {
                     onChanged: (value) =>
                         welcomeSettings.setWelcomeButtonText(value),
                   ),
-                  const SizedBox(height: 8),
+                  Constants.h8,
 
                   _buildColorPickerWithLabel(
                     context: context,
@@ -485,7 +486,7 @@ class WelcomeScreenSettings extends StatelessWidget {
 
                 // Image Button Settings
                 if (welcomeSettings.useImageButton) ...[
-                  const SizedBox(height: 16),
+                  Constants.h16,
                   _buildSectionHeader('Image Button Settings'),
                   Row(
                     children: [

@@ -1,5 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:photobooth_flutter/core/constants/constants.dart';
 import 'package:photobooth_flutter/providers/loading_screen_provider.dart';
 import 'package:photobooth_flutter/widgets/improved_color_picker.dart';
 import 'package:provider/provider.dart';
@@ -25,7 +26,7 @@ class LoadingScreenSettings extends StatelessWidget {
                   'Title Settings',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 16),
+                Constants.h16,
                 _buildSwitch(
                   label: 'Show Title',
                   value: settings.showTitle,
@@ -97,12 +98,12 @@ class LoadingScreenSettings extends StatelessWidget {
                   ),
 
                   // Title Margins
-                  const SizedBox(height: 16),
+                  Constants.h16,
                   const Text(
                     'Title Margins',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
-                  const SizedBox(height: 8),
+                  Constants.h8,
 
                   _buildSlider(
                     label: 'Top Margin',
@@ -172,7 +173,7 @@ class LoadingScreenSettings extends StatelessWidget {
                   'Loader Settings',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 16),
+                Constants.h16,
                 _buildSlider(
                   label: 'Loader Width',
                   value: settings.loaderWidth,
@@ -189,12 +190,12 @@ class LoadingScreenSettings extends StatelessWidget {
                 ),
 
                 // Loader Margins
-                const SizedBox(height: 16),
+                Constants.h16,
                 const Text(
                   'Loader Margins',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 8),
+                Constants.h8,
 
                 _buildSlider(
                   label: 'Top Margin',
@@ -263,7 +264,7 @@ class LoadingScreenSettings extends StatelessWidget {
                   'Loader File',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 16),
+                Constants.h16,
                 _buildDropdown<String>(
                   label: 'Loader File Type',
                   value: settings.loaderFileType,
@@ -279,7 +280,7 @@ class LoadingScreenSettings extends StatelessWidget {
                     value!,
                   ),
                 ),
-                const SizedBox(height: 16),
+                Constants.h16,
                 ElevatedButton(
                   onPressed: () async {
                     FileType fileType;
@@ -339,14 +340,14 @@ class LoadingScreenSettings extends StatelessWidget {
                   'Background Settings',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 16),
+                Constants.h16,
                 _buildSwitch(
                   label: 'Show Custom Background',
                   value: settings.showBackground,
                   onChanged: (value) => settings.setShowBackground(value),
                 ),
                 if (settings.showBackground) ...[
-                  const SizedBox(height: 16),
+                  Constants.h16,
                   ElevatedButton(
                     onPressed: () async {
                       final result = await FilePicker.platform.pickFiles(
@@ -372,7 +373,7 @@ class LoadingScreenSettings extends StatelessWidget {
                     ),
                 ],
 
-                const SizedBox(height: 32),
+                Constants.h32,
                 ElevatedButton(
                   onPressed: () => settings.resetToDefaults(),
                   style: ElevatedButton.styleFrom(

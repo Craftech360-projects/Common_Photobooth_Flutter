@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:photobooth_flutter/core/constants/constants.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/providers/gender_selection_provider.dart';
 import 'package:photobooth_flutter/widgets/improved_color_picker.dart';
@@ -43,7 +44,7 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
               },
             ),
 
-            const SizedBox(height: 16),
+            Constants.h16,
 
             // Title Font Size
             _buildSliderWithLabel(
@@ -192,7 +193,7 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
               },
             ),
 
-            const SizedBox(height: 16),
+            Constants.h16,
 
             // Title Text Style (Italic)
             SwitchListTile(
@@ -225,7 +226,7 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
               },
             ),
 
-            const SizedBox(height: 16),
+            Constants.h16,
 
             // Title Color
             ListTile(
@@ -262,7 +263,7 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
               },
             ),
             if (settings.showBackground) ...[
-              const SizedBox(height: 8),
+              Constants.h8,
               Row(
                 children: [
                   ElevatedButton(
@@ -454,7 +455,7 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
             // Male Image
             const Text('Male Image',
                 style: TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
+            Constants.h8,
             Row(
               children: [
                 ElevatedButton(
@@ -508,12 +509,12 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
                 ),
               ),
 
-            const SizedBox(height: 16),
+            Constants.h16,
 
             // Female Image
             const Text('Female Image',
                 style: TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
+            Constants.h8,
             Row(
               children: [
                 ElevatedButton(
@@ -567,7 +568,7 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
                 ),
               ),
 
-            const SizedBox(height: 16),
+            Constants.h16,
 
             // Image Dimensions
             _buildSectionSubtitle('Image Dimensions'),
@@ -616,7 +617,7 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
               },
             ),
 
-            const SizedBox(height: 16),
+            Constants.h16,
 
             // Image Border Settings
             SwitchListTile(
@@ -628,7 +629,7 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
             ),
 
             if (settings.showImageBorder) ...[
-              const SizedBox(height: 16),
+              Constants.h16,
               _buildSliderWithLabel(
                 label: 'Border Width',
                 value: settings.imageBorderWidth < 1.0
@@ -679,7 +680,7 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
             ),
 
             if (settings.useSelectionEffect) ...[
-              const SizedBox(height: 16),
+              Constants.h16,
               Slider(
                 value: settings.selectedImageScale,
                 min: 1.0,
@@ -692,7 +693,7 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
               ),
               const Text('Selected Image Scale Factor',
                   textAlign: TextAlign.center, style: TextStyle(fontSize: 14)),
-              const SizedBox(height: 16),
+              Constants.h16,
               SwitchListTile(
                 title: const Text('Use Selection Glow'),
                 subtitle: const Text('Add glow effect to selected image'),
@@ -702,7 +703,7 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
                 },
               ),
               if (settings.useSelectionGlow) ...[
-                const SizedBox(height: 16),
+                Constants.h16,
                 ListTile(
                   title: const Text('Glow Color'),
                   trailing: Container(
@@ -723,7 +724,7 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
                     }
                   },
                 ),
-                const SizedBox(height: 16),
+                Constants.h16,
                 const Text('Glow Intensity',
                     style: TextStyle(fontWeight: FontWeight.bold)),
                 Slider(
@@ -736,7 +737,7 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
                     settings.setSelectionEffect(glowIntensity: value);
                   },
                 ),
-                const SizedBox(height: 16),
+                Constants.h16,
                 const Text('Glow Spread',
                     style: TextStyle(fontWeight: FontWeight.bold)),
                 Slider(
@@ -765,7 +766,7 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
               },
             ),
 
-            const SizedBox(height: 16),
+            Constants.h16,
 
             if (settings.useImageButton) ...[
               // Image Button Settings
@@ -832,7 +833,7 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
                 },
               ),
 
-              const SizedBox(height: 16),
+              Constants.h16,
 
               DropdownButtonFormField<FontWeight>(
                 decoration: const InputDecoration(
@@ -863,7 +864,7 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
                 },
               ),
 
-              const SizedBox(height: 16),
+              Constants.h16,
 
               Row(
                 children: [
@@ -914,7 +915,7 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
                 ],
               ),
 
-              const SizedBox(height: 16),
+              Constants.h16,
 
               TextFormField(
                 initialValue: settings.buttonFontSize.toString(),
@@ -1030,7 +1031,7 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
               },
             ),
 
-            const SizedBox(height: 16),
+            Constants.h16,
 
             // Common Button Settings
             Row(
@@ -1073,7 +1074,7 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
               ],
             ),
 
-            const SizedBox(height: 16),
+            Constants.h16,
 
             Row(
               children: [
@@ -1113,7 +1114,7 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
               ],
             ),
 
-            const SizedBox(height: 16),
+            Constants.h16,
 
             SwitchListTile(
               title: const Text('Button Border'),
@@ -1124,7 +1125,7 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
             ),
 
             if (settings.buttonHasBorder) ...[
-              const SizedBox(height: 16),
+              Constants.h16,
               Row(
                 children: [
                   Expanded(

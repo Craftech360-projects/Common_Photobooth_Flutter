@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:photobooth_flutter/core/constants/constants.dart';
 
 class ImprovedColorPicker extends StatefulWidget {
   final Color pickerColor;
@@ -109,7 +110,7 @@ class _ImprovedColorPickerState extends State<ImprovedColorPicker> {
           portraitOnly: true,
         ),
 
-        const SizedBox(height: 16),
+        Constants.h16,
 
         // Hex input field
         Row(
@@ -142,7 +143,7 @@ class _ImprovedColorPickerState extends State<ImprovedColorPicker> {
           ],
         ),
 
-        const SizedBox(height: 16),
+        Constants.h16,
 
         // Color palette
         Wrap(

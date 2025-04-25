@@ -67,8 +67,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     style: TextStyle(
                       fontSize: welcomeSettings.welcomeMessageFontSize,
                       fontWeight: welcomeSettings.welcomeMessageFontWeight,
-                      color: welcomeSettings.welcomeMessageColor
-                          .withValues(alpha: welcomeSettings.welcomeMessageOpacity),
+                      color: welcomeSettings.welcomeMessageColor.withValues(
+                          alpha: welcomeSettings.welcomeMessageOpacity),
                       fontStyle: welcomeSettings.welcomeMessageItalic
                           ? FontStyle.italic
                           : FontStyle.normal,
@@ -135,7 +135,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
             fontSize: settings.buttonTextFontSize,
             fontWeight: settings.buttonTextFontWeight,
             color: settings.welcomeButtonTextColor
-                .withOpacity(settings.buttonTextOpacity),
+                .withValues(alpha: settings.buttonTextOpacity),
             fontStyle:
                 settings.buttonTextItalic ? FontStyle.italic : FontStyle.normal,
             height: settings.buttonTextLineHeight,

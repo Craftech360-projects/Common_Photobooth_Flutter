@@ -209,7 +209,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
             workflow.updateRefreshTrigger(refreshTrigger);
 
             // In the _processImage method, modify the workflow sending section:
-            
+
             // Send workflow to backend
             if (ComfyApiService.isInitialized) {
               try {
@@ -217,36 +217,37 @@ class _LoadingScreenState extends State<LoadingScreen> {
                 final result = await ComfyApiService.instance.sendWorkflow(
                   workflow: workflow,
                 );
-                
+
                 debugPrint('ComfyAPI response: $result');
-            
+
                 if (result['status'] == 'success') {
                   final promptId = result['prompt_id'];
                   final imageUrl = result['image_url'];
-                  debugPrint('Workflow sent successfully with prompt ID: $promptId');
+                  debugPrint(
+                      'Workflow sent successfully with prompt ID: $promptId');
                   debugPrint('Image URL from ComfyAPI: $imageUrl');
-            
+
                   // Set the ComfyAPI URL first (temporary)
                   provider.setSwappedImage(imageUrl);
-                  
+
                   // Also set the captured URL as a fallback
                   provider.setCapturedImageUrl(imageUrl);
-            
+
                   // Wait a moment for the image to be uploaded to Supabase
                   await Future.delayed(const Duration(seconds: 2));
-            
+
                   // Try to get the Supabase URL (permanent)
                   final supabaseImageUrl = await SupabaseService.instance
                       .getLatestOutputImage(participantId);
-                      
+
                   debugPrint('Supabase image URL: $supabaseImageUrl');
-            
+
                   if (supabaseImageUrl != null) {
                     // Update with the permanent URL
                     provider.setSwappedImage(supabaseImageUrl);
                     provider.setCapturedImageUrl(supabaseImageUrl);
                   }
-            
+
                   // Navigate to output screen
                   if (mounted) {
                     debugPrint('Navigating to output screen...');
@@ -375,7 +376,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
                           fontSize: loadingSettings.titleFontSize,
                           fontWeight: loadingSettings.titleFontWeight,
                           color: loadingSettings.titleColor
-                              .withOpacity(loadingSettings.titleOpacity),
+                              .withValues(alpha: loadingSettings.titleOpacity),
                           height: loadingSettings.titleLineHeight,
                         ),
                         textAlign: TextAlign.center,

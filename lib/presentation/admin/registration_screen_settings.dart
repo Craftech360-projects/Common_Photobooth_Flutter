@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:photobooth_flutter/core/constants/constants.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/providers/registration_screen_provider.dart';
 import 'package:photobooth_flutter/widgets/improved_color_picker.dart';
@@ -52,7 +53,7 @@ class _RegistrationScreenSettingsState
                 'Title Settings',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 8),
+              Constants.h8,
 
               // Enable/Disable Title
               SwitchListTile(
@@ -76,7 +77,7 @@ class _RegistrationScreenSettingsState
                     settings.setTitleText(value);
                   },
                 ),
-                const SizedBox(height: 16),
+                Constants.h16,
 
                 // Font Size
                 Row(
@@ -116,7 +117,7 @@ class _RegistrationScreenSettingsState
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                Constants.h16,
 
                 // Font Weight
                 DropdownButtonFormField<FontWeight>(
@@ -157,7 +158,7 @@ class _RegistrationScreenSettingsState
                     }
                   },
                 ),
-                const SizedBox(height: 16),
+                Constants.h16,
 
                 // Text Align
                 DropdownButtonFormField<TextAlign>(
@@ -186,7 +187,7 @@ class _RegistrationScreenSettingsState
                     }
                   },
                 ),
-                const SizedBox(height: 16),
+                Constants.h16,
 
                 // Text Color
                 ListTile(
@@ -260,7 +261,7 @@ class _RegistrationScreenSettingsState
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                Constants.h8,
                 Row(
                   children: [
                     Expanded(
@@ -317,7 +318,7 @@ class _RegistrationScreenSettingsState
                 'Background Image',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 8),
+              Constants.h8,
 
               Row(
                 children: [
@@ -377,7 +378,7 @@ class _RegistrationScreenSettingsState
                 'Text Fields',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 8),
+              Constants.h8,
 
               // Add Text Field Button
               if (settings.textFields.length < 3)
@@ -388,7 +389,7 @@ class _RegistrationScreenSettingsState
                   child: const Text('Add Text Field'),
                 ),
 
-              const SizedBox(height: 16),
+              Constants.h16,
 
               // Text Fields List
               ...settings.textFields
@@ -401,7 +402,7 @@ class _RegistrationScreenSettingsState
                 'Spacing Settings',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 8),
+              Constants.h8,
 
               Row(
                 children: [
@@ -441,7 +442,7 @@ class _RegistrationScreenSettingsState
                 ],
               ),
 
-              const SizedBox(height: 16),
+              Constants.h16,
 
               TextFormField(
                 initialValue: settings.borderRadius.toString(),
@@ -465,7 +466,7 @@ class _RegistrationScreenSettingsState
                 'Button Settings',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 8),
+              Constants.h8,
 
               // Button Type
               SwitchListTile(
@@ -653,7 +654,7 @@ class _RegistrationScreenSettingsState
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            Constants.h16,
             _buildDropdownWithLabel<TextFieldType>(
               label: 'Field Type',
               value: field.fieldType,
@@ -690,7 +691,7 @@ class _RegistrationScreenSettingsState
                 }
               },
             ),
-            const SizedBox(height: 16),
+            Constants.h16,
             TextFormField(
               initialValue: field.label,
               decoration: const InputDecoration(
@@ -723,7 +724,7 @@ class _RegistrationScreenSettingsState
                 settings.updateTextField(field.id, updatedField);
               },
             ),
-            const SizedBox(height: 16),
+            Constants.h16,
             TextFormField(
               initialValue: field.hintText,
               decoration: const InputDecoration(
@@ -757,7 +758,7 @@ class _RegistrationScreenSettingsState
                 settings.updateTextField(field.id, updatedField);
               },
             ),
-            const SizedBox(height: 16),
+            Constants.h16,
             Row(
               children: [
                 Expanded(
@@ -829,7 +830,7 @@ class _RegistrationScreenSettingsState
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            Constants.h16,
             Row(
               children: [
                 Expanded(
@@ -894,7 +895,7 @@ class _RegistrationScreenSettingsState
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            Constants.h16,
             Row(
               children: [
                 Expanded(
@@ -973,7 +974,7 @@ class _RegistrationScreenSettingsState
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            Constants.h8,
             Row(
               children: [
                 Expanded(
@@ -1044,7 +1045,7 @@ class _RegistrationScreenSettingsState
             if (field.hasBorder)
               Column(
                 children: [
-                  const SizedBox(height: 16),
+                  Constants.h16,
                   Row(
                     children: [
                       Expanded(
@@ -1340,7 +1341,7 @@ class _RegistrationScreenSettingsState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 16),
+        Constants.h16,
         TextFormField(
           initialValue: settings.submitButtonText,
           decoration: const InputDecoration(
@@ -1351,7 +1352,7 @@ class _RegistrationScreenSettingsState
             settings.setSubmitButtonText(value);
           },
         ),
-        const SizedBox(height: 16),
+        Constants.h16,
         Row(
           children: [
             Expanded(
@@ -1389,7 +1390,7 @@ class _RegistrationScreenSettingsState
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        Constants.h16,
         Row(
           children: [
             Expanded(
@@ -1427,7 +1428,7 @@ class _RegistrationScreenSettingsState
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        Constants.h16,
         Row(
           children: [
             Expanded(
@@ -1473,7 +1474,7 @@ class _RegistrationScreenSettingsState
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        Constants.h16,
         SwitchListTile(
           title: const Text('Button Border'),
           value: settings.buttonHasBorder,
@@ -1488,7 +1489,7 @@ class _RegistrationScreenSettingsState
         if (settings.buttonHasBorder)
           Column(
             children: [
-              const SizedBox(height: 16),
+              Constants.h16,
               Row(
                 children: [
                   Expanded(
@@ -1683,7 +1684,7 @@ class _RegistrationScreenSettingsState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 16),
+        Constants.h16,
         Row(
           children: [
             ElevatedButton(
@@ -1734,7 +1735,7 @@ class _RegistrationScreenSettingsState
               ),
             ),
           ),
-        const SizedBox(height: 16),
+        Constants.h16,
         Row(
           children: [
             Expanded(
@@ -1772,7 +1773,7 @@ class _RegistrationScreenSettingsState
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        Constants.h16,
         TextFormField(
           initialValue: settings.buttonBorderRadius.toString(),
           decoration: const InputDecoration(
@@ -1787,7 +1788,7 @@ class _RegistrationScreenSettingsState
             }
           },
         ),
-        const SizedBox(height: 16),
+        Constants.h16,
         SwitchListTile(
           title: const Text('Button Border'),
           value: settings.buttonHasBorder,
@@ -1802,7 +1803,7 @@ class _RegistrationScreenSettingsState
         if (settings.buttonHasBorder)
           Column(
             children: [
-              const SizedBox(height: 16),
+              Constants.h16,
               Row(
                 children: [
                   Expanded(

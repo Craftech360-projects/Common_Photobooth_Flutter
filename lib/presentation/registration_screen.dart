@@ -291,7 +291,7 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
               fontStyle:
                   settings.buttonIsItalic ? FontStyle.italic : FontStyle.normal,
               color: settings.submitButtonTextColor
-                  .withOpacity(settings.buttonTextOpacity),
+                  .withValues(alpha: settings.buttonTextOpacity),
             ),
           ),
         ),

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:photobooth_flutter/core/constants/constants.dart';
 import 'package:photobooth_flutter/providers/character_selection_provider.dart';
 import 'package:photobooth_flutter/widgets/improved_color_picker.dart';
 import 'package:provider/provider.dart';
@@ -43,7 +44,7 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
               },
             ),
 
-            const SizedBox(height: 16),
+            Constants.h16,
 
             // Title Font Size
             _buildSliderWithLabel(
@@ -113,7 +114,7 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
               },
             ),
 
-            const SizedBox(height: 16),
+            Constants.h16,
 
             // Title Text Style (Italic)
             SwitchListTile(
@@ -146,7 +147,7 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
               },
             ),
 
-            const SizedBox(height: 16),
+            Constants.h16,
 
             // Title Margin
             _buildSectionSubtitle('Title Margins'),
@@ -250,7 +251,7 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
               },
             ),
             if (settings.showBackground) ...[
-              const SizedBox(height: 8),
+              Constants.h8,
               Row(
                 children: [
                   ElevatedButton(
@@ -356,7 +357,7 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
               ],
             ),
 
-            const SizedBox(height: 16),
+            Constants.h16,
 
             TextFormField(
               initialValue: settings.characterSpacing.toString(),
@@ -373,7 +374,7 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
               },
             ),
 
-            const SizedBox(height: 16),
+            Constants.h16,
 
             TextFormField(
               initialValue: settings.characterBorderRadius.toString(),
@@ -390,7 +391,7 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
               },
             ),
 
-            const SizedBox(height: 16),
+            Constants.h16,
 
             // Character Border Settings
             SwitchListTile(
@@ -402,7 +403,7 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
             ),
 
             if (settings.showCharacterBorder) ...[
-              const SizedBox(height: 16),
+              Constants.h16,
               Row(
                 children: [
                   Expanded(
@@ -460,7 +461,7 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
             ),
 
             if (settings.useSelectionEffect) ...[
-              const SizedBox(height: 16),
+              Constants.h16,
               Slider(
                 value: settings.selectedCharacterScale,
                 min: 1.0,
@@ -473,7 +474,7 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
               ),
               const Text('Selected Character Scale Factor',
                   textAlign: TextAlign.center, style: TextStyle(fontSize: 14)),
-              const SizedBox(height: 16),
+              Constants.h16,
               SwitchListTile(
                 title: const Text('Use Selection Glow'),
                 subtitle: const Text('Add glow effect to selected character'),
@@ -483,7 +484,7 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                 },
               ),
               if (settings.useSelectionGlow) ...[
-                const SizedBox(height: 16),
+                Constants.h16,
                 ListTile(
                   title: const Text('Glow Color'),
                   trailing: Container(
@@ -502,7 +503,7 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                     }
                   },
                 ),
-                const SizedBox(height: 16),
+                Constants.h16,
                 const Text('Glow Intensity',
                     style: TextStyle(fontWeight: FontWeight.bold)),
                 Slider(
@@ -515,7 +516,7 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                     settings.setSelectionEffect(glowIntensity: value);
                   },
                 ),
-                const SizedBox(height: 16),
+                Constants.h16,
                 const Text('Glow Spread',
                     style: TextStyle(fontWeight: FontWeight.bold)),
                 Slider(
@@ -567,7 +568,7 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                 },
               ),
 
-              const SizedBox(height: 16),
+              Constants.h16,
 
               // Row Distribution
               _buildSectionSubtitle('Characters per Row'),
@@ -613,7 +614,7 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                 ),
               ),
 
-              const SizedBox(height: 16),
+              Constants.h16,
 
               // Grid Spacing
               _buildSectionSubtitle('Grid Spacing'),
@@ -732,7 +733,7 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                 settings.setButtonText(value);
               },
             ),
-            const SizedBox(height: 16),
+            Constants.h16,
             // Button dimensions
             Row(
               children: [
@@ -819,7 +820,7 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
               },
             ),
 
-            const SizedBox(height: 16),
+            Constants.h16,
 
             // Button Margin
             _buildSectionSubtitle('Button Margins'),
@@ -918,7 +919,7 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                 ));
               },
             ),
-            const SizedBox(height: 16),
+            Constants.h16,
             Row(
               children: [
                 Expanded(
@@ -963,7 +964,7 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            Constants.h16,
             SwitchListTile(
               title: const Text('Button Has Border'),
               value: settings.buttonHasBorder,
@@ -972,7 +973,7 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
               },
             ),
             if (settings.buttonHasBorder) ...[
-              const SizedBox(height: 16),
+              Constants.h16,
               Row(
                 children: [
                   Expanded(
@@ -1016,7 +1017,7 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
               ),
             ],
 
-            const SizedBox(height: 16),
+            Constants.h16,
             SwitchListTile(
               title: const Text('Use Image Button'),
               value: settings.useImageButton,
@@ -1025,7 +1026,7 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
               },
             ),
             if (settings.useImageButton) ...[
-              const SizedBox(height: 16),
+              Constants.h16,
               Row(
                 children: [
                   ElevatedButton(
@@ -1208,7 +1209,7 @@ Widget _buildCharacterList(
           ),
         ],
       ),
-      const SizedBox(height: 16),
+      Constants.h16,
       if (characters.isEmpty)
         const Padding(
           padding: EdgeInsets.all(16.0),

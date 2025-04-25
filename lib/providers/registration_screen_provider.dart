@@ -312,7 +312,7 @@ class RegistrationScreenProvider extends ChangeNotifier {
           fields.map((field) =>
               CustomTextField.fromJson(field)), // Use factory constructor
         );
-      } catch (e) {
+      } on Exception catch (e) {
         debugPrint("Error decoding text fields JSON: $e. Using defaults.");
         _setDefaultTextFields(); // Fallback to defaults on error
       }
