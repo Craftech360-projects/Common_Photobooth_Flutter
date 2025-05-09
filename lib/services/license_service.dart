@@ -13,7 +13,7 @@ class LicenseService {
 
   // This key should be embedded in your app and kept secret
   // In a production app, you'd use more sophisticated key protection
-  final String _secretKey = 'photobooth_license_secret_key_2024';
+  final String _secretKey = 'photobooth_license_secret_key_2025';
 
   factory LicenseService() {
     return instance;

@@ -1,10 +1,13 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:photobooth_flutter/core/themes/app_colors.dart';
+import 'package:photobooth_flutter/providers/admin_watermark_provider.dart';
 import 'package:photobooth_flutter/providers/gender_selection_provider.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/providers/photobooth_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
+import 'package:photobooth_flutter/widgets/watermark_overlay.dart';
 import 'package:provider/provider.dart';
 
 class GenderSelectionScreen extends StatefulWidget {
@@ -23,6 +26,7 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
     final settings = context.watch<GenderSelectionProvider>();
     final globalSettings = context.watch<GlobalSettingsProvider>();
     final appProvider = context.watch<PhotoboothProvider>();
+    final watermarkProvider = context.watch<AdminWatermarkProvider>();
 
     return Scaffold(
       // appBar: AppBar(
@@ -31,74 +35,77 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
       //           Navigator.pushNamed(context, AppRoutes.genderScreenSettings),
       //       icon: const Icon(Icons.star)),
       // ),
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        padding: EdgeInsets.all(settings.screenPadding),
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: _getBackgroundImage(settings, globalSettings),
-            fit: BoxFit.cover,
+      body: WatermarkOverlay(
+        show: watermarkProvider.showWatermark,
+        child: Container(
+          width: double.infinity,
+          height: double.infinity,
+          padding: EdgeInsets.all(settings.screenPadding),
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: _getBackgroundImage(settings, globalSettings),
+              fit: BoxFit.cover,
+            ),
           ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Title with updated styling
-            Container(
-              margin: settings.titleMargin,
-              padding: EdgeInsets.only(bottom: settings.titlePadding),
-              child: Text(
-                settings.titleText,
-                style: TextStyle(
-                  fontSize: settings.titleFontSize,
-                  fontWeight: settings.titleFontWeight,
-                  color: settings.titleColor
-                      .withValues(alpha: settings.titleOpacity),
-                  fontStyle: settings.titleItalic
-                      ? FontStyle.italic
-                      : FontStyle.normal,
-                  height: settings.titleLineHeight,
-                ),
-                textAlign: settings.titleAlignment,
-              ),
-            ),
-
-            // Gender Selection with margins and padding
-            Container(
-              margin: settings.imagesRowMargin,
-              padding: settings.imagesRowPadding,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Male Option
-                  _buildGenderOption('male', settings),
-
-                  // Female Option
-                  _buildGenderOption('female', settings),
-                ],
-              ),
-            ),
-
-            // Error message
-            if (_showError)
-              Padding(
-                padding: const EdgeInsets.only(top: 16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Title with updated styling
+              Container(
+                margin: settings.titleMargin,
+                padding: EdgeInsets.only(bottom: settings.titlePadding),
                 child: Text(
-                  'Please select a gender to continue',
+                  settings.titleText,
                   style: TextStyle(
-                    color: Colors.red[400],
-                    fontSize: 16,
+                    fontSize: settings.titleFontSize,
+                    fontWeight: settings.titleFontWeight,
+                    color: settings.titleColor
+                        .withValues(alpha: settings.titleOpacity),
+                    fontStyle: settings.titleItalic
+                        ? FontStyle.italic
+                        : FontStyle.normal,
+                    height: settings.titleLineHeight,
+                  ),
+                  textAlign: settings.titleAlignment,
+                ),
+              ),
+
+              // Gender Selection with margins and padding
+              Container(
+                margin: settings.imagesRowMargin,
+                padding: settings.imagesRowPadding,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Male Option
+                    _buildGenderOption('male', settings),
+
+                    // Female Option
+                    _buildGenderOption('female', settings),
+                  ],
+                ),
+              ),
+
+              // Error message
+              if (_showError)
+                const Padding(
+                  padding: EdgeInsets.only(top: 16.0),
+                  child: Text(
+                    'Please select a gender to continue',
+                    style: TextStyle(
+                      color: AppColors.red,
+                      fontSize: 16,
+                    ),
                   ),
                 ),
-              ),
 
-            // Continue Button with margins
-            Container(
-              margin: settings.buttonMargin,
-              child: _buildButton(settings, appProvider),
-            ),
-          ],
+              // Continue Button with margins
+              Container(
+                margin: settings.buttonMargin,
+                child: _buildButton(settings, appProvider),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -181,6 +188,7 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
           Navigator.pushNamed(context, AppRoutes.faceCapture);
         },
         style: ElevatedButton.styleFrom(
+          padding: settings.buttonPadding,
           backgroundColor: settings.buttonColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
@@ -196,6 +204,7 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
                 style: TextStyle(
                   color: settings.buttonTextColor,
                   fontSize: settings.buttonFontSize,
+                  fontWeight: settings.buttonFontWeight,
                 ),
               ),
       ),

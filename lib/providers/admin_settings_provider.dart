@@ -28,7 +28,6 @@ class AdminSettingsProvider extends ChangeNotifier {
   late SharedPreferences _prefs;
 
   // GLOBAL SETTINGS
-  Size _selectedResolution = const Size(1920, 1080);
   String? _backgroundImage;
   bool _isAssetImage = true;
   double _fieldSpacing = 20.0;
@@ -56,7 +55,6 @@ class AdminSettingsProvider extends ChangeNotifier {
 
   // GETTERS
   // Global settings
-  Size get selectedResolution => _selectedResolution;
   String? get backgroundImage => _backgroundImage;
   bool get isAssetImage => _isAssetImage;
   double get fieldSpacing => _fieldSpacing;
@@ -83,11 +81,6 @@ class AdminSettingsProvider extends ChangeNotifier {
   }
 
   Future<void> loadSettings() async {
-    // LOAD GLOBAL SETTINGS
-    _selectedResolution = Size(
-      _prefs.getDouble('resolution_width') ?? 1920,
-      _prefs.getDouble('resolution_height') ?? 1080,
-    );
 
     _backgroundImage = _prefs.getString('background_image');
     _isAssetImage = _prefs.getBool('is_asset_image') ?? true;
@@ -130,12 +123,6 @@ class AdminSettingsProvider extends ChangeNotifier {
   }
 
   // GLOBAL SETTINGS METHODS
-  void setResolution(Size size) async {
-    _selectedResolution = size;
-    await _prefs.setDouble('resolution_width', size.width);
-    await _prefs.setDouble('resolution_height', size.height);
-    notifyListeners();
-  }
 
   Future<void> setBackgroundImage(String sourcePath,
       {required bool isAsset}) async {

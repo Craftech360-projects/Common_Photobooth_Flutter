@@ -152,28 +152,6 @@ class _GlobalSettingsSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Resolution',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        DropdownButton<Size>(
-          value: globalSettings.selectedResolution,
-          items: [
-            const Size(1920, 1080),
-            const Size(1024, 768),
-          ].map((Size size) {
-            return DropdownMenuItem<Size>(
-              value: size,
-              child: Text('${size.width.toInt()} x ${size.height.toInt()}'),
-            );
-          }).toList(),
-          onChanged: (Size? newSize) {
-            if (newSize != null) {
-              globalSettings.setResolution(newSize);
-            }
-          },
-        ),
-        const SizedBox(height: 24),
-        const Text(
           'Global Background Image',
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
@@ -215,7 +193,7 @@ class _GlobalSettingsSection extends StatelessWidget {
             padding: const EdgeInsets.only(top: 8.0),
             child: Text('Selected: ${globalSettings.backgroundImage}'),
           ),
-        const SizedBox(height: 24),
+        Constants.h24,
         const Text(
           'Supabase Configuration',
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),

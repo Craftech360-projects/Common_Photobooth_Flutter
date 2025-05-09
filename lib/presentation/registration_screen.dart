@@ -1,10 +1,12 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:photobooth_flutter/providers/admin_watermark_provider.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/providers/photobooth_provider.dart';
 import 'package:photobooth_flutter/providers/registration_screen_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
+import 'package:photobooth_flutter/widgets/watermark_overlay.dart';
 import 'package:provider/provider.dart';
 
 class ParticipantDetailsScreen extends StatefulWidget {
@@ -78,6 +80,7 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
   Widget build(BuildContext context) {
     final registrationSettings = context.watch<RegistrationScreenProvider>();
     final globalSettings = context.watch<GlobalSettingsProvider>();
+    final watermarkProvider = context.watch<AdminWatermarkProvider>();
 
     return Scaffold(
       // appBar: AppBar(
@@ -87,177 +90,181 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
       //     icon: const Icon(Icons.star),
       //   ),
       // ),
-      body: Stack(children: [
-        Container(
-          width: double.infinity,
-          height: double.infinity,
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: _getBackgroundImage(registrationSettings, globalSettings),
-              fit: BoxFit.cover,
+      body: WatermarkOverlay(
+        show: watermarkProvider.showWatermark,
+        child: Stack(children: [
+          Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image:
+                    _getBackgroundImage(registrationSettings, globalSettings),
+                fit: BoxFit.cover,
+              ),
             ),
-          ),
-          child: Center(
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Add the title widget here
-                  if (registrationSettings.showTitle)
-                    Container(
-                      margin: registrationSettings.titleMargin,
-                      child: Text(
-                        registrationSettings.titleText,
-                        style: TextStyle(
-                          fontSize: registrationSettings.titleFontSize,
-                          fontWeight: registrationSettings.titleFontWeight,
-                          color: registrationSettings.titleTextColor,
-                          height: registrationSettings.titleLineHeight,
+            child: Center(
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Add the title widget here
+                    if (registrationSettings.showTitle)
+                      Container(
+                        margin: registrationSettings.titleMargin,
+                        child: Text(
+                          registrationSettings.titleText,
+                          style: TextStyle(
+                            fontSize: registrationSettings.titleFontSize,
+                            fontWeight: registrationSettings.titleFontWeight,
+                            color: registrationSettings.titleTextColor,
+                            height: registrationSettings.titleLineHeight,
+                          ),
+                          textAlign: registrationSettings.titleTextAlign,
                         ),
-                        textAlign: registrationSettings.titleTextAlign,
                       ),
-                    ),
-                  ...registrationSettings.textFields
-                      .where((field) => field.isEnabled)
-                      .map((field) => Column(
-                            children: [
-                              Container(
-                                margin: field.margin,
-                                width: MediaQuery.of(context).size.width *
-                                    field.width,
-                                height: field.height,
-                                child: TextFormField(
-                                  controller: _controllers[field.id],
-                                  style: TextStyle(
-                                    color: field.textColor,
-                                    fontSize: field.fontSize,
-                                    fontWeight: field.fontWeight,
-                                    fontStyle: field.isItalic
-                                        ? FontStyle.italic
-                                        : FontStyle.normal,
-                                  ),
-                                  decoration: InputDecoration(
-                                    labelText: field.label,
-                                    labelStyle: TextStyle(
-                                      color: field.labelColor,
+                    ...registrationSettings.textFields
+                        .where((field) => field.isEnabled)
+                        .map((field) => Column(
+                              children: [
+                                Container(
+                                  margin: field.margin,
+                                  width: MediaQuery.of(context).size.width *
+                                      field.width,
+                                  height: field.height,
+                                  child: TextFormField(
+                                    controller: _controllers[field.id],
+                                    style: TextStyle(
+                                      color: field.textColor,
+                                      fontSize: field.fontSize,
+                                      fontWeight: field.fontWeight,
+                                      fontStyle: field.isItalic
+                                          ? FontStyle.italic
+                                          : FontStyle.normal,
                                     ),
-                                    hintText: field.hintText,
-                                    filled: true,
-                                    fillColor: field.fillColor,
-                                    contentPadding: field.padding,
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(
-                                        field.borderRadius,
+                                    decoration: InputDecoration(
+                                      labelText: field.label,
+                                      labelStyle: TextStyle(
+                                        color: field.labelColor,
                                       ),
-                                      borderSide: field.hasBorder
-                                          ? BorderSide(
-                                              color: field.borderColor,
-                                              width: field.borderWidth,
-                                            )
-                                          : BorderSide.none,
-                                    ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(
-                                        field.borderRadius,
+                                      hintText: field.hintText,
+                                      filled: true,
+                                      fillColor: field.fillColor,
+                                      contentPadding: field.padding,
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(
+                                          field.borderRadius,
+                                        ),
+                                        borderSide: field.hasBorder
+                                            ? BorderSide(
+                                                color: field.borderColor,
+                                                width: field.borderWidth,
+                                              )
+                                            : BorderSide.none,
                                       ),
-                                      borderSide: field.hasBorder
-                                          ? BorderSide(
-                                              color: field.borderColor,
-                                              width: field.borderWidth,
-                                            )
-                                          : BorderSide.none,
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(
-                                        field.borderRadius,
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(
+                                          field.borderRadius,
+                                        ),
+                                        borderSide: field.hasBorder
+                                            ? BorderSide(
+                                                color: field.borderColor,
+                                                width: field.borderWidth,
+                                              )
+                                            : BorderSide.none,
                                       ),
-                                      borderSide: field.hasBorder
-                                          ? BorderSide(
-                                              color: field.borderColor,
-                                              width: field.borderWidth,
-                                            )
-                                          : BorderSide.none,
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(
+                                          field.borderRadius,
+                                        ),
+                                        borderSide: field.hasBorder
+                                            ? BorderSide(
+                                                color: field.borderColor,
+                                                width: field.borderWidth,
+                                              )
+                                            : BorderSide.none,
+                                      ),
                                     ),
-                                  ),
-                                  validator: (value) {
-                                    if (field.isRequired &&
-                                        (value?.isEmpty ?? true)) {
-                                      return 'Please enter ${field.label.toLowerCase()}';
-                                    }
-
-                                    // Add type-specific validations
-                                    if (value != null && value.isNotEmpty) {
-                                      switch (field.fieldType) {
-                                        case TextFieldType.email:
-                                          // Email validation using regex
-                                          final emailRegex = RegExp(
-                                              r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-                                          if (!emailRegex.hasMatch(value)) {
-                                            return 'Please enter a valid email address';
-                                          }
-                                          break;
-                                        case TextFieldType.phone:
-                                          // Phone validation - allow digits, spaces, and some special chars
-                                          final phoneRegex = RegExp(
-                                              r'^[+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,4}[-\s\.]?[0-9]{1,9}$');
-                                          if (!phoneRegex.hasMatch(value)) {
-                                            return 'Please enter a valid phone number';
-                                          }
-                                          break;
-                                        case TextFieldType.name:
-                                          // Name validation - minimum 2 characters
-                                          if (value.length < 2) {
-                                            return 'Name must be at least 2 characters';
-                                          }
-                                          break;
-                                        default:
-                                          // No additional validation for custom fields
-                                          break;
+                                    validator: (value) {
+                                      if (field.isRequired &&
+                                          (value?.isEmpty ?? true)) {
+                                        return 'Please enter ${field.label.toLowerCase()}';
                                       }
-                                    }
-                                    return null;
-                                  },
+
+                                      // Add type-specific validations
+                                      if (value != null && value.isNotEmpty) {
+                                        switch (field.fieldType) {
+                                          case TextFieldType.email:
+                                            // Email validation using regex
+                                            final emailRegex = RegExp(
+                                                r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                                            if (!emailRegex.hasMatch(value)) {
+                                              return 'Please enter a valid email address';
+                                            }
+                                            break;
+                                          case TextFieldType.phone:
+                                            // Phone validation - allow digits, spaces, and some special chars
+                                            final phoneRegex = RegExp(
+                                                r'^[+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,4}[-\s\.]?[0-9]{1,9}$');
+                                            if (!phoneRegex.hasMatch(value)) {
+                                              return 'Please enter a valid phone number';
+                                            }
+                                            break;
+                                          case TextFieldType.name:
+                                            // Name validation - minimum 2 characters
+                                            if (value.length < 2) {
+                                              return 'Name must be at least 2 characters';
+                                            }
+                                            break;
+                                          default:
+                                            // No additional validation for custom fields
+                                            break;
+                                        }
+                                      }
+                                      return null;
+                                    },
+                                  ),
                                 ),
-                              ),
-                              SizedBox(
-                                  height: registrationSettings.fieldSpacing),
-                            ],
-                          )),
-                  SizedBox(height: registrationSettings.buttonSpacing),
-                  registrationSettings.useImageButton
-                      ? _buildImageButton(registrationSettings)
-                      : _buildTextButton(registrationSettings),
-                ],
+                                SizedBox(
+                                    height: registrationSettings.fieldSpacing),
+                              ],
+                            )),
+                    SizedBox(height: registrationSettings.buttonSpacing),
+                    registrationSettings.useImageButton
+                        ? _buildImageButton(registrationSettings)
+                        : _buildTextButton(registrationSettings),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-        Positioned(
-          left: 0,
-          top: 0,
-          child: GestureDetector(
-            onTap: () => _handleSecretTap(1),
-            child: Container(
-              width: 100,
-              height: 100,
-              color: Colors.transparent,
+          Positioned(
+            left: 0,
+            top: 0,
+            child: GestureDetector(
+              onTap: () => _handleSecretTap(1),
+              child: Container(
+                width: 100,
+                height: 100,
+                color: Colors.transparent,
+              ),
             ),
           ),
-        ),
-        Positioned(
-          left: 0,
-          bottom: 0,
-          child: GestureDetector(
-            onTap: () => _handleSecretTap(2),
-            child: Container(
-              width: 100,
-              height: 100,
-              color: Colors.transparent,
+          Positioned(
+            left: 0,
+            bottom: 0,
+            child: GestureDetector(
+              onTap: () => _handleSecretTap(2),
+              child: Container(
+                width: 100,
+                height: 100,
+                color: Colors.transparent,
+              ),
             ),
-          ),
-        )
-      ]),
+          )
+        ]),
+      ),
     );
   }
 

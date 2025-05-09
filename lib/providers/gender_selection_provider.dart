@@ -12,11 +12,11 @@ class GenderSelectionProvider extends ChangeNotifier {
   Color _titleColor = AppColors.white;
   FontWeight _titleFontWeight = FontWeight.w500;
   double _titlePadding = 0.0;
-  double _titleLineHeight = 1.2;
+  double _titleLineHeight = 1.0;
   bool _titleItalic = false;
   double _titleOpacity = 1.0;
   TextAlign _titleAlignment = TextAlign.center;
-  EdgeInsets _titleMargin = const EdgeInsets.all(0);
+  EdgeInsets _titleMargin = const EdgeInsets.fromLTRB(0, 0, 0, 20);
 
   // Gender images settings
   String? _maleImagePath = 'assets/images/male_avatar.png';
@@ -25,31 +25,31 @@ class GenderSelectionProvider extends ChangeNotifier {
   bool _isFemaleImageAsset = true;
   double _imageWidth = 150.0;
   double _imageHeight = 150.0;
-  double _imageSpacing = 40.0;
-  double _imageBorderRadius = 12.0;
+  double _imageSpacing = 20.0;
+  double _imageBorderRadius = 5.0;
   bool _showImageBorder = false;
   double _imageBorderWidth = 2.0;
   Color _imageBorderColor = AppColors.yellow;
-  EdgeInsets _imagesRowMargin = const EdgeInsets.all(0);
+  EdgeInsets _imagesRowMargin = const EdgeInsets.fromLTRB(0, 0, 0, 20);
   EdgeInsets _imagesRowPadding = const EdgeInsets.all(0);
 
   // Selection effect settings
   bool _useSelectionEffect = true;
-  double _selectedImageScale = 1.1;
+  double _selectedImageScale = 1.05;
   bool _useSelectionGlow = true;
-  Color _selectionGlowColor = Colors.blue;
-  double _selectionGlowIntensity = 0.7;
-  double _selectionGlowSpread = 10.0;
+  Color _selectionGlowColor = AppColors.white;
+  double _selectionGlowIntensity = 0.6;
+  double _selectionGlowSpread = 8.0;
 
   // Button settings
   String _buttonText = 'Continue';
   double _buttonWidth = 200.0;
-  double _buttonHeight = 50.0;
+  double _buttonHeight = 45.0;
   double _buttonFontSize = 18.0;
   FontWeight _buttonFontWeight = FontWeight.w500;
   Color _buttonColor = AppColors.yellow;
   Color _buttonTextColor = AppColors.black;
-  double _buttonBorderRadius = 10.0;
+  double _buttonBorderRadius = 5.0;
   bool _buttonHasBorder = false;
   double _buttonBorderWidth = 1.0;
   Color _buttonBorderColor = AppColors.black;
@@ -59,7 +59,7 @@ class GenderSelectionProvider extends ChangeNotifier {
   bool _isButtonImageAsset = true;
   EdgeInsets _buttonMargin = const EdgeInsets.all(0);
   EdgeInsets _buttonPadding =
-      const EdgeInsets.symmetric(vertical: 10, horizontal: 20);
+      const EdgeInsets.symmetric(vertical: 0, horizontal: 0);
 
   // Layout settings
   double _screenPadding = 0.0;
@@ -366,7 +366,7 @@ class GenderSelectionProvider extends ChangeNotifier {
           settings['titleMarginLeft'] ?? 0.0,
           settings['titleMarginTop'] ?? 0.0,
           settings['titleMarginRight'] ?? 0.0,
-          settings['titleMarginBottom'] ?? 0.0,
+          settings['titleMarginBottom'] ?? 20.0,
         );
       }
 
@@ -428,7 +428,8 @@ class GenderSelectionProvider extends ChangeNotifier {
       _buttonWidth = settings['buttonWidth'] ?? _buttonWidth;
       _buttonHeight = settings['buttonHeight'] ?? _buttonHeight;
       _buttonFontSize = settings['buttonFontSize'] ?? _buttonFontSize;
-      _buttonFontWeight = FontWeight.values[settings['buttonFontWeight'] ?? _buttonFontWeight.index];
+      _buttonFontWeight = FontWeight
+          .values[settings['buttonFontWeight'] ?? _buttonFontWeight.index];
       _buttonColor = Color(settings['buttonColor'] ?? _buttonColor.value);
       _buttonTextColor =
           Color(settings['buttonTextColor'] ?? _buttonTextColor.value);
@@ -456,7 +457,7 @@ class GenderSelectionProvider extends ChangeNotifier {
           settings['imagesRowMarginLeft'] ?? 0.0,
           settings['imagesRowMarginTop'] ?? 0.0,
           settings['imagesRowMarginRight'] ?? 0.0,
-          settings['imagesRowMarginBottom'] ?? 0.0,
+          settings['imagesRowMarginBottom'] ?? 20.0,
         );
       }
 
@@ -479,10 +480,18 @@ class GenderSelectionProvider extends ChangeNotifier {
         );
       }
 
-      if (settings.containsKey('buttonPaddingVertical')) {
+      if (settings.containsKey('buttonPaddingTop')) {
+        _buttonPadding = EdgeInsets.fromLTRB(
+          settings['buttonPaddingLeft'] ?? 0.0,
+          settings['buttonPaddingTop'] ?? 0.0,
+          settings['buttonPaddingRight'] ?? 0.0,
+          settings['buttonPaddingBottom'] ?? 0.0,
+        );
+      } else if (settings.containsKey('buttonPaddingVertical')) {
+        // For backward compatibility
         _buttonPadding = EdgeInsets.symmetric(
-          vertical: settings['buttonPaddingVertical'] ?? 10.0,
-          horizontal: settings['buttonPaddingHorizontal'] ?? 20.0,
+          vertical: settings['buttonPaddingVertical'] ?? 0.0,
+          horizontal: settings['buttonPaddingHorizontal'] ?? 0.0,
         );
       }
     }
@@ -535,11 +544,14 @@ class GenderSelectionProvider extends ChangeNotifier {
         'imagesRowPaddingRight': _imagesRowPadding.right,
 
         // Button margin and padding
+        'buttonMarginTop': _buttonMargin.top,
         'buttonMarginBottom': _buttonMargin.bottom,
         'buttonMarginLeft': _buttonMargin.left,
         'buttonMarginRight': _buttonMargin.right,
-        'buttonPaddingVertical': _buttonPadding.top,
-        'buttonPaddingHorizontal': _buttonPadding.left,
+        'buttonPaddingTop': _buttonPadding.top,
+        'buttonPaddingBottom': _buttonPadding.bottom,
+        'buttonPaddingLeft': _buttonPadding.left,
+        'buttonPaddingRight': _buttonPadding.right,
 
         // Selection effect settings
         'useSelectionEffect': _useSelectionEffect,
@@ -561,7 +573,7 @@ class GenderSelectionProvider extends ChangeNotifier {
         'buttonHasBorder': _buttonHasBorder,
         'buttonBorderWidth': _buttonBorderWidth,
         'buttonBorderColor': _buttonBorderColor.value,
-        'buttonMarginTop': _buttonMarginTop,
+
         'useImageButton': _useImageButton,
         'buttonImagePath': _buttonImagePath,
         'isButtonImageAsset': _isButtonImageAsset,

@@ -22,7 +22,7 @@ class WelcomeScreenProvider extends ChangeNotifier {
   double _welcomeMessageOpacity = 1.0;
   bool _welcomeMessageItalic = false;
   double _welcomeMessageMarginTop = 0.0;
-  double _welcomeMessageMarginBottom = 50.0;
+  double _welcomeMessageMarginBottom = 15.0;
   double _welcomeMessageMarginLeft = 0.0;
   double _welcomeMessageMarginRight = 0.0;
 
@@ -44,8 +44,8 @@ class WelcomeScreenProvider extends ChangeNotifier {
   double _buttonOpacity = 1.0;
   double _buttonMarginTop = 0.0;
   double _buttonMarginBottom = 0.0;
-  double _buttonPaddingVertical = 8.0;
-  double _buttonPaddingHorizontal = 16.0;
+  double _buttonPaddingVertical = 0.0;
+  double _buttonPaddingHorizontal = 0.0;
 
   // Image button settings
   String? _buttonImagePath;

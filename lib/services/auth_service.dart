@@ -16,8 +16,14 @@ class AuthService {
 
   bool _isInitialized = false;
   String? _apiUrl;
+  String? _serviceId;
+  bool _isAuthenticated = false;
+  DateTime? _lastAuthTime;
+  String? _authToken; // Add this to store the token
 
   bool get isInitialized => _isInitialized;
+  bool get isAuthenticated => _isAuthenticated;
+  String? get authToken => _authToken; // Add getter for the token
 
   Future<void> initialize({
     required String apiUrl,
@@ -25,10 +31,53 @@ class AuthService {
     _apiUrl = apiUrl;
     _isInitialized = true;
     debugPrint('Auth service initialized with URL: $_apiUrl');
+
+    // Check if we have a stored authentication
+    await _loadAuthState();
+  }
+
+  Future<void> _loadAuthState() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      _isAuthenticated = prefs.getBool('isAuthenticated') ?? false;
+      final lastAuthTimeStr = prefs.getString('lastAuthTime');
+      if (lastAuthTimeStr != null) {
+        _lastAuthTime = DateTime.parse(lastAuthTimeStr);
+
+        // Check if authentication has expired (24 hours)
+        if (DateTime.now().difference(_lastAuthTime!).inHours > 24) {
+          _isAuthenticated = false;
+          await _saveAuthState();
+        }
+      }
+      _serviceId = prefs.getString('serviceId');
+      _authToken = prefs.getString('authToken'); // Load the token
+    } on Exception catch (e) {
+      debugPrint('Error loading auth state: $e');
+      _isAuthenticated = false;
+    }
+  }
+
+  Future<void> _saveAuthState() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isAuthenticated', _isAuthenticated);
+      if (_lastAuthTime != null) {
+        await prefs.setString('lastAuthTime', _lastAuthTime!.toIso8601String());
+      }
+      if (_serviceId != null) {
+        await prefs.setString('serviceId', _serviceId!);
+      }
+      if (_authToken != null) {
+        await prefs.setString('authToken', _authToken!); // Save the token
+      }
+    } on Exception catch (e) {
+      debugPrint('Error saving auth state: $e');
+    }
   }
 
   Future<AuthResponse> verifyAuthCode({
-    required String eventId,
+    required String serviceId,
     required String authCode,
   }) async {
     if (!_isInitialized) {
@@ -40,53 +89,70 @@ class AuthService {
       final timestamp = (DateTime.now().millisecondsSinceEpoch / 30000).floor();
 
       final response = await http.post(
-        Uri.parse('$_apiUrl/api/verify'),
+        Uri.parse('$_apiUrl/api/services/verify-auth-code'),
         headers: {
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
-          'eventId': eventId,
+          'serviceId': serviceId,
           'authCode': authCode,
           'timestamp': timestamp,
         }),
       );
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final authResponse = AuthResponse.fromJson(data);
+      final responseData = jsonDecode(response.body);
 
-        if (authResponse.success) {
-          // Store the authenticated event ID
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setString('authenticated_event_id', eventId);
-          await prefs.setBool('is_authenticated', true);
+      if (response.statusCode == 200 && responseData['status'] == 'success') {
+        // Store authentication state
+        _isAuthenticated = true;
+        _lastAuthTime = DateTime.now();
+        _serviceId = serviceId;
+
+        // Store the token if it's in the response
+        if (responseData['token'] != null) {
+          _authToken = responseData['token'];
         }
 
-        return authResponse;
+        await _saveAuthState();
+
+        return AuthResponse(
+          success: true,
+          message: responseData['message'] ?? 'Authentication successful',
+        );
       } else {
-        debugPrint('Error verifying auth code: ${response.body}');
         return AuthResponse(
           success: false,
-          message: 'Server error: ${response.statusCode}',
+          message: responseData['message'] ?? 'Authentication failed',
         );
       }
     } on Exception catch (e) {
-      debugPrint('Exception verifying auth code: $e');
+      debugPrint('Error verifying auth code: $e');
       return AuthResponse(
         success: false,
-        message: 'Connection error: $e',
+        message: 'Error connecting to server: $e',
       );
     }
   }
 
-  Future<bool> isAuthenticated() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool('is_authenticated') ?? false;
+  // Add a method to get headers for authenticated requests
+  Map<String, String> getAuthHeaders() {
+    final headers = {
+      'Content-Type': 'application/json',
+    };
+
+    if (_authToken != null) {
+      headers['Authorization'] = 'Bearer $_authToken';
+    }
+
+    return headers;
   }
 
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('authenticated_event_id');
     await prefs.setBool('is_authenticated', false);
+    await prefs.remove('authToken'); // Clear the token
+    _authToken = null;
+    _isAuthenticated = false;
   }
 }

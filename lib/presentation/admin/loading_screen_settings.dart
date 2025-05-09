@@ -1,8 +1,10 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/core/constants/constants.dart';
+import 'package:photobooth_flutter/presentation/loading_screen.dart';
 import 'package:photobooth_flutter/providers/loading_screen_provider.dart';
 import 'package:photobooth_flutter/widgets/improved_color_picker.dart';
+import 'package:photobooth_flutter/widgets/settings_preview.dart';
 import 'package:provider/provider.dart';
 
 class LoadingScreenSettings extends StatelessWidget {
@@ -14,378 +16,409 @@ class LoadingScreenSettings extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Loading Screen Settings'),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Consumer<LoadingScreenProvider>(
-          builder: (context, settings, child) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Title Settings
-                const Text(
-                  'Title Settings',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                Constants.h16,
-                _buildSwitch(
-                  label: 'Show Title',
-                  value: settings.showTitle,
-                  onChanged: (value) => settings.setShowTitle(value),
-                ),
-                if (settings.showTitle) ...[
-                  _buildTextField(
-                    label: 'Title Text',
-                    value: settings.titleText,
-                    onChanged: (value) => settings.setTitleText(value),
-                  ),
-                  _buildSlider(
-                    label: 'Font Size',
-                    value: settings.titleFontSize,
-                    min: 16,
-                    max: 48,
-                    onChanged: (value) => settings.setTitleFontSize(value),
-                  ),
-                  _buildSlider(
-                    label: 'Line Height',
-                    value: settings.titleLineHeight,
-                    min: 0.8,
-                    max: 2.0,
-                    divisions: 24,
-                    onChanged: (value) => settings.setTitleLineHeight(value),
-                  ),
-                  _buildSlider(
-                    label: 'Text Opacity',
-                    value: settings.titleOpacity,
-                    min: 0.1,
-                    max: 1.0,
-                    divisions: 9,
-                    onChanged: (value) => settings.setTitleOpacity(value),
-                  ),
-                  _buildDropdown<FontWeight>(
-                    label: 'Font Weight',
-                    value: settings.titleFontWeight,
-                    items: {
-                      FontWeight.w100: 'Thin',
-                      FontWeight.w300: 'Light',
-                      FontWeight.w400: 'Regular',
-                      FontWeight.w500: 'Medium',
-                      FontWeight.w700: 'Bold',
-                      FontWeight.w900: 'Extra Bold',
-                    },
-                    onChanged: (value) => settings.setTitleFontWeight(value!),
-                  ),
-                  // Title Color with Dialog
-                  ListTile(
-                    title: const Text('Title Color'),
-                    trailing: Container(
-                      width: 24,
-                      height: 24,
-                      decoration: BoxDecoration(
-                        color: settings.titleColor,
-                        border: Border.all(color: Colors.grey),
+      body: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: SettingsPreview(
+              width: 1080,
+              height: 1920,
+              scale: 0.45,
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.transparent),
+                borderRadius: BorderRadius.circular(0),
+              ),
+              child: const LoadingScreen(),
+            ),
+          ),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Consumer<LoadingScreenProvider>(
+                builder: (context, settings, child) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Title Settings
+                      const Text(
+                        'Title Settings',
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
                       ),
-                    ),
-                    onTap: () async {
-                      final color = await _showImprovedColorPicker(
-                        context: context,
-                        color: settings.titleColor,
-                        title: 'Select Title Color',
-                      );
-                      if (color != null) {
-                        settings.setTitleColor(color);
-                      }
-                    },
-                  ),
-
-                  // Title Margins
-                  Constants.h16,
-                  const Text(
-                    'Title Margins',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  Constants.h8,
-
-                  _buildSlider(
-                    label: 'Top Margin',
-                    value: settings.titleMargin.top,
-                    min: 0,
-                    max: 50,
-                    onChanged: (value) => settings.setTitleMargin(
-                      EdgeInsets.fromLTRB(
-                        settings.titleMargin.left,
-                        value,
-                        settings.titleMargin.right,
-                        settings.titleMargin.bottom,
+                      Constants.h16,
+                      _buildSwitch(
+                        label: 'Show Title',
+                        value: settings.showTitle,
+                        onChanged: (value) => settings.setShowTitle(value),
                       ),
-                    ),
-                  ),
+                      if (settings.showTitle) ...[
+                        _buildTextField(
+                          label: 'Title Text',
+                          value: settings.titleText,
+                          onChanged: (value) => settings.setTitleText(value),
+                        ),
+                        _buildSlider(
+                          label: 'Font Size',
+                          value: settings.titleFontSize,
+                          min: 16,
+                          max: 48,
+                          onChanged: (value) =>
+                              settings.setTitleFontSize(value),
+                        ),
+                        _buildSlider(
+                          label: 'Line Height',
+                          value: settings.titleLineHeight,
+                          min: 0.8,
+                          max: 2.0,
+                          divisions: 24,
+                          onChanged: (value) =>
+                              settings.setTitleLineHeight(value),
+                        ),
+                        _buildSlider(
+                          label: 'Text Opacity',
+                          value: settings.titleOpacity,
+                          min: 0.1,
+                          max: 1.0,
+                          divisions: 9,
+                          onChanged: (value) => settings.setTitleOpacity(value),
+                        ),
+                        _buildDropdown<FontWeight>(
+                          label: 'Font Weight',
+                          value: settings.titleFontWeight,
+                          items: {
+                            FontWeight.w100: 'Thin',
+                            FontWeight.w300: 'Light',
+                            FontWeight.w400: 'Regular',
+                            FontWeight.w500: 'Medium',
+                            FontWeight.w700: 'Bold',
+                            FontWeight.w900: 'Extra Bold',
+                          },
+                          onChanged: (value) =>
+                              settings.setTitleFontWeight(value!),
+                        ),
+                        // Title Color with Dialog
+                        ListTile(
+                          title: const Text('Title Color'),
+                          trailing: Container(
+                            width: 24,
+                            height: 24,
+                            decoration: BoxDecoration(
+                              color: settings.titleColor,
+                              border: Border.all(color: Colors.grey),
+                            ),
+                          ),
+                          onTap: () async {
+                            final color = await _showImprovedColorPicker(
+                              context: context,
+                              color: settings.titleColor,
+                              title: 'Select Title Color',
+                            );
+                            if (color != null) {
+                              settings.setTitleColor(color);
+                            }
+                          },
+                        ),
 
-                  _buildSlider(
-                    label: 'Bottom Margin',
-                    value: settings.titleMargin.bottom,
-                    min: 0,
-                    max: 50,
-                    onChanged: (value) => settings.setTitleMargin(
-                      EdgeInsets.fromLTRB(
-                        settings.titleMargin.left,
-                        settings.titleMargin.top,
-                        settings.titleMargin.right,
-                        value,
+                        // Title Margins
+                        Constants.h16,
+                        const Text(
+                          'Title Margins',
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        Constants.h8,
+
+                        _buildSlider(
+                          label: 'Top Margin',
+                          value: settings.titleMargin.top,
+                          min: 0,
+                          max: 50,
+                          onChanged: (value) => settings.setTitleMargin(
+                            EdgeInsets.fromLTRB(
+                              settings.titleMargin.left,
+                              value,
+                              settings.titleMargin.right,
+                              settings.titleMargin.bottom,
+                            ),
+                          ),
+                        ),
+
+                        _buildSlider(
+                          label: 'Bottom Margin',
+                          value: settings.titleMargin.bottom,
+                          min: 0,
+                          max: 50,
+                          onChanged: (value) => settings.setTitleMargin(
+                            EdgeInsets.fromLTRB(
+                              settings.titleMargin.left,
+                              settings.titleMargin.top,
+                              settings.titleMargin.right,
+                              value,
+                            ),
+                          ),
+                        ),
+
+                        _buildSlider(
+                          label: 'Left Margin',
+                          value: settings.titleMargin.left,
+                          min: 0,
+                          max: 50,
+                          onChanged: (value) => settings.setTitleMargin(
+                            EdgeInsets.fromLTRB(
+                              value,
+                              settings.titleMargin.top,
+                              settings.titleMargin.right,
+                              settings.titleMargin.bottom,
+                            ),
+                          ),
+                        ),
+
+                        _buildSlider(
+                          label: 'Right Margin',
+                          value: settings.titleMargin.right,
+                          min: 0,
+                          max: 50,
+                          onChanged: (value) => settings.setTitleMargin(
+                            EdgeInsets.fromLTRB(
+                              settings.titleMargin.left,
+                              settings.titleMargin.top,
+                              value,
+                              settings.titleMargin.bottom,
+                            ),
+                          ),
+                        ),
+                      ],
+
+                      const Divider(height: 32),
+
+                      // Loader Settings
+                      const Text(
+                        'Loader Settings',
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
                       ),
-                    ),
-                  ),
-
-                  _buildSlider(
-                    label: 'Left Margin',
-                    value: settings.titleMargin.left,
-                    min: 0,
-                    max: 50,
-                    onChanged: (value) => settings.setTitleMargin(
-                      EdgeInsets.fromLTRB(
-                        value,
-                        settings.titleMargin.top,
-                        settings.titleMargin.right,
-                        settings.titleMargin.bottom,
+                      Constants.h16,
+                      _buildSlider(
+                        label: 'Loader Width',
+                        value: settings.loaderWidth,
+                        min: 100,
+                        max: 400,
+                        onChanged: (value) => settings.setLoaderWidth(value),
                       ),
-                    ),
-                  ),
-
-                  _buildSlider(
-                    label: 'Right Margin',
-                    value: settings.titleMargin.right,
-                    min: 0,
-                    max: 50,
-                    onChanged: (value) => settings.setTitleMargin(
-                      EdgeInsets.fromLTRB(
-                        settings.titleMargin.left,
-                        settings.titleMargin.top,
-                        value,
-                        settings.titleMargin.bottom,
+                      _buildSlider(
+                        label: 'Loader Height',
+                        value: settings.loaderHeight,
+                        min: 100,
+                        max: 400,
+                        onChanged: (value) => settings.setLoaderHeight(value),
                       ),
-                    ),
-                  ),
-                ],
 
-                const Divider(height: 32),
+                      // Loader Margins
+                      Constants.h16,
+                      const Text(
+                        'Loader Margins',
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      Constants.h8,
 
-                // Loader Settings
-                const Text(
-                  'Loader Settings',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                Constants.h16,
-                _buildSlider(
-                  label: 'Loader Width',
-                  value: settings.loaderWidth,
-                  min: 100,
-                  max: 400,
-                  onChanged: (value) => settings.setLoaderWidth(value),
-                ),
-                _buildSlider(
-                  label: 'Loader Height',
-                  value: settings.loaderHeight,
-                  min: 100,
-                  max: 400,
-                  onChanged: (value) => settings.setLoaderHeight(value),
-                ),
+                      _buildSlider(
+                        label: 'Top Margin',
+                        value: settings.loaderMargin.top,
+                        min: 0,
+                        max: 50,
+                        onChanged: (value) => settings.setLoaderMargin(
+                          EdgeInsets.fromLTRB(
+                            settings.loaderMargin.left,
+                            value,
+                            settings.loaderMargin.right,
+                            settings.loaderMargin.bottom,
+                          ),
+                        ),
+                      ),
 
-                // Loader Margins
-                Constants.h16,
-                const Text(
-                  'Loader Margins',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                Constants.h8,
+                      _buildSlider(
+                        label: 'Bottom Margin',
+                        value: settings.loaderMargin.bottom,
+                        min: 0,
+                        max: 50,
+                        onChanged: (value) => settings.setLoaderMargin(
+                          EdgeInsets.fromLTRB(
+                            settings.loaderMargin.left,
+                            settings.loaderMargin.top,
+                            settings.loaderMargin.right,
+                            value,
+                          ),
+                        ),
+                      ),
 
-                _buildSlider(
-                  label: 'Top Margin',
-                  value: settings.loaderMargin.top,
-                  min: 0,
-                  max: 50,
-                  onChanged: (value) => settings.setLoaderMargin(
-                    EdgeInsets.fromLTRB(
-                      settings.loaderMargin.left,
-                      value,
-                      settings.loaderMargin.right,
-                      settings.loaderMargin.bottom,
-                    ),
-                  ),
-                ),
+                      _buildSlider(
+                        label: 'Left Margin',
+                        value: settings.loaderMargin.left,
+                        min: 0,
+                        max: 50,
+                        onChanged: (value) => settings.setLoaderMargin(
+                          EdgeInsets.fromLTRB(
+                            value,
+                            settings.loaderMargin.top,
+                            settings.loaderMargin.right,
+                            settings.loaderMargin.bottom,
+                          ),
+                        ),
+                      ),
 
-                _buildSlider(
-                  label: 'Bottom Margin',
-                  value: settings.loaderMargin.bottom,
-                  min: 0,
-                  max: 50,
-                  onChanged: (value) => settings.setLoaderMargin(
-                    EdgeInsets.fromLTRB(
-                      settings.loaderMargin.left,
-                      settings.loaderMargin.top,
-                      settings.loaderMargin.right,
-                      value,
-                    ),
-                  ),
-                ),
+                      _buildSlider(
+                        label: 'Right Margin',
+                        value: settings.loaderMargin.right,
+                        min: 0,
+                        max: 50,
+                        onChanged: (value) => settings.setLoaderMargin(
+                          EdgeInsets.fromLTRB(
+                            settings.loaderMargin.left,
+                            settings.loaderMargin.top,
+                            value,
+                            settings.loaderMargin.bottom,
+                          ),
+                        ),
+                      ),
 
-                _buildSlider(
-                  label: 'Left Margin',
-                  value: settings.loaderMargin.left,
-                  min: 0,
-                  max: 50,
-                  onChanged: (value) => settings.setLoaderMargin(
-                    EdgeInsets.fromLTRB(
-                      value,
-                      settings.loaderMargin.top,
-                      settings.loaderMargin.right,
-                      settings.loaderMargin.bottom,
-                    ),
-                  ),
-                ),
+                      const Divider(height: 32),
 
-                _buildSlider(
-                  label: 'Right Margin',
-                  value: settings.loaderMargin.right,
-                  min: 0,
-                  max: 50,
-                  onChanged: (value) => settings.setLoaderMargin(
-                    EdgeInsets.fromLTRB(
-                      settings.loaderMargin.left,
-                      settings.loaderMargin.top,
-                      value,
-                      settings.loaderMargin.bottom,
-                    ),
-                  ),
-                ),
+                      // Loader File Settings
+                      const Text(
+                        'Loader File',
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                      Constants.h16,
+                      _buildDropdown<String>(
+                        label: 'Loader File Type',
+                        value: settings.loaderFileType,
+                        items: {
+                          'gif': 'GIF Animation',
+                          'json': 'Lottie Animation (JSON)',
+                          'mp4': 'MP4 Video',
+                          'mov': 'MOV Video',
+                        },
+                        onChanged: (value) => settings.setLoaderFile(
+                          settings.loaderFilePath,
+                          settings.isLoaderFileAsset,
+                          value!,
+                        ),
+                      ),
+                      Constants.h16,
+                      ElevatedButton(
+                        onPressed: () async {
+                          FileType fileType;
+                          String fileExtension;
 
-                const Divider(height: 32),
+                          switch (settings.loaderFileType) {
+                            case 'gif':
+                              fileType = FileType.image;
+                              fileExtension = 'gif';
+                              break;
+                            case 'json':
+                              fileType = FileType.custom;
+                              fileExtension = 'json';
+                              break;
+                            case 'mp4':
+                              fileType = FileType.video;
+                              fileExtension = 'mp4';
+                              break;
+                            case 'mov':
+                              fileType = FileType.custom;
+                              fileExtension = 'mov';
+                              break;
+                            default:
+                              fileType = FileType.any;
+                              fileExtension = '*';
+                          }
 
-                // Loader File Settings
-                const Text(
-                  'Loader File',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                Constants.h16,
-                _buildDropdown<String>(
-                  label: 'Loader File Type',
-                  value: settings.loaderFileType,
-                  items: {
-                    'gif': 'GIF Animation',
-                    'json': 'Lottie Animation (JSON)',
-                    'mp4': 'MP4 Video',
-                    'mov': 'MOV Video',
-                  },
-                  onChanged: (value) => settings.setLoaderFile(
-                    settings.loaderFilePath,
-                    settings.isLoaderFileAsset,
-                    value!,
-                  ),
-                ),
-                Constants.h16,
-                ElevatedButton(
-                  onPressed: () async {
-                    FileType fileType;
-                    String fileExtension;
-
-                    switch (settings.loaderFileType) {
-                      case 'gif':
-                        fileType = FileType.image;
-                        fileExtension = 'gif';
-                        break;
-                      case 'json':
-                        fileType = FileType.custom;
-                        fileExtension = 'json';
-                        break;
-                      case 'mp4':
-                        fileType = FileType.video;
-                        fileExtension = 'mp4';
-                        break;
-                      case 'mov':
-                        fileType = FileType.custom;
-                        fileExtension = 'mov';
-                        break;
-                      default:
-                        fileType = FileType.any;
-                        fileExtension = '*';
-                    }
-
-                    final result = await FilePicker.platform.pickFiles(
-                      type: fileType,
-                      allowedExtensions:
-                          fileType == FileType.custom ? [fileExtension] : null,
-                    );
-
-                    if (result != null && result.files.isNotEmpty) {
-                      final file = result.files.first;
-                      if (file.path != null) {
-                        settings.setLoaderFile(
-                          file.path,
-                          false,
-                          settings.loaderFileType,
-                        );
-                      }
-                    }
-                  },
-                  child: const Text('Choose Loader File'),
-                ),
-                if (settings.loaderFilePath != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: Text('Selected: ${settings.loaderFilePath}'),
-                  ),
-
-                const Divider(height: 32),
-
-                // Background Settings
-                const Text(
-                  'Background Settings',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                Constants.h16,
-                _buildSwitch(
-                  label: 'Show Custom Background',
-                  value: settings.showBackground,
-                  onChanged: (value) => settings.setShowBackground(value),
-                ),
-                if (settings.showBackground) ...[
-                  Constants.h16,
-                  ElevatedButton(
-                    onPressed: () async {
-                      final result = await FilePicker.platform.pickFiles(
-                        type: FileType.image,
-                      );
-
-                      if (result != null && result.files.isNotEmpty) {
-                        final file = result.files.first;
-                        if (file.path != null) {
-                          settings.setBackgroundImage(
-                            file.path,
-                            false,
+                          final result = await FilePicker.platform.pickFiles(
+                            type: fileType,
+                            allowedExtensions: fileType == FileType.custom
+                                ? [fileExtension]
+                                : null,
                           );
-                        }
-                      }
-                    },
-                    child: const Text('Choose Background Image'),
-                  ),
-                  if (settings.backgroundImagePath != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: Text('Selected: ${settings.backgroundImagePath}'),
-                    ),
-                ],
 
-                Constants.h32,
-                ElevatedButton(
-                  onPressed: () => settings.resetToDefaults(),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                    foregroundColor: Colors.white,
-                  ),
-                  child: const Text('Reset to Defaults'),
-                ),
-              ],
-            );
-          },
-        ),
+                          if (result != null && result.files.isNotEmpty) {
+                            final file = result.files.first;
+                            if (file.path != null) {
+                              settings.setLoaderFile(
+                                file.path,
+                                false,
+                                settings.loaderFileType,
+                              );
+                            }
+                          }
+                        },
+                        child: const Text('Choose Loader File'),
+                      ),
+                      if (settings.loaderFilePath != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Text('Selected: ${settings.loaderFilePath}'),
+                        ),
+
+                      const Divider(height: 32),
+
+                      // Background Settings
+                      const Text(
+                        'Background Settings',
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                      Constants.h16,
+                      _buildSwitch(
+                        label: 'Show Custom Background',
+                        value: settings.showBackground,
+                        onChanged: (value) => settings.setShowBackground(value),
+                      ),
+                      if (settings.showBackground) ...[
+                        Constants.h16,
+                        ElevatedButton(
+                          onPressed: () async {
+                            final result = await FilePicker.platform.pickFiles(
+                              type: FileType.image,
+                            );
+
+                            if (result != null && result.files.isNotEmpty) {
+                              final file = result.files.first;
+                              if (file.path != null) {
+                                settings.setBackgroundImage(
+                                  file.path,
+                                  false,
+                                );
+                              }
+                            }
+                          },
+                          child: const Text('Choose Background Image'),
+                        ),
+                        if (settings.backgroundImagePath != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Text(
+                                'Selected: ${settings.backgroundImagePath}'),
+                          ),
+                      ],
+
+                      Constants.h32,
+                      ElevatedButton(
+                        onPressed: () => settings.resetToDefaults(),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                        ),
+                        child: const Text('Reset to Defaults'),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -395,6 +428,14 @@ class LoadingScreenSettings extends StatelessWidget {
     required String value,
     required ValueChanged<String> onChanged,
   }) {
+    // Create a controller with the current value
+    final controller = TextEditingController(text: value);
+
+    // Set the cursor position at the end of the text
+    controller.selection = TextSelection.fromPosition(
+      TextPosition(offset: controller.text.length),
+    );
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: TextField(
@@ -402,7 +443,7 @@ class LoadingScreenSettings extends StatelessWidget {
           labelText: label,
           border: const OutlineInputBorder(),
         ),
-        controller: TextEditingController(text: value),
+        controller: controller,
         onChanged: onChanged,
       ),
     );

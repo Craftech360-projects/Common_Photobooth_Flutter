@@ -1,9 +1,11 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:photobooth_flutter/providers/admin_watermark_provider.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/providers/welcome_screen_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
+import 'package:photobooth_flutter/widgets/watermark_overlay.dart';
 import 'package:provider/provider.dart';
 
 class WelcomeScreen extends StatefulWidget {
@@ -18,6 +20,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   Widget build(BuildContext context) {
     final welcomeSettings = context.watch<WelcomeScreenProvider>();
     final globalSettings = context.watch<GlobalSettingsProvider>();
+    final watermarkProvider = context.watch<AdminWatermarkProvider>();
 
     // If welcome screen is disabled, navigate directly to participant details
     if (!welcomeSettings.showWelcomeScreen) {
@@ -35,78 +38,82 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       //     icon: const Icon(Icons.star),
       //   ),
       // ),
-      body: Stack(
-        children: [
-          // Background
-          Container(
-            width: double.infinity,
-            height: double.infinity,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: _getBackgroundImage(welcomeSettings, globalSettings),
-                fit: BoxFit.cover,
+      body: WatermarkOverlay(
+        show: watermarkProvider.showWatermark,
+        child: Stack(
+          children: [
+            // Background
+            Container(
+              width: double.infinity,
+              height: double.infinity,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: _getBackgroundImage(welcomeSettings, globalSettings),
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
-          ),
 
-          // Content
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Welcome message
-                Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    welcomeSettings.welcomeMessageMarginLeft,
-                    welcomeSettings.welcomeMessageMarginTop,
-                    welcomeSettings.welcomeMessageMarginRight,
-                    welcomeSettings.welcomeMessageMarginBottom,
-                  ),
-                  child: Text(
-                    welcomeSettings.welcomeMessage,
-                    style: TextStyle(
-                      fontSize: welcomeSettings.welcomeMessageFontSize,
-                      fontWeight: welcomeSettings.welcomeMessageFontWeight,
-                      color: welcomeSettings.welcomeMessageColor.withValues(
-                          alpha: welcomeSettings.welcomeMessageOpacity),
-                      fontStyle: welcomeSettings.welcomeMessageItalic
-                          ? FontStyle.italic
-                          : FontStyle.normal,
-                      height: welcomeSettings.welcomeMessageLineHeight,
+            // Content
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Welcome message
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      welcomeSettings.welcomeMessageMarginLeft,
+                      welcomeSettings.welcomeMessageMarginTop,
+                      welcomeSettings.welcomeMessageMarginRight,
+                      welcomeSettings.welcomeMessageMarginBottom,
                     ),
-                    textAlign: welcomeSettings.welcomeMessageTextAlign,
+                    child: Text(
+                      welcomeSettings.welcomeMessage,
+                      style: TextStyle(
+                        fontSize: welcomeSettings.welcomeMessageFontSize,
+                        fontWeight: welcomeSettings.welcomeMessageFontWeight,
+                        color: welcomeSettings.welcomeMessageColor.withValues(
+                            alpha: welcomeSettings.welcomeMessageOpacity),
+                        fontStyle: welcomeSettings.welcomeMessageItalic
+                            ? FontStyle.italic
+                            : FontStyle.normal,
+                        height: welcomeSettings.welcomeMessageLineHeight,
+                      ),
+                      textAlign: welcomeSettings.welcomeMessageTextAlign,
+                    ),
                   ),
-                ),
 
-                Container(
-                  margin: EdgeInsets.only(
-                    top: welcomeSettings.buttonMarginTop,
-                    bottom: welcomeSettings.buttonMarginBottom,
+                  Container(
+                    margin: EdgeInsets.only(
+                      top: welcomeSettings.buttonMarginTop,
+                      bottom: welcomeSettings.buttonMarginBottom,
+                    ),
+                    child: welcomeSettings.useImageButton
+                        ? _buildImageButton(welcomeSettings)
+                        : _buildTextButton(welcomeSettings),
                   ),
-                  child: welcomeSettings.useImageButton
-                      ? _buildImageButton(welcomeSettings)
-                      : _buildTextButton(welcomeSettings),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
 
-          // Admin access button (hidden at bottom)
-          Positioned(
-            left: 0,
-            bottom: 0,
-            child: GestureDetector(
-              onTap: () => Navigator.pushNamed(context, AppRoutes.adminScreen),
-              child: Container(
-                width: 50,
-                height: 50,
-                decoration: const BoxDecoration(
-                  color: Colors.transparent,
+            // Admin access button (hidden at bottom)
+            Positioned(
+              left: 0,
+              bottom: 0,
+              child: GestureDetector(
+                onTap: () =>
+                    Navigator.pushNamed(context, AppRoutes.adminScreen),
+                child: Container(
+                  width: 50,
+                  height: 50,
+                  decoration: const BoxDecoration(
+                    color: Colors.transparent,
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

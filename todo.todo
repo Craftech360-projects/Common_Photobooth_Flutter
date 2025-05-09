@@ -1,12 +1,13 @@
-. Store User Details locally.
-. Option for offline or online data storage.
+. Store User Details locally / LOCAL DATABASE.
+. IMAGE SHARING VIA SCANNIG QR CODE.
 . Check Image Button loading in all screens.
 . Need more control with widgets positioning.
 . Check for adding controls for MainAxis and CrossAxis Alignment.
 . Set default title paddings
-. Watermark when license is expired
-. License certificate generation and use.
-
+. Watermark when license is expired.
+. Add slider + value input for controlling props
+. Turn off all the default show background image and use image button
+. All the titles should be 22 fsize and regular Fw by default and color as white
 
 
 Global Settings
@@ -14,29 +15,22 @@ Global Settings
 * Set default font size of titles as 22 and line height as 1.2 and FW as Regular.
 * Set default padding and margins for buttons.
 
-Participant Details Screen
-* Title is missing in participant details. ✅
-* For Text Fields in Participant Details, BR is not getting applied when border is disabled. ✅
-* Implement Proper Validations. ✅
-
 Gender Screen
-* Button font weight is missing in gender screen. ✅
+* Btn Txt FW not changing ✅
+* Btn Padding is not working
+* Unnecessary Additional Top Margin Control is there ✅
+* Btn Border is not working.
 
 Character screen
-* Title positioning in Character Screen. ✅
-* Border Radius not properly getting applied. ✅
-* Add GridView Layout. ✅
-* Add Button Margins. ✅
-* Button BR is missing. ✅
-* In Grid Layout 2/1 is not working.
+* Fix Main Axis Alignment
 * Add Controls for Main Axis Alignment.
+* Turn off the default show background
+* Turn off the default center last row
+* Something wrong with Character Border
 
 Capture Screen
-* Title Font Weight, Opacity, Line height, Padding Controls, Text Alignment. ✅
-* Margins for Preview. ✅
-* Keep BR out of border for Preview. ✅
-* Btn FW, is missing in capture screen. ✅
-* Button Margins and Padding. ✅
+* Preview margins has no effect
+* Button margins & padding too has no effect
 * Not able to choose precise 22.0 for title size
 * Add Main Axis Alignment control
 * Properly dispose camera.
@@ -50,9 +44,4 @@ Loading Screen
 
 Output Screen
 * Title Margins, FW, LH, Txt Align
-* Show Color Picker in Modal
 * Image Margins and Padding
-
-
-Okay, it's working. Now I want to implement offline authentication also.
-Actually I need your help with implementing beacuse I don't have a proper idea. But I will explain the concept. So client can either enter the code or they can insert a license certificate in the app. This license certificate will have details like security key, event id, user id, license expiration date

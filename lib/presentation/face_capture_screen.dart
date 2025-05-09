@@ -9,15 +9,22 @@ import 'package:camera_platform_interface/camera_platform_interface.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:photobooth_flutter/providers/admin_watermark_provider.dart';
 import 'package:photobooth_flutter/providers/face_capture_provider.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/providers/photobooth_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
+import 'package:photobooth_flutter/widgets/watermark_overlay.dart';
 import 'package:provider/provider.dart';
 
 /// Example app for Camera Windows plugin.
 class FaceCaptureScreen extends StatefulWidget {
-  const FaceCaptureScreen({super.key});
+  final bool isPreview;
+
+  const FaceCaptureScreen({
+    super.key,
+    this.isPreview = false,
+  });
 
   @override
   State<FaceCaptureScreen> createState() => _FaceCaptureScreenState();
@@ -50,22 +57,25 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
     // Check platform
     _isMacOS = Platform.isMacOS;
 
-    // Initialize camera after the widget is built
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_isMacOS) {
-        _initializeMacOSCamera();
-      } else {
-        _fetchCameras() // Fetch available cameras on init.
-            .then((_) => _initializeCamera()) // Initialize first camera.
-            .catchError((dynamic error) {
-          if (mounted) {
-            setState(() {
-              _cameraInfo = 'Failed to get cameras: $error';
-            });
-          }
-        });
-      }
-    });
+    // Only initialize camera if not in preview mode
+    if (!widget.isPreview) {
+      // Initialize camera after the widget is built
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_isMacOS) {
+          _initializeMacOSCamera();
+        } else {
+          _fetchCameras() // Fetch available cameras on init.
+              .then((_) => _initializeCamera()) // Initialize first camera.
+              .catchError((dynamic error) {
+            if (mounted) {
+              setState(() {
+                _cameraInfo = 'Failed to get cameras: $error';
+              });
+            }
+          });
+        }
+      });
+    }
   }
 
   // Add a didUpdateWidget lifecycle method to detect camera changes from settings
@@ -336,7 +346,7 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
           throw Exception("Camera not ready or controller not initialized.");
         }
         file = await CameraPlatform.instance.takePicture(_cameraId);
-        
+
         // --- End Windows/Other Logic ---
       }
 
@@ -423,6 +433,7 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
   Widget build(BuildContext context) {
     final settings = context.watch<FaceCaptureProvider>();
     final globalSettings = context.watch<GlobalSettingsProvider>();
+    final watermarkProvider = context.watch<AdminWatermarkProvider>();
 
     return Scaffold(
       // appBar: AppBar(
@@ -447,71 +458,123 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
       //   //   ),
       //   // ],
       // ),
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: _getBackgroundImage(settings, globalSettings),
-            fit: BoxFit.cover,
+      body: WatermarkOverlay(
+        show: watermarkProvider.showWatermark && !widget.isPreview,
+        child: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: _getBackgroundImage(settings, globalSettings),
+              fit: BoxFit.cover,
+            ),
           ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Title
-            if (settings.showTitle)
-              Padding(
-                padding: settings.titlePadding,
-                child: Text(
-                  textAlign: settings.titleAlignment,
-                  settings.titleText,
-                  style: TextStyle(
-                    height: settings.titleLineHeight,
-                    fontSize: settings.titleFontSize,
-                    fontWeight: settings.titleFontWeight,
-                    color: settings.titleColor
-                        .withValues(alpha: settings.titleOpacity),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Title
+              if (settings.showTitle)
+                Padding(
+                  padding: settings.titlePadding,
+                  child: Text(
+                    textAlign: settings.titleAlignment,
+                    settings.titleText,
+                    style: TextStyle(
+                      height: settings.titleLineHeight,
+                      fontSize: settings.titleFontSize,
+                      fontWeight: settings.titleFontWeight,
+                      color: settings.titleColor
+                          .withValues(alpha: settings.titleOpacity),
+                    ),
                   ),
                 ),
-              ),
 
-            // Windows Preview
-            // Container(
-            //   decoration: settings.showPreviewBorder
-            //       ? BoxDecoration(
-            //           borderRadius:
-            //               BorderRadius.circular(settings.previewBorderRadius),
-            //           border: Border.all(
-            //             color: settings.previewBorderColor,
-            //             width: settings.previewBorderWidth,
-            //           ),
-            //         )
-            //       : null,
-            //   width: settings.previewWidth,
-            //   height: settings.previewHeight,
-            //   child: ClipRRect(
-            //     borderRadius:
-            //         BorderRadius.circular(settings.previewBorderRadius),
-            //     child: AspectRatio(
-            //         aspectRatio: settings.previewWidth / settings.previewHeight,
-            //         child: _buildPreview()),
-            //   ),
-            // ),
+              // Camera Preview
+              widget.isPreview
+                  ? _buildPreviewPlaceholder(settings)
+                  : _buildCameraPreview(settings),
 
-            // macOS Preview
-            _buildCameraPreview(settings),
-
-            // Capture Button
-
-            _buildCaptureButton(settings),
-          ],
+              // Capture Button
+              widget.isPreview
+                  ? _buildCaptureButtonPreview(settings)
+                  : _buildCaptureButton(settings),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  // MacOS Preview
+  // Add placeholder widgets for preview mode
+  Widget _buildPreviewPlaceholder(FaceCaptureProvider settings) {
+    return Container(
+      width: settings.previewWidth,
+      height: settings.previewHeight,
+      decoration: settings.showPreviewBorder
+          ? BoxDecoration(
+              borderRadius: BorderRadius.circular(settings.previewBorderRadius),
+              border: Border.all(
+                color: settings.previewBorderColor,
+                width: settings.previewBorderWidth,
+              ),
+            )
+          : null,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(settings.previewBorderRadius),
+        child: Container(
+          color: Colors.black.withOpacity(0.7),
+          child: const Center(
+            child: Icon(
+              Icons.camera_alt,
+              size: 50,
+              color: Colors.white54,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCaptureButtonPreview(FaceCaptureProvider settings) {
+    if (settings.useImageButton && settings.buttonImagePath != null) {
+      return Container(
+        width: settings.buttonWidth,
+        height: settings.buttonHeight,
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: FileImage(File(settings.buttonImagePath!)),
+            fit: BoxFit.cover,
+          ),
+        ),
+      );
+    } else {
+      return Container(
+        width: settings.buttonWidth,
+        height: settings.buttonHeight,
+        decoration: BoxDecoration(
+          color: settings.buttonColor,
+          borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
+          border: settings.buttonHasBorder
+              ? Border.all(
+                  color: settings.buttonBorderColor,
+                  width: settings.buttonBorderWidth,
+                )
+              : null,
+        ),
+        child: Center(
+          child: Text(
+            settings.buttonText,
+            style: TextStyle(
+              color: settings.buttonTextColor,
+              fontSize: settings.buttonFontSize,
+              fontWeight: settings.buttonFontWeight,
+            ),
+          ),
+        ),
+      );
+    }
+  }
+
   Widget _buildCameraPreview(FaceCaptureProvider settings) {
     if (!_cameraInitialized) {
       return const Center(

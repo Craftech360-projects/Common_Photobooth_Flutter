@@ -13,7 +13,6 @@ class GlobalSettingsProvider with ChangeNotifier {
   String? get comfyApiUrl => _comfyApiUrl;
 
   // Global settings
-  Size _selectedResolution = const Size(1920, 1080);
   String? _backgroundImage;
   bool _isAssetImage = true;
   double _fieldSpacing = 20.0;
@@ -25,7 +24,6 @@ class GlobalSettingsProvider with ChangeNotifier {
   // Getters
   String? get runpodApiUrl => _runpodApiUrl;
   String? get runpodApiKey => _runpodApiKey;
-  Size get selectedResolution => _selectedResolution;
   String? get backgroundImage => _backgroundImage;
   String? get backgroundImagePath =>
       _backgroundImage; // Added for consistency with other providers
@@ -50,11 +48,6 @@ class GlobalSettingsProvider with ChangeNotifier {
   String? get supabaseAnonKey => _supabaseAnonKey;
 
   Future<void> loadSettings() async {
-    _selectedResolution = Size(
-      _prefs.getDouble('resolution_width') ?? 1920,
-      _prefs.getDouble('resolution_height') ?? 1080,
-    );
-
     _backgroundImage = _prefs.getString('background_image');
     _isAssetImage = _prefs.getBool('is_asset_image') ?? true;
 
@@ -91,13 +84,6 @@ class GlobalSettingsProvider with ChangeNotifier {
   void setRunpodApiKey(String key) async {
     _runpodApiKey = key;
     await _prefs.setString('runpod_api_key', _runpodApiKey ?? '');
-    notifyListeners();
-  }
-
-  void setResolution(Size size) async {
-    _selectedResolution = size;
-    await _prefs.setDouble('resolution_width', size.width);
-    await _prefs.setDouble('resolution_height', size.height);
     notifyListeners();
   }
 
@@ -171,7 +157,6 @@ class GlobalSettingsProvider with ChangeNotifier {
     await _prefs.clear();
 
     // Reset to default values
-    _selectedResolution = const Size(1920, 1080);
     _backgroundImage = null;
     _isAssetImage = true;
     _fieldSpacing = 20.0;

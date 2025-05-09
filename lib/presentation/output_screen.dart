@@ -5,7 +5,6 @@ import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/providers/output_screen_provider.dart';
 import 'package:photobooth_flutter/providers/photobooth_provider.dart';
-import 'package:photobooth_flutter/routes/routes.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
@@ -56,13 +55,13 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
     final globalSettings = Provider.of<GlobalSettingsProvider>(context);
 
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          onPressed: () =>
-              Navigator.pushNamed(context, AppRoutes.outputScreenSettings),
-          icon: const Icon(Icons.star),
-        ),
-      ),
+      // appBar: AppBar(
+      //   leading: IconButton(
+      //     onPressed: () =>
+      //         Navigator.pushNamed(context, AppRoutes.outputScreenSettings),
+      //     icon: const Icon(Icons.star),
+      //   ),
+      // ),
       body: Container(
         width: double.infinity,
         height: double.infinity,

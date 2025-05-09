@@ -30,7 +30,7 @@ class AuthProvider extends ChangeNotifier {
 
     try {
       // First check online authentication
-      _isAuthenticated = await AuthService.instance.isAuthenticated();
+      _isAuthenticated = AuthService.instance.isAuthenticated;
 
       // If not authenticated online, check license
       if (!_isAuthenticated) {
@@ -49,14 +49,14 @@ class AuthProvider extends ChangeNotifier {
 
   // Existing online verification method
   Future<bool> verifyAuthCode(
-      {required String eventId, required String authCode}) async {
+      {required String serviceId, required String authCode}) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
       final response = await AuthService.instance.verifyAuthCode(
-        eventId: eventId,
+        serviceId: serviceId,
         authCode: authCode,
       );
 

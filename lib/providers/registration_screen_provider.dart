@@ -53,7 +53,7 @@ class CustomTextField {
     this.borderWidth = 1.0,
     this.borderColor = AppColors.black,
     this.borderRadius = 4.0,
-    this.width = 0.55, // Percentage of screen width
+    this.width = 0.2, // Percentage of screen width
     this.height = 60.0,
     this.margin = EdgeInsets.zero,
     this.padding = const EdgeInsets.symmetric(horizontal: 12.0),
@@ -150,8 +150,8 @@ class RegistrationScreenProvider extends ChangeNotifier {
 
   // Registration screen settings
   bool _showRegistrationScreen = true;
-  double _fieldSpacing = 10.0;
-  double _buttonSpacing = 20.0;
+  double _fieldSpacing = 0.0;
+  double _buttonSpacing = 0.0;
   double _borderRadius = 4.0;
   List<CustomTextField> _textFields = [];
 
@@ -160,10 +160,11 @@ class RegistrationScreenProvider extends ChangeNotifier {
   String _titleText = "Enter Details";
   double _titleFontSize = 22.0;
   FontWeight _titleFontWeight = FontWeight.w500;
-  double _titleLineHeight = 1.2;
+  double _titleLineHeight = 1.0;
   TextAlign _titleTextAlign = TextAlign.center;
-  Color _titleTextColor = AppColors.black;
-  EdgeInsets _titleMargin = const EdgeInsets.only(bottom: 20.0);
+  Color _titleTextColor = AppColors.white;
+  EdgeInsets _titleMargin =
+      const EdgeInsets.only(top: 0, left: 0, right: 0, bottom: 20);
 
   // Button settings
   bool _useImageButton = false;
@@ -171,7 +172,7 @@ class RegistrationScreenProvider extends ChangeNotifier {
   Color _submitButtonColor = AppColors.goldenYellow;
   Color _submitButtonTextColor = AppColors.black;
   double _buttonWidth = 200.0;
-  double _buttonHeight = 50.0;
+  double _buttonHeight = 45.0;
   double _buttonBorderRadius = 4.0;
   double _buttonFontSize = 18.0;
   FontWeight _buttonFontWeight = FontWeight.w500;
@@ -273,7 +274,7 @@ class RegistrationScreenProvider extends ChangeNotifier {
     final double titleTopMargin =
         _prefs.getDouble('registration_title_margin_top') ?? 0.0;
     final double titleBottomMargin =
-        _prefs.getDouble('registration_title_margin_bottom') ?? 0.0;
+        _prefs.getDouble('registration_title_margin_bottom') ?? 20.0;
     final double titleLeftMargin =
         _prefs.getDouble('registration_title_margin_left') ?? 0.0;
     final double titleRightMargin =

@@ -4,8 +4,10 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/core/constants/constants.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
+import 'package:photobooth_flutter/presentation/registration_screen.dart';
 import 'package:photobooth_flutter/providers/registration_screen_provider.dart';
 import 'package:photobooth_flutter/widgets/improved_color_picker.dart';
+import 'package:photobooth_flutter/widgets/settings_preview.dart';
 import 'package:provider/provider.dart';
 
 class RegistrationScreenSettings extends StatefulWidget {
@@ -30,460 +32,437 @@ class _RegistrationScreenSettingsState
       ),
       body: Form(
         key: _formKey,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Enable/Disable Registration Screen
-              SwitchListTile(
-                title: const Text('Show Registration Screen'),
-                subtitle:
-                    const Text('Enable or disable the registration screen'),
-                value: settings.showRegistrationScreen,
-                onChanged: (value) {
-                  settings.setShowRegistrationScreen(value);
-                },
-              ),
-
-              const Divider(),
-
-              // Title Settings
-              const Text(
-                'Title Settings',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              Constants.h8,
-
-              // Enable/Disable Title
-              SwitchListTile(
-                title: const Text('Show Title'),
-                subtitle: const Text('Enable or disable the title'),
-                value: settings.showTitle,
-                onChanged: (value) {
-                  settings.setShowTitle(value);
-                },
-              ),
-
-              if (settings.showTitle) ...[
-                // Title Text
-                TextFormField(
-                  initialValue: settings.titleText,
-                  decoration: const InputDecoration(
-                    labelText: 'Title Text',
-                    border: OutlineInputBorder(),
-                  ),
-                  onChanged: (value) {
-                    settings.setTitleText(value);
-                  },
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SettingsPreview(
+                width: 1080,
+                height: 1920,
+                scale: 0.45,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.transparent),
+                  borderRadius: BorderRadius.circular(0),
                 ),
-                Constants.h16,
-
-                // Font Size
-                Row(
+                child: const ParticipantDetailsScreen(),
+              ),
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: TextFormField(
-                        initialValue: settings.titleFontSize.toString(),
-                        decoration: const InputDecoration(
-                          labelText: 'Font Size',
-                          border: OutlineInputBorder(),
-                        ),
-                        keyboardType: TextInputType.number,
-                        onChanged: (value) {
-                          final size = double.tryParse(value);
-                          if (size != null) {
-                            settings.setTitleFontSize(size);
-                          }
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: TextFormField(
-                        initialValue: settings.titleLineHeight.toString(),
-                        decoration: const InputDecoration(
-                          labelText: 'Line Height',
-                          border: OutlineInputBorder(),
-                        ),
-                        keyboardType: TextInputType.number,
-                        onChanged: (value) {
-                          final height = double.tryParse(value);
-                          if (height != null) {
-                            settings.setTitleLineHeight(height);
-                          }
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                Constants.h16,
-
-                // Font Weight
-                DropdownButtonFormField<FontWeight>(
-                  value: settings.titleFontWeight,
-                  decoration: const InputDecoration(
-                    labelText: 'Font Weight',
-                    border: OutlineInputBorder(),
-                  ),
-                  items: [
-                    const DropdownMenuItem(
-                      value: FontWeight.normal,
-                      child: Text('Normal'),
-                    ),
-                    const DropdownMenuItem(
-                      value: FontWeight.bold,
-                      child: Text('Bold'),
-                    ),
-                    const DropdownMenuItem(
-                      value: FontWeight.w100,
-                      child: Text('Thin'),
-                    ),
-                    const DropdownMenuItem(
-                      value: FontWeight.w300,
-                      child: Text('Light'),
-                    ),
-                    const DropdownMenuItem(
-                      value: FontWeight.w500,
-                      child: Text('Medium'),
-                    ),
-                    const DropdownMenuItem(
-                      value: FontWeight.w900,
-                      child: Text('Black'),
-                    ),
-                  ],
-                  onChanged: (value) {
-                    if (value != null) {
-                      settings.setTitleFontWeight(value);
-                    }
-                  },
-                ),
-                Constants.h16,
-
-                // Text Align
-                DropdownButtonFormField<TextAlign>(
-                  value: settings.titleTextAlign,
-                  decoration: const InputDecoration(
-                    labelText: 'Text Align',
-                    border: OutlineInputBorder(),
-                  ),
-                  items: [
-                    const DropdownMenuItem(
-                      value: TextAlign.left,
-                      child: Text('Left'),
-                    ),
-                    const DropdownMenuItem(
-                      value: TextAlign.center,
-                      child: Text('Center'),
-                    ),
-                    const DropdownMenuItem(
-                      value: TextAlign.right,
-                      child: Text('Right'),
-                    ),
-                  ],
-                  onChanged: (value) {
-                    if (value != null) {
-                      settings.setTitleTextAlign(value);
-                    }
-                  },
-                ),
-                Constants.h16,
-
-                // Text Color
-                ListTile(
-                  title: const Text('Title Text Color'),
-                  trailing: Container(
-                    width: 24,
-                    height: 24,
-                    decoration: BoxDecoration(
-                      color: settings.titleTextColor,
-                      border: Border.all(color: Colors.grey),
-                    ),
-                  ),
-                  onTap: () async {
-                    final color = await _buildColorPickerWithLabel(
-                      context,
-                      settings.titleTextColor,
-                      label: 'Title Text Color',
-                    );
-                    if (color != null) {
-                      settings.setTitleTextColor(color);
-                    }
-                  },
-                ),
-
-                // Title Margins
-                _buildSectionHeader('Title Margins'),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextFormField(
-                        initialValue: settings.titleMargin.top.toString(),
-                        decoration: const InputDecoration(
-                          labelText: 'Top',
-                          border: OutlineInputBorder(),
-                        ),
-                        keyboardType: TextInputType.number,
-                        onChanged: (value) {
-                          final top = double.tryParse(value);
-                          if (top != null) {
-                            settings.setTitleMargin(EdgeInsets.fromLTRB(
-                              settings.titleMargin.left,
-                              top,
-                              settings.titleMargin.right,
-                              settings.titleMargin.bottom,
-                            ));
-                          }
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: TextFormField(
-                        initialValue: settings.titleMargin.bottom.toString(),
-                        decoration: const InputDecoration(
-                          labelText: 'Bottom',
-                          border: OutlineInputBorder(),
-                        ),
-                        keyboardType: TextInputType.number,
-                        onChanged: (value) {
-                          final bottom = double.tryParse(value);
-                          if (bottom != null) {
-                            settings.setTitleMargin(EdgeInsets.fromLTRB(
-                              settings.titleMargin.left,
-                              settings.titleMargin.top,
-                              settings.titleMargin.right,
-                              bottom,
-                            ));
-                          }
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                Constants.h8,
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextFormField(
-                        initialValue: settings.titleMargin.left.toString(),
-                        decoration: const InputDecoration(
-                          labelText: 'Left',
-                          border: OutlineInputBorder(),
-                        ),
-                        keyboardType: TextInputType.number,
-                        onChanged: (value) {
-                          final left = double.tryParse(value);
-                          if (left != null) {
-                            settings.setTitleMargin(EdgeInsets.fromLTRB(
-                              left,
-                              settings.titleMargin.top,
-                              settings.titleMargin.right,
-                              settings.titleMargin.bottom,
-                            ));
-                          }
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: TextFormField(
-                        initialValue: settings.titleMargin.right.toString(),
-                        decoration: const InputDecoration(
-                          labelText: 'Right',
-                          border: OutlineInputBorder(),
-                        ),
-                        keyboardType: TextInputType.number,
-                        onChanged: (value) {
-                          final right = double.tryParse(value);
-                          if (right != null) {
-                            settings.setTitleMargin(EdgeInsets.fromLTRB(
-                              settings.titleMargin.left,
-                              settings.titleMargin.top,
-                              right,
-                              settings.titleMargin.bottom,
-                            ));
-                          }
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-
-              const Divider(),
-
-              // Background Image Settings
-              const Text(
-                'Background Image',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              Constants.h8,
-
-              Row(
-                children: [
-                  ElevatedButton(
-                    onPressed: () async {
-                      final result = await FilePicker.platform.pickFiles(
-                        type: FileType.image,
-                        allowMultiple: false,
-                      );
-                      if (result != null && result.files.isNotEmpty) {
-                        await settings.setRegistrationScreenBackground(
-                          result.files.first.path,
-                          isAsset: false,
-                        );
-                      }
-                    },
-                    child: const Text('Select Background Image'),
-                  ),
-                  const SizedBox(width: 16),
-                  if (settings.registrationScreenBackground != null)
-                    ElevatedButton(
-                      onPressed: () {
-                        settings.setRegistrationScreenBackground(null);
+                    // Enable/Disable Registration Screen
+                    SwitchListTile(
+                      title: const Text('Show Registration Screen'),
+                      subtitle: const Text(
+                          'Enable or disable the registration screen'),
+                      value: settings.showRegistrationScreen,
+                      onChanged: (value) {
+                        settings.setShowRegistrationScreen(value);
                       },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                      ),
-                      child: const Text('Remove Background'),
                     ),
-                ],
-              ),
 
-              if (settings.registrationScreenBackground != null)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: Container(
-                    width: 200,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
-                      image: DecorationImage(
-                        image: settings.isRegistrationScreenBackgroundAsset
-                            ? AssetImage(settings.registrationScreenBackground!)
-                            : FileImage(File(
-                                    settings.registrationScreenBackground!))
-                                as ImageProvider,
-                        fit: BoxFit.cover,
-                      ),
+                    const Divider(),
+
+                    // Title Settings
+                    const Text(
+                      'Title Settings',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
-                  ),
-                ),
+                    Constants.h8,
 
-              const Divider(),
+                    // Enable/Disable Title
+                    SwitchListTile(
+                      title: const Text('Show Title'),
+                      subtitle: const Text('Enable or disable the title'),
+                      value: settings.showTitle,
+                      onChanged: (value) {
+                        settings.setShowTitle(value);
+                      },
+                    ),
 
-              // Text Fields Settings
-              const Text(
-                'Text Fields',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              Constants.h8,
+                    if (settings.showTitle) ...[
+                      // Title Text
+                      TextFormField(
+                        initialValue: settings.titleText,
+                        decoration: const InputDecoration(
+                          labelText: 'Title Text',
+                          border: OutlineInputBorder(),
+                        ),
+                        onChanged: (value) {
+                          settings.setTitleText(value);
+                        },
+                      ),
+                      Constants.h16,
 
-              // Add Text Field Button
-              if (settings.textFields.length < 3)
-                ElevatedButton(
-                  onPressed: () {
-                    settings.addTextField();
-                  },
-                  child: const Text('Add Text Field'),
-                ),
+                      // Font Size
+                      _buildSliderWithLabel(
+                        label: 'Font Size',
+                        value: settings.titleFontSize,
+                        min: 12,
+                        max: 80,
+                        divisions: 90,
+                        onChanged: (value) => settings.setTitleFontSize(value),
+                      ),
 
-              Constants.h16,
+                      _buildSliderWithLabel(
+                        label: 'Line Height',
+                        value: settings.titleLineHeight,
+                        min: 0.8,
+                        max: 2.0,
+                        divisions: 24,
+                        onChanged: (value) =>
+                            settings.setTitleLineHeight(value),
+                      ),
+                      Constants.w16,
+                      Constants.h16,
 
-              // Text Fields List
-              ...settings.textFields
-                  .map((field) => _buildTextFieldCard(field, settings)),
+                      // Font Weight
+                      DropdownButtonFormField<FontWeight>(
+                        value: settings.titleFontWeight,
+                        decoration: const InputDecoration(
+                          labelText: 'Font Weight',
+                          border: OutlineInputBorder(),
+                        ),
+                        items: [
+                          const DropdownMenuItem(
+                            value: FontWeight.normal,
+                            child: Text('Normal'),
+                          ),
+                          const DropdownMenuItem(
+                            value: FontWeight.bold,
+                            child: Text('Bold'),
+                          ),
+                          const DropdownMenuItem(
+                            value: FontWeight.w100,
+                            child: Text('Thin'),
+                          ),
+                          const DropdownMenuItem(
+                            value: FontWeight.w300,
+                            child: Text('Light'),
+                          ),
+                          const DropdownMenuItem(
+                            value: FontWeight.w500,
+                            child: Text('Medium'),
+                          ),
+                          const DropdownMenuItem(
+                            value: FontWeight.w900,
+                            child: Text('Black'),
+                          ),
+                        ],
+                        onChanged: (value) {
+                          if (value != null) {
+                            settings.setTitleFontWeight(value);
+                          }
+                        },
+                      ),
+                      Constants.h16,
 
-              const Divider(),
+                      // Text Align
+                      DropdownButtonFormField<TextAlign>(
+                        value: settings.titleTextAlign,
+                        decoration: const InputDecoration(
+                          labelText: 'Text Align',
+                          border: OutlineInputBorder(),
+                        ),
+                        items: [
+                          const DropdownMenuItem(
+                            value: TextAlign.left,
+                            child: Text('Left'),
+                          ),
+                          const DropdownMenuItem(
+                            value: TextAlign.center,
+                            child: Text('Center'),
+                          ),
+                          const DropdownMenuItem(
+                            value: TextAlign.right,
+                            child: Text('Right'),
+                          ),
+                        ],
+                        onChanged: (value) {
+                          if (value != null) {
+                            settings.setTitleTextAlign(value);
+                          }
+                        },
+                      ),
+                      Constants.h16,
 
-              // Spacing Settings
-              const Text(
-                'Spacing Settings',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              Constants.h8,
+                      // Text Color
+                      ListTile(
+                        title: const Text('Title Text Color'),
+                        leading: Container(
+                          width: 24,
+                          height: 24,
+                          decoration: BoxDecoration(
+                            color: settings.titleTextColor,
+                            border: Border.all(color: AppColors.black),
+                          ),
+                        ),
+                        onTap: () async {
+                          final color = await _buildColorPickerWithLabel(
+                            context,
+                            settings.titleTextColor,
+                            label: 'Title Text Color',
+                          );
+                          if (color != null) {
+                            settings.setTitleTextColor(color);
+                          }
+                        },
+                      ),
 
-              Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      initialValue: settings.fieldSpacing.toString(),
+                      // Title Margins
+                      // Title Margins
+                      _buildSectionHeader('Title Margins'),
+                      _buildSliderWithLabel(
+                        label: 'Top Margin',
+                        value: settings.titleMargin.top,
+                        min: 0,
+                        max: 350,
+                        divisions: 60,
+                        onChanged: (value) {
+                          settings.setTitleMargin(EdgeInsets.fromLTRB(
+                            settings.titleMargin.left,
+                            value,
+                            settings.titleMargin.right,
+                            settings.titleMargin.bottom,
+                          ));
+                        },
+                      ),
+                      _buildSliderWithLabel(
+                        label: 'Left Margin',
+                        value: settings.titleMargin.left,
+                        min: 0,
+                        max: 350,
+                        divisions: 60,
+                        onChanged: (value) {
+                          settings.setTitleMargin(EdgeInsets.fromLTRB(
+                            value,
+                            settings.titleMargin.top,
+                            settings.titleMargin.right,
+                            settings.titleMargin.bottom,
+                          ));
+                        },
+                      ),
+                      _buildSliderWithLabel(
+                        label: 'Right Margin',
+                        value: settings.titleMargin.right,
+                        min: 0,
+                        max: 350,
+                        divisions: 60,
+                        onChanged: (value) {
+                          settings.setTitleMargin(EdgeInsets.fromLTRB(
+                            settings.titleMargin.left,
+                            settings.titleMargin.top,
+                            value,
+                            settings.titleMargin.bottom,
+                          ));
+                        },
+                      ),
+                      _buildSliderWithLabel(
+                        label: 'Bottom Margin',
+                        value: settings.titleMargin.bottom,
+                        min: 0,
+                        max: 350,
+                        divisions: 60,
+                        onChanged: (value) {
+                          settings.setTitleMargin(EdgeInsets.fromLTRB(
+                            settings.titleMargin.left,
+                            settings.titleMargin.top,
+                            settings.titleMargin.right,
+                            value,
+                          ));
+                        },
+                      ),
+                      
+                    ],
+
+                    const Divider(),
+
+                    // Background Image Settings
+                    const Text(
+                      'Background Image',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    Constants.h8,
+
+                    Row(
+                      children: [
+                        ElevatedButton(
+                          onPressed: () async {
+                            final result = await FilePicker.platform.pickFiles(
+                              type: FileType.image,
+                              allowMultiple: false,
+                            );
+                            if (result != null && result.files.isNotEmpty) {
+                              await settings.setRegistrationScreenBackground(
+                                result.files.first.path,
+                                isAsset: false,
+                              );
+                            }
+                          },
+                          child: const Text('Select Background Image'),
+                        ),
+                        Constants.w16,
+                        if (settings.registrationScreenBackground != null)
+                          ElevatedButton(
+                            onPressed: () {
+                              settings.setRegistrationScreenBackground(null);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.red,
+                            ),
+                            child: const Text('Remove Background'),
+                          ),
+                      ],
+                    ),
+
+                    if (settings.registrationScreenBackground != null)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: Container(
+                          width: 200,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: AppColors.grey),
+                            image: DecorationImage(
+                              image: settings
+                                      .isRegistrationScreenBackgroundAsset
+                                  ? AssetImage(
+                                      settings.registrationScreenBackground!)
+                                  : FileImage(File(settings
+                                          .registrationScreenBackground!))
+                                      as ImageProvider,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                    const Divider(),
+
+                    // Text Fields Settings
+                    const Text(
+                      'Text Fields',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    Constants.h8,
+
+                    // Add Text Field Button
+                    if (settings.textFields.length < 3)
+                      ElevatedButton(
+                        onPressed: () {
+                          settings.addTextField();
+                        },
+                        child: const Text('Add Text Field'),
+                      ),
+
+                    Constants.h16,
+
+                    // Text Fields List
+                    ...settings.textFields
+                        .map((field) => _buildTextFieldCard(field, settings)),
+
+                    const Divider(),
+
+                    // Spacing Settings
+                    const Text(
+                      'Spacing Settings',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    Constants.h8,
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            initialValue: settings.fieldSpacing.toString(),
+                            decoration: const InputDecoration(
+                              labelText: 'Field Spacing',
+                              border: OutlineInputBorder(),
+                            ),
+                            keyboardType: TextInputType.number,
+                            onChanged: (value) {
+                              final spacing = double.tryParse(value);
+                              if (spacing != null) {
+                                settings.setFieldSpacing(spacing);
+                              }
+                            },
+                          ),
+                        ),
+                        Constants.w16,
+                        Expanded(
+                          child: TextFormField(
+                            initialValue: settings.buttonSpacing.toString(),
+                            decoration: const InputDecoration(
+                              labelText: 'Button Spacing',
+                              border: OutlineInputBorder(),
+                            ),
+                            keyboardType: TextInputType.number,
+                            onChanged: (value) {
+                              final spacing = double.tryParse(value);
+                              if (spacing != null) {
+                                settings.setButtonSpacing(spacing);
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    Constants.h16,
+
+                    TextFormField(
+                      initialValue: settings.borderRadius.toString(),
                       decoration: const InputDecoration(
-                        labelText: 'Field Spacing',
+                        labelText: 'Border Radius',
                         border: OutlineInputBorder(),
                       ),
                       keyboardType: TextInputType.number,
                       onChanged: (value) {
-                        final spacing = double.tryParse(value);
-                        if (spacing != null) {
-                          settings.setFieldSpacing(spacing);
+                        final radius = double.tryParse(value);
+                        if (radius != null) {
+                          settings.setBorderRadius(radius);
                         }
                       },
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: TextFormField(
-                      initialValue: settings.buttonSpacing.toString(),
-                      decoration: const InputDecoration(
-                        labelText: 'Button Spacing',
-                        border: OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.number,
+
+                    const Divider(),
+
+                    // Button Settings
+                    const Text(
+                      'Button Settings',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    Constants.h8,
+
+                    // Button Type
+                    SwitchListTile(
+                      title: const Text('Use Image Button'),
+                      subtitle:
+                          const Text('Toggle between text and image button'),
+                      value: settings.useImageButton,
                       onChanged: (value) {
-                        final spacing = double.tryParse(value);
-                        if (spacing != null) {
-                          settings.setButtonSpacing(spacing);
-                        }
+                        settings.setUseImageButton(value);
                       },
                     ),
-                  ),
-                ],
-              ),
 
-              Constants.h16,
-
-              TextFormField(
-                initialValue: settings.borderRadius.toString(),
-                decoration: const InputDecoration(
-                  labelText: 'Border Radius',
-                  border: OutlineInputBorder(),
+                    if (settings.useImageButton)
+                      _buildImageButtonSettings(settings)
+                    else
+                      _buildTextButtonSettings(settings),
+                  ],
                 ),
-                keyboardType: TextInputType.number,
-                onChanged: (value) {
-                  final radius = double.tryParse(value);
-                  if (radius != null) {
-                    settings.setBorderRadius(radius);
-                  }
-                },
               ),
-
-              const Divider(),
-
-              // Button Settings
-              const Text(
-                'Button Settings',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              Constants.h8,
-
-              // Button Type
-              SwitchListTile(
-                title: const Text('Use Image Button'),
-                subtitle: const Text('Toggle between text and image button'),
-                value: settings.useImageButton,
-                onChanged: (value) {
-                  settings.setUseImageButton(value);
-                },
-              ),
-
-              if (settings.useImageButton)
-                _buildImageButtonSettings(settings)
-              else
-                _buildTextButtonSettings(settings),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -794,7 +773,7 @@ class _RegistrationScreenSettingsState
                     },
                   ),
                 ),
-                const SizedBox(width: 16),
+                Constants.w16,
                 Expanded(
                   child: TextFormField(
                     initialValue: field.height.toString(),
@@ -866,7 +845,7 @@ class _RegistrationScreenSettingsState
                     },
                   ),
                 ),
-                const SizedBox(width: 16),
+                Constants.w16,
                 Expanded(
                   child: SwitchListTile(
                     title: const Text('Required'),
@@ -1081,7 +1060,7 @@ class _RegistrationScreenSettingsState
                           },
                         ),
                       ),
-                      const SizedBox(width: 16),
+                      Constants.w16,
                       Expanded(
                         child: ListTile(
                           title: const Text('Border Color'),
@@ -1371,7 +1350,7 @@ class _RegistrationScreenSettingsState
                 },
               ),
             ),
-            const SizedBox(width: 16),
+            Constants.w16,
             Expanded(
               child: TextFormField(
                 initialValue: settings.buttonHeight.toString(),
@@ -1409,7 +1388,7 @@ class _RegistrationScreenSettingsState
                 },
               ),
             ),
-            const SizedBox(width: 16),
+            Constants.w16,
             Expanded(
               child: TextFormField(
                 initialValue: settings.buttonFontSize.toString(),
@@ -1512,7 +1491,7 @@ class _RegistrationScreenSettingsState
                       },
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  Constants.w16,
                   Expanded(
                     child: ListTile(
                       title: const Text('Border Color'),
@@ -1702,7 +1681,7 @@ class _RegistrationScreenSettingsState
               },
               child: const Text('Select Button Image'),
             ),
-            const SizedBox(width: 16),
+            Constants.w16,
             if (settings.buttonImagePath != null)
               ElevatedButton(
                 onPressed: () {
@@ -1754,7 +1733,7 @@ class _RegistrationScreenSettingsState
                 },
               ),
             ),
-            const SizedBox(width: 16),
+            Constants.w16,
             Expanded(
               child: TextFormField(
                 initialValue: settings.buttonHeight.toString(),
@@ -1826,7 +1805,7 @@ class _RegistrationScreenSettingsState
                       },
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  Constants.w16,
                   Expanded(
                     child: ListTile(
                       title: const Text('Border Color'),

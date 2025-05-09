@@ -47,7 +47,7 @@ class _AuthScreenState extends State<AuthScreen> {
       } else {
         // Verify with event ID and auth code
         success = await authProvider.verifyAuthCode(
-          eventId: _eventIdController.text.trim(),
+          serviceId: _eventIdController.text.trim(),
           authCode: _authCodeController.text.trim(),
         );
       }
@@ -155,7 +155,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       size: 40,
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  Constants.h24,
 
                   // Title
                   const Text(
@@ -212,7 +212,7 @@ class _AuthScreenState extends State<AuthScreen> {
                           TextFormField(
                             controller: _eventIdController,
                             decoration: InputDecoration(
-                              labelText: 'Event ID',
+                              labelText: 'Service ID',
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),
@@ -220,7 +220,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
-                                return 'Please enter the Event ID';
+                                return 'Please enter the Service ID';
                               }
                               return null;
                             },
@@ -317,7 +317,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             ),
                           ),
                         ],
-                        const SizedBox(height: 24),
+                        Constants.h24,
                         SizedBox(
                           width: double.infinity,
                           height: 50,
