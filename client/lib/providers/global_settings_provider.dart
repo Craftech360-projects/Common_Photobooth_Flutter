@@ -1,0 +1,170 @@
+import 'dart:io';
+
+import 'package:flutter/material.dart';
+import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+class GlobalSettingsProvider with ChangeNotifier {
+  late SharedPreferences _prefs;
+
+  // Add ComfyAPI URL
+  String? _comfyApiUrl;
+  String? get comfyApiUrl => _comfyApiUrl;
+
+  // Global settings
+  String? _backgroundImage;
+  bool _isAssetImage = true;
+  double _fieldSpacing = 20.0;
+  double _buttonSpacing = 40.0;
+  double _borderRadius = 4.0;
+  String? _runpodApiUrl;
+  String? _runpodApiKey;
+
+  // Getters
+  String? get runpodApiUrl => _runpodApiUrl;
+  String? get runpodApiKey => _runpodApiKey;
+  String? get backgroundImage => _backgroundImage;
+  String? get backgroundImagePath =>
+      _backgroundImage; // Added for consistency with other providers
+  bool get isAssetImage => _isAssetImage;
+  bool get isBackgroundImageAsset =>
+      _isAssetImage; // Added for consistency with other providers
+  double get fieldSpacing => _fieldSpacing;
+  double get buttonSpacing => _buttonSpacing;
+  double get borderRadius => _borderRadius;
+
+  Future<void> init() async {
+    _prefs = await SharedPreferences.getInstance();
+    await loadSettings();
+  }
+
+  // Add these properties
+  String? _supabaseUrl;
+  String? _supabaseAnonKey;
+
+  // Add these getters
+  String? get supabaseUrl => _supabaseUrl;
+  String? get supabaseAnonKey => _supabaseAnonKey;
+
+  Future<void> loadSettings() async {
+    _backgroundImage = _prefs.getString('background_image');
+    _isAssetImage = _prefs.getBool('is_asset_image') ?? true;
+
+    // Verify background image file exists if it's not an asset
+    if (_backgroundImage != null && !_isAssetImage) {
+      final file = File(_backgroundImage!);
+      if (!file.existsSync()) {
+        _backgroundImage = null;
+        await _prefs.remove('background_image');
+      }
+    }
+
+    _fieldSpacing = _prefs.getDouble('field_spacing') ?? 20.0;
+    _buttonSpacing = _prefs.getDouble('button_spacing') ?? 40.0;
+    _borderRadius = _prefs.getDouble('border_radius') ?? 4.0;
+
+    // Load Supabase settings
+    _supabaseUrl = _prefs.getString('supabase_url');
+    _supabaseAnonKey = _prefs.getString('supabase_anon_key');
+
+    // Load ComfyAPI settings
+    _comfyApiUrl =
+        _prefs.getString('comfy_api_url') ?? 'http://213.173.109.100:12508';
+
+    notifyListeners();
+  }
+
+  void setRunpodApiUrl(String url) async {
+    _runpodApiUrl = url;
+    await _prefs.setString('runpod_api_url', _runpodApiUrl ?? '');
+    notifyListeners();
+  }
+
+  void setRunpodApiKey(String key) async {
+    _runpodApiKey = key;
+    await _prefs.setString('runpod_api_key', _runpodApiKey ?? '');
+    notifyListeners();
+  }
+
+  Future<void> setBackgroundImage(String sourcePath,
+      {required bool isAsset}) async {
+    if (isAsset) {
+      // For asset images, just store the path
+      _backgroundImage = sourcePath;
+      _isAssetImage = true;
+    } else {
+      // For file images, copy to app documents directory
+      final appDir = await getApplicationDocumentsDirectory();
+      final fileName =
+          'global_background_${DateTime.now().millisecondsSinceEpoch}${path.extension(sourcePath)}';
+      final destinationPath = path.join(appDir.path, fileName);
+
+      try {
+        final sourceFile = File(sourcePath);
+        await sourceFile.copy(destinationPath);
+        _backgroundImage = destinationPath;
+        _isAssetImage = false;
+      } on Exception catch (e) {
+        debugPrint('Error copying background image: $e');
+        return;
+      }
+    }
+
+    await _prefs.setString('background_image', _backgroundImage!);
+    await _prefs.setBool('is_asset_image', _isAssetImage);
+    notifyListeners();
+  }
+
+  void setFieldSpacing(double spacing) async {
+    _fieldSpacing = spacing;
+    await _prefs.setDouble('field_spacing', spacing);
+    notifyListeners();
+  }
+
+  void setButtonSpacing(double spacing) async {
+    _buttonSpacing = spacing;
+    await _prefs.setDouble('button_spacing', spacing);
+    notifyListeners();
+  }
+
+  void setBorderRadius(double radius) async {
+    _borderRadius = radius;
+    await _prefs.setDouble('border_radius', radius);
+    notifyListeners();
+  }
+
+  // Add these methods
+  void setSupabaseUrl(String url) async {
+    _supabaseUrl = url;
+    await _prefs.setString('supabase_url', url);
+    notifyListeners();
+  }
+
+  void setSupabaseAnonKey(String key) async {
+    _supabaseAnonKey = key;
+    await _prefs.setString('supabase_anon_key', key);
+    notifyListeners();
+  }
+
+  void setComfyApiUrl(String url) async {
+    _comfyApiUrl = url;
+    await _prefs.setString('comfy_api_url', url);
+    notifyListeners();
+  }
+
+  Future<void> clearAllPreferences() async {
+    await _prefs.clear();
+
+    // Reset to default values
+    _backgroundImage = null;
+    _isAssetImage = true;
+    _fieldSpacing = 20.0;
+    _buttonSpacing = 40.0;
+    _borderRadius = 4.0;
+    _supabaseUrl = null;
+    _supabaseAnonKey = null;
+
+    notifyListeners();
+  }
+}
