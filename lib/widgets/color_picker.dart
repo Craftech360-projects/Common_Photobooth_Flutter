@@ -52,8 +52,8 @@
 //             _colorOption(Colors.brown),
 //             _colorOption(Colors.grey),
 //             _colorOption(Colors.blueGrey),
-//             _colorOption(Colors.black),
-//             _colorOption(Colors.white),
+//             _colorOption(AppColors.black),
+//             _colorOption(AppColors.white),
 //           ],
 //         ),
 //         Constants.h16,
@@ -61,8 +61,8 @@
 //           height: 50,
 //           decoration: BoxDecoration(
 //             color: _currentColor,
-//             border: Border.all(color: Colors.grey),
-//             borderRadius: BorderRadius.circular(8),
+//             border: Border.all(color: AppColors.black),
+//             borderRadius: Constants.br8,
 //           ),
 //         ),
 //       ],
@@ -81,10 +81,10 @@
 //         decoration: BoxDecoration(
 //           color: color,
 //           border: Border.all(
-//             color: _currentColor == color ? Colors.black : Colors.grey,
+//             color: _currentColor == color ? AppColors.black : Colors.grey,
 //             width: _currentColor == color ? 2 : 1,
 //           ),
-//           borderRadius: BorderRadius.circular(8),
+//           borderRadius: Constants.br8,
 //         ),
 //       ),
 //     );

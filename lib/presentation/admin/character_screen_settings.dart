@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/core/constants/constants.dart';
+import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/presentation/character_selection_screen.dart';
 import 'package:photobooth_flutter/providers/character_selection_provider.dart';
 import 'package:photobooth_flutter/widgets/improved_color_picker.dart';
@@ -69,9 +70,9 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                   _buildSliderWithLabel(
                     label: 'Font Size',
                     value: settings.titleFontSize,
-                    min: 16.0,
-                    max: 48.0,
-                    divisions: 32,
+                    min: 12.0,
+                    max: 80.0,
+                    divisions: 68,
                     onChanged: (value) {
                       settings.setTitleStyle(fontSize: value);
                     },
@@ -176,8 +177,8 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                     label: 'Top Margin',
                     value: settings.titleMargin.top,
                     min: 0.0,
-                    max: 50.0,
-                    divisions: 50,
+                    max: 350.0,
+                    divisions: 60,
                     onChanged: (value) {
                       settings.setTitleMargin(EdgeInsets.fromLTRB(
                         settings.titleMargin.left,
@@ -192,8 +193,8 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                     label: 'Bottom Margin',
                     value: settings.titleMargin.bottom,
                     min: 0.0,
-                    max: 50.0,
-                    divisions: 50,
+                    max: 350.0,
+                    divisions: 60,
                     onChanged: (value) {
                       settings.setTitleMargin(EdgeInsets.fromLTRB(
                         settings.titleMargin.left,
@@ -208,8 +209,8 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                     label: 'Left Margin',
                     value: settings.titleMargin.left,
                     min: 0.0,
-                    max: 50.0,
-                    divisions: 50,
+                    max: 350.0,
+                    divisions: 60,
                     onChanged: (value) {
                       settings.setTitleMargin(EdgeInsets.fromLTRB(
                         value,
@@ -224,8 +225,8 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                     label: 'Right Margin',
                     value: settings.titleMargin.right,
                     min: 0.0,
-                    max: 50.0,
-                    divisions: 50,
+                    max: 350.0,
+                    divisions: 60,
                     onChanged: (value) {
                       settings.setTitleMargin(EdgeInsets.fromLTRB(
                         settings.titleMargin.left,
@@ -239,12 +240,12 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                   // Title Color
                   ListTile(
                     title: const Text('Title Color'),
-                    trailing: Container(
+                    leading: Container(
                       width: 24,
                       height: 24,
                       decoration: BoxDecoration(
                         color: settings.titleColor,
-                        border: Border.all(color: Colors.grey),
+                        border: Border.all(color: AppColors.black),
                       ),
                     ),
                     onTap: () async {
@@ -296,7 +297,7 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                               settings.setBackgroundImage(null, isAsset: true);
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red,
+                              backgroundColor: AppColors.red,
                             ),
                             child: const Text('Remove Background'),
                           ),
@@ -309,7 +310,7 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                           width: 200,
                           height: 120,
                           decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey),
+                            border: Border.all(color: AppColors.black),
                             image: DecorationImage(
                               image: settings.isBackgroundImageAsset
                                   ? AssetImage(settings.backgroundImagePath!)
@@ -338,77 +339,52 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
 
                   // Character Display Settings
                   _buildSectionTitle('Character Display Settings'),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextFormField(
-                          initialValue: settings.characterWidth.toString(),
-                          decoration: const InputDecoration(
-                            labelText: 'Character Width',
-                            border: OutlineInputBorder(),
-                          ),
-                          keyboardType: TextInputType.number,
-                          onChanged: (value) {
-                            final width = double.tryParse(value);
-                            if (width != null) {
-                              settings.setCharacterDimensions(
-                                  width, settings.characterHeight);
-                            }
-                          },
-                        ),
-                      ),
-                      Constants.w16,
-                      Expanded(
-                        child: TextFormField(
-                          initialValue: settings.characterHeight.toString(),
-                          decoration: const InputDecoration(
-                            labelText: 'Character Height',
-                            border: OutlineInputBorder(),
-                          ),
-                          keyboardType: TextInputType.number,
-                          onChanged: (value) {
-                            final height = double.tryParse(value);
-                            if (height != null) {
-                              settings.setCharacterDimensions(
-                                  settings.characterWidth, height);
-                            }
-                          },
-                        ),
-                      ),
-                    ],
+                  _buildSliderWithLabel(
+                    label: 'Character Width',
+                    value: settings.characterWidth,
+                    min: 0.0,
+                    max: 300.0,
+                    divisions: 80,
+                    onChanged: (value) {
+                      settings.setCharacterDimensions(
+                          value, settings.characterHeight);
+                    },
+                  ),
+                  _buildSliderWithLabel(
+                    label: 'Character Height',
+                    value: settings.characterHeight,
+                    min: 0.0,
+                    max: 600.0,
+                    divisions: 80,
+                    onChanged: (value) {
+                      settings.setCharacterDimensions(
+                          settings.characterWidth, value);
+                    },
                   ),
 
                   Constants.h16,
-
-                  TextFormField(
-                    initialValue: settings.characterSpacing.toString(),
-                    decoration: const InputDecoration(
-                      labelText: 'Spacing Between Characters',
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.number,
+                  _buildSliderWithLabel(
+                    label: 'Spacing < > Characters',
+                    value: settings.characterSpacing,
+                    min: 0.0,
+                    max: 100.0,
+                    divisions: 40,
                     onChanged: (value) {
-                      final spacing = double.tryParse(value);
-                      if (spacing != null) {
-                        settings.setCharacterSpacing(spacing);
-                      }
+                      settings.setCharacterSpacing(value);
                     },
                   ),
 
                   Constants.h16,
 
-                  TextFormField(
-                    initialValue: settings.characterBorderRadius.toString(),
-                    decoration: const InputDecoration(
-                      labelText: 'Character Border Radius',
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.number,
+                  Constants.h16,
+                  _buildSliderWithLabel(
+                    label: 'Character Border Radius',
+                    value: settings.characterBorderRadius,
+                    min: 0.0,
+                    max: 120.0,
+                    divisions: 40,
                     onChanged: (value) {
-                      final radius = double.tryParse(value);
-                      if (radius != null) {
-                        settings.setCharacterBorder(borderRadius: radius);
-                      }
+                      settings.setCharacterBorder(borderRadius: value);
                     },
                   ),
 
@@ -428,19 +404,14 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                     Row(
                       children: [
                         Expanded(
-                          child: TextFormField(
-                            initialValue:
-                                settings.characterBorderWidth.toString(),
-                            decoration: const InputDecoration(
-                              labelText: 'Border Width',
-                              border: OutlineInputBorder(),
-                            ),
-                            keyboardType: TextInputType.number,
+                          child: _buildSliderWithLabel(
+                            label: 'Border Width',
+                            value: settings.characterBorderWidth,
+                            min: 0.0,
+                            max: 20.0,
+                            divisions: 20,
                             onChanged: (value) {
-                              final width = double.tryParse(value);
-                              if (width != null) {
-                                settings.setCharacterBorder(borderWidth: width);
-                              }
+                              settings.setCharacterBorder(borderWidth: value);
                             },
                           ),
                         ),
@@ -448,12 +419,12 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                         Expanded(
                           child: ListTile(
                             title: const Text('Border Color'),
-                            trailing: Container(
+                            leading: Container(
                               width: 24,
                               height: 24,
                               decoration: BoxDecoration(
                                 color: settings.characterBorderColor,
-                                border: Border.all(color: Colors.grey),
+                                border: Border.all(color: AppColors.black),
                               ),
                             ),
                             onTap: () async {
@@ -488,7 +459,7 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                       value: settings.selectedCharacterScale,
                       min: 1.0,
                       max: 1.3,
-                      divisions: 6,
+                      divisions: 60,
                       label: settings.selectedCharacterScale.toStringAsFixed(2),
                       onChanged: (value) {
                         settings.setSelectionEffect(scale: value);
@@ -511,12 +482,12 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                       Constants.h16,
                       ListTile(
                         title: const Text('Glow Color'),
-                        trailing: Container(
+                        leading: Container(
                           width: 24,
                           height: 24,
                           decoration: BoxDecoration(
                             color: settings.selectionGlowColor,
-                            border: Border.all(color: Colors.grey),
+                            border: Border.all(color: AppColors.black),
                           ),
                         ),
                         onTap: () async {
@@ -652,7 +623,7 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                       label: 'Horizontal Spacing',
                       value: settings.gridHorizontalSpacing,
                       min: 0.0,
-                      max: 50.0,
+                      max: 150.0,
                       divisions: 50,
                       onChanged: (value) {
                         settings.setGridSpacing(horizontal: value);
@@ -663,7 +634,7 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                       label: 'Vertical Spacing',
                       value: settings.gridVerticalSpacing,
                       min: 0.0,
-                      max: 50.0,
+                      max: 150.0,
                       divisions: 50,
                       onChanged: (value) {
                         settings.setGridSpacing(vertical: value);
@@ -677,7 +648,7 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                       label: 'Top Margin',
                       value: settings.gridMargin.top,
                       min: 0.0,
-                      max: 50.0,
+                      max: 150.0,
                       divisions: 50,
                       onChanged: (value) {
                         settings.setGridMargin(EdgeInsets.fromLTRB(
@@ -693,7 +664,7 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                       label: 'Bottom Margin',
                       value: settings.gridMargin.bottom,
                       min: 0.0,
-                      max: 50.0,
+                      max: 150.0,
                       divisions: 50,
                       onChanged: (value) {
                         settings.setGridMargin(EdgeInsets.fromLTRB(
@@ -709,7 +680,7 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                       label: 'Left Margin',
                       value: settings.gridMargin.left,
                       min: 0.0,
-                      max: 50.0,
+                      max: 150.0,
                       divisions: 50,
                       onChanged: (value) {
                         settings.setGridMargin(EdgeInsets.fromLTRB(
@@ -725,7 +696,7 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                       label: 'Right Margin',
                       value: settings.gridMargin.right,
                       min: 0.0,
-                      max: 50.0,
+                      max: 150.0,
                       divisions: 50,
                       onChanged: (value) {
                         settings.setGridMargin(EdgeInsets.fromLTRB(
@@ -770,9 +741,9 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                         child: _buildSliderWithLabel(
                           label: 'Button Width',
                           value: settings.buttonWidth,
-                          min: 100.0,
-                          max: 300.0,
-                          divisions: 20,
+                          min: 60.0,
+                          max: 400.0,
+                          divisions: 80,
                           onChanged: (value) {
                             settings.setButtonDimensions(
                                 value, settings.buttonHeight);
@@ -788,9 +759,9 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                         child: _buildSliderWithLabel(
                           label: 'Button Height',
                           value: settings.buttonHeight,
-                          min: 40.0,
+                          min: 30.0,
                           max: 100.0,
-                          divisions: 12,
+                          divisions: 40,
                           onChanged: (value) {
                             settings.setButtonDimensions(
                                 settings.buttonWidth, value);
@@ -805,8 +776,8 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                     label: 'Button Font Size',
                     value: settings.buttonFontSize,
                     min: 12.0,
-                    max: 32.0,
-                    divisions: 20,
+                    max: 80.0,
+                    divisions: 68,
                     onChanged: (value) {
                       settings.setButtonStyle(fontSize: value);
                     },
@@ -859,8 +830,8 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                     label: 'Top Margin',
                     value: settings.buttonMargin.top,
                     min: 0.0,
-                    max: 50.0,
-                    divisions: 50,
+                    max: 350.0,
+                    divisions: 60,
                     onChanged: (value) {
                       settings.setButtonMargin(EdgeInsets.fromLTRB(
                         settings.buttonMargin.left,
@@ -875,8 +846,8 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                     label: 'Bottom Margin',
                     value: settings.buttonMargin.bottom,
                     min: 0.0,
-                    max: 50.0,
-                    divisions: 50,
+                    max: 350.0,
+                    divisions: 60,
                     onChanged: (value) {
                       settings.setButtonMargin(EdgeInsets.fromLTRB(
                         settings.buttonMargin.left,
@@ -891,8 +862,8 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                     label: 'Left Margin',
                     value: settings.buttonMargin.left,
                     min: 0.0,
-                    max: 50.0,
-                    divisions: 50,
+                    max: 350.0,
+                    divisions: 60,
                     onChanged: (value) {
                       settings.setButtonMargin(EdgeInsets.fromLTRB(
                         value,
@@ -907,8 +878,8 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                     label: 'Right Margin',
                     value: settings.buttonMargin.right,
                     min: 0.0,
-                    max: 50.0,
-                    divisions: 50,
+                    max: 350.0,
+                    divisions: 60,
                     onChanged: (value) {
                       settings.setButtonMargin(EdgeInsets.fromLTRB(
                         settings.buttonMargin.left,
@@ -920,47 +891,47 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                   ),
 
                   // Button Padding
-                  _buildSectionSubtitle('Button Padding'),
+                  // _buildSectionSubtitle('Button Padding'),
 
-                  _buildSliderWithLabel(
-                    label: 'Vertical Padding',
-                    value: settings.buttonPadding.top,
-                    min: 0.0,
-                    max: 30.0,
-                    divisions: 30,
-                    onChanged: (value) {
-                      settings.setButtonPadding(EdgeInsets.symmetric(
-                        vertical: value,
-                        horizontal: settings.buttonPadding.left,
-                      ));
-                    },
-                  ),
+                  // _buildSliderWithLabel(
+                  //   label: 'Vertical Padding',
+                  //   value: settings.buttonPadding.top,
+                  //   min: 0.0,
+                  //   max: 30.0,
+                  //   divisions: 30,
+                  //   onChanged: (value) {
+                  //     settings.setButtonPadding(EdgeInsets.symmetric(
+                  //       vertical: value,
+                  //       horizontal: settings.buttonPadding.left,
+                  //     ));
+                  //   },
+                  // ),
 
-                  _buildSliderWithLabel(
-                    label: 'Horizontal Padding',
-                    value: settings.buttonPadding.left,
-                    min: 0.0,
-                    max: 50.0,
-                    divisions: 50,
-                    onChanged: (value) {
-                      settings.setButtonPadding(EdgeInsets.symmetric(
-                        vertical: settings.buttonPadding.top,
-                        horizontal: value,
-                      ));
-                    },
-                  ),
-                  Constants.h16,
+                  // _buildSliderWithLabel(
+                  //   label: 'Horizontal Padding',
+                  //   value: settings.buttonPadding.left,
+                  //   min: 0.0,
+                  //   max: 50.0,
+                  //   divisions: 50,
+                  //   onChanged: (value) {
+                  //     settings.setButtonPadding(EdgeInsets.symmetric(
+                  //       vertical: settings.buttonPadding.top,
+                  //       horizontal: value,
+                  //     ));
+                  //   },
+                  // ),
+                  // Constants.h16,
                   Row(
                     children: [
                       Expanded(
                         child: ListTile(
                           title: const Text('Button Color'),
-                          trailing: Container(
+                          leading: Container(
                             width: 24,
                             height: 24,
                             decoration: BoxDecoration(
                               color: settings.buttonColor,
-                              border: Border.all(color: Colors.grey),
+                              border: Border.all(color: AppColors.black),
                             ),
                           ),
                           onTap: () async {
@@ -975,12 +946,12 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                       Expanded(
                         child: ListTile(
                           title: const Text('Text Color'),
-                          trailing: Container(
+                          leading: Container(
                             width: 24,
                             height: 24,
                             decoration: BoxDecoration(
                               color: settings.buttonTextColor,
-                              border: Border.all(color: Colors.grey),
+                              border: Border.all(color: AppColors.black),
                             ),
                           ),
                           onTap: () async {
@@ -1007,31 +978,41 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                     Row(
                       children: [
                         Expanded(
-                          child: TextFormField(
-                            initialValue: settings.buttonBorderWidth.toString(),
-                            decoration: const InputDecoration(
-                              labelText: 'Border Width',
-                              border: OutlineInputBorder(),
-                            ),
-                            keyboardType: TextInputType.number,
+                          child: _buildSliderWithLabel(
+                            label: 'Border Width',
+                            value: settings.buttonBorderWidth,
+                            min: 0.0,
+                            max: 10.0,
+                            divisions: 10,
                             onChanged: (value) {
-                              final width = double.tryParse(value);
-                              if (width != null) {
-                                settings.setButtonBorder(borderWidth: width);
-                              }
+                              settings.setButtonBorder(borderWidth: value);
                             },
                           ),
+                          // child: TextFormField(
+                          //   initialValue: settings.buttonBorderWidth.toString(),
+                          //   decoration: const InputDecoration(
+                          //     labelText: 'Border Width',
+                          //     border: OutlineInputBorder(),
+                          //   ),
+                          //   keyboardType: TextInputType.number,
+                          //   onChanged: (value) {
+                          //     final width = double.tryParse(value);
+                          //     if (width != null) {
+                          //       settings.setButtonBorder(borderWidth: width);
+                          //     }
+                          //   },
+                          // ),
                         ),
                         Constants.w16,
                         Expanded(
                           child: ListTile(
                             title: const Text('Border Color'),
-                            trailing: Container(
+                            leading: Container(
                               width: 24,
                               height: 24,
                               decoration: BoxDecoration(
                                 color: settings.buttonBorderColor,
-                                border: Border.all(color: Colors.grey),
+                                border: Border.all(color: AppColors.black),
                               ),
                             ),
                             onTap: () async {
@@ -1081,7 +1062,7 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                               settings.setButtonImage(null);
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red,
+                              backgroundColor: AppColors.red,
                             ),
                             child: const Text('Remove Image'),
                           ),
@@ -1094,7 +1075,7 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                           width: 200,
                           height: 50,
                           decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey),
+                            border: Border.all(color: AppColors.black),
                             borderRadius: BorderRadius.circular(
                                 settings.buttonBorderRadius),
                             image: DecorationImage(
@@ -1264,7 +1245,7 @@ Widget _buildCharacterList(
                       width: 100,
                       height: 150,
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
+                        border: Border.all(color: AppColors.black),
                         borderRadius: BorderRadius.circular(
                             settings.characterBorderRadius),
                         image: DecorationImage(

@@ -2,9 +2,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
+import 'package:photobooth_flutter/providers/admin_watermark_provider.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/providers/output_screen_provider.dart';
 import 'package:photobooth_flutter/providers/photobooth_provider.dart';
+import 'package:photobooth_flutter/widgets/watermark_overlay.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
@@ -53,7 +55,7 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
   Widget build(BuildContext context) {
     final outputSettings = Provider.of<OutputScreenProvider>(context);
     final globalSettings = Provider.of<GlobalSettingsProvider>(context);
-
+    final watermarkProvider = context.watch<AdminWatermarkProvider>();
     return Scaffold(
       // appBar: AppBar(
       //   leading: IconButton(
@@ -62,52 +64,42 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
       //     icon: const Icon(Icons.star),
       //   ),
       // ),
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          image: outputSettings.showBackground &&
-                  outputSettings.backgroundImagePath != null
-              ? DecorationImage(
-                  image: outputSettings.isBackgroundImageAsset
-                      ? AssetImage(outputSettings.backgroundImagePath!)
-                      : FileImage(File(outputSettings.backgroundImagePath!))
-                          as ImageProvider,
-                  fit: BoxFit.cover,
-                )
-              : globalSettings.backgroundImage != null
-                  ? DecorationImage(
-                      image: globalSettings.isAssetImage
-                          ? AssetImage(globalSettings.backgroundImage!)
-                          : FileImage(File(globalSettings.backgroundImage!))
-                              as ImageProvider,
-                      fit: BoxFit.cover,
+      body: WatermarkOverlay(
+        show: watermarkProvider.showWatermark,
+        child: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: _getBackgroundImage(outputSettings, globalSettings),
+              fit: BoxFit.cover,
+            ),
+          ),
+          child: _isLoading
+              ? const Center(
+                  child:
+                      CircularProgressIndicator(color: AppColors.goldenYellow))
+              : _errorMessage != null
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            _errorMessage!,
+                            style: const TextStyle(
+                                color: AppColors.red, fontSize: 18),
+                          ),
+                          const SizedBox(height: 20),
+                          ElevatedButton(
+                            onPressed: () =>
+                                Navigator.of(context).pushReplacementNamed('/'),
+                            child: const Text('Start Over'),
+                          ),
+                        ],
+                      ),
                     )
-                  : null,
+                  : _buildSuccessContent(context, outputSettings),
         ),
-        child: _isLoading
-            ? const Center(
-                child: CircularProgressIndicator(color: AppColors.goldenYellow))
-            : _errorMessage != null
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          _errorMessage!,
-                          style:
-                              const TextStyle(color: Colors.red, fontSize: 18),
-                        ),
-                        const SizedBox(height: 20),
-                        ElevatedButton(
-                          onPressed: () =>
-                              Navigator.of(context).pushReplacementNamed('/'),
-                          child: const Text('Start Over'),
-                        ),
-                      ],
-                    ),
-                  )
-                : _buildSuccessContent(context, outputSettings),
       ),
     );
   }
@@ -235,18 +227,18 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
           return Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.error, color: Colors.red, size: 50),
+              const Icon(Icons.error, color: AppColors.red, size: 50),
               const SizedBox(height: 10),
               Text('Error: $error',
-                  style: const TextStyle(color: Colors.white)),
+                  style: const TextStyle(color: AppColors.white)),
             ],
           );
         },
       );
     } else {
       return const Center(
-        child:
-            Text('No image available', style: TextStyle(color: Colors.white)),
+        child: Text('No image available',
+            style: TextStyle(color: AppColors.white)),
       );
     }
   }
@@ -340,5 +332,29 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
           ],
         );
     }
+  }
+
+  ImageProvider _getBackgroundImage(
+      OutputScreenProvider settings, GlobalSettingsProvider globalSettings) {
+    // First try to use gender screen specific background
+    if (settings.showBackground && settings.backgroundImagePath != null) {
+      if (settings.isBackgroundImageAsset) {
+        return AssetImage(settings.backgroundImagePath!);
+      } else {
+        return FileImage(File(settings.backgroundImagePath!));
+      }
+    }
+
+    // Fall back to global background if available
+    if (globalSettings.backgroundImage != null) {
+      if (globalSettings.isAssetImage) {
+        return AssetImage(globalSettings.backgroundImage!);
+      } else {
+        return FileImage(File(globalSettings.backgroundImage!));
+      }
+    }
+
+    // Default background
+    return const AssetImage('assets/images/background.jpg');
   }
 }

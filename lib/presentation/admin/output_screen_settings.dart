@@ -636,7 +636,7 @@ class OutputScreenSettings extends StatelessWidget {
               height: 40,
               decoration: BoxDecoration(
                 color: color,
-                border: Border.all(color: Colors.grey),
+                border: Border.all(color: AppColors.black),
                 borderRadius: BorderRadius.circular(4),
               ),
             ),

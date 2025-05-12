@@ -101,7 +101,7 @@ class WelcomeScreenSettings extends StatelessWidget {
                         value: welcomeSettings.welcomeMessageFontSize,
                         min: 12,
                         max: 80,
-                        divisions: 90,
+                        divisions: 68,
                         onChanged: (value) =>
                             welcomeSettings.setWelcomeMessageFontSize(value),
                       ),
@@ -189,7 +189,7 @@ class WelcomeScreenSettings extends StatelessWidget {
                         label: 'Top Margin',
                         value: welcomeSettings.welcomeMessageMarginTop,
                         min: 0,
-                        max: 300,
+                        max: 500,
                         divisions: 60,
                         onChanged: (value) =>
                             welcomeSettings.setWelcomeMessageMargins(
@@ -204,7 +204,7 @@ class WelcomeScreenSettings extends StatelessWidget {
                         label: 'Bottom Margin',
                         value: welcomeSettings.welcomeMessageMarginBottom,
                         min: 0,
-                        max: 300,
+                        max: 500,
                         divisions: 60,
                         onChanged: (value) =>
                             welcomeSettings.setWelcomeMessageMargins(
@@ -219,7 +219,7 @@ class WelcomeScreenSettings extends StatelessWidget {
                         label: 'Left Margin',
                         value: welcomeSettings.welcomeMessageMarginLeft,
                         min: 0,
-                        max: 300,
+                        max: 500,
                         divisions: 60,
                         onChanged: (value) =>
                             welcomeSettings.setWelcomeMessageMargins(
@@ -234,7 +234,7 @@ class WelcomeScreenSettings extends StatelessWidget {
                         label: 'Right Margin',
                         value: welcomeSettings.welcomeMessageMarginRight,
                         min: 0,
-                        max: 300,
+                        max: 500,
                         divisions: 60,
                         onChanged: (value) =>
                             welcomeSettings.setWelcomeMessageMargins(
@@ -681,7 +681,7 @@ class WelcomeScreenSettings extends StatelessWidget {
               height: 40,
               decoration: BoxDecoration(
                 color: color,
-                border: Border.all(color: Colors.grey),
+                border: Border.all(color: AppColors.black),
                 borderRadius: BorderRadius.circular(4),
               ),
             ),

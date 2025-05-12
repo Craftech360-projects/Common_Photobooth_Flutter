@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/providers/admin_watermark_provider.dart';
+import 'package:photobooth_flutter/providers/app_flow_provider.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/providers/photobooth_provider.dart';
 import 'package:photobooth_flutter/providers/registration_screen_provider.dart';
@@ -351,6 +352,7 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
     if (_formKey.currentState!.validate()) {
       final provider = Provider.of<PhotoboothProvider>(context, listen: false);
       final registrationSettings = context.read<RegistrationScreenProvider>();
+      final appFlowProvider = context.read<AppFlowProvider>();
 
       // Log controllers (optional debugging)
       _controllers.forEach((key, controller) {});
@@ -399,8 +401,12 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
       // Set user details in provider
       provider.setUserDetails(name, email);
 
-      // Navigate to gender selection screen
-      Navigator.pushNamed(context, AppRoutes.genderSelection);
+      // Navigate based on the current flow
+      if (appFlowProvider.currentFlow == AppFlow.defaultFlow) {
+        Navigator.pushNamed(context, AppRoutes.genderSelection);
+      } else {
+        Navigator.pushNamed(context, AppRoutes.faceCapture);
+      }
     }
   }
 

@@ -57,7 +57,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
             // Content
             Center(
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // Welcome message
                   Padding(

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/core/themes/app_theme.dart';
 import 'package:photobooth_flutter/providers/admin_settings_provider.dart';
 import 'package:photobooth_flutter/providers/admin_watermark_provider.dart';
+import 'package:photobooth_flutter/providers/app_flow_provider.dart';
 import 'package:photobooth_flutter/providers/auth_provider.dart';
 import 'package:photobooth_flutter/providers/character_selection_provider.dart';
 import 'package:photobooth_flutter/providers/face_capture_provider.dart';
@@ -57,6 +58,10 @@ void main() async {
   final authProvider = AuthProvider();
   await authProvider.init();
 
+  // Initialize app flow provider
+  final appFlowProvider = AppFlowProvider();
+  await appFlowProvider.init();
+
   final welcomeSettings = WelcomeScreenProvider();
   try {
     await welcomeSettings.init();
@@ -101,6 +106,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => PhotoboothProvider()),
         ChangeNotifierProvider.value(value: globalSettings),
         ChangeNotifierProvider.value(value: authProvider),
+        ChangeNotifierProvider.value(value: appFlowProvider),
         ChangeNotifierProvider.value(value: welcomeSettings),
         ChangeNotifierProvider.value(value: adminSettings),
         ChangeNotifierProvider.value(value: registrationSettings),
@@ -116,9 +122,14 @@ void main() async {
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
@@ -137,10 +148,10 @@ class MyApp extends StatelessWidget {
       title: 'Photobooth App',
       theme: AppTheme.lightTheme,
       onGenerateRoute: AppRoutes.onGenerateRoute,
-      initialRoute: AppRoutes.welcomeScreen,
-      // initialRoute: authProvider.isAuthenticated
-      //     ? AppRoutes.welcomeScreen
-      //     : AppRoutes.authScreen,
+      // initialRoute: AppRoutes.welcomeScreen,
+      initialRoute: authProvider.isAuthenticated
+          ? AppRoutes.welcomeScreen
+          : AppRoutes.authScreen,
       // home: const LoadingScreen(),
       debugShowCheckedModeBanner: false,
     );

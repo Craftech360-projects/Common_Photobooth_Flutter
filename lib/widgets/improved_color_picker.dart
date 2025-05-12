@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:photobooth_flutter/core/constants/constants.dart';
+import 'package:photobooth_flutter/core/themes/app_colors.dart';
 
 class ImprovedColorPicker extends StatefulWidget {
   final Color pickerColor;
@@ -25,27 +26,17 @@ class _ImprovedColorPickerState extends State<ImprovedColorPicker> {
 
   // Default color palette if none provided
   final List<Color> _defaultPalette = [
-    Colors.red,
-    Colors.pink,
-    Colors.purple,
-    Colors.deepPurple,
-    Colors.indigo,
-    Colors.blue,
-    Colors.lightBlue,
-    Colors.cyan,
-    Colors.teal,
-    Colors.green,
-    Colors.lightGreen,
-    Colors.lime,
-    Colors.yellow,
-    Colors.amber,
-    Colors.orange,
-    Colors.deepOrange,
-    Colors.brown,
-    Colors.grey,
-    Colors.blueGrey,
-    Colors.black,
-    Colors.white,
+    AppColors.red,
+    AppColors.purple,
+    AppColors.deepPurple,
+    AppColors.indigo,
+    AppColors.blue,
+    AppColors.green,
+    AppColors.yellow,
+    AppColors.orange,
+    AppColors.grey,
+    AppColors.black,
+    AppColors.white,
   ];
 
   @override
@@ -170,7 +161,7 @@ class _ImprovedColorPickerState extends State<ImprovedColorPicker> {
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: _currentColor.value == color.value
-                    ? const Icon(Icons.check, size: 20, color: Colors.white)
+                    ? const Icon(Icons.check, size: 20, color: AppColors.white)
                     : null,
               ),
             );

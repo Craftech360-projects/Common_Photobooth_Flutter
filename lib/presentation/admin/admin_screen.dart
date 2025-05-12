@@ -1,6 +1,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/core/constants/constants.dart';
+import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/providers/admin_watermark_provider.dart';
 import 'package:photobooth_flutter/providers/auth_provider.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
@@ -86,8 +87,8 @@ class _AdminScreenState extends State<AdminScreen> {
       children: [
         ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.red,
-            foregroundColor: Colors.white,
+            backgroundColor: AppColors.red,
+            foregroundColor: AppColors.white,
           ),
           onPressed: () => _showResetConfirmationDialog(),
           child: const Text('Reset All Preferences'),
@@ -110,7 +111,7 @@ class _AdminScreenState extends State<AdminScreen> {
           ),
           TextButton(
             style: TextButton.styleFrom(
-              foregroundColor: Colors.red,
+              foregroundColor: AppColors.red,
             ),
             onPressed: () async {
               Navigator.pop(context);

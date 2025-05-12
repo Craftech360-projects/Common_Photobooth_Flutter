@@ -2,7 +2,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:photobooth_flutter/api/ghibli_api.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/providers/loading_screen_provider.dart';
@@ -11,6 +10,7 @@ import 'package:photobooth_flutter/routes/routes.dart';
 import 'package:photobooth_flutter/services/comfy_api_service.dart';
 import 'package:photobooth_flutter/services/supabase_service.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/video_player.dart';
 
 class LoadingScreen extends StatefulWidget {
@@ -56,9 +56,11 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
   Future<void> _processImage() async {
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final serviceId = prefs.getString('authenticated_service_id');
+
       final provider = Provider.of<PhotoboothProvider>(context, listen: false);
-      final globalSettings =
-          Provider.of<GlobalSettingsProvider>(context, listen: false);
+      final globalSettings = Provider.of<GlobalSettingsProvider>(context, listen: false);
 
       // Check if we have a face image path
       if (provider.faceImagePath == null) {
@@ -79,6 +81,15 @@ class _LoadingScreenState extends State<LoadingScreen> {
         setState(() {
           _isProcessing = false;
           _errorMessage = 'Image file not found';
+        });
+        return;
+      }
+
+      // For faceswap workflow, verify we have a character image
+      if (serviceId == 'LjCIQ5ONsqCHIHd6Rmyu' && provider.characterImagePath == null) {
+        setState(() {
+          _isProcessing = false;
+          _errorMessage = 'No character image selected for faceswap';
         });
         return;
       }
@@ -137,7 +148,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
             imageUrl: faceImageUrl,
           );
 
-          if (participantId != null) {
+          if (participantId != null && serviceId != null) {
             // Initialize ComfyAPI service if not already initialized
             if (!ComfyApiService.isInitialized) {
               await ComfyApiService.initialize(
@@ -146,37 +157,27 @@ class _LoadingScreenState extends State<LoadingScreen> {
               );
             }
 
-            // Load and prepare the Ghibli workflow
-            final workflow = await GhibliWorkflow.getWorkflow();
-            print("workflow: ${workflow.toString()}");
-
-            // Update face image URL in the workflow
-            workflow.updateFaceImageUrl(
-              faceImageUrl: faceImageUrl,
-            );
-
-            // Update noise seed for randomization
             final seed = DateTime.now().millisecondsSinceEpoch;
-            workflow.updateNoiseSeed(seed);
 
-            // Send workflow to backend
+            // Send workflow based on serviceId
             if (ComfyApiService.isInitialized) {
               try {
-                debugPrint('Sending Ghibli workflow to ComfyAPI...');
+                debugPrint(
+                    'Sending workflow for serviceId: $serviceId to ComfyAPI...');
                 // Send the workflow and get the response with sent time
-                final response = await ComfyApiService.instance.sendWorkflow(
-                  ghibliWorkflow: workflow,
+                final response =
+                    await ComfyApiService.instance.sendWorkflowByServiceId(
+                  serviceId,
+                  faceImageUrl,
+                  seed,
                 );
 
                 // Store the workflow sent time in the provider
                 if (response.containsKey('sentTime')) {
                   final sentTimeStr = response['sentTime'] as String;
                   final sentTime = DateTime.parse(sentTimeStr);
-                  provider.setWorkflowSentTime(sentTime);
-                  debugPrint('Workflow sent at: $sentTimeStr');
-                } else {
-                  // If no sent time in response, use current time
-                  provider.setWorkflowSentTime(DateTime.now());
+                  Provider.of<PhotoboothProvider>(context, listen: false)
+                      .setWorkflowSentTime(sentTime);
                 }
 
                 // Start polling Supabase for the new image
@@ -314,7 +315,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
             ),
             child: Center(
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // Title
                   // Update the title widget
@@ -424,3 +424,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
     }
   }
 }
+
+// Inside the _processUserData method
+// Replace the existing workflow sending code with:

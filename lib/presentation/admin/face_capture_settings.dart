@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:camera_platform_interface/camera_platform_interface.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:photobooth_flutter/core/constants/constants.dart';
+import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/presentation/face_capture_screen.dart';
 import 'package:photobooth_flutter/providers/face_capture_provider.dart';
 import 'package:photobooth_flutter/widgets/improved_color_picker.dart';
@@ -77,7 +79,7 @@ class _FaceCaptureSettingsState extends State<FaceCaptureSettings> {
                   border: Border.all(color: Colors.transparent),
                   borderRadius: BorderRadius.circular(0),
                 ),
-                child: const FaceCaptureScreen(isPreview: true),
+                child: const FaceCaptureScreen(),
               ),
             ),
             Expanded(
@@ -165,7 +167,7 @@ class _FaceCaptureSettingsState extends State<FaceCaptureSettings> {
                             label: 'Left Padding',
                             value: settings.titlePadding.left,
                             min: 0.0,
-                            max: 50.0,
+                            max: 350.0,
                             onChanged: (value) => settings.setTitlePadding(
                               settings.titlePadding.copyWith(left: value),
                             ),
@@ -174,7 +176,7 @@ class _FaceCaptureSettingsState extends State<FaceCaptureSettings> {
                             label: 'Top Padding',
                             value: settings.titlePadding.top,
                             min: 0.0,
-                            max: 50.0,
+                            max: 350.0,
                             onChanged: (value) => settings.setTitlePadding(
                               settings.titlePadding.copyWith(top: value),
                             ),
@@ -183,7 +185,7 @@ class _FaceCaptureSettingsState extends State<FaceCaptureSettings> {
                             label: 'Right Padding',
                             value: settings.titlePadding.right,
                             min: 0.0,
-                            max: 50.0,
+                            max: 350.0,
                             onChanged: (value) => settings.setTitlePadding(
                               settings.titlePadding.copyWith(right: value),
                             ),
@@ -192,7 +194,7 @@ class _FaceCaptureSettingsState extends State<FaceCaptureSettings> {
                             label: 'Bottom Padding',
                             value: settings.titlePadding.bottom,
                             min: 0.0,
-                            max: 50.0,
+                            max: 350.0,
                             onChanged: (value) => settings.setTitlePadding(
                               settings.titlePadding.copyWith(bottom: value),
                             ),
@@ -275,7 +277,7 @@ class _FaceCaptureSettingsState extends State<FaceCaptureSettings> {
                           label: 'Left Margin',
                           value: settings.previewMargin.left,
                           min: 0.0,
-                          max: 50.0,
+                          max: 200.0,
                           onChanged: (value) => settings.setPreviewMargin(
                             settings.previewMargin.copyWith(left: value),
                           ),
@@ -284,7 +286,7 @@ class _FaceCaptureSettingsState extends State<FaceCaptureSettings> {
                           label: 'Top Margin',
                           value: settings.previewMargin.top,
                           min: 0.0,
-                          max: 50.0,
+                          max: 200.0,
                           onChanged: (value) => settings.setPreviewMargin(
                             settings.previewMargin.copyWith(top: value),
                           ),
@@ -293,7 +295,7 @@ class _FaceCaptureSettingsState extends State<FaceCaptureSettings> {
                           label: 'Right Margin',
                           value: settings.previewMargin.right,
                           min: 0.0,
-                          max: 50.0,
+                          max: 200.0,
                           onChanged: (value) => settings.setPreviewMargin(
                             settings.previewMargin.copyWith(right: value),
                           ),
@@ -302,7 +304,7 @@ class _FaceCaptureSettingsState extends State<FaceCaptureSettings> {
                           label: 'Bottom Margin',
                           value: settings.previewMargin.bottom,
                           min: 0.0,
-                          max: 50.0,
+                          max: 200.0,
                           onChanged: (value) => settings.setPreviewMargin(
                             settings.previewMargin.copyWith(bottom: value),
                           ),
@@ -539,8 +541,8 @@ class _FaceCaptureSettingsState extends State<FaceCaptureSettings> {
                               child: Container(
                                 height: 100,
                                 decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.grey),
-                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: AppColors.black),
+                                  borderRadius: Constants.br8,
                                   image: DecorationImage(
                                     image: settings.isBackgroundImageAsset
                                         ? AssetImage(
@@ -684,7 +686,7 @@ class _FaceCaptureSettingsState extends State<FaceCaptureSettings> {
               height: 40,
               decoration: BoxDecoration(
                 color: color,
-                border: Border.all(color: Colors.grey),
+                border: Border.all(color: AppColors.black),
                 borderRadius: BorderRadius.circular(4),
               ),
             ),

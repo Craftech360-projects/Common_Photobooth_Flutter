@@ -81,7 +81,7 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen> {
           child: Center(
             child: IconButton(
               icon: const Icon(Icons.arrow_back_ios,
-                  color: Colors.white, size: 30),
+                  color: AppColors.white, size: 30),
               onPressed: () {
                 _pageController.previousPage(
                   duration: const Duration(milliseconds: 300),
@@ -100,7 +100,7 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen> {
           child: Center(
             child: IconButton(
               icon: const Icon(Icons.arrow_forward_ios,
-                  color: Colors.white, size: 30),
+                  color: AppColors.white, size: 30),
               onPressed: () {
                 _pageController.nextPage(
                   duration: const Duration(milliseconds: 300),
@@ -312,9 +312,7 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen> {
           ),
         ),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Title with updated styling
             Container(
               margin: settings.titleMargin,
               padding: EdgeInsets.zero,
@@ -335,7 +333,8 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen> {
             ),
 
             // Character Selection
-            Expanded(
+            SizedBox(
+              height: settings.characterHeight + 20,
               child: characters.length > 3 && settings.useCarousel
                   ? Container(
                       margin: settings.carouselMargin,
@@ -347,13 +346,14 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen> {
 
             // Error message
             if (_showError)
-              const Padding(
-                padding: EdgeInsets.only(top: 8.0),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
                 child: Text(
-                  'Please select a character to continue',
+                  'Please select a character to continue!',
                   style: TextStyle(
-                    color: Colors.red,
-                    fontWeight: FontWeight.bold,
+                    color: settings.titleColor
+                        .withValues(alpha: settings.titleOpacity),
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ),

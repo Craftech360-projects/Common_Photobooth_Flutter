@@ -1,26 +1,28 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class FaceCaptureProvider extends ChangeNotifier {
   // Title settings
   String _titleText = 'Smile Please... 😃';
-  double _titleFontSize = 32.0;
+  double _titleFontSize = 22.0;
   FontWeight _titleFontWeight = FontWeight.w500;
-  Color _titleColor = Colors.white;
-  EdgeInsets _titlePadding = const EdgeInsets.all(10.0);
+  Color _titleColor = AppColors.white;
+  EdgeInsets _titlePadding =
+      const EdgeInsets.only(top: 187, bottom: 34.0, left: 0.0, right: 0.0);
   bool _showTitle = true;
-  double _titleLineHeight = 1.2;
+  double _titleLineHeight = 1.0;
   double _titleOpacity = 1.0;
   TextAlign _titleAlignment = TextAlign.center;
 
   // Camera preview settings
-  double _previewWidth = 350.0;
-  double _previewHeight = 500.0;
-  double _previewBorderRadius = 26.0;
-  Color _previewBorderColor = Colors.amber;
-  double _previewBorderWidth = 5.0;
+  double _previewWidth = 375.0;
+  double _previewHeight = 375.0;
+  double _previewBorderRadius = 5.0;
+  Color _previewBorderColor = AppColors.orange;
+  double _previewBorderWidth = 2.0;
   bool _showPreviewBorder = true;
   EdgeInsets _previewMargin = const EdgeInsets.all(0.0);
 
@@ -32,15 +34,15 @@ class FaceCaptureProvider extends ChangeNotifier {
   String _buttonText = 'Capture';
   double _buttonFontSize = 18.0;
   FontWeight _buttonFontWeight = FontWeight.w500;
-  Color _buttonColor = Colors.white;
-  Color _buttonTextColor = Colors.black;
+  Color _buttonColor = AppColors.white;
+  Color _buttonTextColor = AppColors.black;
   double _buttonWidth = 200.0;
-  double _buttonHeight = 60.0;
-  double _buttonBorderRadius = 40.0;
-  EdgeInsets _buttonMargin = const EdgeInsets.only(top: 40.0);
-  EdgeInsets _buttonPadding = const EdgeInsets.all(16.0);
+  double _buttonHeight = 45.0;
+  double _buttonBorderRadius = 5.0;
+  EdgeInsets _buttonMargin = const EdgeInsets.only(top: 20.0);
+  EdgeInsets _buttonPadding = const EdgeInsets.all(8.0);
   bool _buttonHasBorder = false;
-  Color _buttonBorderColor = Colors.amber;
+  Color _buttonBorderColor = AppColors.orange;
   double _buttonBorderWidth = 2.0;
 
   // Image button settings
@@ -49,7 +51,7 @@ class FaceCaptureProvider extends ChangeNotifier {
   bool _isButtonImageAsset = true;
 
   // Background settings
-  bool _showBackground = true;
+  bool _showBackground = false;
   String? _backgroundImagePath;
   bool _isBackgroundImageAsset = true;
 
@@ -333,10 +335,10 @@ class FaceCaptureProvider extends ChangeNotifier {
       if (settings['titlePadding'] is Map) {
         final paddingMap = settings['titlePadding'] as Map<String, dynamic>;
         _titlePadding = EdgeInsets.fromLTRB(
-          (paddingMap['left'] as num?)?.toDouble() ?? 10.0,
-          (paddingMap['top'] as num?)?.toDouble() ?? 10.0,
-          (paddingMap['right'] as num?)?.toDouble() ?? 10.0,
-          (paddingMap['bottom'] as num?)?.toDouble() ?? 10.0,
+          (paddingMap['left'] as num?)?.toDouble() ?? 0.0,
+          (paddingMap['top'] as num?)?.toDouble() ?? 187.0,
+          (paddingMap['right'] as num?)?.toDouble() ?? 0.0,
+          (paddingMap['bottom'] as num?)?.toDouble() ?? 34.0,
         );
       }
 
@@ -369,7 +371,7 @@ class FaceCaptureProvider extends ChangeNotifier {
       _buttonText = settings['buttonText'] ?? _buttonText;
       _buttonFontSize = settings['buttonFontSize'] ?? _buttonFontSize;
       _buttonFontWeight = FontWeight
-         .values[settings['buttonFontWeight']?? _buttonFontWeight.index];
+          .values[settings['buttonFontWeight'] ?? _buttonFontWeight.index];
       _buttonColor = Color(settings['buttonColor'] ?? _buttonColor.value);
       _buttonTextColor =
           Color(settings['buttonTextColor'] ?? _buttonTextColor.value);

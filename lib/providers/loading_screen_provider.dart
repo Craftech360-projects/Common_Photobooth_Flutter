@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoadingScreenProvider extends ChangeNotifier {
@@ -9,26 +10,25 @@ class LoadingScreenProvider extends ChangeNotifier {
 
   // Title settings
   String _titleText = 'Processing Your Image...';
-  double _titleFontSize = 32.0;
-  FontWeight _titleFontWeight = FontWeight.bold;
-  Color _titleColor = Colors.white;
-  EdgeInsets _titlePadding = const EdgeInsets.all(0);
+  double _titleFontSize = 22.0;
+  FontWeight _titleFontWeight = FontWeight.w500;
+  Color _titleColor = AppColors.white;
+  EdgeInsets _titlePadding = const EdgeInsets.only(top: 170, bottom: 20);
   bool _showTitle = true;
-  double _titleLineHeight = 1.2;
+  double _titleLineHeight = 1.0;
   double _titleOpacity = 1.0;
-  EdgeInsets _titleMargin = const EdgeInsets.all(0);
 
   // Loader settings
-  double _loaderWidth = 200.0;
-  double _loaderHeight = 200.0;
+  double _loaderWidth = 100.0;
+  double _loaderHeight = 100.0;
   double _loaderBorderRadius = 0.0;
-  Color _loaderBorderColor = Colors.white;
+  Color _loaderBorderColor = AppColors.white;
   double _loaderBorderWidth = 0.0;
   bool _showLoaderBorder = false;
-  EdgeInsets _loaderMargin = const EdgeInsets.all(0);
+  EdgeInsets _loaderMargin = const EdgeInsets.only(top: 200);
 
   // Background settings
-  bool _showBackground = true;
+  bool _showBackground = false;
   String? _backgroundImagePath;
   bool _isBackgroundImageAsset = true;
 
@@ -46,7 +46,6 @@ class LoadingScreenProvider extends ChangeNotifier {
   bool get showTitle => _showTitle;
   double get titleLineHeight => _titleLineHeight;
   double get titleOpacity => _titleOpacity;
-  EdgeInsets get titleMargin => _titleMargin;
 
   double get loaderWidth => _loaderWidth;
   double get loaderHeight => _loaderHeight;
@@ -103,12 +102,6 @@ class LoadingScreenProvider extends ChangeNotifier {
 
   void setTitleOpacity(double opacity) {
     _titleOpacity = opacity;
-    notifyListeners();
-    _saveSettings();
-  }
-
-  void setTitleMargin(EdgeInsets margin) {
-    _titleMargin = margin;
     notifyListeners();
     _saveSettings();
   }
@@ -220,7 +213,7 @@ class LoadingScreenProvider extends ChangeNotifier {
 
         _titleText = settings['titleText'] ?? _titleText;
         _titleFontSize = settings['titleFontSize'] ?? _titleFontSize;
-        _titleFontWeight = FontWeight.values[settings['titleFontWeight'] ?? 3];
+        _titleFontWeight = FontWeight.values[settings['titleFontWeight'] ?? 4];
         _titleColor = Color(settings['titleColor'] ?? _titleColor.value);
         _showTitle = settings['showTitle'] ?? _showTitle;
         _titleLineHeight = settings['titleLineHeight'] ?? _titleLineHeight;
@@ -231,20 +224,9 @@ class LoadingScreenProvider extends ChangeNotifier {
           final paddingMap = settings['titlePadding'] as Map<String, dynamic>;
           _titlePadding = EdgeInsets.fromLTRB(
             paddingMap['left'] ?? 0.0,
-            paddingMap['top'] ?? 0.0,
+            paddingMap['top'] ?? 170.0,
             paddingMap['right'] ?? 0.0,
-            paddingMap['bottom'] ?? 0.0,
-          );
-        }
-
-        // Load title margin
-        if (settings['titleMargin'] != null) {
-          final marginMap = settings['titleMargin'] as Map<String, dynamic>;
-          _titleMargin = EdgeInsets.fromLTRB(
-            marginMap['left'] ?? 0.0,
-            marginMap['top'] ?? 0.0,
-            marginMap['right'] ?? 0.0,
-            marginMap['bottom'] ?? 0.0,
+            paddingMap['bottom'] ?? 20.0,
           );
         }
 
@@ -263,7 +245,7 @@ class LoadingScreenProvider extends ChangeNotifier {
           final marginMap = settings['loaderMargin'] as Map<String, dynamic>;
           _loaderMargin = EdgeInsets.fromLTRB(
             marginMap['left'] ?? 0.0,
-            marginMap['top'] ?? 0.0,
+            marginMap['top'] ?? 200.0,
             marginMap['right'] ?? 0.0,
             marginMap['bottom'] ?? 0.0,
           );
@@ -294,7 +276,7 @@ class LoadingScreenProvider extends ChangeNotifier {
       'showTitle': _showTitle,
       'titleLineHeight': _titleLineHeight,
       'titleOpacity': _titleOpacity,
-      
+
       // Properly serialize title padding
       'titlePadding': {
         'left': _titlePadding.left,
@@ -302,15 +284,7 @@ class LoadingScreenProvider extends ChangeNotifier {
         'right': _titlePadding.right,
         'bottom': _titlePadding.bottom,
       },
-      
-      // Properly serialize title margin
-      'titleMargin': {
-        'left': _titleMargin.left,
-        'top': _titleMargin.top,
-        'right': _titleMargin.right,
-        'bottom': _titleMargin.bottom,
-      },
-      
+
       'loaderWidth': _loaderWidth,
       'loaderHeight': _loaderHeight,
       'loaderBorderRadius': _loaderBorderRadius,
@@ -332,36 +306,4 @@ class LoadingScreenProvider extends ChangeNotifier {
     };
 
     await _prefs.setString('loading_screen_settings', jsonEncode(settings));
-  }
-
-  void resetToDefaults() {
-    _titleText = 'Processing Your Image...';
-    _titleFontSize = 32.0;
-    _titleFontWeight = FontWeight.bold;
-    _titleColor = Colors.white;
-    _titlePadding = const EdgeInsets.all(0);
-    _showTitle = true;
-    _titleLineHeight = 1.2;
-    _titleOpacity = 1.0;
-    _titleMargin = const EdgeInsets.all(0);
-
-    _loaderWidth = 200.0;
-    _loaderHeight = 200.0;
-    _loaderBorderRadius = 0.0;
-    _loaderBorderColor = Colors.white;
-    _loaderBorderWidth = 0.0;
-    _showLoaderBorder = false;
-    _loaderMargin = const EdgeInsets.all(0);
-
-    _showBackground = true;
-    _backgroundImagePath = null;
-    _isBackgroundImageAsset = true;
-
-    _loaderFilePath = null;
-    _isLoaderFileAsset = true;
-    _loaderFileType = 'gif';
-
-    notifyListeners();
-    _saveSettings();
-  }
-}
+  }}

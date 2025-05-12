@@ -1,14 +1,8 @@
 {
   "5": {
     "inputs": {
-      "width": [
-        "216",
-        1
-      ],
-      "height": [
-        "216",
-        2
-      ],
+      "width": ["216", 1],
+      "height": ["216", 2],
       "batch_size": 1
     },
     "class_type": "EmptyLatentImage",
@@ -18,14 +12,8 @@
   },
   "6": {
     "inputs": {
-      "text": [
-        "270",
-        0
-      ],
-      "clip": [
-        "219",
-        1
-      ]
+      "text": ["270", 0],
+      "clip": ["219", 1]
     },
     "class_type": "CLIPTextEncode",
     "_meta": {
@@ -34,26 +22,11 @@
   },
   "13": {
     "inputs": {
-      "noise": [
-        "25",
-        0
-      ],
-      "guider": [
-        "22",
-        0
-      ],
-      "sampler": [
-        "16",
-        0
-      ],
-      "sigmas": [
-        "17",
-        0
-      ],
-      "latent_image": [
-        "5",
-        0
-      ]
+      "noise": ["25", 0],
+      "guider": ["22", 0],
+      "sampler": ["16", 0],
+      "sigmas": ["17", 0],
+      "latent_image": ["5", 0]
     },
     "class_type": "SamplerCustomAdvanced",
     "_meta": {
@@ -74,10 +47,7 @@
       "scheduler": "simple",
       "steps": 12,
       "denoise": 1,
-      "model": [
-        "61",
-        0
-      ]
+      "model": ["61", 0]
     },
     "class_type": "BasicScheduler",
     "_meta": {
@@ -86,14 +56,8 @@
   },
   "22": {
     "inputs": {
-      "model": [
-        "61",
-        0
-      ],
-      "conditioning": [
-        "60",
-        0
-      ]
+      "model": ["61", 0],
+      "conditioning": ["60", 0]
     },
     "class_type": "BasicGuider",
     "_meta": {
@@ -102,7 +66,7 @@
   },
   "25": {
     "inputs": {
-      "noise_seed": 840529574116437
+      "noise_seed": 126918550896445
     },
     "class_type": "RandomNoise",
     "_meta": {
@@ -112,10 +76,7 @@
   "60": {
     "inputs": {
       "guidance": 3,
-      "conditioning": [
-        "6",
-        0
-      ]
+      "conditioning": ["6", 0]
     },
     "class_type": "FluxGuidance",
     "_meta": {
@@ -126,18 +87,9 @@
     "inputs": {
       "max_shift": 1.1500000000000001,
       "base_shift": 0.5000000000000001,
-      "width": [
-        "216",
-        1
-      ],
-      "height": [
-        "216",
-        2
-      ],
-      "model": [
-        "227",
-        0
-      ]
+      "width": ["216", 1],
+      "height": ["216", 2],
+      "model": ["227", 0]
     },
     "class_type": "ModelSamplingFlux",
     "_meta": {
@@ -146,14 +98,8 @@
   },
   "147": {
     "inputs": {
-      "samples": [
-        "13",
-        0
-      ],
-      "vae": [
-        "228",
-        2
-      ]
+      "samples": ["13", 0],
+      "vae": ["228", 2]
     },
     "class_type": "VAEDecode",
     "_meta": {
@@ -162,10 +108,7 @@
   },
   "148": {
     "inputs": {
-      "images": [
-        "147",
-        0
-      ]
+      "images": ["147", 0]
     },
     "class_type": "PreviewImage",
     "_meta": {
@@ -186,14 +129,8 @@
       "lora_name": "diffusion_pytorch_model.safetensors",
       "strength_model": 1.0000000000000002,
       "strength_clip": 1.0000000000000002,
-      "model": [
-        "257",
-        0
-      ],
-      "clip": [
-        "257",
-        1
-      ]
+      "model": ["257", 0],
+      "clip": ["257", 1]
     },
     "class_type": "LoraLoader",
     "_meta": {
@@ -230,26 +167,11 @@
       "weight": 0.8000000000000002,
       "start_at": 0,
       "end_at": 1,
-      "model": [
-        "219",
-        0
-      ],
-      "pulid_flux": [
-        "223",
-        0
-      ],
-      "eva_clip": [
-        "224",
-        0
-      ],
-      "face_analysis": [
-        "225",
-        0
-      ],
-      "image": [
-        "289",
-        0
-      ]
+      "model": ["219", 0],
+      "pulid_flux": ["223", 0],
+      "eva_clip": ["224", 0],
+      "face_analysis": ["225", 0],
+      "image": ["283", 0]
     },
     "class_type": "ApplyPulidFlux",
     "_meta": {
@@ -275,15 +197,9 @@
       "num_beams": 3,
       "do_sample": true,
       "output_mask_select": "",
-      "seed": 148507840440391,
-      "image": [
-        "256",
-        0
-      ],
-      "florence2_model": [
-        "282",
-        0
-      ]
+      "seed": 33373286664912,
+      "image": ["256", 0],
+      "florence2_model": ["282", 0]
     },
     "class_type": "Florence2Run",
     "_meta": {
@@ -294,10 +210,7 @@
     "inputs": {
       "upscale_method": "lanczos",
       "megapixels": 1.0000000000000002,
-      "image": [
-        "281",
-        0
-      ]
+      "image": ["281", 0]
     },
     "class_type": "ImageScaleToTotalPixels",
     "_meta": {
@@ -306,17 +219,11 @@
   },
   "257": {
     "inputs": {
-      "lora_name": "ghibli.safetensors",
+      "lora_name": "ghibli-flux.safetensors",
       "strength_model": 0.8000000000000002,
       "strength_clip": 1.0000000000000002,
-      "model": [
-        "228",
-        0
-      ],
-      "clip": [
-        "228",
-        1
-      ]
+      "model": ["228", 0],
+      "clip": ["228", 1]
     },
     "class_type": "LoraLoader",
     "_meta": {
@@ -327,10 +234,7 @@
     "inputs": {
       "index": "0",
       "batch": false,
-      "data": [
-        "237",
-        3
-      ]
+      "data": ["237", 3]
     },
     "class_type": "Florence2toCoordinates",
     "_meta": {
@@ -341,22 +245,10 @@
     "inputs": {
       "keep_model_loaded": true,
       "individual_objects": false,
-      "sam2_model": [
-        "263",
-        0
-      ],
-      "image": [
-        "256",
-        0
-      ],
-      "coordinates_positive": [
-        "261",
-        0
-      ],
-      "bboxes": [
-        "261",
-        1
-      ]
+      "sam2_model": ["263", 0],
+      "image": ["256", 0],
+      "coordinates_positive": ["261", 0],
+      "bboxes": ["261", 1]
     },
     "class_type": "Sam2Segmentation",
     "_meta": {
@@ -382,14 +274,8 @@
       "padding_top": 64,
       "padding_bottom": 64,
       "return_list": false,
-      "image": [
-        "256",
-        0
-      ],
-      "mask": [
-        "262",
-        0
-      ]
+      "image": ["256", 0],
+      "mask": ["262", 0]
     },
     "class_type": "Bounded Image Crop with Mask",
     "_meta": {
@@ -406,15 +292,9 @@
       "num_beams": 3,
       "do_sample": true,
       "output_mask_select": "",
-      "seed": 859726739742529,
-      "image": [
-        "281",
-        0
-      ],
-      "florence2_model": [
-        "282",
-        0
-      ]
+      "seed": 1074246607987400,
+      "image": ["281", 0],
+      "florence2_model": ["282", 0]
     },
     "class_type": "Florence2Run",
     "_meta": {
@@ -423,12 +303,9 @@
   },
   "270": {
     "inputs": {
-      "text": "GHIBLI STYLE, Recreate the exact scene and composition from the input image in the whimsical, hand-drawn style of Studio Ghibli. Retain all characters, clothing, background elements, and lighting, but translate them into soft watercolor textures, delicate linework, and vibrant yet natural colors typical of Ghibli films. Infuse the image with a warm, storybook-like atmosphere, adding subtle magical or fantastical touches while preserving the original mood and setting. [caption]",
+      "text": "GHIBLI, Recreate the exact scene and composition from the input image in the whimsical, hand-drawn style of Studio Ghibli. Retain all characters, clothing, background elements, and lighting, but translate them into soft watercolor textures, delicate linework, and vibrant yet natural colors typical of Ghibli films. Infuse the image with a warm, storybook-like atmosphere, adding subtle magical or fantastical touches while preserving the original mood and setting. [caption]",
       "old": "[caption]",
-      "new": [
-        "268",
-        2
-      ]
+      "new": ["268", 2]
     },
     "class_type": "Replace Text _O",
     "_meta": {
@@ -438,14 +315,8 @@
   "277": {
     "inputs": {
       "size": "custom",
-      "custom_width": [
-        "278",
-        0
-      ],
-      "custom_height": [
-        "278",
-        1
-      ],
+      "custom_width": ["278", 0],
+      "custom_height": ["278", 1],
       "color": "#fff"
     },
     "class_type": "LayerUtility: ColorImage V2",
@@ -455,10 +326,7 @@
   },
   "278": {
     "inputs": {
-      "image": [
-        "289",
-        0
-      ]
+      "image": ["283", 0]
     },
     "class_type": "easy imageSize",
     "_meta": {
@@ -467,10 +335,7 @@
   },
   "280": {
     "inputs": {
-      "images": [
-        "256",
-        0
-      ]
+      "images": ["256", 0]
     },
     "class_type": "PreviewImage",
     "_meta": {
@@ -482,14 +347,8 @@
       "invert_mask": true,
       "blend_mode": "normal",
       "opacity": 100,
-      "background_image": [
-        "277",
-        0
-      ],
-      "layer_image": [
-        "289",
-        0
-      ]
+      "background_image": ["277", 0],
+      "layer_image": ["283", 0]
     },
     "class_type": "LayerUtility: ImageBlend V2",
     "_meta": {
@@ -507,16 +366,31 @@
       "title": "DownloadAndLoadFlorence2Model"
     }
   },
+  "283": {
+    "inputs": {
+      "supabase_url": "https://vfhrnwvbfhchxvjlxnxf.supabase.co",
+      "supabase_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZmaHJud3ZiZmhjaHh2amx4bnhmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3ODIyMzYsImV4cCI6MjA2MDM1ODIzNn0.j94ddkuXuJHCmRK9UP2bW5ryngWrFbKvWxBjUVhEioo",
+      "table_name": "inputimagetable",
+      "image_column": "image_url",
+      "id_column": "unique_id",
+      "unique_id": " "
+    },
+    "class_type": "SupabaseTableWatcherNode",
+    "_meta": {
+      "title": "Supabase Table Watcher"
+    }
+  },
   "284": {
     "inputs": {
+      "unique_id": ["283", 2],
       "supabase_url": "https://vfhrnwvbfhchxvjlxnxf.supabase.co",
       "supabase_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZmaHJud3ZiZmhjaHh2amx4bnhmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3ODIyMzYsImV4cCI6MjA2MDM1ODIzNn0.j94ddkuXuJHCmRK9UP2bW5ryngWrFbKvWxBjUVhEioo",
       "bucket": "outputimages",
       "base_file_name": "image",
-      "image": [
-        "147",
-        0
-      ]
+      "table_name": "inputimagetable",
+      "unique_id_column": "unique_id",
+      "table_column": "output",
+      "image": ["147", 0]
     },
     "class_type": "SupabaseImageUploader",
     "_meta": {
@@ -525,23 +399,11 @@
   },
   "285": {
     "inputs": {
-      "images": [
-        "289",
-        0
-      ]
+      "images": ["283", 0]
     },
     "class_type": "PreviewImage",
     "_meta": {
       "title": "Preview Image"
-    }
-  },
-  "289": {
-    "inputs": {
-      "url_or_path": "https://ycpcfsdnfvabqojsuatj.supabase.co/storage/v1/object/public/images/gurgaon/WhatsApp%20Image%202025-04-25%20at%205.49.02%20PM.jpeg"
-    },
-    "class_type": "LoadImageFromUrlOrPath",
-    "_meta": {
-      "title": "LoadImageFromUrlOrPath"
     }
   }
 }

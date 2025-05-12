@@ -105,7 +105,7 @@ class _RegistrationScreenSettingsState
                         value: settings.titleFontSize,
                         min: 12,
                         max: 80,
-                        divisions: 90,
+                        divisions: 68,
                         onChanged: (value) => settings.setTitleFontSize(value),
                       ),
 
@@ -277,7 +277,6 @@ class _RegistrationScreenSettingsState
                           ));
                         },
                       ),
-                      
                     ],
 
                     const Divider(),
@@ -522,8 +521,8 @@ class _RegistrationScreenSettingsState
               selectedColor = color;
             },
             colorPalette: [
-              Colors.white,
-              Colors.black,
+              AppColors.white,
+              AppColors.black,
               AppColors.yellow,
               AppColors.goldenYellow,
               AppColors.blue,
@@ -880,12 +879,12 @@ class _RegistrationScreenSettingsState
                 Expanded(
                   child: ListTile(
                     title: const Text('Fill Color'),
-                    trailing: Container(
+                    leading: Container(
                       width: 24,
                       height: 24,
                       decoration: BoxDecoration(
                         color: field.fillColor,
-                        border: Border.all(color: Colors.grey),
+                        border: Border.all(color: AppColors.black),
                       ),
                     ),
                     onTap: () async {
@@ -917,12 +916,12 @@ class _RegistrationScreenSettingsState
                 Expanded(
                   child: ListTile(
                     title: const Text('Text Color'),
-                    trailing: Container(
+                    leading: Container(
                       width: 24,
                       height: 24,
                       decoration: BoxDecoration(
                         color: field.textColor,
-                        border: Border.all(color: Colors.grey),
+                        border: Border.all(color: AppColors.black),
                       ),
                     ),
                     onTap: () async {
@@ -959,12 +958,12 @@ class _RegistrationScreenSettingsState
                 Expanded(
                   child: ListTile(
                     title: const Text('Label Color'),
-                    trailing: Container(
+                    leading: Container(
                       width: 24,
                       height: 24,
                       decoration: BoxDecoration(
                         color: field.labelColor,
-                        border: Border.all(color: Colors.grey),
+                        border: Border.all(color: AppColors.black),
                       ),
                     ),
                     onTap: () async {
@@ -1064,12 +1063,12 @@ class _RegistrationScreenSettingsState
                       Expanded(
                         child: ListTile(
                           title: const Text('Border Color'),
-                          trailing: Container(
+                          leading: Container(
                             width: 24,
                             height: 24,
                             decoration: BoxDecoration(
                               color: field.borderColor,
-                              border: Border.all(color: Colors.grey),
+                              border: Border.all(color: AppColors.black),
                             ),
                           ),
                           onTap: () async {
@@ -1413,12 +1412,12 @@ class _RegistrationScreenSettingsState
             Expanded(
               child: ListTile(
                 title: const Text('Button Color'),
-                trailing: Container(
+                leading: Container(
                   width: 24,
                   height: 24,
                   decoration: BoxDecoration(
                     color: settings.submitButtonColor,
-                    border: Border.all(color: Colors.grey),
+                    border: Border.all(color: AppColors.black),
                   ),
                 ),
                 onTap: () async {
@@ -1433,12 +1432,12 @@ class _RegistrationScreenSettingsState
             Expanded(
               child: ListTile(
                 title: const Text('Text Color'),
-                trailing: Container(
+                leading: Container(
                   width: 24,
                   height: 24,
                   decoration: BoxDecoration(
                     color: settings.submitButtonTextColor,
-                    border: Border.all(color: Colors.grey),
+                    border: Border.all(color: AppColors.black),
                   ),
                 ),
                 onTap: () async {
@@ -1495,12 +1494,12 @@ class _RegistrationScreenSettingsState
                   Expanded(
                     child: ListTile(
                       title: const Text('Border Color'),
-                      trailing: Container(
+                      leading: Container(
                         width: 24,
                         height: 24,
                         decoration: BoxDecoration(
                           color: settings.buttonBorderColor,
-                          border: Border.all(color: Colors.grey),
+                          border: Border.all(color: AppColors.black),
                         ),
                       ),
                       onTap: () async {
@@ -1688,7 +1687,7 @@ class _RegistrationScreenSettingsState
                   settings.setButtonImage(null);
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
+                  backgroundColor: AppColors.red,
                 ),
                 child: const Text('Remove Image'),
               ),
@@ -1701,7 +1700,7 @@ class _RegistrationScreenSettingsState
               width: 200,
               height: 60,
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
+                border: Border.all(color: AppColors.black),
                 borderRadius:
                     BorderRadius.circular(settings.buttonBorderRadius),
                 image: DecorationImage(
@@ -1809,12 +1808,12 @@ class _RegistrationScreenSettingsState
                   Expanded(
                     child: ListTile(
                       title: const Text('Border Color'),
-                      trailing: Container(
+                      leading: Container(
                         width: 24,
                         height: 24,
                         decoration: BoxDecoration(
                           color: settings.buttonBorderColor,
-                          border: Border.all(color: Colors.grey),
+                          border: Border.all(color: AppColors.black),
                         ),
                       ),
                       onTap: () async {

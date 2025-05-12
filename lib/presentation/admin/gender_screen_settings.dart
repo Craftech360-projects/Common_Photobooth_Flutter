@@ -251,12 +251,12 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
                   // Title Color
                   ListTile(
                     title: const Text('Title Color'),
-                    trailing: Container(
+                    leading: Container(
                       width: 24,
                       height: 24,
                       decoration: BoxDecoration(
                         color: settings.titleColor,
-                        border: Border.all(color: Colors.grey),
+                        border: Border.all(color: AppColors.black),
                       ),
                     ),
                     onTap: () async {
@@ -308,7 +308,7 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
                               settings.setBackgroundImage(null, isAsset: true);
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red,
+                              backgroundColor: AppColors.red,
                             ),
                             child: const Text('Remove Background'),
                           ),
@@ -321,7 +321,7 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
                           width: 200,
                           height: 120,
                           decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey),
+                            border: Border.all(color: AppColors.black),
                             image: DecorationImage(
                               image: settings.isBackgroundImageAsset
                                   ? AssetImage(settings.backgroundImagePath!)
@@ -517,7 +517,7 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
                         width: 100,
                         height: 150,
                         decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey),
+                          border: Border.all(color: AppColors.black),
                           borderRadius:
                               BorderRadius.circular(settings.imageBorderRadius),
                           image: DecorationImage(
@@ -577,7 +577,7 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
                         width: 100,
                         height: 150,
                         decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey),
+                          border: Border.all(color: AppColors.black),
                           borderRadius:
                               BorderRadius.circular(settings.imageBorderRadius),
                           image: DecorationImage(
@@ -667,12 +667,12 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
                     ),
                     ListTile(
                       title: const Text('Border Color'),
-                      trailing: Container(
+                      leading: Container(
                         width: 24,
                         height: 24,
                         decoration: BoxDecoration(
                           color: settings.imageBorderColor,
-                          border: Border.all(color: Colors.grey),
+                          border: Border.all(color: AppColors.black),
                         ),
                       ),
                       onTap: () async {
@@ -730,12 +730,12 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
                       Constants.h16,
                       ListTile(
                         title: const Text('Glow Color'),
-                        trailing: Container(
+                        leading: Container(
                           width: 24,
                           height: 24,
                           decoration: BoxDecoration(
                             color: settings.selectionGlowColor,
-                            border: Border.all(color: Colors.grey),
+                            border: Border.all(color: AppColors.black),
                           ),
                         ),
                         onTap: () async {
@@ -819,7 +819,7 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
                               settings.setButtonImage(null);
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red,
+                              backgroundColor: AppColors.red,
                             ),
                             child: const Text('Remove Image'),
                           ),
@@ -832,7 +832,7 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
                           width: 200,
                           height: 50,
                           decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey),
+                            border: Border.all(color: AppColors.black),
                             borderRadius: BorderRadius.circular(
                                 settings.buttonBorderRadius),
                             image: DecorationImage(
@@ -896,12 +896,12 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
                         Expanded(
                           child: ListTile(
                             title: const Text('Button Color'),
-                            trailing: Container(
+                            leading: Container(
                               width: 24,
                               height: 24,
                               decoration: BoxDecoration(
                                 color: settings.buttonColor,
-                                border: Border.all(color: Colors.grey),
+                                border: Border.all(color: AppColors.black),
                               ),
                             ),
                             onTap: () async {
@@ -918,12 +918,12 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
                         Expanded(
                           child: ListTile(
                             title: const Text('Text Color'),
-                            trailing: Container(
+                            leading: Container(
                               width: 24,
                               height: 24,
                               decoration: BoxDecoration(
                                 color: settings.buttonTextColor,
-                                border: Border.all(color: Colors.grey),
+                                border: Border.all(color: AppColors.black),
                               ),
                             ),
                             onTap: () async {
@@ -1191,12 +1191,12 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
                         Expanded(
                           child: ListTile(
                             title: const Text('Border Color'),
-                            trailing: Container(
+                            leading: Container(
                               width: 24,
                               height: 24,
                               decoration: BoxDecoration(
                                 color: settings.buttonBorderColor,
-                                border: Border.all(color: Colors.grey),
+                                border: Border.all(color: AppColors.black),
                               ),
                             ),
                             onTap: () async {
@@ -1310,8 +1310,8 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
               selectedColor = color;
             },
             colorPalette: [
-              Colors.white,
-              Colors.black,
+              AppColors.white,
+              AppColors.black,
               AppColors.yellow,
               AppColors.goldenYellow,
               AppColors.blue,

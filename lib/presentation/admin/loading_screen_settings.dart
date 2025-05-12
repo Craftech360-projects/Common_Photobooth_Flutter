@@ -1,6 +1,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/core/constants/constants.dart';
+import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/presentation/loading_screen.dart';
 import 'package:photobooth_flutter/providers/loading_screen_provider.dart';
 import 'package:photobooth_flutter/widgets/improved_color_picker.dart';
@@ -100,12 +101,12 @@ class LoadingScreenSettings extends StatelessWidget {
                         // Title Color with Dialog
                         ListTile(
                           title: const Text('Title Color'),
-                          trailing: Container(
+                          leading: Container(
                             width: 24,
                             height: 24,
                             decoration: BoxDecoration(
                               color: settings.titleColor,
-                              border: Border.all(color: Colors.grey),
+                              border: Border.all(color: AppColors.black),
                             ),
                           ),
                           onTap: () async {
@@ -123,68 +124,68 @@ class LoadingScreenSettings extends StatelessWidget {
                         // Title Margins
                         Constants.h16,
                         const Text(
-                          'Title Margins',
+                          'Title Padding',
                           style: TextStyle(
                               fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                         Constants.h8,
 
                         _buildSlider(
-                          label: 'Top Margin',
-                          value: settings.titleMargin.top,
+                          label: 'Top Padding',
+                          value: settings.titlePadding.top,
                           min: 0,
-                          max: 50,
-                          onChanged: (value) => settings.setTitleMargin(
+                          max: 400,
+                          onChanged: (value) => settings.setTitlePadding(
                             EdgeInsets.fromLTRB(
-                              settings.titleMargin.left,
+                              settings.titlePadding.left,
                               value,
-                              settings.titleMargin.right,
-                              settings.titleMargin.bottom,
+                              settings.titlePadding.right,
+                              settings.titlePadding.bottom,
                             ),
                           ),
                         ),
 
                         _buildSlider(
-                          label: 'Bottom Margin',
-                          value: settings.titleMargin.bottom,
+                          label: 'Bottom Padding',
+                          value: settings.titlePadding.bottom,
                           min: 0,
-                          max: 50,
-                          onChanged: (value) => settings.setTitleMargin(
+                          max: 400,
+                          onChanged: (value) => settings.setTitlePadding(
                             EdgeInsets.fromLTRB(
-                              settings.titleMargin.left,
-                              settings.titleMargin.top,
-                              settings.titleMargin.right,
+                              settings.titlePadding.left,
+                              settings.titlePadding.top,
+                              settings.titlePadding.right,
                               value,
                             ),
                           ),
                         ),
 
                         _buildSlider(
-                          label: 'Left Margin',
-                          value: settings.titleMargin.left,
+                          label: 'Left Padding',
+                          value: settings.titlePadding.left,
                           min: 0,
-                          max: 50,
-                          onChanged: (value) => settings.setTitleMargin(
+                          max: 400,
+                          onChanged: (value) => settings.setTitlePadding(
                             EdgeInsets.fromLTRB(
                               value,
-                              settings.titleMargin.top,
-                              settings.titleMargin.right,
-                              settings.titleMargin.bottom,
+                              settings.titlePadding.top,
+                              settings.titlePadding.right,
+                              settings.titlePadding.bottom,
                             ),
                           ),
                         ),
 
                         _buildSlider(
-                          label: 'Right Margin',
-                          value: settings.titleMargin.right,
+                          label: 'Right Padding',
+                          value: settings.titlePadding.right,
                           min: 0,
-                          max: 50,
-                          onChanged: (value) => settings.setTitleMargin(
+                          max: 400,
+                          onChanged: (value) => settings.setTitlePadding(
                             EdgeInsets.fromLTRB(
-                              settings.titleMargin.left,
-                              settings.titleMargin.top,
+                              settings.titlePadding.left,
+                              settings.titlePadding.top,
                               value,
-                              settings.titleMargin.bottom,
+                              settings.titlePadding.bottom,
                             ),
                           ),
                         ),
@@ -202,15 +203,15 @@ class LoadingScreenSettings extends StatelessWidget {
                       _buildSlider(
                         label: 'Loader Width',
                         value: settings.loaderWidth,
-                        min: 100,
-                        max: 400,
+                        min: 50,
+                        max: 500,
                         onChanged: (value) => settings.setLoaderWidth(value),
                       ),
                       _buildSlider(
                         label: 'Loader Height',
                         value: settings.loaderHeight,
-                        min: 100,
-                        max: 400,
+                        min: 50,
+                        max: 500,
                         onChanged: (value) => settings.setLoaderHeight(value),
                       ),
 
@@ -227,7 +228,7 @@ class LoadingScreenSettings extends StatelessWidget {
                         label: 'Top Margin',
                         value: settings.loaderMargin.top,
                         min: 0,
-                        max: 50,
+                        max: 500,
                         onChanged: (value) => settings.setLoaderMargin(
                           EdgeInsets.fromLTRB(
                             settings.loaderMargin.left,
@@ -242,7 +243,7 @@ class LoadingScreenSettings extends StatelessWidget {
                         label: 'Bottom Margin',
                         value: settings.loaderMargin.bottom,
                         min: 0,
-                        max: 50,
+                        max: 500,
                         onChanged: (value) => settings.setLoaderMargin(
                           EdgeInsets.fromLTRB(
                             settings.loaderMargin.left,
@@ -257,7 +258,7 @@ class LoadingScreenSettings extends StatelessWidget {
                         label: 'Left Margin',
                         value: settings.loaderMargin.left,
                         min: 0,
-                        max: 50,
+                        max: 500,
                         onChanged: (value) => settings.setLoaderMargin(
                           EdgeInsets.fromLTRB(
                             value,
@@ -272,7 +273,7 @@ class LoadingScreenSettings extends StatelessWidget {
                         label: 'Right Margin',
                         value: settings.loaderMargin.right,
                         min: 0,
-                        max: 50,
+                        max: 500,
                         onChanged: (value) => settings.setLoaderMargin(
                           EdgeInsets.fromLTRB(
                             settings.loaderMargin.left,
@@ -402,16 +403,6 @@ class LoadingScreenSettings extends StatelessWidget {
                                 'Selected: ${settings.backgroundImagePath}'),
                           ),
                       ],
-
-                      Constants.h32,
-                      ElevatedButton(
-                        onPressed: () => settings.resetToDefaults(),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                          foregroundColor: Colors.white,
-                        ),
-                        child: const Text('Reset to Defaults'),
-                      ),
                     ],
                   );
                 },

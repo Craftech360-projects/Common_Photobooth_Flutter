@@ -9,7 +9,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class LicenseService {
   static final LicenseService instance = LicenseService._internal();
-  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
+  late final FlutterSecureStorage _secureStorage;
+  bool _useSecureStorage = true;
 
   // This key should be embedded in your app and kept secret
   // In a production app, you'd use more sophisticated key protection
@@ -19,7 +20,111 @@ class LicenseService {
     return instance;
   }
 
-  LicenseService._internal();
+  LicenseService._internal() {
+    _initSecureStorage();
+  }
+
+  void _initSecureStorage() {
+    try {
+      _secureStorage = const FlutterSecureStorage();
+    } on Exception catch (e) {
+      debugPrint('Failed to initialize secure storage: $e');
+      _useSecureStorage = false;
+    }
+  }
+
+  Future<void> storeServiceDetails(Map<String, dynamic> serviceDetails) async {
+    try {
+      if (_useSecureStorage) {
+        // Store in secure storage
+        if (serviceDetails['userId'] != null) {
+          await _secureStorage.write(
+              key: 'license_user_id', value: serviceDetails['userId']);
+        }
+
+        if (serviceDetails['serviceId'] != null) {
+          await _secureStorage.write(
+              key: 'license_service_id', value: serviceDetails['serviceId']);
+        }
+
+        if (serviceDetails['licenseSecurityKey'] != null) {
+          await _secureStorage.write(
+              key: 'license_security_key',
+              value: serviceDetails['licenseSecurityKey']);
+        }
+
+        // Store expiration date if available
+        if (serviceDetails['licenseEndDateTime'] != null) {
+          final expirationTimestamp =
+              DateTime.parse(serviceDetails['licenseEndDateTime'])
+                  .millisecondsSinceEpoch;
+          await _secureStorage.write(
+            key: 'license_expiration',
+            value: expirationTimestamp.toString(),
+          );
+        }
+
+        // Store requestId
+        if (serviceDetails['requestId'] != null) {
+          await _secureStorage.write(
+              key: 'license_request_id', value: serviceDetails['requestId']);
+        }
+
+        // Store deviceId
+        if (serviceDetails['deviceId'] != null) {
+          await _secureStorage.write(
+              key: 'license_device_id', value: serviceDetails['deviceId']);
+        }
+
+        // Store startDateTime
+        if (serviceDetails['startDateTime'] != null) {
+          await _secureStorage.write(
+              key: 'license_start_date',
+              value: serviceDetails['startDateTime']);
+        }
+
+        // Store issuedAt
+        if (serviceDetails['licenseIssuedAt'] != null) {
+          await _secureStorage.write(
+              key: 'license_issued_at',
+              value: serviceDetails['licenseIssuedAt']);
+        }
+
+        // Store last verification time
+        await _secureStorage.write(
+          key: 'last_verification_time',
+          value: DateTime.now().millisecondsSinceEpoch.toString(),
+        );
+      }
+
+      // Also store authentication flag in regular preferences for quick access
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('is_authenticated', true);
+
+      if (serviceDetails['serviceId'] != null) {
+        await prefs.setString(
+            'authenticated_service_id', serviceDetails['serviceId']);
+      }
+
+      if (serviceDetails['licenseEndDateTime'] != null) {
+        final expirationTimestamp =
+            DateTime.parse(serviceDetails['licenseEndDateTime'])
+                .millisecondsSinceEpoch;
+        await prefs.setString(
+            'license_expiration', expirationTimestamp.toString());
+      }
+    } on Exception catch (e) {
+      debugPrint('Error storing service details: $e');
+      // Fall back to just storing in SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('is_authenticated', true);
+
+      if (serviceDetails['serviceId'] != null) {
+        await prefs.setString(
+            'authenticated_service_id', serviceDetails['serviceId']);
+      }
+    }
+  }
 
   // Verify a license certificate
   Future<LicenseVerificationResult> verifyLicense(String certificate) async {
@@ -46,9 +151,19 @@ class LicenseService {
         );
       }
 
-      // Check expiration
-      final expiration =
-          DateTime.fromMillisecondsSinceEpoch(payload['exp'] * 1000);
+      // Check expiration - use endDateTime instead of exp
+      final expiration = payload['exp'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(payload['exp'] * 1000)
+          : payload['endDateTime'] != null
+              ? DateTime.parse(payload['endDateTime'])
+              : null;
+
+      if (expiration == null) {
+        return LicenseVerificationResult(
+          isValid: false,
+          message: 'Invalid license: missing expiration date',
+        );
+      }
 
       // Get server time if possible to prevent time manipulation
       final currentTime = await _getSecureTime();
@@ -62,9 +177,7 @@ class LicenseService {
 
       // Store license data securely
       await _storeLicenseData(
-        payload['userId'],
-        payload['eventId'],
-        payload['securityKey'],
+        payload,
         expiration.millisecondsSinceEpoch,
       );
 
@@ -72,7 +185,7 @@ class LicenseService {
         isValid: true,
         message: 'License verified successfully',
         userId: payload['userId'],
-        eventId: payload['eventId'],
+        eventId: payload['serviceId'], // Use serviceId instead of eventId
         expirationDate: expiration,
       );
     } on Exception catch (e) {
@@ -81,6 +194,71 @@ class LicenseService {
         isValid: false,
         message: 'Error verifying license: $e',
       );
+    }
+  }
+
+  // Store license data securely
+  Future<void> _storeLicenseData(
+    Map<String, dynamic> payload,
+    int expirationTimestamp,
+  ) async {
+    try {
+      if (_useSecureStorage) {
+        // Store in secure storage
+        await _secureStorage.write(
+            key: 'license_user_id', value: payload['userId']);
+        await _secureStorage.write(
+            key: 'license_service_id', value: payload['serviceId']);
+        await _secureStorage.write(
+            key: 'license_security_key', value: payload['securityKey']);
+        await _secureStorage.write(
+          key: 'license_expiration',
+          value: expirationTimestamp.toString(),
+        );
+
+        // Store requestId instead of eventId
+        if (payload['requestId'] != null) {
+          await _secureStorage.write(
+              key: 'license_request_id', value: payload['requestId']);
+        }
+
+        // Store deviceId as a new field
+        if (payload['deviceId'] != null) {
+          await _secureStorage.write(
+              key: 'license_device_id', value: payload['deviceId']);
+        }
+
+        // Store startDateTime if available
+        if (payload['startDateTime'] != null) {
+          await _secureStorage.write(
+              key: 'license_start_date', value: payload['startDateTime']);
+        }
+
+        // Store issuedAt if available
+        if (payload['issuedAt'] != null) {
+          await _secureStorage.write(
+              key: 'license_issued_at', value: payload['issuedAt']);
+        }
+
+        // Store last verification time
+        await _secureStorage.write(
+          key: 'last_verification_time',
+          value: DateTime.now().millisecondsSinceEpoch.toString(),
+        );
+      }
+
+      // Also store authentication flag in regular preferences for quick access
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('is_authenticated', true);
+      await prefs.setString('authenticated_service_id', payload['serviceId']);
+    } on Exception catch (e) {
+      debugPrint('Error storing license data: $e');
+      // Fall back to just storing in SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('is_authenticated', true);
+      await prefs.setString('authenticated_service_id', payload['serviceId']);
+      await prefs.setString(
+          'license_expiration', expirationTimestamp.toString());
     }
   }
 
@@ -93,34 +271,6 @@ class LicenseService {
 
     // Remove padding for comparison
     return calculatedSignature.replaceAll('=', '') == signature;
-  }
-
-  // Store license data securely
-  Future<void> _storeLicenseData(
-    String userId,
-    String eventId,
-    String securityKey,
-    int expirationTimestamp,
-  ) async {
-    // Store in secure storage
-    await _secureStorage.write(key: 'license_user_id', value: userId);
-    await _secureStorage.write(key: 'license_event_id', value: eventId);
-    await _secureStorage.write(key: 'license_security_key', value: securityKey);
-    await _secureStorage.write(
-      key: 'license_expiration',
-      value: expirationTimestamp.toString(),
-    );
-
-    // Also store authentication flag in regular preferences for quick access
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('is_authenticated', true);
-    await prefs.setString('authenticated_event_id', eventId);
-
-    // Store last verification time
-    await _secureStorage.write(
-      key: 'last_verification_time',
-      value: DateTime.now().millisecondsSinceEpoch.toString(),
-    );
   }
 
   // Check if license is still valid
@@ -215,14 +365,18 @@ class LicenseService {
 
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('authenticated_event_id');
+    await prefs.remove('authenticated_service_id');
     await prefs.setBool('is_authenticated', false);
 
     // Clear secure storage
     await _secureStorage.delete(key: 'license_user_id');
-    await _secureStorage.delete(key: 'license_event_id');
+    await _secureStorage.delete(key: 'license_service_id');
     await _secureStorage.delete(key: 'license_security_key');
     await _secureStorage.delete(key: 'license_expiration');
+    await _secureStorage.delete(key: 'license_request_id');
+    await _secureStorage.delete(key: 'license_device_id');
+    await _secureStorage.delete(key: 'license_start_date');
+    await _secureStorage.delete(key: 'license_issued_at');
     await _secureStorage.delete(key: 'last_verification_time');
   }
 }

@@ -41,7 +41,7 @@ class OutputScreenProvider extends ChangeNotifier {
   String _titleText = 'Your Image has been created';
   double _titleFontSize = 32.0;
   FontWeight _titleFontWeight = FontWeight.bold;
-  Color _titleColor = Colors.white;
+  Color _titleColor = AppColors.white;
   double _titlePadding = 20.0;
   bool _showTitle = true;
   WidgetPosition _titlePosition = WidgetPosition.topCenter;
@@ -57,11 +57,11 @@ class OutputScreenProvider extends ChangeNotifier {
 
   // QR code settings
   double _qrCodeSize = 150.0;
-  Color _qrCodeBackgroundColor = Colors.white;
-  Color _qrCodeForegroundColor = Colors.black;
+  Color _qrCodeBackgroundColor = AppColors.white;
+  Color _qrCodeForegroundColor = AppColors.black;
   String _qrCodeText = 'Scan QR code to download your image';
   double _qrCodeTextFontSize = 18.0;
-  Color _qrCodeTextColor = Colors.white;
+  Color _qrCodeTextColor = AppColors.white;
   QrCodeLayout _qrCodeLayout = QrCodeLayout.below;
   double _qrCodeSpacing = 20.0;
   WidgetPosition _qrCodePosition = WidgetPosition.bottomCenter;
@@ -70,7 +70,7 @@ class OutputScreenProvider extends ChangeNotifier {
   String _buttonText = 'START OVER';
   double _buttonFontSize = 24.0;
   Color _buttonColor = AppColors.yellow;
-  Color _buttonTextColor = Colors.black;
+  Color _buttonTextColor = AppColors.black;
   double _buttonPaddingHorizontal = 40.0;
   double _buttonPaddingVertical = 15.0;
   double _buttonSpacing = 30.0;
@@ -478,7 +478,7 @@ class OutputScreenProvider extends ChangeNotifier {
     _titleText = 'Your Image has been created';
     _titleFontSize = 32.0;
     _titleFontWeight = FontWeight.bold;
-    _titleColor = Colors.white;
+    _titleColor = AppColors.white;
     _titlePadding = 20.0;
     _showTitle = true;
     _titlePosition = WidgetPosition.topCenter;
@@ -498,11 +498,11 @@ class OutputScreenProvider extends ChangeNotifier {
 
     // QR code settings
     _qrCodeSize = 150.0;
-    _qrCodeBackgroundColor = Colors.white;
-    _qrCodeForegroundColor = Colors.black;
+    _qrCodeBackgroundColor = AppColors.white;
+    _qrCodeForegroundColor = AppColors.black;
     _qrCodeText = 'Scan QR code to download your image';
     _qrCodeTextFontSize = 18.0;
-    _qrCodeTextColor = Colors.white;
+    _qrCodeTextColor = AppColors.white;
     _qrCodeLayout = QrCodeLayout.below;
     _qrCodeSpacing = 20.0;
     _qrCodePosition = WidgetPosition.bottomCenter;
@@ -513,7 +513,7 @@ class OutputScreenProvider extends ChangeNotifier {
     _buttonText = 'START OVER';
     _buttonFontSize = 24.0;
     _buttonColor = AppColors.yellow;
-    _buttonTextColor = Colors.black;
+    _buttonTextColor = AppColors.black;
     _buttonPaddingHorizontal = 40.0;
     _buttonPaddingVertical = 15.0;
     _buttonSpacing = 30.0;

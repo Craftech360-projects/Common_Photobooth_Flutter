@@ -8,13 +8,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 class CharacterSelectionProvider extends ChangeNotifier {
   // Title settings
   String _titleText = 'Select Your Character';
-  double _titleFontSize = 40.0;
-  Color _titleColor = Colors.white;
-  FontWeight _titleFontWeight = FontWeight.bold;
-  double _titlePadding = 20.0;
+  double _titleFontSize = 22.0;
+  Color _titleColor = AppColors.white;
+  FontWeight _titleFontWeight = FontWeight.w500;
+  double _titlePadding = 0.0;
   // New title properties
   EdgeInsets _titleMargin = const EdgeInsets.all(0);
-  double _titleLineHeight = 1.2;
+  double _titleLineHeight = 1.0;
   bool _titleItalic = false;
   double _titleOpacity = 1.0;
   TextAlign _titleAlignment = TextAlign.center;
@@ -68,18 +68,18 @@ class CharacterSelectionProvider extends ChangeNotifier {
 
   // Character display settings
   double _characterWidth = 250.0;
-  double _characterHeight = 300.0;
-  double _characterSpacing = 20.0;
-  double _characterBorderRadius = 20.0;
-  bool _showCharacterBorder = true;
-  double _characterBorderWidth = 3.0;
+  double _characterHeight = 375.0;
+  double _characterSpacing = 0.0;
+  double _characterBorderRadius = 6.0;
+  bool _showCharacterBorder = false;
+  double _characterBorderWidth = 2.0;
   Color _characterBorderColor = AppColors.yellow; // Golden yellow
 
   // Selection effect settings
   bool _useSelectionEffect = true;
-  double _selectedCharacterScale = 1.1;
+  double _selectedCharacterScale = 1.03;
   bool _useSelectionGlow = true;
-  Color _selectionGlowColor = Colors.white;
+  Color _selectionGlowColor = AppColors.white;
   double _selectionGlowIntensity = 0.7;
   double _selectionGlowSpread = 10.0;
 
@@ -96,32 +96,32 @@ class CharacterSelectionProvider extends ChangeNotifier {
   double _gridHorizontalSpacing = 20.0;
   double _gridVerticalSpacing = 20.0;
   EdgeInsets _gridMargin = const EdgeInsets.all(20.0);
-  bool _gridCenterLastRow = true;
+  bool _gridCenterLastRow = false;
 
   // Button settings
   String _buttonText = 'Next';
   double _buttonWidth = 200.0;
-  double _buttonHeight = 50.0;
+  double _buttonHeight = 45.0;
   double _buttonFontSize = 18.0;
   Color _buttonColor = AppColors.yellow;
-  Color _buttonTextColor = Colors.black;
-  double _buttonBorderRadius = 10.0;
+  Color _buttonTextColor = AppColors.black;
+  double _buttonBorderRadius = 5.0;
   bool _buttonHasBorder = false;
   double _buttonBorderWidth = 1.0;
-  Color _buttonBorderColor = Colors.black;
-  double _buttonMarginTop = 30.0;
+  Color _buttonBorderColor = AppColors.black;
+  double _buttonMarginTop = 0.0;
   bool _useImageButton = false;
   String? _buttonImagePath;
   bool _isButtonImageAsset = true;
   // New button properties
   FontWeight _buttonFontWeight = FontWeight.w500;
-  EdgeInsets _buttonMargin = const EdgeInsets.only(top: 30.0);
+  EdgeInsets _buttonMargin = const EdgeInsets.only(top: 0.0);
   EdgeInsets _buttonPadding =
       const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0);
 
   // Layout settings
   double _screenPadding = 0.0;
-  bool _showBackground = true;
+  bool _showBackground = false;
   String? _backgroundImagePath;
   bool _isBackgroundImageAsset = true;
 

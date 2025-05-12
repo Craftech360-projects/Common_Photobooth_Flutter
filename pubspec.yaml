@@ -42,6 +42,7 @@ flutter:
     - assets/images/
     - assets/characters/
     - assets/videos/
+    - assets/workflows/
     - lib/api/ghibli.json
 
   fonts:

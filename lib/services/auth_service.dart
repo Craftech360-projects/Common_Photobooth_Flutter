@@ -16,7 +16,7 @@ class AuthService {
 
   bool _isInitialized = false;
   String? _apiUrl;
-  String? _serviceId;
+  String? _requestId;
   bool _isAuthenticated = false;
   DateTime? _lastAuthTime;
   String? _authToken; // Add this to store the token
@@ -50,7 +50,7 @@ class AuthService {
           await _saveAuthState();
         }
       }
-      _serviceId = prefs.getString('serviceId');
+      _requestId = prefs.getString('serviceId');
       _authToken = prefs.getString('authToken'); // Load the token
     } on Exception catch (e) {
       debugPrint('Error loading auth state: $e');
@@ -65,8 +65,8 @@ class AuthService {
       if (_lastAuthTime != null) {
         await prefs.setString('lastAuthTime', _lastAuthTime!.toIso8601String());
       }
-      if (_serviceId != null) {
-        await prefs.setString('serviceId', _serviceId!);
+      if (_requestId != null) {
+        await prefs.setString('requestId', _requestId!);
       }
       if (_authToken != null) {
         await prefs.setString('authToken', _authToken!); // Save the token
@@ -77,7 +77,7 @@ class AuthService {
   }
 
   Future<AuthResponse> verifyAuthCode({
-    required String serviceId,
+    required String requestId,
     required String authCode,
   }) async {
     if (!_isInitialized) {
@@ -94,7 +94,7 @@ class AuthService {
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
-          'serviceId': serviceId,
+          'requestId': requestId,
           'authCode': authCode,
           'timestamp': timestamp,
         }),
@@ -106,7 +106,7 @@ class AuthService {
         // Store authentication state
         _isAuthenticated = true;
         _lastAuthTime = DateTime.now();
-        _serviceId = serviceId;
+        _requestId = requestId;
 
         // Store the token if it's in the response
         if (responseData['token'] != null) {
@@ -131,6 +131,31 @@ class AuthService {
         success: false,
         message: 'Error connecting to server: $e',
       );
+    }
+  }
+
+  // Add a new method to fetch service details
+  Future<Map<String, dynamic>?> fetchServiceDetails(String requestId) async {
+    if (!_isInitialized) {
+      throw Exception('Auth service not initialized');
+    }
+
+    try {
+      final response = await http.get(
+        Uri.parse('$_apiUrl/api/services/requests/$requestId'),
+        headers: getAuthHeaders(),
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        return responseData;
+      } else {
+        debugPrint('Failed to fetch service details: ${response.statusCode}');
+        return null;
+      }
+    } on Exception catch (e) {
+      debugPrint('Error fetching service details: $e');
+      return null;
     }
   }
 

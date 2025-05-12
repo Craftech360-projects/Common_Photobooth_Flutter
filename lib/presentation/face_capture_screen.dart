@@ -1,5 +1,4 @@
 // ignore_for_file: unused_field
-
 import 'dart:async';
 import 'dart:io';
 
@@ -19,11 +18,8 @@ import 'package:provider/provider.dart';
 
 /// Example app for Camera Windows plugin.
 class FaceCaptureScreen extends StatefulWidget {
-  final bool isPreview;
-
   const FaceCaptureScreen({
     super.key,
-    this.isPreview = false,
   });
 
   @override
@@ -58,24 +54,23 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
     _isMacOS = Platform.isMacOS;
 
     // Only initialize camera if not in preview mode
-    if (!widget.isPreview) {
-      // Initialize camera after the widget is built
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (_isMacOS) {
-          _initializeMacOSCamera();
-        } else {
-          _fetchCameras() // Fetch available cameras on init.
-              .then((_) => _initializeCamera()) // Initialize first camera.
-              .catchError((dynamic error) {
-            if (mounted) {
-              setState(() {
-                _cameraInfo = 'Failed to get cameras: $error';
-              });
-            }
-          });
-        }
-      });
-    }
+
+    // Initialize camera after the widget is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_isMacOS) {
+        _initializeMacOSCamera();
+      } else {
+        _fetchCameras() // Fetch available cameras on init.
+            .then((_) => _initializeCamera()) // Initialize first camera.
+            .catchError((dynamic error) {
+          if (mounted) {
+            setState(() {
+              _cameraInfo = 'Failed to get cameras: $error';
+            });
+          }
+        });
+      }
+    });
   }
 
   // Add a didUpdateWidget lifecycle method to detect camera changes from settings
@@ -459,7 +454,7 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
       //   // ],
       // ),
       body: WatermarkOverlay(
-        show: watermarkProvider.showWatermark && !widget.isPreview,
+        show: watermarkProvider.showWatermark,
         child: Container(
           width: double.infinity,
           height: double.infinity,
@@ -470,7 +465,6 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
             ),
           ),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               // Title
               if (settings.showTitle)
@@ -490,14 +484,10 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
                 ),
 
               // Camera Preview
-              widget.isPreview
-                  ? _buildPreviewPlaceholder(settings)
-                  : _buildCameraPreview(settings),
+              _buildCameraPreview(settings),
 
               // Capture Button
-              widget.isPreview
-                  ? _buildCaptureButtonPreview(settings)
-                  : _buildCaptureButton(settings),
+              _buildCaptureButton(settings),
             ],
           ),
         ),
@@ -506,74 +496,6 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
   }
 
   // Add placeholder widgets for preview mode
-  Widget _buildPreviewPlaceholder(FaceCaptureProvider settings) {
-    return Container(
-      width: settings.previewWidth,
-      height: settings.previewHeight,
-      decoration: settings.showPreviewBorder
-          ? BoxDecoration(
-              borderRadius: BorderRadius.circular(settings.previewBorderRadius),
-              border: Border.all(
-                color: settings.previewBorderColor,
-                width: settings.previewBorderWidth,
-              ),
-            )
-          : null,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(settings.previewBorderRadius),
-        child: Container(
-          color: Colors.black.withOpacity(0.7),
-          child: const Center(
-            child: Icon(
-              Icons.camera_alt,
-              size: 50,
-              color: Colors.white54,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCaptureButtonPreview(FaceCaptureProvider settings) {
-    if (settings.useImageButton && settings.buttonImagePath != null) {
-      return Container(
-        width: settings.buttonWidth,
-        height: settings.buttonHeight,
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: FileImage(File(settings.buttonImagePath!)),
-            fit: BoxFit.cover,
-          ),
-        ),
-      );
-    } else {
-      return Container(
-        width: settings.buttonWidth,
-        height: settings.buttonHeight,
-        decoration: BoxDecoration(
-          color: settings.buttonColor,
-          borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
-          border: settings.buttonHasBorder
-              ? Border.all(
-                  color: settings.buttonBorderColor,
-                  width: settings.buttonBorderWidth,
-                )
-              : null,
-        ),
-        child: Center(
-          child: Text(
-            settings.buttonText,
-            style: TextStyle(
-              color: settings.buttonTextColor,
-              fontSize: settings.buttonFontSize,
-              fontWeight: settings.buttonFontWeight,
-            ),
-          ),
-        ),
-      );
-    }
-  }
 
   Widget _buildCameraPreview(FaceCaptureProvider settings) {
     if (!_cameraInitialized) {
@@ -642,6 +564,8 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
       return GestureDetector(
         onTap: _takePicture,
         child: Container(
+          margin: settings.buttonMargin,
+          padding: settings.buttonPadding,
           width: settings.buttonWidth,
           height: settings.buttonHeight,
           decoration: BoxDecoration(

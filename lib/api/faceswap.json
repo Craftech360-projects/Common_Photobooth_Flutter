@@ -12,14 +12,8 @@
       "input_faces_index": "0",
       "source_faces_index": "0",
       "console_log_level": 1,
-      "input_image": [
-        "30",
-        0
-      ],
-      "source_image": [
-        "31",
-        0
-      ]
+      "input_image": ["30", 0],
+      "source_image": ["31", 0]
     },
     "class_type": "ReActorFaceSwap",
     "_meta": {
@@ -28,21 +22,15 @@
   },
   "28": {
     "inputs": {
-      "unique_id": [
-        "31",
-        2
-      ],
-      "supabase_url": "https://your-project.supabase.co",
-      "supabase_key": "your-service-role-key",
+      "unique_id": ["31", 2],
+      "supabase_url": "https://vfhrnwvbfhchxvjlxnxf.supabase.co",
+      "supabase_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZmaHJud3ZiZmhjaHh2amx4bnhmIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NDc4MjIzNiwiZXhwIjoyMDYwMzU4MjM2fQ.9ILXFbvh2GcEMLgamTccrnGn144pLwgModm9LdJndqc",
       "bucket": "outputimages",
       "base_file_name": "image",
       "table_name": "inputimagetable",
       "unique_id_column": "unique_id",
       "table_column": "output",
-      "image": [
-        "1",
-        0
-      ]
+      "image": ["1", 0]
     },
     "class_type": "SupabaseImageUploader",
     "_meta": {
@@ -51,8 +39,8 @@
   },
   "30": {
     "inputs": {
-      "supabase_url": "https://your-project.supabase.co",
-      "supabase_key": "your-anon-key",
+      "supabase_url": "https://vfhrnwvbfhchxvjlxnxf.supabase.co",
+      "supabase_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZmaHJud3ZiZmhjaHh2amx4bnhmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3ODIyMzYsImV4cCI6MjA2MDM1ODIzNn0.j94ddkuXuJHCmRK9UP2bW5ryngWrFbKvWxBjUVhEioo",
       "table_name": "inputimagetable",
       "image_column": "image_url",
       "id_column": "unique_id",
@@ -65,8 +53,8 @@
   },
   "31": {
     "inputs": {
-      "supabase_url": "https://your-project.supabase.co",
-      "supabase_key": "your-anon-key",
+      "supabase_url": "https://vfhrnwvbfhchxvjlxnxf.supabase.co",
+      "supabase_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZmaHJud3ZiZmhjaHh2amx4bnhmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3ODIyMzYsImV4cCI6MjA2MDM1ODIzNn0.j94ddkuXuJHCmRK9UP2bW5ryngWrFbKvWxBjUVhEioo",
       "table_name": "inputimagetable",
       "image_column": "image_url",
       "id_column": "unique_id",
