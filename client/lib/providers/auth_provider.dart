@@ -49,20 +49,30 @@ class AuthProvider extends ChangeNotifier {
 
   // Existing online verification method
   Future<bool> verifyAuthCode(
-      {required String serviceId, required String authCode}) async {
+      {required String requestId, required String authCode}) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
       final response = await AuthService.instance.verifyAuthCode(
-        serviceId: serviceId,
+        requestId: requestId,
         authCode: authCode,
       );
 
       if (response.success) {
-        _isAuthenticated = true;
-        _updateWatermarkVisibility();
+        // Fetch service details after successful authentication
+        final serviceDetails = await AuthService.instance.fetchServiceDetails(requestId);
+        
+        if (serviceDetails != null) {
+          // Store service details in LicenseService
+          await LicenseService.instance.storeServiceDetails(serviceDetails);
+          _isAuthenticated = true;
+          _updateWatermarkVisibility();
+        } else {
+          _error = 'Failed to fetch service details';
+          return false;
+        }
       } else {
         _error = response.message ?? 'Authentication failed';
       }

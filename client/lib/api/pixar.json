@@ -306,7 +306,7 @@
   },
   "257": {
     "inputs": {
-      "lora_name": "ghibli-flux.safetensors",
+      "lora_name": "pixar-animation-flux.safetensors",
       "strength_model": 0.8000000000000002,
       "strength_clip": 1.0000000000000002,
       "model": [
@@ -423,7 +423,7 @@
   },
   "270": {
     "inputs": {
-      "text": "GHIBLI, Recreate the exact scene and composition from the input image in the whimsical, hand-drawn style of Studio Ghibli. Retain all characters, clothing, background elements, and lighting, but translate them into soft watercolor textures, delicate linework, and vibrant yet natural colors typical of Ghibli films. Infuse the image with a warm, storybook-like atmosphere, adding subtle magical or fantastical touches while preserving the original mood and setting. [caption]",
+      "text": "Create a Pixar-style animated poster featuring the input image as a cute, expressive character. Use soft, colorful lighting, smooth textures, big bright eyes, and a slightly exaggerated, cartoony design. The background should be whimsical and vibrant, capturing a warm, adventurous, and heartwarming mood, like a scene from a Pixar movie. [caption]",
       "old": "[caption]",
       "new": [
         "268",
@@ -514,7 +514,7 @@
       "table_name": "inputimagetable",
       "image_column": "image_url",
       "id_column": "unique_id",
-      "unique_id": " "
+      "unique_id": ""
     },
     "class_type": "SupabaseTableWatcherNode",
     "_meta": {

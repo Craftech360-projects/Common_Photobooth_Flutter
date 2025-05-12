@@ -230,15 +230,15 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
               const Icon(Icons.error, color: AppColors.red, size: 50),
               const SizedBox(height: 10),
               Text('Error: $error',
-                  style: const TextStyle(color: Colors.white)),
+                  style: const TextStyle(color: AppColors.white)),
             ],
           );
         },
       );
     } else {
       return const Center(
-        child:
-            Text('No image available', style: TextStyle(color: Colors.white)),
+        child: Text('No image available',
+            style: TextStyle(color: AppColors.white)),
       );
     }
   }

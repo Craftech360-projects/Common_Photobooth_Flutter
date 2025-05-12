@@ -521,8 +521,8 @@ class _RegistrationScreenSettingsState
               selectedColor = color;
             },
             colorPalette: [
-              Colors.white,
-              Colors.black,
+              AppColors.white,
+              AppColors.black,
               AppColors.yellow,
               AppColors.goldenYellow,
               AppColors.blue,

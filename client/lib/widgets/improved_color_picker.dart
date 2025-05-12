@@ -161,7 +161,7 @@ class _ImprovedColorPickerState extends State<ImprovedColorPicker> {
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: _currentColor.value == color.value
-                    ? const Icon(Icons.check, size: 20, color: Colors.white)
+                    ? const Icon(Icons.check, size: 20, color: AppColors.white)
                     : null,
               ),
             );

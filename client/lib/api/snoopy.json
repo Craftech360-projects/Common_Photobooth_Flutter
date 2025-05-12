@@ -306,7 +306,7 @@
   },
   "257": {
     "inputs": {
-      "lora_name": "ghibli-flux.safetensors",
+      "lora_name": "snoopy-style.safetensors",
       "strength_model": 0.8000000000000002,
       "strength_clip": 1.0000000000000002,
       "model": [
@@ -423,7 +423,7 @@
   },
   "270": {
     "inputs": {
-      "text": "GHIBLI, Recreate the exact scene and composition from the input image in the whimsical, hand-drawn style of Studio Ghibli. Retain all characters, clothing, background elements, and lighting, but translate them into soft watercolor textures, delicate linework, and vibrant yet natural colors typical of Ghibli films. Infuse the image with a warm, storybook-like atmosphere, adding subtle magical or fantastical touches while preserving the original mood and setting. [caption]",
+      "text": "cartoon style illustration, Transform the provided input image into a poster in the style of classic Peanuts/Snoopy comics.\nUse clean black outlines, flat pastel colors, and very simple shading. Reimagine the character with round, childlike proportions, simple facial features, and a peaceful, warm expression.\nPlace the character outdoors, with a soft autumn background — yellow ginkgo trees, rounded bushes, and a light cream sky — matching the cozy, nostalgic vibe of Peanuts artwork.\nThe entire scene should feel calm, minimalistic, and heartwarming, keeping everything visually simple and colorful, just like a Peanuts comic. [caption]",
       "old": "[caption]",
       "new": [
         "268",
@@ -514,7 +514,7 @@
       "table_name": "inputimagetable",
       "image_column": "image_url",
       "id_column": "unique_id",
-      "unique_id": " "
+      "unique_id": ""
     },
     "class_type": "SupabaseTableWatcherNode",
     "_meta": {

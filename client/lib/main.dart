@@ -16,16 +16,17 @@ import 'package:photobooth_flutter/providers/registration_screen_provider.dart';
 import 'package:photobooth_flutter/providers/welcome_screen_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
 import 'package:photobooth_flutter/services/auth_service.dart';
+import 'package:photobooth_flutter/services/server_manager.dart';
 import 'package:photobooth_flutter/services/supabase_service.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// final ServerManager serverManager = ServerManager();
+final ServerManager serverManager = ServerManager();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // await serverManager.startServer();
+  await serverManager.startServer();
 
   // Initialize auth service
   await AuthService.instance.initialize(
@@ -128,12 +129,12 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  // @override
-  // void dispose() {
-  //   // Stop the server when the app closes
-  //   serverManager.stopServer();
-  //   super.dispose();
-  // }
+  @override
+  void dispose() {
+    // Stop the server when the app closes
+    serverManager.stopServer();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

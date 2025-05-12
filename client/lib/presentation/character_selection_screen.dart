@@ -81,7 +81,7 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen> {
           child: Center(
             child: IconButton(
               icon: const Icon(Icons.arrow_back_ios,
-                  color: Colors.white, size: 30),
+                  color: AppColors.white, size: 30),
               onPressed: () {
                 _pageController.previousPage(
                   duration: const Duration(milliseconds: 300),
@@ -100,7 +100,7 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen> {
           child: Center(
             child: IconButton(
               icon: const Icon(Icons.arrow_forward_ios,
-                  color: Colors.white, size: 30),
+                  color: AppColors.white, size: 30),
               onPressed: () {
                 _pageController.nextPage(
                   duration: const Duration(milliseconds: 300),

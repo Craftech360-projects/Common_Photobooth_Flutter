@@ -1,0 +1,80 @@
+{
+  "1": {
+    "inputs": {
+      "enabled": true,
+      "swap_model": "inswapper_128.onnx",
+      "facedetection": "YOLOv5n",
+      "face_restore_model": "GFPGANv1.4.pth",
+      "face_restore_visibility": 1,
+      "codeformer_weight": 1,
+      "detect_gender_input": "no",
+      "detect_gender_source": "no",
+      "input_faces_index": "0",
+      "source_faces_index": "0",
+      "console_log_level": 1,
+      "input_image": [
+        "30",
+        0
+      ],
+      "source_image": [
+        "31",
+        0
+      ]
+    },
+    "class_type": "ReActorFaceSwap",
+    "_meta": {
+      "title": "ReActor 🌌 Fast Face Swap"
+    }
+  },
+  "28": {
+    "inputs": {
+      "unique_id": [
+        "31",
+        2
+      ],
+      "supabase_url": "https://your-project.supabase.co",
+      "supabase_key": "your-service-role-key",
+      "bucket": "outputimages",
+      "base_file_name": "image",
+      "table_name": "inputimagetable",
+      "unique_id_column": "unique_id",
+      "table_column": "output",
+      "image": [
+        "1",
+        0
+      ]
+    },
+    "class_type": "SupabaseImageUploader",
+    "_meta": {
+      "title": "Upload Image to Supabase"
+    }
+  },
+  "30": {
+    "inputs": {
+      "supabase_url": "https://your-project.supabase.co",
+      "supabase_key": "your-anon-key",
+      "table_name": "inputimagetable",
+      "image_column": "image_url",
+      "id_column": "unique_id",
+      "unique_id": ""
+    },
+    "class_type": "SupabaseTableWatcherNode",
+    "_meta": {
+      "title": "Supabase Table Watcher"
+    }
+  },
+  "31": {
+    "inputs": {
+      "supabase_url": "https://your-project.supabase.co",
+      "supabase_key": "your-anon-key",
+      "table_name": "inputimagetable",
+      "image_column": "image_url",
+      "id_column": "unique_id",
+      "unique_id": ""
+    },
+    "class_type": "SupabaseTableWatcherNode",
+    "_meta": {
+      "title": "Supabase Table Watcher"
+    }
+  }
+}

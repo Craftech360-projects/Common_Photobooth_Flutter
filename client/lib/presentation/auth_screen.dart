@@ -17,7 +17,7 @@ class AuthScreen extends StatefulWidget {
 
 class _AuthScreenState extends State<AuthScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _eventIdController = TextEditingController();
+  final _requestIdController = TextEditingController();
   final _authCodeController = TextEditingController();
   bool _showLicenseInput = false;
   String? _licenseContent;
@@ -25,7 +25,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
   @override
   void dispose() {
-    _eventIdController.dispose();
+    _requestIdController.dispose();
     _authCodeController.dispose();
     super.dispose();
   }
@@ -44,9 +44,9 @@ class _AuthScreenState extends State<AuthScreen> {
         }
         success = await authProvider.verifyLicense(_licenseContent!);
       } else {
-        // Verify with event ID and auth code
+        // Verify with request ID and auth code
         success = await authProvider.verifyAuthCode(
-          serviceId: _eventIdController.text.trim(),
+          requestId: _requestIdController.text.trim(),
           authCode: _authCodeController.text.trim(),
         );
       }
@@ -80,13 +80,6 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
-  // Add this method to handle license text input
-  // void _handleLicenseTextChange(String value) {
-  //   setState(() {
-  //     _licenseContent = value;
-  //   });
-  // }
-
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -94,11 +87,11 @@ class _AuthScreenState extends State<AuthScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.black,
+        backgroundColor: AppColors.black,
         elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings, color: Colors.white),
+            icon: const Icon(Icons.settings, color: AppColors.white),
             onPressed: () {
               Navigator.pushNamed(context, AppRoutes.adminScreen);
             },
@@ -113,7 +106,7 @@ class _AuthScreenState extends State<AuthScreen> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Colors.black,
+              AppColors.black,
               Colors.grey[900]!,
             ],
           ),
@@ -127,11 +120,11 @@ class _AuthScreenState extends State<AuthScreen> {
               ),
               padding: const EdgeInsets.all(32),
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
+                color: AppColors.white,
+                borderRadius: Constants.br16,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.3),
+                    color: AppColors.black.withValues(alpha: 0.3),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                   ),
@@ -150,7 +143,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     ),
                     child: const Icon(
                       Icons.lock_outline,
-                      color: Colors.white,
+                      color: AppColors.white,
                       size: 40,
                     ),
                   ),
@@ -209,17 +202,17 @@ class _AuthScreenState extends State<AuthScreen> {
                         if (!_showLicenseInput) ...[
                           // Event ID field
                           TextFormField(
-                            controller: _eventIdController,
+                            controller: _requestIdController,
                             decoration: InputDecoration(
-                              labelText: 'Service ID',
+                              labelText: 'Request ID',
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: Constants.br8,
                               ),
                               prefixIcon: const Icon(Icons.event),
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
-                                return 'Please enter the Service ID';
+                                return 'Please enter the Request ID';
                               }
                               return null;
                             },
@@ -233,7 +226,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             decoration: InputDecoration(
                               labelText: 'Authentication Code',
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: Constants.br8,
                               ),
                               prefixIcon: const Icon(Icons.vpn_key),
                             ),
@@ -300,9 +293,9 @@ class _AuthScreenState extends State<AuthScreen> {
                                 authProvider.isLoading ? null : _handleSubmit,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.goldenYellow,
-                              foregroundColor: Colors.white,
+                              foregroundColor: AppColors.white,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: Constants.br8,
                               ),
                             ),
                             child: authProvider.isLoading
@@ -310,7 +303,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                     width: 24,
                                     height: 24,
                                     child: CircularProgressIndicator(
-                                      color: Colors.white,
+                                      color: AppColors.white,
                                       strokeWidth: 2,
                                     ),
                                   )
@@ -331,7 +324,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             children: [
                               const TextSpan(
                                 text: "Checkout application from here: ",
-                                style: TextStyle(color: Colors.black),
+                                style: TextStyle(color: AppColors.black),
                               ),
                               WidgetSpan(
                                 alignment: PlaceholderAlignment.middle,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/core/constants/constants.dart';
+import 'package:photobooth_flutter/core/themes/app_colors.dart';
 
 class WatermarkOverlay extends StatelessWidget {
   final Widget child;
@@ -60,7 +61,7 @@ class WatermarkOverlay extends StatelessWidget {
                           'assets/images/cft_logo.png',
                           width: 80,
                           height: 80,
-                          color: Colors.white.withValues(alpha: 0.6),
+                          color: AppColors.white.withValues(alpha: 0.6),
                         )),
                       ),
                       Constants.h16,

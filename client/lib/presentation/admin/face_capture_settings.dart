@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:camera_platform_interface/camera_platform_interface.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:photobooth_flutter/core/constants/constants.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/presentation/face_capture_screen.dart';
 import 'package:photobooth_flutter/providers/face_capture_provider.dart';
@@ -541,7 +542,7 @@ class _FaceCaptureSettingsState extends State<FaceCaptureSettings> {
                                 height: 100,
                                 decoration: BoxDecoration(
                                   border: Border.all(color: AppColors.black),
-                                  borderRadius: BorderRadius.circular(8),
+                                  borderRadius: Constants.br8,
                                   image: DecorationImage(
                                     image: settings.isBackgroundImageAsset
                                         ? AssetImage(

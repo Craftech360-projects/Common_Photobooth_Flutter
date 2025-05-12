@@ -88,7 +88,7 @@ class _AdminScreenState extends State<AdminScreen> {
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.red,
-            foregroundColor: Colors.white,
+            foregroundColor: AppColors.white,
           ),
           onPressed: () => _showResetConfirmationDialog(),
           child: const Text('Reset All Preferences'),
