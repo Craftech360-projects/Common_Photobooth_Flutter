@@ -145,6 +145,7 @@ class _GlobalSettingsSection extends StatelessWidget {
     required this.supabaseAnonKeyController,
   });
 
+  // In the _GlobalSettingsSection class
   @override
   Widget build(BuildContext context) {
     final globalSettings = context.watch<GlobalSettingsProvider>();
@@ -195,34 +196,105 @@ class _GlobalSettingsSection extends StatelessWidget {
             child: Text('Selected: ${globalSettings.backgroundImage}'),
           ),
         Constants.h24,
+
+        // Add Offline Mode Toggle
         const Text(
-          'Supabase Configuration',
+          'Storage Mode',
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         Constants.h8,
-        TextFormField(
-          controller: supabaseUrlController,
-          decoration: const InputDecoration(
-            labelText: 'Supabase URL',
-            border: OutlineInputBorder(),
-            hintText: 'https://your-project.supabase.co',
+        SwitchListTile(
+          title: const Text('Offline Mode'),
+          subtitle: Text(
+            globalSettings.isOfflineMode
+                ? 'Using local storage for images'
+                : 'Using Supabase for image storage',
           ),
+          value: globalSettings.isOfflineMode,
           onChanged: (value) {
-            globalSettings.setSupabaseUrl(value);
+            globalSettings.setOfflineMode(value);
           },
         ),
-        const SizedBox(height: 12),
-        TextFormField(
-          controller: supabaseAnonKeyController,
-          decoration: const InputDecoration(
-            labelText: 'Supabase Anon Key',
-            border: OutlineInputBorder(),
-            hintText: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9........',
+
+        // Show directory settings if in offline mode
+        if (globalSettings.isOfflineMode) ...[
+          ListTile(
+            title: const Text('Input Directory'),
+            subtitle: Text(globalSettings.inputDirectory ?? 'Not set'),
+            trailing: ElevatedButton(
+              onPressed: () async {
+                try {
+                  final result = await FilePicker.platform.getDirectoryPath(
+                    dialogTitle: 'Select Input Directory',
+                  );
+
+                  if (result != null) {
+                    await globalSettings.setInputDirectory(result);
+                    showSnackBar(context, 'Input directory updated');
+                  }
+                } on Exception catch (e) {
+                  debugPrint('Error selecting directory: $e');
+                  showSnackBar(context, 'Error selecting directory: $e');
+                }
+              },
+              child: const Text('Choose Directory'),
+            ),
           ),
-          onChanged: (value) {
-            globalSettings.setSupabaseAnonKey(value);
-          },
-        ),
+          ListTile(
+            title: const Text('Output Directory'),
+            subtitle: Text(globalSettings.outputDirectory ?? 'Not set'),
+            trailing: ElevatedButton(
+              onPressed: () async {
+                try {
+                  final result = await FilePicker.platform.getDirectoryPath(
+                    dialogTitle: 'Select Output Directory',
+                  );
+
+                  if (result != null) {
+                    await globalSettings.setOutputDirectory(result);
+                    showSnackBar(context, 'Output directory updated');
+                  }
+                } on Exception catch (e) {
+                  debugPrint('Error selecting directory: $e');
+                  showSnackBar(context, 'Error selecting directory: $e');
+                }
+              },
+              child: const Text('Choose Directory'),
+            ),
+          ),
+        ],
+
+        // Show Supabase settings if not in offline mode
+        if (!globalSettings.isOfflineMode) ...[
+          const Text(
+            'Supabase Configuration',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          Constants.h8,
+          TextFormField(
+            controller: supabaseUrlController,
+            decoration: const InputDecoration(
+              labelText: 'Supabase URL',
+              border: OutlineInputBorder(),
+              hintText: 'https://your-project.supabase.co',
+            ),
+            onChanged: (value) {
+              globalSettings.setSupabaseUrl(value);
+            },
+          ),
+          const SizedBox(height: 12),
+          TextFormField(
+            controller: supabaseAnonKeyController,
+            decoration: const InputDecoration(
+              labelText: 'Supabase Anon Key',
+              border: OutlineInputBorder(),
+              hintText: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9........',
+            ),
+            onChanged: (value) {
+              globalSettings.setSupabaseAnonKey(value);
+            },
+          ),
+        ],
       ],
     );
   }

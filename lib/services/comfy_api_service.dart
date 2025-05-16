@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:photobooth_flutter/api/faceswap.dart';
 import 'package:photobooth_flutter/api/ghibli.dart';
+import 'package:photobooth_flutter/api/ghibli_offline.dart';
 import 'package:photobooth_flutter/api/pixar.dart'; // Add import for Pixar workflow
 import 'package:photobooth_flutter/api/snoopy.dart';
 import 'package:photobooth_flutter/providers/photobooth_provider.dart';
@@ -135,6 +136,7 @@ class ComfyApiService {
               await _getDiscoWorkflow(faceImageUrl, seed, uniqueId: uniqueId);
           break;
         case 'v0cHGA51YbXw7xteYLBM':
+
           ///=====> Default is Ghibli
           // Ghibli Workflow (default)
           final ghibliWorkflow = await GhibliWorkflow.getWorkflow();
@@ -240,8 +242,8 @@ class ComfyApiService {
     return faceswapWorkflow.toMap();
   }
 
-  Future<Map<String, dynamic>> _getSnoopyWorkflow(
-      String faceImageUrl, int seed, {required String uniqueId}) async {
+  Future<Map<String, dynamic>> _getSnoopyWorkflow(String faceImageUrl, int seed,
+      {required String uniqueId}) async {
     // Implement Snoopy workflow using the SnoopyWorkflow class
     final snoopyWorkflow = await SnoopyWorkflow.getWorkflow();
     snoopyWorkflow.updateFaceImageUrl(faceImageUrl);
@@ -252,8 +254,8 @@ class ComfyApiService {
     return snoopyWorkflow.toMap();
   }
 
-  Future<Map<String, dynamic>> _getPixarWorkflow(
-      String faceImageUrl, int seed, {required String uniqueId}) async {
+  Future<Map<String, dynamic>> _getPixarWorkflow(String faceImageUrl, int seed,
+      {required String uniqueId}) async {
     // Use PixarWorkflow instead of GhibliWorkflow
     final pixarWorkflow = await PixarWorkflow.getWorkflow();
     pixarWorkflow.updateFaceImageUrl(faceImageUrl);
@@ -264,8 +266,8 @@ class ComfyApiService {
     return pixarWorkflow.toMap();
   }
 
-  Future<Map<String, dynamic>> _getDiscoWorkflow(
-      String faceImageUrl, int seed, {required String uniqueId}) async {
+  Future<Map<String, dynamic>> _getDiscoWorkflow(String faceImageUrl, int seed,
+      {required String uniqueId}) async {
     // For now, use GhibliWorkflow for Disco until a proper DiscoWorkflow is implemented
     // TODO: Create a proper DiscoWorkflow class
     final ghibliWorkflow = await GhibliWorkflow.getWorkflow();
@@ -275,5 +277,72 @@ class ComfyApiService {
     ghibliWorkflow.updateUniqueId(uniqueId);
 
     return ghibliWorkflow.toMap();
+  }
+
+// Send workflow in offline mode
+  Future<Map<String, dynamic>> sendOfflineWorkflow({
+    required String faceImagePath,
+    required String outputPathPrefix,
+    required String serviceId,
+    int? seed,
+  }) async {
+    try {
+      Map<String, dynamic>? workflow;
+      seed ??= DateTime.now().millisecondsSinceEpoch;
+
+      // Get the offline workflow based on serviceId
+      switch (serviceId) {
+        case 'v0cHGA51YbXw7xteYLBM':
+        default:
+          // Default to Ghibli offline workflow
+          final ghibliOfflineWorkflow =
+              await GhibliOfflineWorkflow.getWorkflow();
+          ghibliOfflineWorkflow.updateFaceImagePath(faceImagePath);
+          ghibliOfflineWorkflow.updateOutputPath(outputPathPrefix);
+          ghibliOfflineWorkflow.updateNoiseSeed(seed);
+          workflow = ghibliOfflineWorkflow.toMap();
+          break;
+      }
+
+      // Print workflow details for debugging
+      debugPrint('======= OFFLINE WORKFLOW DETAILS =======');
+      debugPrint('Service ID: $serviceId');
+      debugPrint('Face Image Path: $faceImagePath');
+      debugPrint('Output Path Prefix: $outputPathPrefix');
+      debugPrint('Seed: $seed');
+
+      // Pretty print the workflow JSON for better readability
+      final workflowJson = const JsonEncoder.withIndent('  ').convert(workflow);
+      debugPrint('Workflow JSON: $workflowJson');
+      debugPrint('======= END OFFLINE WORKFLOW DETAILS =======');
+
+      final sentTime = DateTime.now();
+
+      final response = await http.post(
+        Uri.parse('$_apiUrl/prompt'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'prompt': workflow,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        return {
+          'status': 'success',
+          'message': 'Offline workflow sent successfully',
+          'sentTime': sentTime.toIso8601String(),
+          'outputPathPrefix': outputPathPrefix,
+        };
+      } else {
+        debugPrint('Error sending offline workflow: ${response.body}');
+        throw Exception(
+            'Failed to send offline workflow: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('Exception sending offline workflow: $e');
+      rethrow;
+    }
   }
 }

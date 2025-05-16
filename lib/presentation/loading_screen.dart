@@ -8,6 +8,7 @@ import 'package:photobooth_flutter/providers/loading_screen_provider.dart';
 import 'package:photobooth_flutter/providers/photobooth_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
 import 'package:photobooth_flutter/services/comfy_api_service.dart';
+import 'package:photobooth_flutter/services/local_storage_service.dart'; // Add this import
 import 'package:photobooth_flutter/services/supabase_service.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -60,7 +61,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
       final serviceId = prefs.getString('authenticated_service_id');
 
       final provider = Provider.of<PhotoboothProvider>(context, listen: false);
-      final globalSettings = Provider.of<GlobalSettingsProvider>(context, listen: false);
+      final globalSettings =
+          Provider.of<GlobalSettingsProvider>(context, listen: false);
 
       // Check if we have a face image path
       if (provider.faceImagePath == null) {
@@ -86,7 +88,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
       }
 
       // For faceswap workflow, verify we have a character image
-      if (serviceId == 'LjCIQ5ONsqCHIHd6Rmyu' && provider.characterImagePath == null) {
+      if (serviceId == 'LjCIQ5ONsqCHIHd6Rmyu' &&
+          provider.characterImagePath == null) {
         setState(() {
           _isProcessing = false;
           _errorMessage = 'No character image selected for faceswap';
@@ -99,162 +102,290 @@ class _LoadingScreenState extends State<LoadingScreen> {
       final email = provider.email ?? '';
       final gender = provider.selectedGender;
 
-      // Get Supabase credentials from global settings
-      final supabaseUrl = globalSettings.supabaseUrl;
-      final supabaseAnonKey = globalSettings.supabaseAnonKey;
-
-      // Check if Supabase credentials are available
-      if (supabaseUrl == null || supabaseAnonKey == null) {
-        setState(() {
-          _isProcessing = false;
-          _errorMessage =
-              'Supabase credentials not configured. Please set them in the admin screen.';
-        });
-        return;
+      // Initialize ComfyAPI service if not already initialized
+      if (!ComfyApiService.isInitialized) {
+        await ComfyApiService.initialize(
+          apiUrl: globalSettings.comfyApiUrl ?? "http://127.0.0.1:8188",
+          context: context,
+        );
       }
 
-      // Initialize Supabase if not already initialized
-      if (!SupabaseService.instance.isInitialized) {
-        try {
-          await SupabaseService.instance.initialize(
-            url: supabaseUrl,
-            anonKey: supabaseAnonKey,
-          );
-        } on Exception catch (e) {
-          setState(() {
-            _isProcessing = false;
-            _errorMessage = 'Failed to initialize Supabase: $e';
-          });
-          return;
-        }
-      }
+      final seed = DateTime.now().millisecondsSinceEpoch;
 
-      // Check if Supabase is initialized
-      if (SupabaseService.instance.isInitialized) {
-        // Generate a unique user 
-
-        // Upload face image to Supabase using the new method
-        final faceImageUrl = await SupabaseService.instance
-            .uploadUserFaceImage(imageFile);
-
-        if (faceImageUrl != null) {
-          // Store participant details in Supabase
-          final uniqueId =
-              await SupabaseService.instance.storeParticipantDetails(
-            name: name,
-            email: email,
-            gender: gender,
-            imageUrl: faceImageUrl,
-          );
-
-          if (uniqueId != null && serviceId != null) {
-            // Initialize ComfyAPI service if not already initialized
-            if (!ComfyApiService.isInitialized) {
-              await ComfyApiService.initialize(
-                apiUrl: globalSettings.comfyApiUrl ??
-                    "http://127.0.0.1:8188",
-              );
-            }
-
-            final seed = DateTime.now().millisecondsSinceEpoch;
-
-            // Send workflow based on serviceId
-            if (ComfyApiService.isInitialized) {
-              try {
-                debugPrint(
-                    'Sending workflow for serviceId: $serviceId to ComfyAPI...');
-                // Send the workflow and get the response with sent time
-                final response =
-                    await ComfyApiService.instance.sendWorkflowByServiceId(
-                  serviceId,
-                  faceImageUrl,
-                  seed,
-                  uniqueId: uniqueId, // Pass the uniqueId from Supabase
-                );
-
-                // Store the workflow sent time in the provider
-                if (response.containsKey('sentTime')) {
-                  final sentTimeStr = response['sentTime'] as String;
-                  final sentTime = DateTime.parse(sentTimeStr);
-                  Provider.of<PhotoboothProvider>(context, listen: false)
-                      .setWorkflowSentTime(sentTime);
-                }
-
-                // Start polling Supabase for the new image
-                int attempts = 0;
-                const maxAttempts =
-                    30; // 30 attempts with 2 second delay = 1 minute max
-                const pollDelay = Duration(seconds: 2);
-
-                while (attempts < maxAttempts) {
-                  // Check for new image in Supabase, passing the workflow sent time
-                  final supabaseImageUrl =
-                      await SupabaseService.instance.getLatestOutputImage(
-                    uniqueId,
-                    afterTime: provider.workflowSentTime,
-                  );
-
-                  if (supabaseImageUrl != null) {
-                    debugPrint(
-                        'Found new image in Supabase: $supabaseImageUrl');
-                    // Update the URLs in the provider
-                    provider.setSwappedImage(supabaseImageUrl);
-                    provider.setCapturedImageUrl(supabaseImageUrl);
-
-                    // Navigate to output screen
-                    if (mounted) {
-                      debugPrint('Navigating to output screen...');
-                      await Navigator.of(context)
-                          .pushReplacementNamed(AppRoutes.swappedFace);
-                    }
-                    return;
-                  }
-
-                  // Wait before next attempt
-                  await Future.delayed(pollDelay);
-                  attempts++;
-                }
-
-                // If we get here, we've timed out waiting for the image
-                setState(() {
-                  _isProcessing = false;
-                  _errorMessage = 'Timed out waiting for image processing';
-                });
-              } on Exception catch (e) {
-                setState(() {
-                  _isProcessing = false;
-                  _errorMessage = 'Error processing image: $e';
-                });
-              }
-            } else {
-              setState(() {
-                _isProcessing = false;
-                _errorMessage = 'ComfyAPI service not initialized';
-              });
-            }
-          } else {
-            setState(() {
-              _isProcessing = false;
-              _errorMessage = 'Failed to store participant details';
-            });
-          }
-        } else {
-          setState(() {
-            _isProcessing = false;
-            _errorMessage = 'Failed to upload face image';
-          });
-        }
+      // Check if we're in offline mode
+      if (globalSettings.isOfflineMode) {
+        // Process in offline mode
+        await _processOfflineMode(
+            serviceId, imageFile, provider, globalSettings, seed);
       } else {
-        setState(() {
-          _isProcessing = false;
-          _errorMessage = 'Supabase not initialized';
-        });
+        // Process in online mode (Supabase)
+        await _processOnlineMode(serviceId, imageFile, provider, globalSettings,
+            name, email, gender, seed);
       }
     } on Exception catch (e) {
       debugPrint('Error processing image: $e');
       setState(() {
         _isProcessing = false;
         _errorMessage = 'Error: $e';
+      });
+    }
+  }
+
+  // Handle offline mode processing
+  Future<void> _processOfflineMode(
+      String? serviceId,
+      File imageFile,
+      PhotoboothProvider provider,
+      GlobalSettingsProvider globalSettings,
+      int seed) async {
+    try {
+      // Initialize LocalStorageService if needed
+      if (!LocalStorageService.instance.isInitialized) {
+        // Check if input and output directories are set
+        if (globalSettings.inputDirectory == null ||
+            globalSettings.outputDirectory == null) {
+          setState(() {
+            _isProcessing = false;
+            _errorMessage =
+                'Input or output directories not configured. Please set them in the admin screen.';
+          });
+          return;
+        }
+
+        await LocalStorageService.initialize(
+          inputDirectory: globalSettings.inputDirectory!,
+          outputDirectory: globalSettings.outputDirectory!,
+        );
+      }
+
+      // Save face image to input directory
+      final faceImagePath =
+          await LocalStorageService.instance.saveFaceImage(imageFile);
+
+      // Get output path prefix
+      final outputPathPrefix =
+          LocalStorageService.instance.getOutputPathPrefix();
+
+      // Send offline workflow to ComfyAPI
+      if (ComfyApiService.isInitialized && serviceId != null) {
+        debugPrint(
+            'Sending offline workflow for serviceId: $serviceId to ComfyAPI...');
+
+        final response = await ComfyApiService.instance.sendOfflineWorkflow(
+          faceImagePath: faceImagePath,
+          outputPathPrefix: outputPathPrefix,
+          serviceId: serviceId,
+          seed: seed,
+        );
+
+        // Store the workflow sent time in the provider
+        if (response.containsKey('sentTime')) {
+          final sentTimeStr = response['sentTime'] as String;
+          final sentTime = DateTime.parse(sentTimeStr);
+          provider.setWorkflowSentTime(sentTime);
+        }
+
+        // Start polling for the new image in the output directory
+        int attempts = 0;
+        const maxAttempts =
+            30; // 30 attempts with 2 second delay = 1 minute max
+        const pollDelay = Duration(seconds: 2);
+
+        final outputPrefix = outputPathPrefix.split('/').last;
+
+        while (attempts < maxAttempts) {
+          // Check for new image in output directory
+          final localImagePath =
+              await LocalStorageService.instance.getLatestOutputImage(
+            outputPrefix,
+            afterTime: provider.workflowSentTime,
+          );
+
+          if (localImagePath != null) {
+            debugPrint('Found new image in local storage: $localImagePath');
+            // Update the provider with local file path
+            provider.setSwappedImage(localImagePath);
+            provider.setCapturedImageUrl(localImagePath);
+
+            // Navigate to output screen
+            if (mounted) {
+              debugPrint('Navigating to output screen...');
+              await Navigator.of(context)
+                  .pushReplacementNamed(AppRoutes.swappedFace);
+            }
+            return;
+          }
+
+          // Wait before next attempt
+          await Future.delayed(pollDelay);
+          attempts++;
+        }
+
+        // If we get here, we've timed out waiting for the image
+        setState(() {
+          _isProcessing = false;
+          _errorMessage = 'Timed out waiting for image processing';
+        });
+      } else {
+        setState(() {
+          _isProcessing = false;
+          _errorMessage =
+              'ComfyAPI service not initialized or service ID not available';
+        });
+      }
+    } on Exception catch (e) {
+      setState(() {
+        _isProcessing = false;
+        _errorMessage = 'Error processing image in offline mode: $e';
+      });
+    }
+  }
+
+  // Handle online mode processing (existing Supabase flow)
+  Future<void> _processOnlineMode(
+      String? serviceId,
+      File imageFile,
+      PhotoboothProvider provider,
+      GlobalSettingsProvider globalSettings,
+      String name,
+      String email,
+      String gender,
+      int seed) async {
+    // Get Supabase credentials from global settings
+    final supabaseUrl = globalSettings.supabaseUrl;
+    final supabaseAnonKey = globalSettings.supabaseAnonKey;
+
+    // Check if Supabase credentials are available
+    if (supabaseUrl == null || supabaseAnonKey == null) {
+      setState(() {
+        _isProcessing = false;
+        _errorMessage =
+            'Supabase credentials not configured. Please set them in the admin screen.';
+      });
+      return;
+    }
+
+    // Initialize Supabase if not already initialized
+    if (!SupabaseService.instance.isInitialized) {
+      try {
+        await SupabaseService.instance.initialize(
+          url: supabaseUrl,
+          anonKey: supabaseAnonKey,
+        );
+      } on Exception catch (e) {
+        setState(() {
+          _isProcessing = false;
+          _errorMessage = 'Failed to initialize Supabase: $e';
+        });
+        return;
+      }
+    }
+
+    // Check if Supabase is initialized
+    if (SupabaseService.instance.isInitialized) {
+      // Upload face image to Supabase using the new method
+      final faceImageUrl =
+          await SupabaseService.instance.uploadUserFaceImage(imageFile);
+
+      if (faceImageUrl != null) {
+        // Store participant details in Supabase
+        final uniqueId = await SupabaseService.instance.storeParticipantDetails(
+          name: name,
+          email: email,
+          gender: gender,
+          imageUrl: faceImageUrl,
+        );
+
+        if (uniqueId != null && serviceId != null) {
+          // Send workflow based on serviceId
+          if (ComfyApiService.isInitialized) {
+            try {
+              debugPrint(
+                  'Sending workflow for serviceId: $serviceId to ComfyAPI...');
+              // Send the workflow and get the response with sent time
+              final response =
+                  await ComfyApiService.instance.sendWorkflowByServiceId(
+                serviceId,
+                faceImageUrl,
+                seed,
+                uniqueId: uniqueId, // Pass the uniqueId from Supabase
+              );
+
+              // Store the workflow sent time in the provider
+              if (response.containsKey('sentTime')) {
+                final sentTimeStr = response['sentTime'] as String;
+                final sentTime = DateTime.parse(sentTimeStr);
+                Provider.of<PhotoboothProvider>(context, listen: false)
+                    .setWorkflowSentTime(sentTime);
+              }
+
+              // Start polling Supabase for the new image
+              int attempts = 0;
+              const maxAttempts =
+                  30; // 30 attempts with 2 second delay = 1 minute max
+              const pollDelay = Duration(seconds: 2);
+
+              while (attempts < maxAttempts) {
+                // Check for new image in Supabase, passing the workflow sent time
+                final supabaseImageUrl =
+                    await SupabaseService.instance.getLatestOutputImage(
+                  uniqueId,
+                  afterTime: provider.workflowSentTime,
+                );
+
+                if (supabaseImageUrl != null) {
+                  debugPrint('Found new image in Supabase: $supabaseImageUrl');
+                  // Update the URLs in the provider
+                  provider.setSwappedImage(supabaseImageUrl);
+                  provider.setCapturedImageUrl(supabaseImageUrl);
+
+                  // Navigate to output screen
+                  if (mounted) {
+                    debugPrint('Navigating to output screen...');
+                    await Navigator.of(context)
+                        .pushReplacementNamed(AppRoutes.swappedFace);
+                  }
+                  return;
+                }
+
+                // Wait before next attempt
+                await Future.delayed(pollDelay);
+                attempts++;
+              }
+
+              // If we get here, we've timed out waiting for the image
+              setState(() {
+                _isProcessing = false;
+                _errorMessage = 'Timed out waiting for image processing';
+              });
+            } on Exception catch (e) {
+              setState(() {
+                _isProcessing = false;
+                _errorMessage = 'Error processing image: $e';
+              });
+            }
+          } else {
+            setState(() {
+              _isProcessing = false;
+              _errorMessage = 'ComfyAPI service not initialized';
+            });
+          }
+        } else {
+          setState(() {
+            _isProcessing = false;
+            _errorMessage = 'Failed to store participant details';
+          });
+        }
+      } else {
+        setState(() {
+          _isProcessing = false;
+          _errorMessage = 'Failed to upload face image';
+        });
+      }
+    } else {
+      setState(() {
+        _isProcessing = false;
+        _errorMessage = 'Supabase not initialized';
       });
     }
   }

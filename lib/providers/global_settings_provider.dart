@@ -12,6 +12,16 @@ class GlobalSettingsProvider with ChangeNotifier {
   String? _comfyApiUrl;
   String? get comfyApiUrl => _comfyApiUrl;
 
+  // Add offline mode toggle
+  bool _isOfflineMode = false;
+  bool get isOfflineMode => _isOfflineMode;
+
+  // Add input/output directories for offline mode
+  String? _inputDirectory;
+  String? _outputDirectory;
+  String? get inputDirectory => _inputDirectory;
+  String? get outputDirectory => _outputDirectory;
+
   // Global settings
   String? _backgroundImage;
   bool _isAssetImage = true;
@@ -69,10 +79,52 @@ class GlobalSettingsProvider with ChangeNotifier {
     _supabaseAnonKey = _prefs.getString('supabase_anon_key');
 
     // Load ComfyAPI settings
-    _comfyApiUrl =
-        _prefs.getString('comfy_api_url') ?? 'http://127.0.0.1:8188';
+    _comfyApiUrl = _prefs.getString('comfy_api_url') ?? 'http://127.0.0.1:8188';
+
+    // Load offline mode settings
+    _isOfflineMode = _prefs.getBool('is_offline_mode') ?? false;
+    _inputDirectory = _prefs.getString('input_directory');
+    _outputDirectory = _prefs.getString('output_directory');
+
+    // Initialize directories if in offline mode and directories not set
+    if (_isOfflineMode &&
+        (_inputDirectory == null || _outputDirectory == null)) {
+      await _initializeOfflineDirectories();
+    }
 
     notifyListeners();
+  }
+
+  // Initialize default directories for offline mode
+  Future<void> _initializeOfflineDirectories() async {
+    final appDir = await getApplicationDocumentsDirectory();
+    final baseDir = path.join(appDir.path, 'photobooth');
+
+    // Create base directory if it doesn't exist
+    final baseDirFile = Directory(baseDir);
+    if (!await baseDirFile.exists()) {
+      await baseDirFile.create(recursive: true);
+    }
+
+    // Set input and output directories
+    _inputDirectory = path.join(baseDir, 'inputs');
+    _outputDirectory = path.join(baseDir, 'outputs');
+
+    // Create directories if they don't exist
+    final inputDir = Directory(_inputDirectory!);
+    final outputDir = Directory(_outputDirectory!);
+
+    if (!await inputDir.exists()) {
+      await inputDir.create(recursive: true);
+    }
+
+    if (!await outputDir.exists()) {
+      await outputDir.create(recursive: true);
+    }
+
+    // Save to preferences
+    await _prefs.setString('input_directory', _inputDirectory!);
+    await _prefs.setString('output_directory', _outputDirectory!);
   }
 
   void setRunpodApiUrl(String url) async {
@@ -153,6 +205,47 @@ class GlobalSettingsProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  // Set offline mode
+  Future<void> setOfflineMode(bool isOffline) async {
+    _isOfflineMode = isOffline;
+    await _prefs.setBool('is_offline_mode', isOffline);
+
+    // Initialize directories if switching to offline mode
+    if (isOffline && (_inputDirectory == null || _outputDirectory == null)) {
+      await _initializeOfflineDirectories();
+    }
+
+    notifyListeners();
+  }
+
+  // Set input directory
+  Future<void> setInputDirectory(String directory) async {
+    _inputDirectory = directory;
+    await _prefs.setString('input_directory', directory);
+
+    // Create directory if it doesn't exist
+    final dir = Directory(directory);
+    if (!await dir.exists()) {
+      await dir.create(recursive: true);
+    }
+
+    notifyListeners();
+  }
+
+  // Set output directory
+  Future<void> setOutputDirectory(String directory) async {
+    _outputDirectory = directory;
+    await _prefs.setString('output_directory', directory);
+
+    // Create directory if it doesn't exist
+    final dir = Directory(directory);
+    if (!await dir.exists()) {
+      await dir.create(recursive: true);
+    }
+
+    notifyListeners();
+  }
+
   Future<void> clearAllPreferences() async {
     await _prefs.clear();
 
@@ -164,6 +257,9 @@ class GlobalSettingsProvider with ChangeNotifier {
     _borderRadius = 4.0;
     _supabaseUrl = null;
     _supabaseAnonKey = null;
+    _isOfflineMode = false;
+    _inputDirectory = null;
+    _outputDirectory = null;
 
     notifyListeners();
   }

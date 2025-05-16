@@ -200,41 +200,65 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
 
   Widget _buildOutputImage() {
     final provider = Provider.of<PhotoboothProvider>(context, listen: false);
+    final globalSettings =
+        Provider.of<GlobalSettingsProvider>(context, listen: false);
 
     // First try to use swappedImageUrl, then fall back to capturedImageUrl if needed
     final imageUrl = provider.swappedImageUrl;
     debugPrint('Attempting to load image from URL: $imageUrl');
 
     if (imageUrl != null) {
-      return Image.network(
-        imageUrl,
-        fit: BoxFit.fill,
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          debugPrint(
-              'Loading progress: ${loadingProgress.cumulativeBytesLoaded}/${loadingProgress.expectedTotalBytes}');
-          return Center(
-            child: CircularProgressIndicator(
-              value: loadingProgress.expectedTotalBytes != null
-                  ? loadingProgress.cumulativeBytesLoaded /
-                      loadingProgress.expectedTotalBytes!
-                  : null,
-            ),
-          );
-        },
-        errorBuilder: (context, error, stackTrace) {
-          debugPrint('Error loading image: $error');
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.error, color: AppColors.red, size: 50),
-              const SizedBox(height: 10),
-              Text('Error: $error',
-                  style: const TextStyle(color: AppColors.white)),
-            ],
-          );
-        },
-      );
+      // Check if we're in offline mode and if the image is a local file path
+      if (globalSettings.isOfflineMode && !imageUrl.startsWith('http')) {
+        // Display local file image
+        return Image.file(
+          File(imageUrl),
+          fit: BoxFit.fill,
+          errorBuilder: (context, error, stackTrace) {
+            debugPrint('Error loading local image: $error');
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.error, color: AppColors.red, size: 50),
+                const SizedBox(height: 10),
+                Text('Error: $error',
+                    style: const TextStyle(color: AppColors.white)),
+              ],
+            );
+          },
+        );
+      } else {
+        // Display online image from URL
+        return Image.network(
+          imageUrl,
+          fit: BoxFit.fill,
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+            debugPrint(
+                'Loading progress: ${loadingProgress.cumulativeBytesLoaded}/${loadingProgress.expectedTotalBytes}');
+            return Center(
+              child: CircularProgressIndicator(
+                value: loadingProgress.expectedTotalBytes != null
+                    ? loadingProgress.cumulativeBytesLoaded /
+                        loadingProgress.expectedTotalBytes!
+                    : null,
+              ),
+            );
+          },
+          errorBuilder: (context, error, stackTrace) {
+            debugPrint('Error loading image: $error');
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.error, color: AppColors.red, size: 50),
+                const SizedBox(height: 10),
+                Text('Error: $error',
+                    style: const TextStyle(color: AppColors.white)),
+              ],
+            );
+          },
+        );
+      }
     } else {
       return const Center(
         child: Text('No image available',
@@ -245,10 +269,17 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
 
   Widget _buildQrCodeWithText(OutputScreenProvider settings) {
     final provider = Provider.of<PhotoboothProvider>(context);
+    final globalSettings = Provider.of<GlobalSettingsProvider>(context);
     final swappedImage = provider.swappedImageUrl;
 
+    // For QR code data, use the image URL directly for online mode
+    // For offline mode, use a placeholder or local file path
+    final qrData = globalSettings.isOfflineMode
+        ? 'Image saved locally at: ${swappedImage ?? "unknown location"}'
+        : swappedImage ?? 'https://example.com/download-image';
+
     final qrCode = QrImageView(
-      data: swappedImage ?? 'https://example.com/download-image',
+      data: qrData,
       version: QrVersions.auto,
       size: settings.qrCodeSize,
       backgroundColor: settings.qrCodeBackgroundColor,
@@ -262,8 +293,11 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
       ),
     );
 
+    // Adjust QR code text based on mode
     final qrText = Text(
-      settings.qrCodeText,
+      globalSettings.isOfflineMode
+          ? 'Image saved locally'
+          : settings.qrCodeText,
       style: TextStyle(
         fontSize: settings.qrCodeTextFontSize,
         color: settings.qrCodeTextColor,
