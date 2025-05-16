@@ -2,6 +2,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:path/path.dart' as path;
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/providers/loading_screen_provider.dart';
@@ -139,8 +140,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
       GlobalSettingsProvider globalSettings,
       int seed) async {
     try {
-      // Initialize LocalStorageService if needed
-      if (!LocalStorageService.instance.isInitialized) {
+      // Check if LocalStorageService is initialized using the static method
+      if (!LocalStorageService.isServiceInitialized) {
         // Check if input and output directories are set
         if (globalSettings.inputDirectory == null ||
             globalSettings.outputDirectory == null) {
@@ -152,80 +153,86 @@ class _LoadingScreenState extends State<LoadingScreen> {
           return;
         }
 
+        
         await LocalStorageService.initialize(
           inputDirectory: globalSettings.inputDirectory!,
           outputDirectory: globalSettings.outputDirectory!,
         );
       }
-
+  
+      // Now it's safe to use the instance
       // Save face image to input directory
       final faceImagePath =
           await LocalStorageService.instance.saveFaceImage(imageFile);
-
+  
       // Get output path prefix
       final outputPathPrefix =
           LocalStorageService.instance.getOutputPathPrefix();
-
+  
       // Send offline workflow to ComfyAPI
       if (ComfyApiService.isInitialized && serviceId != null) {
-        debugPrint(
-            'Sending offline workflow for serviceId: $serviceId to ComfyAPI...');
-
-        final response = await ComfyApiService.instance.sendOfflineWorkflow(
-          faceImagePath: faceImagePath,
-          outputPathPrefix: outputPathPrefix,
-          serviceId: serviceId,
-          seed: seed,
-        );
-
-        // Store the workflow sent time in the provider
-        if (response.containsKey('sentTime')) {
-          final sentTimeStr = response['sentTime'] as String;
-          final sentTime = DateTime.parse(sentTimeStr);
-          provider.setWorkflowSentTime(sentTime);
-        }
-
-        // Start polling for the new image in the output directory
-        int attempts = 0;
-        const maxAttempts =
-            30; // 30 attempts with 2 second delay = 1 minute max
-        const pollDelay = Duration(seconds: 2);
-
-        final outputPrefix = outputPathPrefix.split('/').last;
-
-        while (attempts < maxAttempts) {
-          // Check for new image in output directory
-          final localImagePath =
-              await LocalStorageService.instance.getLatestOutputImage(
-            outputPrefix,
-            afterTime: provider.workflowSentTime,
+        
+        try {
+          // Send the workflow and get the response with sent time
+          final response = await ComfyApiService.instance.sendOfflineWorkflow(
+            faceImagePath: faceImagePath,
+            outputPathPrefix: outputPathPrefix,
+            serviceId: serviceId,
+            seed: seed,
           );
-
-          if (localImagePath != null) {
-            debugPrint('Found new image in local storage: $localImagePath');
-            // Update the provider with local file path
-            provider.setSwappedImage(localImagePath);
-            provider.setCapturedImageUrl(localImagePath);
-
-            // Navigate to output screen
-            if (mounted) {
-              debugPrint('Navigating to output screen...');
-              await Navigator.of(context)
-                  .pushReplacementNamed(AppRoutes.swappedFace);
-            }
-            return;
+  
+          // Store the workflow sent time in the provider
+          if (response.containsKey('sentTime')) {
+            final sentTimeStr = response['sentTime'] as String;
+            final sentTime = DateTime.parse(sentTimeStr);
+            provider.setWorkflowSentTime(sentTime);
           }
-
-          // Wait before next attempt
-          await Future.delayed(pollDelay);
-          attempts++;
+  
+          // Start polling for the new image in the output directory
+          int attempts = 0;
+          const maxAttempts =
+              30; // 30 attempts with 2 second delay = 1 minute max
+          const pollDelay = Duration(seconds: 2);
+  
+          final outputPrefix = path.basename(outputPathPrefix);
+  
+          while (attempts < maxAttempts) {
+            // Check for new image in output directory
+            final localImagePath =
+                await LocalStorageService.instance.getLatestOutputImage(
+              outputPrefix,
+              afterTime: provider.workflowSentTime,
+            );
+  
+            if (localImagePath != null) {
+              // Update the provider with local file path
+              provider.setSwappedImage(localImagePath);
+              provider.setCapturedImageUrl(localImagePath);
+  
+              // Navigate to output screen
+              if (mounted) {
+                await Navigator.of(context)
+                    .pushReplacementNamed(AppRoutes.swappedFace);
+              }
+              return;
+            }
+  
+            // Wait before next attempt
+            await Future.delayed(pollDelay);
+            attempts++;
+          }
+  
+          // If we get here, we've timed out waiting for the image
+          setState(() {
+            _isProcessing = false;
+            _errorMessage = 'Timed out waiting for image processing';
+          });
+        } catch (e) {
+          setState(() {
+            _isProcessing = false;
+            _errorMessage = 'Error sending workflow: $e';
+          });
         }
-
-        // If we get here, we've timed out waiting for the image
-        setState(() {
-          _isProcessing = false;
-          _errorMessage = 'Timed out waiting for image processing';
-        });
       } else {
         setState(() {
           _isProcessing = false;

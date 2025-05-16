@@ -33,6 +33,7 @@ class LocalStorageService {
       final inputDir = Directory(inputDirectory);
       final outputDir = Directory(outputDirectory);
 
+
       if (!await inputDir.exists()) {
         await inputDir.create(recursive: true);
       }
@@ -56,7 +57,10 @@ class LocalStorageService {
 
   // Check if the service is initialized
   bool get isInitialized => _isInitialized;
-
+  
+  // Add a static method to check if the service is initialized
+  static bool get isServiceInitialized => _instance != null;
+  
   // Save face image to input directory
   Future<String> saveFaceImage(File imageFile) async {
     if (!_isInitialized) {
@@ -87,7 +91,7 @@ class LocalStorageService {
     }
 
     final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
-    return path.join(_outputDirectory, 'output_$timestamp');
+    return path.join(_outputDirectory, 'output_$timestamp.png');
   }
 
   // Check for new output image
@@ -98,31 +102,38 @@ class LocalStorageService {
     }
 
     try {
+      
       final outputDir = Directory(_outputDirectory);
+      if (!await outputDir.exists()) {
+        return null;
+      }
+      
       final files = await outputDir.list().toList();
-
+  
       // Filter files by prefix and creation time
       final matchingFiles = files.whereType<File>().where((file) {
         final fileName = path.basename(file.path);
         final fileCreationTime = file.statSync().modified;
-
-        return fileName.startsWith(prefix) &&
+        
+        final matches = fileName.startsWith(prefix) &&
             (afterTime == null || fileCreationTime.isAfter(afterTime));
+        
+        return matches;
       }).toList();
-
+  
+  
       // Sort by creation time (newest first)
       matchingFiles.sort((a, b) {
         return b.statSync().modified.compareTo(a.statSync().modified);
       });
-
+  
       // Return the path of the newest file if any
       if (matchingFiles.isNotEmpty) {
         return matchingFiles.first.path;
       }
-
+  
       return null;
     } on Exception catch (e) {
-      debugPrint('Error getting latest output image: $e');
       return null;
     }
   }

@@ -22,6 +22,7 @@ class GhibliOfflineWorkflow {
         _workflow['289'].containsKey('inputs')) {
       // Update the image_path to use the provided path
       _workflow['289']['inputs']['image_path'] = imagePath;
+    } else {
     }
   }
 
@@ -32,6 +33,7 @@ class GhibliOfflineWorkflow {
         _workflow['288'].containsKey('inputs')) {
       // Update the path to use the provided output path
       _workflow['288']['inputs']['path'] = outputPath;
+    } else {
     }
   }
 
@@ -40,6 +42,7 @@ class GhibliOfflineWorkflow {
     // Node 25 is the RandomNoise node
     if (_workflow.containsKey('25') && _workflow['25'].containsKey('inputs')) {
       _workflow['25']['inputs']['noise_seed'] = seed;
+    } else {
     }
   }
 

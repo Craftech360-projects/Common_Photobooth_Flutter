@@ -4,6 +4,7 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   app_links
+  bitsdojo_window_windows
   camera_windows
   flutter_secure_storage_windows
   media_kit_video

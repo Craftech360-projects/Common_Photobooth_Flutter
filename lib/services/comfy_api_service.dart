@@ -290,31 +290,29 @@ class ComfyApiService {
       Map<String, dynamic>? workflow;
       seed ??= DateTime.now().millisecondsSinceEpoch;
 
-      // Get the offline workflow based on serviceId
+
+// Get the offline workflow based on serviceId
       switch (serviceId) {
         case 'v0cHGA51YbXw7xteYLBM':
         default:
-          // Default to Ghibli offline workflow
+// Default to Ghibli offline workflow
           final ghibliOfflineWorkflow =
               await GhibliOfflineWorkflow.getWorkflow();
+
           ghibliOfflineWorkflow.updateFaceImagePath(faceImagePath);
+
           ghibliOfflineWorkflow.updateOutputPath(outputPathPrefix);
+
           ghibliOfflineWorkflow.updateNoiseSeed(seed);
+
           workflow = ghibliOfflineWorkflow.toMap();
           break;
       }
 
-      // Print workflow details for debugging
-      debugPrint('======= OFFLINE WORKFLOW DETAILS =======');
-      debugPrint('Service ID: $serviceId');
-      debugPrint('Face Image Path: $faceImagePath');
-      debugPrint('Output Path Prefix: $outputPathPrefix');
-      debugPrint('Seed: $seed');
+// Print workflow details for debugging
 
-      // Pretty print the workflow JSON for better readability
+// Pretty print the workflow JSON for better readability
       final workflowJson = const JsonEncoder.withIndent('  ').convert(workflow);
-      debugPrint('Workflow JSON: $workflowJson');
-      debugPrint('======= END OFFLINE WORKFLOW DETAILS =======');
 
       final sentTime = DateTime.now();
 
@@ -336,12 +334,10 @@ class ComfyApiService {
           'outputPathPrefix': outputPathPrefix,
         };
       } else {
-        debugPrint('Error sending offline workflow: ${response.body}');
         throw Exception(
             'Failed to send offline workflow: ${response.statusCode}');
       }
     } catch (e) {
-      debugPrint('Exception sending offline workflow: $e');
       rethrow;
     }
   }
