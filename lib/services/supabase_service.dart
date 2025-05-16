@@ -39,7 +39,7 @@ class SupabaseService {
   }
 
   // Upload image to Supabase storage
-  Future<String?> uploadImage(File imageFile, String userId,
+  Future<String?> uploadImage(File imageFile, String? userId,
       {String bucket = 'outputimages', String prefix = 'face_'}) async {
     if (!_isInitialized) {
       throw Exception('Supabase not initialized');
@@ -49,7 +49,7 @@ class SupabaseService {
       // Generate a unique filename
       final fileExt = path.extension(imageFile.path);
       final fileName =
-          '$prefix${userId}_${DateTime.now().millisecondsSinceEpoch}$fileExt';
+          '$prefix${userId ?? DateTime.now().millisecondsSinceEpoch.toString()}_${DateTime.now().millisecondsSinceEpoch}$fileExt';
 
       // Upload to Supabase
       await _client.storage.from(bucket).uploadBinary(
@@ -115,8 +115,8 @@ class SupabaseService {
   }
 
   // Upload user face image to Supabase
-  Future<String?> uploadUserFaceImage(File imageFile, String userId) async {
-    return uploadImage(imageFile, userId, bucket: 'userfaces', prefix: 'face_');
+  Future<String?> uploadUserFaceImage(File imageFile) async {
+    return uploadImage(imageFile, null, bucket: 'input-images', prefix: 'face_');
   }
 
   // Store participant details in Supabase
@@ -133,22 +133,21 @@ class SupabaseService {
     }
 
     try {
-      // Create a unique ID for the participant
-      final userId = DateTime.now().millisecondsSinceEpoch.toString();
-
-      // Insert data into the 'user_faces' table
-      await _client.from('user_faces').insert({
-        'user_id': userId,
+      final result = await _client.from('inputimagetable').insert({
         'name': name,
         'email': email,
         'contact': contact,
         'gender': gender,
         'character_id': characterId,
-        'face_image_url': imageUrl,
+        'image_url': imageUrl,
         'created_at': DateTime.now().toIso8601String(),
       }).select();
 
-      return userId;
+      // Return the UUID from the result
+      if (result.isNotEmpty && result[0]['id'] != null) {
+        return result[0]['id'].toString();
+      }
+      return null;
     } on Exception catch (e) {
       debugPrint('Error storing participant details: $e');
       return null;

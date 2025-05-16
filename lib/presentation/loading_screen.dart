@@ -131,16 +131,15 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
       // Check if Supabase is initialized
       if (SupabaseService.instance.isInitialized) {
-        // Generate a unique user ID
-        final userId = DateTime.now().millisecondsSinceEpoch.toString();
+        // Generate a unique user 
 
         // Upload face image to Supabase using the new method
         final faceImageUrl = await SupabaseService.instance
-            .uploadUserFaceImage(imageFile, userId);
+            .uploadUserFaceImage(imageFile);
 
         if (faceImageUrl != null) {
           // Store participant details in Supabase
-          final participantId =
+          final uniqueId =
               await SupabaseService.instance.storeParticipantDetails(
             name: name,
             email: email,
@@ -148,12 +147,12 @@ class _LoadingScreenState extends State<LoadingScreen> {
             imageUrl: faceImageUrl,
           );
 
-          if (participantId != null && serviceId != null) {
+          if (uniqueId != null && serviceId != null) {
             // Initialize ComfyAPI service if not already initialized
             if (!ComfyApiService.isInitialized) {
               await ComfyApiService.initialize(
                 apiUrl: globalSettings.comfyApiUrl ??
-                    "http://213.173.109.100:12508",
+                    "http://127.0.0.1:8188",
               );
             }
 
@@ -170,6 +169,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
                   serviceId,
                   faceImageUrl,
                   seed,
+                  uniqueId: uniqueId, // Pass the uniqueId from Supabase
                 );
 
                 // Store the workflow sent time in the provider
@@ -190,7 +190,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
                   // Check for new image in Supabase, passing the workflow sent time
                   final supabaseImageUrl =
                       await SupabaseService.instance.getLatestOutputImage(
-                    participantId,
+                    uniqueId,
                     afterTime: provider.workflowSentTime,
                   );
 
@@ -424,6 +424,3 @@ class _LoadingScreenState extends State<LoadingScreen> {
     }
   }
 }
-
-// Inside the _processUserData method
-// Replace the existing workflow sending code with:

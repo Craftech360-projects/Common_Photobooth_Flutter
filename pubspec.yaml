@@ -42,8 +42,10 @@ flutter:
     - assets/images/
     - assets/characters/
     - assets/videos/
-    - assets/workflows/
     - lib/api/ghibli.json
+    - lib/api/faceswap.json
+    - lib/api/pixar.json
+    - lib/api/snoopy.json
 
   fonts:
     - family: Satoshi

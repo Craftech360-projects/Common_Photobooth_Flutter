@@ -1,4 +1,5 @@
 // ignore_for_file: unused_field
+
 import 'dart:async';
 import 'dart:io';
 
@@ -8,19 +9,15 @@ import 'package:camera_platform_interface/camera_platform_interface.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:photobooth_flutter/providers/admin_watermark_provider.dart';
 import 'package:photobooth_flutter/providers/face_capture_provider.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/providers/photobooth_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
-import 'package:photobooth_flutter/widgets/watermark_overlay.dart';
 import 'package:provider/provider.dart';
 
 /// Example app for Camera Windows plugin.
 class FaceCaptureScreen extends StatefulWidget {
-  const FaceCaptureScreen({
-    super.key,
-  });
+  const FaceCaptureScreen({super.key});
 
   @override
   State<FaceCaptureScreen> createState() => _FaceCaptureScreenState();
@@ -30,7 +27,8 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
   String _cameraInfo = 'Unknown';
   List<CameraDescription> _cameras = <CameraDescription>[];
   int _cameraIndex = 0;
-  int _cameraId = -1;
+  // Remove _cameraId for non-macOS, CameraController handles it
+  // int _cameraId = -1; 
   CameraController? _controller;
   Future<void>? _initializeControllerFuture;
   bool _cameraInitialized = false;
@@ -52,8 +50,6 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
 
     // Check platform
     _isMacOS = Platform.isMacOS;
-
-    // Only initialize camera if not in preview mode
 
     // Initialize camera after the widget is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -187,6 +183,8 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
   }
 
   Future<void> _initializeCamera() async {
+    // Use a local variable for clarity, but don't store it in the state for non-macOS
+    // int cameraId = -1; 
     assert(!_cameraInitialized);
 
     if (_cameras.isEmpty) {
@@ -213,15 +211,16 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
       _initializeControllerFuture = _controller?.initialize();
       await _initializeControllerFuture;
 
-      unawaited(_errorStreamSubscription?.cancel());
-      _errorStreamSubscription = CameraPlatform.instance
-          .onCameraError(cameraId)
-          .listen(_onCameraError);
+      // Remove stream subscriptions related to cameraId if not using CameraPlatform directly
+      // unawaited(_errorStreamSubscription?.cancel());
+      // _errorStreamSubscription = CameraPlatform.instance
+      //     .onCameraError(cameraId) // cameraId is -1 here
+      //     .listen(_onCameraError);
 
-      unawaited(_cameraClosingStreamSubscription?.cancel());
-      _cameraClosingStreamSubscription = CameraPlatform.instance
-          .onCameraClosing(cameraId)
-          .listen(_onCameraClosing);
+      // unawaited(_cameraClosingStreamSubscription?.cancel());
+      // _cameraClosingStreamSubscription = CameraPlatform.instance
+      //     .onCameraClosing(cameraId) // cameraId is -1 here
+      //     .listen(_onCameraClosing);
 
       // final Future<CameraInitializedEvent> initialized =
       //     CameraPlatform.instance.onCameraInitialized(cameraId).first;
@@ -239,26 +238,29 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
       if (mounted) {
         setState(() {
           _cameraInitialized = true;
-          _cameraId = cameraId;
+          // Remove _cameraId assignment
+          // _cameraId = cameraId; 
           _cameraIndex = cameraIndex;
           _cameraInfo = 'Capturing camera: ${camera.name}';
         });
       }
     } on CameraException catch (e) {
-      try {
-        if (cameraId >= 0) {
-          await CameraPlatform.instance.dispose(cameraId);
-        }
-      } on CameraException catch (e) {
-        debugPrint('Failed to dispose camera: ${e.code}: ${e.description}');
-      }
+      // try {
+      //   // No explicit cameraId to dispose here when using CameraController
+      //   // if (cameraId >= 0) { 
+      //   //   await CameraPlatform.instance.dispose(cameraId);
+      //   // }
+      // } on CameraException catch (e) {
+      //   debugPrint('Failed to dispose camera: ${e.code}: ${e.description}');
+      // }
 
       // Reset state.
       if (mounted) {
         setState(() {
           _cameraInitialized = false;
-          _cameraId = -1;
+          // _cameraId = -1; // Remove
           _cameraIndex = 0;
+          _controller = null; // Ensure controller is null on failure
           _cameraInfo =
               'Failed to initialize camera: ${e.code}: ${e.description}';
         });
@@ -267,27 +269,87 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
   }
 
   Future<void> _disposeCurrentCamera() async {
-    if (_cameraId >= 0 && _cameraInitialized) {
-      try {
-        await CameraPlatform.instance.dispose(_cameraId);
-        await _controller?.dispose();
-        _controller = null;
-
+    if (_isMacOS) {
+      // --- macOS Disposal ---
+      if (_macOSController != null && _cameraInitialized) {
+        final currentMacOSController = _macOSController;
         if (mounted) {
           setState(() {
             _cameraInitialized = false;
-            _cameraId = -1;
-            _cameraInfo = 'Camera disposed';
+            _macOSController = null;
+            _cameraInfo = 'Disposing macOS camera...';
           });
+        } else {
+          _cameraInitialized = false;
+          _macOSController = null;
         }
-      } on CameraException catch (e) {
+        try {
+          await currentMacOSController?.destroy(); // Use destroy for macOS controller
+          if (mounted) {
+            setState(() { _cameraInfo = 'macOS Camera disposed'; });
+          }
+        } on CameraMacOSException catch (e) {
+          debugPrint('Failed to destroy macOS camera: ${e.code}: ${e.toString()}');
+        }
+      } else {
+         if (mounted) {
+           setState(() { _cameraInitialized = false; _macOSController = null; });
+         } else {
+           _cameraInitialized = false; _macOSController = null;
+         }
+      }
+      // --- End macOS Disposal ---
+    } else {
+      // --- Non-macOS Disposal ---
+      if (_controller != null && _cameraInitialized) { 
+        final currentController = _controller; // Store controller
+
+        // Immediately mark as not initialized
         if (mounted) {
           setState(() {
-            _cameraInfo =
-                'Failed to dispose camera: ${e.code}: ${e.description}';
+            _cameraInitialized = false;
+            _controller = null; 
+            _cameraInfo = 'Disposing camera...';
           });
+        } else {
+           _cameraInitialized = false;
+           _controller = null;
         }
+
+        try {
+          // Dispose the controller
+          await currentController?.dispose(); 
+
+          // Update info on successful disposal if mounted
+          if (mounted) {
+             setState(() {
+               _cameraInfo = 'Camera disposed';
+             });
+          }
+
+        } on CameraException catch (e) {
+          debugPrint('Failed to dispose camera controller: ${e.code}: ${e.description}');
+          // Update info on failed disposal if mounted
+          if (mounted) {
+            setState(() {
+              _cameraInfo =
+                  'Failed to dispose camera: ${e.code}: ${e.description}';
+            });
+          }
+        }
+      } else {
+         // Ensure state reflects camera not being initialized/controller null
+         if (mounted) {
+           setState(() {
+             _cameraInitialized = false; 
+             _controller = null;
+           });
+         } else {
+           _cameraInitialized = false;
+           _controller = null;
+         }
       }
+      // --- End Non-macOS Disposal ---
     }
   }
 
@@ -295,7 +357,7 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
     // Determine which platform logic to use
     final isMacOS = Platform.isMacOS;
     XFile? file; // Define file here so it's accessible after the if/else
-
+  
     // Use try-finally to ensure potential camera re-init happens even on success path if needed
     try {
       if (isMacOS) {
@@ -303,11 +365,11 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
         if (_macOSController == null) {
           throw Exception("macOS controller is not initialized");
         }
-
+  
         // Correctly expect CameraMacOSPicture?
         final CameraMacOSFile? macOSPicture =
             await _macOSController!.takePicture(); // Renamed for clarity
-
+  
         if (macOSPicture == null) {
           // Check the picture object itself
           throw Exception(
@@ -318,33 +380,35 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
           throw Exception(
               "macOS controller failed to take picture (returned null bytes)");
         }
-
+  
         // --- Convert Bitmap to File ---
         // Get temporary directory
         final Directory tempDir = await getTemporaryDirectory();
         final String filePath =
             '${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}.png';
-
+  
         // Create image directly from the bytes
         // The CameraMacOSFile doesn't have width/height properties
         // We need to save the bytes directly
         await File(filePath).writeAsBytes(macOSPicture.bytes!);
-
+  
         // Create an XFile object from the saved path
         file = XFile(filePath);
         // --- End Bitmap to File ---
-
+  
         // --- End macOS Logic ---
       } else {
         // --- Windows/Other Platform Picture Taking Logic ---
-        if (!_cameraInitialized || _controller == null || _cameraId < 0) {
+        // Update check: rely only on _cameraInitialized and _controller
+        if (!_cameraInitialized || _controller == null) { 
           throw Exception("Camera not ready or controller not initialized.");
         }
-        file = await CameraPlatform.instance.takePicture(_cameraId);
-
+        // Use controller's takePicture method
+        file = await _controller!.takePicture(); 
+        
         // --- End Windows/Other Logic ---
       }
-
+  
       // Verify file exists (important!)
       final imageFile = File(file.path); // Use file! (null check above)
       if (!await imageFile.exists()) {
@@ -354,16 +418,16 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
       } else {
         debugPrint('File verified, exists at path: ${file.path}');
       }
-
-      // --- Consider removing this disposal ---
-      // await _disposeCurrentCamera(); // Removed as discussed before
-
+  
+      // --- Dispose the camera AFTER successful capture and BEFORE navigation ---
+      await _disposeCurrentCamera(); // Uncommented and placed here
+  
       // --- Update Provider ---
       // Use context safely
       if (!mounted) return; // Check if widget is still in the tree
       final provider = context.read<PhotoboothProvider>();
       provider.setFaceImage(file.path); // Use file!
-
+  
       // --- Navigate ---
       if (mounted) {
         // Check again before async gap
@@ -377,17 +441,26 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to take picture: $e')),
         );
-
-        // Ensure camera is disposed *before* trying to re-initialize (only non-macOS here)
-        if (_cameraInitialized && !isMacOS) {
-          debugPrint("Disposing non-macOS camera due to error...");
-          await _disposeCurrentCamera();
+  
+        // Ensure camera controller is disposed *before* trying to re-initialize
+        // Check appropriate controller based on platform
+        if (!isMacOS && _controller != null) { 
+            debugPrint("Disposing non-macOS camera controller due to error...");
+            await _disposeCurrentCamera(); 
+        } else if (isMacOS && _macOSController != null) {
+            debugPrint("Disposing macOS camera controller due to error...");
+            await _disposeCurrentCamera();
         }
-
-        // Attempt re-initialization
+  
+        // Attempt re-initialization only if the corresponding controller is null
         if (!isMacOS) {
           debugPrint("Re-initializing non-macOS camera...");
-          await _initializeCamera();
+          // Ensure controller is null before re-initializing
+          if (_controller == null) { 
+             await _initializeCamera();
+          } else {
+             debugPrint("Controller not null, skipping re-initialization attempt.");
+          }
         } else {
           debugPrint("Re-initializing macOS camera...");
           // Handle macOS re-initialization
@@ -428,7 +501,6 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
   Widget build(BuildContext context) {
     final settings = context.watch<FaceCaptureProvider>();
     final globalSettings = context.watch<GlobalSettingsProvider>();
-    final watermarkProvider = context.watch<AdminWatermarkProvider>();
 
     return Scaffold(
       // appBar: AppBar(
@@ -453,58 +525,82 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
       //   //   ),
       //   // ],
       // ),
-      body: WatermarkOverlay(
-        show: watermarkProvider.showWatermark,
-        child: Container(
-          width: double.infinity,
-          height: double.infinity,
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: _getBackgroundImage(settings, globalSettings),
-              fit: BoxFit.cover,
-            ),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: _getBackgroundImage(settings, globalSettings),
+            fit: BoxFit.cover,
           ),
-          child: Column(
-            children: [
-              // Title
-              if (settings.showTitle)
-                Padding(
-                  padding: settings.titlePadding,
-                  child: Text(
-                    textAlign: settings.titleAlignment,
-                    settings.titleText,
-                    style: TextStyle(
-                      height: settings.titleLineHeight,
-                      fontSize: settings.titleFontSize,
-                      fontWeight: settings.titleFontWeight,
-                      color: settings.titleColor
-                          .withValues(alpha: settings.titleOpacity),
-                    ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Title
+            if (settings.showTitle)
+              Padding(
+                padding: settings.titlePadding,
+                child: Text(
+                  textAlign: settings.titleAlignment,
+                  settings.titleText,
+                  style: TextStyle(
+                    height: settings.titleLineHeight,
+                    fontSize: settings.titleFontSize,
+                    fontWeight: settings.titleFontWeight,
+                    color: settings.titleColor
+                        .withValues(alpha: settings.titleOpacity),
                   ),
                 ),
+              ),
 
-              // Camera Preview
-              _buildCameraPreview(settings),
+            // Windows Preview
+            // Container(
+            //   decoration: settings.showPreviewBorder
+            //       ? BoxDecoration(
+            //           borderRadius:
+            //               BorderRadius.circular(settings.previewBorderRadius),
+            //           border: Border.all(
+            //             color: settings.previewBorderColor,
+            //             width: settings.previewBorderWidth,
+            //           ),
+            //         )
+            //       : null,
+            //   width: settings.previewWidth,
+            //   height: settings.previewHeight,
+            //   child: ClipRRect(
+            //     borderRadius:
+            //         BorderRadius.circular(settings.previewBorderRadius),
+            //     child: AspectRatio(
+            //         aspectRatio: settings.previewWidth / settings.previewHeight,
+            //         child: _buildPreview()),
+            //   ),
+            // ),
 
-              // Capture Button
-              _buildCaptureButton(settings),
-            ],
-          ),
+            // macOS Preview
+            _buildCameraPreview(settings),
+
+            // Capture Button
+
+            _buildCaptureButton(settings),
+          ],
         ),
       ),
     );
   }
 
-  // Add placeholder widgets for preview mode
-
+  // MacOS Preview
   Widget _buildCameraPreview(FaceCaptureProvider settings) {
-    if (!_cameraInitialized) {
-      return const Center(
-        child: CircularProgressIndicator(),
+    if (!_cameraInitialized || (_controller == null && !_isMacOS) || (_macOSController == null && _isMacOS)) {
+      return Center(
+        child: CircularProgressIndicator(
+          color: settings.previewBorderColor, // Use a relevant color
+        ),
       );
     }
 
     if (_isMacOS) {
+      // --- macOS Preview ---
       return Container(
         margin: settings.previewMargin,
         width: settings.previewWidth,
@@ -518,44 +614,73 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
                   width: settings.previewBorderWidth,
                 ),
               )
-            : null,
+            : BoxDecoration( // Ensure BorderRadius is applied even without border
+                borderRadius:
+                    BorderRadius.circular(settings.previewBorderRadius),
+              ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(settings.previewBorderRadius),
           child: CameraMacOSView(
             key: _cameraKey,
             deviceId: _selectedVideoDeviceId,
             cameraMode: CameraMacOSMode.photo,
-            fit: BoxFit.cover,
+            fit: BoxFit.cover, // BoxFit.cover usually works well here
             onCameraInizialized: (controller) {
-              setState(() {
-                _macOSController = controller;
-              });
+              if (mounted) { // Check if mounted before setState
+                setState(() {
+                  _macOSController = controller;
+                });
+              } else {
+                 _macOSController = controller; // Assign directly if not mounted (less likely needed here)
+              }
             },
           ),
         ),
       );
+      // --- End macOS Preview ---
     } else {
+      // --- Non-macOS Preview (Windows, etc.) ---
+      // Ensure controller and its value are ready
+      if (_controller == null || !_controller!.value.isInitialized) {
+         return Center(
+           child: CircularProgressIndicator(
+             color: settings.previewBorderColor,
+           ),
+         );
+      }
+
+      // Calculate aspect ratio
+      final cameraAspectRatio = _controller!.value.aspectRatio;
+
       return Container(
-        width: settings.previewWidth,
-        height: settings.previewHeight,
-        decoration: settings.showPreviewBorder
-            ? BoxDecoration(
-                borderRadius:
-                    BorderRadius.circular(settings.previewBorderRadius),
-                border: Border.all(
+        margin: settings.previewMargin, // Apply margin here
+        width: settings.previewWidth,   // Keep container width
+        height: settings.previewHeight, // Keep container height
+        decoration: BoxDecoration( // Apply decoration to the container
+          borderRadius: BorderRadius.circular(settings.previewBorderRadius),
+          border: settings.showPreviewBorder
+              ? Border.all(
                   color: settings.previewBorderColor,
                   width: settings.previewBorderWidth,
-                ),
-              )
-            : null,
-        child: ClipRRect(
+                )
+              : null,
+        ),
+        child: ClipRRect( // Clip the contents to the rounded border
           borderRadius: BorderRadius.circular(settings.previewBorderRadius),
-          child: _controller != null
-              ? AspectRatio(
-                  aspectRatio: 2 / 6, child: CameraPreview(_controller!))
-              : const Center(child: Text('Camera not available')),
+          child: OverflowBox( // Allow the AspectRatio to overflow if needed, centered
+            alignment: Alignment.center,
+            child: FittedBox( // Scale the AspectRatio to fit the container
+              fit: BoxFit.cover, // Use BoxFit.cover to fill the container while maintaining aspect ratio
+              child: SizedBox( // Constrain the CameraPreview by the camera's aspect ratio
+                width: settings.previewWidth, // Start with container width
+                height: settings.previewWidth / cameraAspectRatio, // Calculate height based on aspect ratio
+                child: CameraPreview(_controller!),
+              ),
+            ),
+          ),
         ),
       );
+      // --- End Non-macOS Preview ---
     }
   }
 
@@ -564,8 +689,6 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
       return GestureDetector(
         onTap: _takePicture,
         child: Container(
-          margin: settings.buttonMargin,
-          padding: settings.buttonPadding,
           width: settings.buttonWidth,
           height: settings.buttonHeight,
           decoration: BoxDecoration(

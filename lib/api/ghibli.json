@@ -372,7 +372,7 @@
       "supabase_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZmaHJud3ZiZmhjaHh2amx4bnhmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3ODIyMzYsImV4cCI6MjA2MDM1ODIzNn0.j94ddkuXuJHCmRK9UP2bW5ryngWrFbKvWxBjUVhEioo",
       "table_name": "inputimagetable",
       "image_column": "image_url",
-      "id_column": "unique_id",
+      "id_column": "id",
       "unique_id": " "
     },
     "class_type": "SupabaseTableWatcherNode",
@@ -388,7 +388,7 @@
       "bucket": "outputimages",
       "base_file_name": "image",
       "table_name": "inputimagetable",
-      "unique_id_column": "unique_id",
+      "unique_id_column": "id",
       "table_column": "output",
       "image": ["147", 0]
     },

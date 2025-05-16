@@ -102,40 +102,46 @@ class ComfyApiService {
   // Send workflow based on serviceId
   Future<Map<String, dynamic>> sendWorkflowByServiceId(
       String serviceId, String faceImageUrl, int seed,
-      {BuildContext? context}) async {
+      {BuildContext? context, String? uniqueId}) async {
     try {
       Map<String, dynamic>? workflow;
       final ctx = context ?? _context;
+
+      // If no uniqueId is provided, this is an error as we need the same ID used in Supabase
+      if (uniqueId == null) {
+        throw Exception('No uniqueId provided for workflow');
+      }
 
       // Select workflow based on serviceId
       switch (serviceId) {
         case 'LjCIQ5ONsqCHIHd6Rmyu':
           // Faceswap Workflow
-          workflow =
-              await _getFaceswapWorkflow(faceImageUrl, seed, context: ctx);
+          workflow = await _getFaceswapWorkflow(faceImageUrl, seed,
+              uniqueId: uniqueId, context: ctx);
           break;
         case 'LxdfSxqisSz6upaGX2Ly':
           // Snoopy Workflow
-          workflow = await _getSnoopyWorkflow(faceImageUrl, seed);
+          workflow =
+              await _getSnoopyWorkflow(faceImageUrl, seed, uniqueId: uniqueId);
           break;
         case 's8I5m3JkBICqt2X1itzQ':
           // Pixar Workflow
-          workflow = await _getPixarWorkflow(faceImageUrl, seed);
+          workflow =
+              await _getPixarWorkflow(faceImageUrl, seed, uniqueId: uniqueId);
           break;
         case 'ufD3VgOLuZD14zk601in':
           // Disco Workflow
-          workflow = await _getDiscoWorkflow(faceImageUrl, seed);
+          workflow =
+              await _getDiscoWorkflow(faceImageUrl, seed, uniqueId: uniqueId);
           break;
         case 'v0cHGA51YbXw7xteYLBM':
-
           ///=====> Default is Ghibli
           // Ghibli Workflow (default)
           final ghibliWorkflow = await GhibliWorkflow.getWorkflow();
           ghibliWorkflow.updateFaceImageUrl(faceImageUrl);
           ghibliWorkflow.updateNoiseSeed(seed);
 
-          // Update unique ID
-          final uniqueId = DateTime.now().millisecondsSinceEpoch.toString();
+          // Use the provided uniqueId from Supabase
           ghibliWorkflow.updateUniqueId(uniqueId);
 
           workflow = ghibliWorkflow.toMap();
@@ -146,13 +152,24 @@ class ComfyApiService {
           ghibliWorkflow.updateFaceImageUrl(faceImageUrl);
           ghibliWorkflow.updateNoiseSeed(seed);
 
-          // Update unique ID
-          final uniqueId = DateTime.now().millisecondsSinceEpoch.toString();
+          // Use the provided uniqueId from Supabase
           ghibliWorkflow.updateUniqueId(uniqueId);
 
           workflow = ghibliWorkflow.toMap();
           break;
       }
+
+      // Print workflow details for debugging
+      debugPrint('======= WORKFLOW DETAILS =======');
+      debugPrint('Service ID: $serviceId');
+      debugPrint('Unique ID: $uniqueId');
+      debugPrint('Face Image URL: $faceImageUrl');
+      debugPrint('Seed: $seed');
+
+      // Pretty print the workflow JSON for better readability
+      final workflowJson = const JsonEncoder.withIndent('  ').convert(workflow);
+      debugPrint('Workflow JSON: $workflowJson');
+      debugPrint('======= END WORKFLOW DETAILS =======');
 
       final sentTime = DateTime.now();
 
@@ -185,7 +202,7 @@ class ComfyApiService {
   // Helper methods to get different workflows
   Future<Map<String, dynamic>> _getFaceswapWorkflow(
       String faceImageUrl, int seed,
-      {BuildContext? context}) async {
+      {BuildContext? context, required String uniqueId}) async {
     // Get the PhotoboothProvider to access the character image
     final ctx = context ?? _context;
     if (ctx == null) {
@@ -217,48 +234,44 @@ class ComfyApiService {
       targetImageUrl: faceImageUrl, // User's face image
     );
 
-    // Update the unique ID instead of refresh trigger
-    final uniqueId = DateTime.now().millisecondsSinceEpoch.toString();
+    // Use the provided uniqueId from Supabase
     faceswapWorkflow.updateUniqueId(uniqueId);
 
     return faceswapWorkflow.toMap();
   }
 
   Future<Map<String, dynamic>> _getSnoopyWorkflow(
-      String faceImageUrl, int seed) async {
+      String faceImageUrl, int seed, {required String uniqueId}) async {
     // Implement Snoopy workflow using the SnoopyWorkflow class
     final snoopyWorkflow = await SnoopyWorkflow.getWorkflow();
     snoopyWorkflow.updateFaceImageUrl(faceImageUrl);
 
-    // Update unique ID
-    final uniqueId = DateTime.now().millisecondsSinceEpoch.toString();
+    // Use the provided uniqueId
     snoopyWorkflow.updateUniqueId(uniqueId);
 
     return snoopyWorkflow.toMap();
   }
 
   Future<Map<String, dynamic>> _getPixarWorkflow(
-      String faceImageUrl, int seed) async {
+      String faceImageUrl, int seed, {required String uniqueId}) async {
     // Use PixarWorkflow instead of GhibliWorkflow
     final pixarWorkflow = await PixarWorkflow.getWorkflow();
     pixarWorkflow.updateFaceImageUrl(faceImageUrl);
 
-    // Update unique ID
-    final uniqueId = DateTime.now().millisecondsSinceEpoch.toString();
+    // Use the provided uniqueId
     pixarWorkflow.updateUniqueId(uniqueId);
 
     return pixarWorkflow.toMap();
   }
 
   Future<Map<String, dynamic>> _getDiscoWorkflow(
-      String faceImageUrl, int seed) async {
+      String faceImageUrl, int seed, {required String uniqueId}) async {
     // For now, use GhibliWorkflow for Disco until a proper DiscoWorkflow is implemented
     // TODO: Create a proper DiscoWorkflow class
     final ghibliWorkflow = await GhibliWorkflow.getWorkflow();
     ghibliWorkflow.updateFaceImageUrl(faceImageUrl);
 
-    // Update unique ID
-    final uniqueId = DateTime.now().millisecondsSinceEpoch.toString();
+    // Use the provided uniqueId
     ghibliWorkflow.updateUniqueId(uniqueId);
 
     return ghibliWorkflow.toMap();
