@@ -55,50 +55,39 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
             ),
 
             // Content
-            Center(
-              child: Column(
-                children: [
-                  // Welcome message
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      welcomeSettings.welcomeMessageMarginLeft,
-                      welcomeSettings.welcomeMessageMarginTop,
-                      welcomeSettings.welcomeMessageMarginRight,
-                      welcomeSettings.welcomeMessageMarginBottom,
-                    ),
-                    child: Text(
-                      welcomeSettings.welcomeMessage,
-                      style: TextStyle(
-                        fontSize: welcomeSettings.welcomeMessageFontSize,
-                        fontWeight: welcomeSettings.welcomeMessageFontWeight,
-                        color: welcomeSettings.welcomeMessageColor.withValues(
-                            alpha: welcomeSettings.welcomeMessageOpacity),
-                        fontStyle: welcomeSettings.welcomeMessageItalic
-                            ? FontStyle.italic
-                            : FontStyle.normal,
-                        height: welcomeSettings.welcomeMessageLineHeight,
-                      ),
-                      textAlign: welcomeSettings.welcomeMessageTextAlign,
-                    ),
-                  ),
-
-                  Container(
-                    margin: EdgeInsets.only(
-                      top: welcomeSettings.buttonMarginTop,
-                      bottom: welcomeSettings.buttonMarginBottom,
-                    ),
-                    child: welcomeSettings.useImageButton
-                        ? _buildImageButton(welcomeSettings)
-                        : _buildTextButton(welcomeSettings),
-                  ),
-                ],
+            Positioned(
+              left: welcomeSettings.welcomeMessageLeft,
+              top: welcomeSettings.welcomeMessageTop,
+              width: welcomeSettings.welcomeMessageWidth,
+             
+              child: Text(
+                welcomeSettings.welcomeMessage,
+                style: TextStyle(
+                  fontSize: welcomeSettings.welcomeMessageFontSize,
+                  fontWeight: welcomeSettings.welcomeMessageFontWeight,
+                  color: welcomeSettings.welcomeMessageColor
+                      .withValues(alpha: welcomeSettings.welcomeMessageOpacity),
+                  fontStyle: welcomeSettings.welcomeMessageItalic
+                      ? FontStyle.italic
+                      : FontStyle.normal,
+                  height: welcomeSettings.welcomeMessageLineHeight,
+                ),
+                textAlign: welcomeSettings.welcomeMessageTextAlign,
               ),
+            ),
+
+            Positioned(
+              left: welcomeSettings.buttonLeft,
+              top: welcomeSettings.buttonTop,
+              child: welcomeSettings.useImageButton
+                  ? _buildImageButton(welcomeSettings)
+                  : _buildTextButton(welcomeSettings),
             ),
 
             // Admin access button (hidden at bottom)
             Positioned(
-              left: 0,
-              bottom: 0,
+              right: 0,
+              top: 0,
               child: GestureDetector(
                 onTap: () =>
                     Navigator.pushNamed(context, AppRoutes.adminScreen),

@@ -21,9 +21,6 @@ class ParticipantDetailsScreen extends StatefulWidget {
 class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
   final _formKey = GlobalKey<FormState>();
   final Map<String, TextEditingController> _controllers = {};
-  final List<int> _secretPattern = [];
-  final List<int> _correctPattern = [1, 2];
-  DateTime? _lastTapTime;
 
   @override
   void initState() {
@@ -44,30 +41,6 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
     });
   }
 
-  // FOR NAVIGATING TO ADMIN SCREEN
-  void _handleSecretTap(int position) {
-    final now = DateTime.now();
-    if (_lastTapTime != null && now.difference(_lastTapTime!).inSeconds > 5) {
-      _secretPattern.clear();
-    }
-    _lastTapTime = now;
-
-    _secretPattern.add(position);
-    if (_secretPattern.length == _correctPattern.length) {
-      bool isCorrect = true;
-      for (int i = 0; i < _correctPattern.length; i++) {
-        if (_secretPattern[i] != _correctPattern[i]) {
-          isCorrect = false;
-          break;
-        }
-      }
-      if (isCorrect) {
-        Navigator.pushNamed(context, AppRoutes.adminScreen);
-      }
-      _secretPattern.clear();
-    }
-  }
-
   @override
   void dispose() {
     // Dispose all controllers
@@ -84,187 +57,177 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
     final watermarkProvider = context.watch<AdminWatermarkProvider>();
 
     return Scaffold(
-      // appBar: AppBar(
-      //   leading: IconButton(
-      //     onPressed: () => Navigator.pushNamed(
-      //         context, AppRoutes.registrationScreenSettings),
-      //     icon: const Icon(Icons.star),
-      //   ),
-      // ),
       body: WatermarkOverlay(
         show: watermarkProvider.showWatermark,
-        child: Stack(children: [
-          Container(
-            width: double.infinity,
-            height: double.infinity,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image:
-                    _getBackgroundImage(registrationSettings, globalSettings),
-                fit: BoxFit.cover,
-              ),
-            ),
-            child: Center(
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Add the title widget here
-                    if (registrationSettings.showTitle)
-                      Container(
-                        margin: registrationSettings.titleMargin,
-                        child: Text(
-                          registrationSettings.titleText,
-                          style: TextStyle(
-                            fontSize: registrationSettings.titleFontSize,
-                            fontWeight: registrationSettings.titleFontWeight,
-                            color: registrationSettings.titleTextColor,
-                            height: registrationSettings.titleLineHeight,
-                          ),
-                          textAlign: registrationSettings.titleTextAlign,
-                        ),
-                      ),
-                    ...registrationSettings.textFields
-                        .where((field) => field.isEnabled)
-                        .map((field) => Column(
-                              children: [
-                                Container(
-                                  margin: field.margin,
-                                  width: MediaQuery.of(context).size.width *
-                                      field.width,
-                                  height: field.height,
-                                  child: TextFormField(
-                                    controller: _controllers[field.id],
-                                    style: TextStyle(
-                                      color: field.textColor,
-                                      fontSize: field.fontSize,
-                                      fontWeight: field.fontWeight,
-                                      fontStyle: field.isItalic
-                                          ? FontStyle.italic
-                                          : FontStyle.normal,
-                                    ),
-                                    decoration: InputDecoration(
-                                      labelText: field.label,
-                                      labelStyle: TextStyle(
-                                        color: field.labelColor,
-                                      ),
-                                      hintText: field.hintText,
-                                      filled: true,
-                                      fillColor: field.fillColor,
-                                      contentPadding: field.padding,
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(
-                                          field.borderRadius,
-                                        ),
-                                        borderSide: field.hasBorder
-                                            ? BorderSide(
-                                                color: field.borderColor,
-                                                width: field.borderWidth,
-                                              )
-                                            : BorderSide.none,
-                                      ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(
-                                          field.borderRadius,
-                                        ),
-                                        borderSide: field.hasBorder
-                                            ? BorderSide(
-                                                color: field.borderColor,
-                                                width: field.borderWidth,
-                                              )
-                                            : BorderSide.none,
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(
-                                          field.borderRadius,
-                                        ),
-                                        borderSide: field.hasBorder
-                                            ? BorderSide(
-                                                color: field.borderColor,
-                                                width: field.borderWidth,
-                                              )
-                                            : BorderSide.none,
-                                      ),
-                                    ),
-                                    validator: (value) {
-                                      if (field.isRequired &&
-                                          (value?.isEmpty ?? true)) {
-                                        return 'Please enter ${field.label.toLowerCase()}';
-                                      }
-
-                                      // Add type-specific validations
-                                      if (value != null && value.isNotEmpty) {
-                                        switch (field.fieldType) {
-                                          case TextFieldType.email:
-                                            // Email validation using regex
-                                            final emailRegex = RegExp(
-                                                r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-                                            if (!emailRegex.hasMatch(value)) {
-                                              return 'Please enter a valid email address';
-                                            }
-                                            break;
-                                          case TextFieldType.phone:
-                                            // Phone validation - allow digits, spaces, and some special chars
-                                            final phoneRegex = RegExp(
-                                                r'^[+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,4}[-\s\.]?[0-9]{1,9}$');
-                                            if (!phoneRegex.hasMatch(value)) {
-                                              return 'Please enter a valid phone number';
-                                            }
-                                            break;
-                                          case TextFieldType.name:
-                                            // Name validation - minimum 2 characters
-                                            if (value.length < 2) {
-                                              return 'Name must be at least 2 characters';
-                                            }
-                                            break;
-                                          default:
-                                            // No additional validation for custom fields
-                                            break;
-                                        }
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                                SizedBox(
-                                    height: registrationSettings.fieldSpacing),
-                              ],
-                            )),
-                    SizedBox(height: registrationSettings.buttonSpacing),
-                    registrationSettings.useImageButton
-                        ? _buildImageButton(registrationSettings)
-                        : _buildTextButton(registrationSettings),
-                  ],
+        child: Stack(
+          children: [
+            // Background container
+            Container(
+              width: double.infinity,
+              height: double.infinity,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image:
+                      _getBackgroundImage(registrationSettings, globalSettings),
+                  fit: BoxFit.cover,
                 ),
               ),
             ),
-          ),
-          Positioned(
-            left: 0,
-            top: 0,
-            child: GestureDetector(
-              onTap: () => _handleSecretTap(1),
-              child: Container(
-                width: 100,
-                height: 100,
-                color: Colors.transparent,
+
+            // Title widget with positioning
+            if (registrationSettings.showTitle)
+              Positioned(
+                left: registrationSettings.titleLeft,
+                top: registrationSettings.titleTop,
+                width: registrationSettings.titleWidth,
+                child: Text(
+                  registrationSettings.titleText,
+                  style: TextStyle(
+                    fontSize: registrationSettings.titleFontSize,
+                    fontWeight: registrationSettings.titleFontWeight,
+                    color: registrationSettings.titleTextColor,
+                    height: registrationSettings.titleLineHeight,
+                  ),
+                  textAlign: registrationSettings.titleTextAlign,
+                ),
+              ),
+
+            // Text fields with positioning
+            ...registrationSettings.textFields
+                .where((field) => field.isEnabled)
+                .map((field) => Positioned(
+                      left: field.left,
+                      top: field.top,
+                      width: MediaQuery.of(context).size.width * field.width,
+                      height: field.height,
+                      child: TextFormField(
+                        controller: _controllers[field.id],
+                        style: TextStyle(
+                          color: field.textColor,
+                          fontSize: field.fontSize,
+                          fontWeight: field.fontWeight,
+                          fontStyle: field.isItalic
+                              ? FontStyle.italic
+                              : FontStyle.normal,
+                        ),
+                        decoration: InputDecoration(
+                          labelText: field.label,
+                          labelStyle: TextStyle(
+                            color: field.labelColor,
+                          ),
+                          hintText: field.hintText,
+                          filled: true,
+                          fillColor: field.fillColor,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(
+                              field.borderRadius,
+                            ),
+                            borderSide: field.hasBorder
+                                ? BorderSide(
+                                    color: field.borderColor,
+                                    width: field.borderWidth,
+                                  )
+                                : BorderSide.none,
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(
+                              field.borderRadius,
+                            ),
+                            borderSide: field.hasBorder
+                                ? BorderSide(
+                                    color: field.borderColor,
+                                    width: field.borderWidth,
+                                  )
+                                : BorderSide.none,
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(
+                              field.borderRadius,
+                            ),
+                            borderSide: field.hasBorder
+                                ? BorderSide(
+                                    color: field.borderColor,
+                                    width: field.borderWidth,
+                                  )
+                                : BorderSide.none,
+                          ),
+                        ),
+                        validator: (value) {
+                          if (field.isRequired && (value?.isEmpty ?? true)) {
+                            return 'Please enter ${field.label.toLowerCase()}';
+                          }
+
+                          // Add type-specific validations
+                          if (value != null && value.isNotEmpty) {
+                            switch (field.fieldType) {
+                              case TextFieldType.email:
+                                // Email validation using regex
+                                final emailRegex =
+                                    RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                                if (!emailRegex.hasMatch(value)) {
+                                  return 'Please enter a valid email address';
+                                }
+                                break;
+                              case TextFieldType.phone:
+                                // Phone validation - allow digits, spaces, and some special chars
+                                final phoneRegex = RegExp(
+                                    r'^[+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,4}[-\s\.]?[0-9]{1,9}$');
+                                if (!phoneRegex.hasMatch(value)) {
+                                  return 'Please enter a valid phone number';
+                                }
+                                break;
+                              case TextFieldType.name:
+                                // Name validation - minimum 2 characters
+                                if (value.length < 2) {
+                                  return 'Name must be at least 2 characters';
+                                }
+                                break;
+                              default:
+                                // No additional validation for custom fields
+                                break;
+                            }
+                          }
+                          return null;
+                        },
+                      ),
+                    )),
+
+            // Button with positioning
+            Positioned(
+              left: registrationSettings.buttonLeft,
+              top: registrationSettings.buttonTop,
+              child: registrationSettings.useImageButton
+                  ? _buildImageButton(registrationSettings)
+                  : _buildTextButton(registrationSettings),
+            ),
+
+            // Admin settings access
+            Positioned(
+              right: 0,
+              top: 0,
+              child: GestureDetector(
+                onTap: () => Navigator.pushNamed(
+                    context, AppRoutes.registrationScreenSettings),
+                child: Container(
+                  width: 50,
+                  height: 50,
+                  decoration: const BoxDecoration(
+                    color: Colors.transparent,
+                  ),
+                ),
               ),
             ),
-          ),
-          Positioned(
-            left: 0,
-            bottom: 0,
-            child: GestureDetector(
-              onTap: () => _handleSecretTap(2),
-              child: Container(
-                width: 100,
-                height: 100,
-                color: Colors.transparent,
+
+            // Hidden form for validation
+            Opacity(
+              opacity: 0,
+              child: Form(
+                key: _formKey,
+                child: Container(),
               ),
             ),
-          )
-        ]),
+          ],
+        ),
       ),
     );
   }
@@ -272,35 +235,32 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
   Widget _buildTextButton(RegistrationScreenProvider settings) {
     return Opacity(
       opacity: settings.buttonOpacity,
-      child: Container(
-        margin: settings.buttonMargin,
-        child: ElevatedButton(
-          onPressed: _handleSubmit,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: settings.submitButtonColor,
-            foregroundColor: settings.submitButtonTextColor,
-            padding: settings.buttonPadding,
-            minimumSize: Size(settings.buttonWidth, settings.buttonHeight),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
-              side: settings.buttonHasBorder
-                  ? BorderSide(
-                      color: settings.buttonBorderColor,
-                      width: settings.buttonBorderWidth,
-                    )
-                  : BorderSide.none,
-            ),
+      child: ElevatedButton(
+        onPressed: _handleSubmit,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: settings.submitButtonColor,
+          foregroundColor: settings.submitButtonTextColor,
+          padding: settings.buttonPadding,
+          minimumSize: Size(settings.buttonWidth, settings.buttonHeight),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
+            side: settings.buttonHasBorder
+                ? BorderSide(
+                    color: settings.buttonBorderColor,
+                    width: settings.buttonBorderWidth,
+                  )
+                : BorderSide.none,
           ),
-          child: Text(
-            settings.submitButtonText,
-            style: TextStyle(
-              fontSize: settings.buttonFontSize,
-              fontWeight: settings.buttonFontWeight,
-              fontStyle:
-                  settings.buttonIsItalic ? FontStyle.italic : FontStyle.normal,
-              color: settings.submitButtonTextColor
-                  .withValues(alpha: settings.buttonTextOpacity),
-            ),
+        ),
+        child: Text(
+          settings.submitButtonText,
+          style: TextStyle(
+            fontSize: settings.buttonFontSize,
+            fontWeight: settings.buttonFontWeight,
+            fontStyle:
+                settings.buttonIsItalic ? FontStyle.italic : FontStyle.normal,
+            color: settings.submitButtonTextColor
+                .withValues(alpha: settings.buttonTextOpacity),
           ),
         ),
       ),
@@ -317,30 +277,26 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
       opacity: settings.buttonImageOpacity,
       child: GestureDetector(
         onTap: _handleSubmit,
-        child: Container(
-          margin: settings.buttonMargin,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
-            child: Container(
-              width: settings.buttonWidth,
-              height: settings.buttonHeight,
-              decoration: BoxDecoration(
-                borderRadius:
-                    BorderRadius.circular(settings.buttonBorderRadius),
-                image: DecorationImage(
-                  image: settings.isButtonImageAsset
-                      ? AssetImage(settings.buttonImagePath!)
-                      : FileImage(File(settings.buttonImagePath!))
-                          as ImageProvider,
-                  fit: BoxFit.cover,
-                ),
-                border: settings.buttonHasBorder
-                    ? Border.all(
-                        color: settings.buttonBorderColor,
-                        width: settings.buttonBorderWidth,
-                      )
-                    : null,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
+          child: Container(
+            width: settings.buttonWidth,
+            height: settings.buttonHeight,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
+              image: DecorationImage(
+                image: settings.isButtonImageAsset
+                    ? AssetImage(settings.buttonImagePath!)
+                    : FileImage(File(settings.buttonImagePath!))
+                        as ImageProvider,
+                fit: BoxFit.cover,
               ),
+              border: settings.buttonHasBorder
+                  ? Border.all(
+                      color: settings.buttonBorderColor,
+                      width: settings.buttonBorderWidth,
+                    )
+                  : null,
             ),
           ),
         ),

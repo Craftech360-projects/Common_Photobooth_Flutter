@@ -153,25 +153,23 @@ class _LoadingScreenState extends State<LoadingScreen> {
           return;
         }
 
-        
         await LocalStorageService.initialize(
           inputDirectory: globalSettings.inputDirectory!,
           outputDirectory: globalSettings.outputDirectory!,
         );
       }
-  
+
       // Now it's safe to use the instance
       // Save face image to input directory
       final faceImagePath =
           await LocalStorageService.instance.saveFaceImage(imageFile);
-  
+
       // Get output path prefix
       final outputPathPrefix =
           LocalStorageService.instance.getOutputPathPrefix();
-  
+
       // Send offline workflow to ComfyAPI
       if (ComfyApiService.isInitialized && serviceId != null) {
-        
         try {
           // Send the workflow and get the response with sent time
           final response = await ComfyApiService.instance.sendOfflineWorkflow(
@@ -180,22 +178,22 @@ class _LoadingScreenState extends State<LoadingScreen> {
             serviceId: serviceId,
             seed: seed,
           );
-  
+
           // Store the workflow sent time in the provider
           if (response.containsKey('sentTime')) {
             final sentTimeStr = response['sentTime'] as String;
             final sentTime = DateTime.parse(sentTimeStr);
             provider.setWorkflowSentTime(sentTime);
           }
-  
+
           // Start polling for the new image in the output directory
           int attempts = 0;
           const maxAttempts =
               30; // 30 attempts with 2 second delay = 1 minute max
           const pollDelay = Duration(seconds: 2);
-  
+
           final outputPrefix = path.basename(outputPathPrefix);
-  
+
           while (attempts < maxAttempts) {
             // Check for new image in output directory
             final localImagePath =
@@ -203,12 +201,12 @@ class _LoadingScreenState extends State<LoadingScreen> {
               outputPrefix,
               afterTime: provider.workflowSentTime,
             );
-  
+
             if (localImagePath != null) {
               // Update the provider with local file path
               provider.setSwappedImage(localImagePath);
               provider.setCapturedImageUrl(localImagePath);
-  
+
               // Navigate to output screen
               if (mounted) {
                 await Navigator.of(context)
@@ -216,12 +214,12 @@ class _LoadingScreenState extends State<LoadingScreen> {
               }
               return;
             }
-  
+
             // Wait before next attempt
             await Future.delayed(pollDelay);
             attempts++;
           }
-  
+
           // If we get here, we've timed out waiting for the image
           setState(() {
             _isProcessing = false;
@@ -438,49 +436,45 @@ class _LoadingScreenState extends State<LoadingScreen> {
     return Consumer2<LoadingScreenProvider, GlobalSettingsProvider>(
       builder: (context, loadingSettings, globalSettings, child) {
         return Scaffold(
-          // appBar: AppBar(
-          //   leading: IconButton(
-          //     onPressed: () =>
-          //         Navigator.pushNamed(context, AppRoutes.loadingScreenSettings),
-          //     icon: const Icon(Icons.star),
-          //   ),
-          // ),
           body: Container(
             width: double.infinity,
             height: double.infinity,
             decoration: BoxDecoration(
               image: _getBackgroundImage(loadingSettings, globalSettings),
             ),
-            child: Center(
-              child: Column(
-                children: [
-                  // Title
-                  // Update the title widget
-                  if (loadingSettings.showTitle)
-                    Padding(
-                      padding: loadingSettings.titlePadding,
-                      child: Text(
-                        loadingSettings.titleText,
-                        style: TextStyle(
-                          fontSize: loadingSettings.titleFontSize,
-                          fontWeight: loadingSettings.titleFontWeight,
-                          color: loadingSettings.titleColor
-                              .withValues(alpha: loadingSettings.titleOpacity),
-                          height: loadingSettings.titleLineHeight,
-                        ),
-                        textAlign: TextAlign.center,
+            child: Stack(
+              children: [
+                // Title
+                if (loadingSettings.showTitle)
+                  Positioned(
+                    top: loadingSettings.titleTop,
+                    left: loadingSettings.titleLeft,
+                    right: loadingSettings.titleRight,
+                    child: Text(
+                      loadingSettings.titleText,
+                      style: TextStyle(
+                        fontSize: loadingSettings.titleFontSize,
+                        fontWeight: loadingSettings.titleFontWeight,
+                        color: loadingSettings.titleColor
+                            .withValues(alpha: loadingSettings.titleOpacity),
+                        height: loadingSettings.titleLineHeight,
                       ),
+                      textAlign: TextAlign.center,
                     ),
+                  ),
 
-                  // Update the loader container
-                  Container(
+                // Loader
+                Positioned(
+                  top: loadingSettings.loaderTop,
+                  left: loadingSettings.loaderLeft,
+                  right: loadingSettings.loaderRight,
+                  child: SizedBox(
                     width: loadingSettings.loaderWidth,
                     height: loadingSettings.loaderHeight,
-                    margin: loadingSettings.loaderMargin,
                     child: _buildLoader(loadingSettings),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         );

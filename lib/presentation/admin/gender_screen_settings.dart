@@ -34,7 +34,7 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
             child: SettingsPreview(
               width: 1080,
               height: 1920,
-              scale: 0.45,
+              // scale: 0.45,
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.transparent),
                 borderRadius: BorderRadius.circular(0),

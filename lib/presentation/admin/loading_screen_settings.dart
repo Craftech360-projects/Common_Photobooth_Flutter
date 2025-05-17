@@ -25,7 +25,7 @@ class LoadingScreenSettings extends StatelessWidget {
             child: SettingsPreview(
               width: 1080,
               height: 1920,
-              scale: 0.45,
+              // scale: 0.45,
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.transparent),
                 borderRadius: BorderRadius.circular(0),
@@ -124,70 +124,34 @@ class LoadingScreenSettings extends StatelessWidget {
                         // Title Margins
                         Constants.h16,
                         const Text(
-                          'Title Padding',
+                          'Title Position',
                           style: TextStyle(
                               fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                         Constants.h8,
 
                         _buildSlider(
-                          label: 'Top Padding',
-                          value: settings.titlePadding.top,
+                          label: 'Top Position',
+                          value: settings.titleTop,
                           min: 0,
-                          max: 400,
-                          onChanged: (value) => settings.setTitlePadding(
-                            EdgeInsets.fromLTRB(
-                              settings.titlePadding.left,
-                              value,
-                              settings.titlePadding.right,
-                              settings.titlePadding.bottom,
-                            ),
-                          ),
+                          max: 1000,
+                          onChanged: (value) => settings.setTitleTop(value),
                         ),
 
                         _buildSlider(
-                          label: 'Bottom Padding',
-                          value: settings.titlePadding.bottom,
+                          label: 'Left Position',
+                          value: settings.titleLeft,
                           min: 0,
-                          max: 400,
-                          onChanged: (value) => settings.setTitlePadding(
-                            EdgeInsets.fromLTRB(
-                              settings.titlePadding.left,
-                              settings.titlePadding.top,
-                              settings.titlePadding.right,
-                              value,
-                            ),
-                          ),
+                          max: 500,
+                          onChanged: (value) => settings.setTitleLeft(value),
                         ),
 
                         _buildSlider(
-                          label: 'Left Padding',
-                          value: settings.titlePadding.left,
+                          label: 'Right Position',
+                          value: settings.titleRight,
                           min: 0,
-                          max: 400,
-                          onChanged: (value) => settings.setTitlePadding(
-                            EdgeInsets.fromLTRB(
-                              value,
-                              settings.titlePadding.top,
-                              settings.titlePadding.right,
-                              settings.titlePadding.bottom,
-                            ),
-                          ),
-                        ),
-
-                        _buildSlider(
-                          label: 'Right Padding',
-                          value: settings.titlePadding.right,
-                          min: 0,
-                          max: 400,
-                          onChanged: (value) => settings.setTitlePadding(
-                            EdgeInsets.fromLTRB(
-                              settings.titlePadding.left,
-                              settings.titlePadding.top,
-                              value,
-                              settings.titlePadding.bottom,
-                            ),
-                          ),
+                          max: 500,
+                          onChanged: (value) => settings.setTitleRight(value),
                         ),
                       ],
 
@@ -218,70 +182,34 @@ class LoadingScreenSettings extends StatelessWidget {
                       // Loader Margins
                       Constants.h16,
                       const Text(
-                        'Loader Margins',
+                        'Loader Position',
                         style: TextStyle(
                             fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                       Constants.h8,
 
                       _buildSlider(
-                        label: 'Top Margin',
-                        value: settings.loaderMargin.top,
+                        label: 'Top Position',
+                        value: settings.loaderTop,
                         min: 0,
-                        max: 500,
-                        onChanged: (value) => settings.setLoaderMargin(
-                          EdgeInsets.fromLTRB(
-                            settings.loaderMargin.left,
-                            value,
-                            settings.loaderMargin.right,
-                            settings.loaderMargin.bottom,
-                          ),
-                        ),
+                        max: 1000,
+                        onChanged: (value) => settings.setLoaderTop(value),
                       ),
 
                       _buildSlider(
-                        label: 'Bottom Margin',
-                        value: settings.loaderMargin.bottom,
+                        label: 'Left Position',
+                        value: settings.loaderLeft,
                         min: 0,
                         max: 500,
-                        onChanged: (value) => settings.setLoaderMargin(
-                          EdgeInsets.fromLTRB(
-                            settings.loaderMargin.left,
-                            settings.loaderMargin.top,
-                            settings.loaderMargin.right,
-                            value,
-                          ),
-                        ),
+                        onChanged: (value) => settings.setLoaderLeft(value),
                       ),
 
                       _buildSlider(
-                        label: 'Left Margin',
-                        value: settings.loaderMargin.left,
+                        label: 'Right Position',
+                        value: settings.loaderRight,
                         min: 0,
                         max: 500,
-                        onChanged: (value) => settings.setLoaderMargin(
-                          EdgeInsets.fromLTRB(
-                            value,
-                            settings.loaderMargin.top,
-                            settings.loaderMargin.right,
-                            settings.loaderMargin.bottom,
-                          ),
-                        ),
-                      ),
-
-                      _buildSlider(
-                        label: 'Right Margin',
-                        value: settings.loaderMargin.right,
-                        min: 0,
-                        max: 500,
-                        onChanged: (value) => settings.setLoaderMargin(
-                          EdgeInsets.fromLTRB(
-                            settings.loaderMargin.left,
-                            settings.loaderMargin.top,
-                            value,
-                            settings.loaderMargin.bottom,
-                          ),
-                        ),
+                        onChanged: (value) => settings.setLoaderRight(value),
                       ),
 
                       const Divider(height: 32),

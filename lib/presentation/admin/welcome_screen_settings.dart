@@ -38,7 +38,7 @@ class WelcomeScreenSettings extends StatelessWidget {
               child: SettingsPreview(
                 width: 1080,
                 height: 1920,
-                scale: 0.45,
+                // scale: 0.45,
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.transparent),
                   borderRadius: BorderRadius.circular(0),
@@ -182,65 +182,47 @@ class WelcomeScreenSettings extends StatelessWidget {
 
                       // Margins
                       Constants.h8,
-                      const Text('Margins',
+                      const Text('Positioning',
                           style: TextStyle(fontWeight: FontWeight.bold)),
 
                       _buildSliderWithLabel(
-                        label: 'Top Margin',
-                        value: welcomeSettings.welcomeMessageMarginTop,
+                        label: 'Left Position',
+                        value: welcomeSettings.welcomeMessageLeft,
                         min: 0,
-                        max: 500,
-                        divisions: 60,
+                        max: 1080,
+                        divisions: 108,
                         onChanged: (value) =>
-                            welcomeSettings.setWelcomeMessageMargins(
+                            welcomeSettings.setWelcomeMessagePosition(
                           value,
-                          welcomeSettings.welcomeMessageMarginBottom,
-                          welcomeSettings.welcomeMessageMarginLeft,
-                          welcomeSettings.welcomeMessageMarginRight,
+                          welcomeSettings.welcomeMessageTop,
+                          welcomeSettings.welcomeMessageWidth,
                         ),
                       ),
 
                       _buildSliderWithLabel(
-                        label: 'Bottom Margin',
-                        value: welcomeSettings.welcomeMessageMarginBottom,
+                        label: 'Top Position',
+                        value: welcomeSettings.welcomeMessageTop,
                         min: 0,
-                        max: 500,
-                        divisions: 60,
+                        max: 1000,
+                        divisions: 100,
                         onChanged: (value) =>
-                            welcomeSettings.setWelcomeMessageMargins(
-                          welcomeSettings.welcomeMessageMarginTop,
+                            welcomeSettings.setWelcomeMessagePosition(
+                          welcomeSettings.welcomeMessageLeft,
                           value,
-                          welcomeSettings.welcomeMessageMarginLeft,
-                          welcomeSettings.welcomeMessageMarginRight,
+                          welcomeSettings.welcomeMessageWidth,
                         ),
                       ),
 
                       _buildSliderWithLabel(
-                        label: 'Left Margin',
-                        value: welcomeSettings.welcomeMessageMarginLeft,
-                        min: 0,
-                        max: 500,
-                        divisions: 60,
+                        label: 'Width',
+                        value: welcomeSettings.welcomeMessageWidth,
+                        min: 200,
+                        max: 1080,
+                        divisions: 88,
                         onChanged: (value) =>
-                            welcomeSettings.setWelcomeMessageMargins(
-                          welcomeSettings.welcomeMessageMarginTop,
-                          welcomeSettings.welcomeMessageMarginBottom,
-                          value,
-                          welcomeSettings.welcomeMessageMarginRight,
-                        ),
-                      ),
-
-                      _buildSliderWithLabel(
-                        label: 'Right Margin',
-                        value: welcomeSettings.welcomeMessageMarginRight,
-                        min: 0,
-                        max: 500,
-                        divisions: 60,
-                        onChanged: (value) =>
-                            welcomeSettings.setWelcomeMessageMargins(
-                          welcomeSettings.welcomeMessageMarginTop,
-                          welcomeSettings.welcomeMessageMarginBottom,
-                          welcomeSettings.welcomeMessageMarginLeft,
+                            welcomeSettings.setWelcomeMessagePosition(
+                          welcomeSettings.welcomeMessageLeft,
+                          welcomeSettings.welcomeMessageTop,
                           value,
                         ),
                       ),
@@ -367,29 +349,7 @@ class WelcomeScreenSettings extends StatelessWidget {
                       ),
 
                       // Button Margins
-                      _buildSliderWithLabel(
-                        label: 'Button Top Margin',
-                        value: welcomeSettings.buttonMarginTop,
-                        min: 0,
-                        max: 350,
-                        divisions: 60,
-                        onChanged: (value) => welcomeSettings.setButtonMargins(
-                          value,
-                          welcomeSettings.buttonMarginBottom,
-                        ),
-                      ),
-
-                      _buildSliderWithLabel(
-                        label: 'Button Bottom Margin',
-                        value: welcomeSettings.buttonMarginBottom,
-                        min: 0,
-                        max: 350,
-                        divisions: 60,
-                        onChanged: (value) => welcomeSettings.setButtonMargins(
-                          welcomeSettings.buttonMarginTop,
-                          value,
-                        ),
-                      ),
+                     
 
                       _buildSliderWithLabel(
                         label: 'Button Opacity',

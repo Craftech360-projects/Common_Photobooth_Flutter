@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:photobooth_flutter/core/themes/app_colors.dart';
 
 class SettingsPreview extends StatelessWidget {
   final Widget child;
@@ -18,26 +19,38 @@ class SettingsPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Calculate the available space
+    final screenSize = MediaQuery.of(context).size;
+    final availableHeight = screenSize.height * 0.85; // Leave some margin
+    
+    // Calculate the scale that would fit the height
+    final heightScale = availableHeight / height;
+    
+    // Use the smaller of the provided scale or height-based scale
+    final effectiveScale = scale < heightScale ? scale : heightScale;
+    
     // Calculate the scaled dimensions
-    final scaledWidth = width * scale;
-    final scaledHeight = height * scale;
+    final scaledWidth = width * effectiveScale;
+    final scaledHeight = height * effectiveScale;
 
     return Container(
       width: scaledWidth,
       height: scaledHeight,
       decoration: decoration ??
           BoxDecoration(
-            color: Colors.transparent,
-            borderRadius: BorderRadius.circular(0),
+            color: Colors.black12, // Light gray background to show boundaries
+            border: Border.all(color: AppColors.grey.withValues(alpha: 0.5)),
+            borderRadius: BorderRadius.circular(8),
           ),
-      child: Transform.scale(
-        scale: 1,
-        alignment: Alignment.center,
-        transformHitTests: false,
-        child: SizedBox(
-          width: width,
-          height: height,
-          child: child,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: FittedBox(
+          fit: BoxFit.contain,
+          child: SizedBox(
+            width: width,
+            height: height,
+            child: child,
+          ),
         ),
       ),
     );

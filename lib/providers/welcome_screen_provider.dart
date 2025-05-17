@@ -11,7 +11,7 @@ class WelcomeScreenProvider extends ChangeNotifier {
 
   // Welcome screen settings
   bool _showWelcomeScreen = true;
-  String _welcomeMessage = 'Welcome to the AI Photobooth!';
+  String _welcomeMessage = 'Welcome to\nNext Level AI Photobooth';
 
   // Welcome message styling
   double _welcomeMessageFontSize = 22.0;
@@ -21,10 +21,15 @@ class WelcomeScreenProvider extends ChangeNotifier {
   Color _welcomeMessageColor = AppColors.white;
   double _welcomeMessageOpacity = 1.0;
   bool _welcomeMessageItalic = false;
-  double _welcomeMessageMarginTop = 0.0;
-  double _welcomeMessageMarginBottom = 15.0;
-  double _welcomeMessageMarginLeft = 0.0;
-  double _welcomeMessageMarginRight = 0.0;
+
+  // Position properties for welcome message
+  double _welcomeMessageLeft = 400.0;
+  double _welcomeMessageTop = 900.0;
+  double _welcomeMessageWidth = 300.0;
+
+  // Position properties for button
+  double _buttonLeft = 460.0;
+  double _buttonTop = 970.0;
 
   // Button settings
   bool _useImageButton = false;
@@ -42,8 +47,6 @@ class WelcomeScreenProvider extends ChangeNotifier {
   bool _buttonTextItalic = false;
   double _buttonTextOpacity = 1.0;
   double _buttonOpacity = 1.0;
-  double _buttonMarginTop = 0.0;
-  double _buttonMarginBottom = 0.0;
   double _buttonPaddingVertical = 0.0;
   double _buttonPaddingHorizontal = 0.0;
 
@@ -64,10 +67,12 @@ class WelcomeScreenProvider extends ChangeNotifier {
   Color get welcomeMessageColor => _welcomeMessageColor;
   double get welcomeMessageOpacity => _welcomeMessageOpacity;
   bool get welcomeMessageItalic => _welcomeMessageItalic;
-  double get welcomeMessageMarginTop => _welcomeMessageMarginTop;
-  double get welcomeMessageMarginBottom => _welcomeMessageMarginBottom;
-  double get welcomeMessageMarginLeft => _welcomeMessageMarginLeft;
-  double get welcomeMessageMarginRight => _welcomeMessageMarginRight;
+
+  double get welcomeMessageLeft => _welcomeMessageLeft;
+  double get welcomeMessageTop => _welcomeMessageTop;
+  double get welcomeMessageWidth => _welcomeMessageWidth;
+  double get buttonLeft => _buttonLeft;
+  double get buttonTop => _buttonTop;
 
   // Getters for button styling
   double get buttonTextFontSize => _buttonTextFontSize;
@@ -76,8 +81,6 @@ class WelcomeScreenProvider extends ChangeNotifier {
   bool get buttonTextItalic => _buttonTextItalic;
   double get buttonTextOpacity => _buttonTextOpacity;
   double get buttonOpacity => _buttonOpacity;
-  double get buttonMarginTop => _buttonMarginTop;
-  double get buttonMarginBottom => _buttonMarginBottom;
   double get buttonPaddingVertical => _buttonPaddingVertical;
   double get buttonPaddingHorizontal => _buttonPaddingHorizontal;
 
@@ -128,17 +131,16 @@ class WelcomeScreenProvider extends ChangeNotifier {
         _prefs.getDouble('welcome_message_opacity') ?? _welcomeMessageOpacity;
     _welcomeMessageItalic =
         _prefs.getBool('welcome_message_italic') ?? _welcomeMessageItalic;
-    _welcomeMessageMarginTop = _prefs.getDouble('welcome_message_margin_top') ??
-        _welcomeMessageMarginTop;
-    _welcomeMessageMarginBottom =
-        _prefs.getDouble('welcome_message_margin_bottom') ??
-            _welcomeMessageMarginBottom;
-    _welcomeMessageMarginLeft =
-        _prefs.getDouble('welcome_message_margin_left') ??
-            _welcomeMessageMarginLeft;
-    _welcomeMessageMarginRight =
-        _prefs.getDouble('welcome_message_margin_right') ??
-            _welcomeMessageMarginRight;
+
+    // Load position properties
+    _welcomeMessageLeft =
+        _prefs.getDouble('welcome_message_left') ?? _welcomeMessageLeft;
+    _welcomeMessageTop =
+        _prefs.getDouble('welcome_message_top') ?? _welcomeMessageTop;
+    _welcomeMessageWidth =
+        _prefs.getDouble('welcome_message_width') ?? _welcomeMessageWidth;
+    _buttonLeft = _prefs.getDouble('welcome_button_left') ?? _buttonLeft;
+    _buttonTop = _prefs.getDouble('welcome_button_top') ?? _buttonTop;
 
     /// Load button settings
     _useImageButton =
@@ -170,10 +172,6 @@ class WelcomeScreenProvider extends ChangeNotifier {
         _prefs.getDouble('welcome_button_text_opacity') ?? _buttonTextOpacity;
     _buttonOpacity =
         _prefs.getDouble('welcome_button_opacity') ?? _buttonOpacity;
-    _buttonMarginTop =
-        _prefs.getDouble('welcome_button_margin_top') ?? _buttonMarginTop;
-    _buttonMarginBottom =
-        _prefs.getDouble('welcome_button_margin_bottom') ?? _buttonMarginBottom;
     _buttonPaddingVertical =
         _prefs.getDouble('welcome_button_padding_vertical') ??
             _buttonPaddingVertical;
@@ -271,16 +269,22 @@ class WelcomeScreenProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setWelcomeMessageMargins(
-      double top, double bottom, double left, double right) async {
-    _welcomeMessageMarginTop = top;
-    _welcomeMessageMarginBottom = bottom;
-    _welcomeMessageMarginLeft = left;
-    _welcomeMessageMarginRight = right;
-    await _prefs.setDouble('welcome_message_margin_top', top);
-    await _prefs.setDouble('welcome_message_margin_bottom', bottom);
-    await _prefs.setDouble('welcome_message_margin_left', left);
-    await _prefs.setDouble('welcome_message_margin_right', right);
+  // Position methods
+  void setWelcomeMessagePosition(double left, double top, double width) async {
+    _welcomeMessageLeft = left;
+    _welcomeMessageTop = top;
+    _welcomeMessageWidth = width;
+    await _prefs.setDouble('welcome_message_left', left);
+    await _prefs.setDouble('welcome_message_top', top);
+    await _prefs.setDouble('welcome_message_width', width);
+    notifyListeners();
+  }
+
+  void setButtonPosition(double left, double top) async {
+    _buttonLeft = left;
+    _buttonTop = top;
+    await _prefs.setDouble('welcome_button_left', left);
+    await _prefs.setDouble('welcome_button_top', top);
     notifyListeners();
   }
 
@@ -318,14 +322,6 @@ class WelcomeScreenProvider extends ChangeNotifier {
   void setButtonOpacity(double opacity) async {
     _buttonOpacity = opacity;
     await _prefs.setDouble('welcome_button_opacity', opacity);
-    notifyListeners();
-  }
-
-  void setButtonMargins(double top, double bottom) async {
-    _buttonMarginTop = top;
-    _buttonMarginBottom = bottom;
-    await _prefs.setDouble('welcome_button_margin_top', top);
-    await _prefs.setDouble('welcome_button_margin_bottom', bottom);
     notifyListeners();
   }
 

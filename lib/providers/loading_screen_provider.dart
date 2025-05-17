@@ -13,10 +13,12 @@ class LoadingScreenProvider extends ChangeNotifier {
   double _titleFontSize = 22.0;
   FontWeight _titleFontWeight = FontWeight.w500;
   Color _titleColor = AppColors.white;
-  EdgeInsets _titlePadding = const EdgeInsets.only(top: 170, bottom: 20);
   bool _showTitle = true;
   double _titleLineHeight = 1.0;
   double _titleOpacity = 1.0;
+  double _titleTop = 455.0;
+  double _titleLeft = 0.0;
+  double _titleRight = 0.0;
 
   // Loader settings
   double _loaderWidth = 100.0;
@@ -25,7 +27,10 @@ class LoadingScreenProvider extends ChangeNotifier {
   Color _loaderBorderColor = AppColors.white;
   double _loaderBorderWidth = 0.0;
   bool _showLoaderBorder = false;
-  EdgeInsets _loaderMargin = const EdgeInsets.only(top: 200);
+  // Loader position
+  double _loaderTop = 915.0;
+  double _loaderLeft = 0.0;
+  double _loaderRight = 0.0;
 
   // Background settings
   bool _showBackground = false;
@@ -42,7 +47,9 @@ class LoadingScreenProvider extends ChangeNotifier {
   double get titleFontSize => _titleFontSize;
   FontWeight get titleFontWeight => _titleFontWeight;
   Color get titleColor => _titleColor;
-  EdgeInsets get titlePadding => _titlePadding;
+  double get titleTop => _titleTop;
+  double get titleLeft => _titleLeft;
+  double get titleRight => _titleRight;
   bool get showTitle => _showTitle;
   double get titleLineHeight => _titleLineHeight;
   double get titleOpacity => _titleOpacity;
@@ -53,7 +60,9 @@ class LoadingScreenProvider extends ChangeNotifier {
   Color get loaderBorderColor => _loaderBorderColor;
   double get loaderBorderWidth => _loaderBorderWidth;
   bool get showLoaderBorder => _showLoaderBorder;
-  EdgeInsets get loaderMargin => _loaderMargin;
+  double get loaderTop => _loaderTop;
+  double get loaderLeft => _loaderLeft;
+  double get loaderRight => _loaderRight;
 
   bool get showBackground => _showBackground;
   String? get backgroundImagePath => _backgroundImagePath;
@@ -88,8 +97,20 @@ class LoadingScreenProvider extends ChangeNotifier {
     _saveSettings();
   }
 
-  void setTitlePadding(EdgeInsets padding) {
-    _titlePadding = padding;
+  void setTitleTop(double top) {
+    _titleTop = top;
+    notifyListeners();
+    _saveSettings();
+  }
+
+  void setTitleLeft(double left) {
+    _titleLeft = left;
+    notifyListeners();
+    _saveSettings();
+  }
+
+  void setTitleRight(double right) {
+    _titleRight = right;
     notifyListeners();
     _saveSettings();
   }
@@ -124,8 +145,20 @@ class LoadingScreenProvider extends ChangeNotifier {
     _saveSettings();
   }
 
-  void setLoaderMargin(EdgeInsets margin) {
-    _loaderMargin = margin;
+  void setLoaderTop(double top) {
+    _loaderTop = top;
+    notifyListeners();
+    _saveSettings();
+  }
+
+  void setLoaderLeft(double left) {
+    _loaderLeft = left;
+    notifyListeners();
+    _saveSettings();
+  }
+
+  void setLoaderRight(double right) {
+    _loaderRight = right;
     notifyListeners();
     _saveSettings();
   }
@@ -220,15 +253,10 @@ class LoadingScreenProvider extends ChangeNotifier {
         _titleOpacity = settings['titleOpacity'] ?? _titleOpacity;
 
         // Load title padding properly
-        if (settings['titlePadding'] != null) {
-          final paddingMap = settings['titlePadding'] as Map<String, dynamic>;
-          _titlePadding = EdgeInsets.fromLTRB(
-            paddingMap['left'] ?? 0.0,
-            paddingMap['top'] ?? 170.0,
-            paddingMap['right'] ?? 0.0,
-            paddingMap['bottom'] ?? 20.0,
-          );
-        }
+       // Load title position
+        _titleTop = settings['titleTop'] ?? _titleTop;
+        _titleLeft = settings['titleLeft'] ?? _titleLeft;
+        _titleRight = settings['titleRight'] ?? _titleRight;
 
         _loaderWidth = settings['loaderWidth'] ?? _loaderWidth;
         _loaderHeight = settings['loaderHeight'] ?? _loaderHeight;
@@ -241,15 +269,9 @@ class LoadingScreenProvider extends ChangeNotifier {
         _showLoaderBorder = settings['showLoaderBorder'] ?? _showLoaderBorder;
 
         // Load loader margin
-        if (settings['loaderMargin'] != null) {
-          final marginMap = settings['loaderMargin'] as Map<String, dynamic>;
-          _loaderMargin = EdgeInsets.fromLTRB(
-            marginMap['left'] ?? 0.0,
-            marginMap['top'] ?? 200.0,
-            marginMap['right'] ?? 0.0,
-            marginMap['bottom'] ?? 0.0,
-          );
-        }
+        _loaderTop = settings['loaderTop'] ?? _loaderTop;
+        _loaderLeft = settings['loaderLeft'] ?? _loaderLeft;
+        _loaderRight = settings['loaderRight'] ?? _loaderRight;
 
         _showBackground = settings['showBackground'] ?? _showBackground;
         _backgroundImagePath = settings['backgroundImagePath'];
@@ -278,12 +300,9 @@ class LoadingScreenProvider extends ChangeNotifier {
       'titleOpacity': _titleOpacity,
 
       // Properly serialize title padding
-      'titlePadding': {
-        'left': _titlePadding.left,
-        'top': _titlePadding.top,
-        'right': _titlePadding.right,
-        'bottom': _titlePadding.bottom,
-      },
+      'titleTop': _titleTop,
+      'titleLeft': _titleLeft,
+      'titleRight': _titleRight,
 
       'loaderWidth': _loaderWidth,
       'loaderHeight': _loaderHeight,
@@ -291,12 +310,9 @@ class LoadingScreenProvider extends ChangeNotifier {
       'loaderBorderColor': _loaderBorderColor.value,
       'loaderBorderWidth': _loaderBorderWidth,
       'showLoaderBorder': _showLoaderBorder,
-      'loaderMargin': {
-        'left': _loaderMargin.left,
-        'top': _loaderMargin.top,
-        'right': _loaderMargin.right,
-        'bottom': _loaderMargin.bottom,
-      },
+      'loaderTop': _loaderTop,
+      'loaderLeft': _loaderLeft,
+      'loaderRight': _loaderRight,
       'showBackground': _showBackground,
       'backgroundImagePath': _backgroundImagePath,
       'isBackgroundImageAsset': _isBackgroundImageAsset,

@@ -33,9 +33,9 @@ class CustomTextField {
   double borderRadius;
   double width;
   double height;
-  EdgeInsets margin;
-  EdgeInsets padding;
   TextFieldType fieldType;
+  double left;
+  double top;
 
   CustomTextField({
     required this.id,
@@ -53,10 +53,10 @@ class CustomTextField {
     this.borderWidth = 1.0,
     this.borderColor = AppColors.black,
     this.borderRadius = 4.0,
-    this.width = 0.2, // Percentage of screen width
+    this.width = 0.4, // Percentage of screen width
     this.height = 60.0,
-    this.margin = EdgeInsets.zero,
-    this.padding = const EdgeInsets.symmetric(horizontal: 12.0),
+    this.left = 350.0,
+    this.top = 0.0,
     this.fieldType = TextFieldType.custom,
   });
 
@@ -79,18 +79,8 @@ class CustomTextField {
         'borderRadius': borderRadius,
         'width': width,
         'height': height,
-        'margin': {
-          'left': margin.left,
-          'top': margin.top,
-          'right': margin.right,
-          'bottom': margin.bottom,
-        },
-        'padding': {
-          'left': padding.left,
-          'top': padding.top,
-          'right': padding.right,
-          'bottom': padding.bottom,
-        },
+        'left': left,
+        'top': top,
         'fieldType': fieldType.name, // --- SERIALIZE ENUM NAME ---
       };
 // Helper method for deserialization (optional but good practice)
@@ -123,22 +113,8 @@ class CustomTextField {
       borderRadius: json['borderRadius']?.toDouble() ?? 4.0,
       width: json['width']?.toDouble() ?? 0.55,
       height: json['height']?.toDouble() ?? 60.0,
-      margin: json['margin'] != null
-          ? EdgeInsets.fromLTRB(
-              json['margin']['left']?.toDouble() ?? 0.0,
-              json['margin']['top']?.toDouble() ?? 0.0,
-              json['margin']['right']?.toDouble() ?? 0.0,
-              json['margin']['bottom']?.toDouble() ?? 0.0,
-            )
-          : EdgeInsets.zero,
-      padding: json['padding'] != null
-          ? EdgeInsets.fromLTRB(
-              json['padding']['left']?.toDouble() ?? 12.0,
-              json['padding']['top']?.toDouble() ?? 0.0,
-              json['padding']['right']?.toDouble() ?? 12.0,
-              json['padding']['bottom']?.toDouble() ?? 0.0,
-            )
-          : const EdgeInsets.symmetric(horizontal: 12.0),
+      left: json['left']?.toDouble() ?? 350.0,
+      top: json['top']?.toDouble() ?? 0.0,
       fieldType: getTextFieldTypeFromName(
           json['fieldType']), // --- DESERIALIZE ENUM NAME ---
     );
@@ -163,8 +139,9 @@ class RegistrationScreenProvider extends ChangeNotifier {
   double _titleLineHeight = 1.0;
   TextAlign _titleTextAlign = TextAlign.center;
   Color _titleTextColor = AppColors.white;
-  EdgeInsets _titleMargin =
-      const EdgeInsets.only(top: 0, left: 0, right: 0, bottom: 20);
+  double _titleLeft = 395.0;
+  double _titleTop = 900.0;
+  double _titleWidth = 300.0;
 
   // Button settings
   bool _useImageButton = false;
@@ -182,9 +159,10 @@ class RegistrationScreenProvider extends ChangeNotifier {
   Color _buttonBorderColor = AppColors.white;
   EdgeInsets _buttonPadding =
       const EdgeInsets.symmetric(horizontal: 30, vertical: 15);
-  EdgeInsets _buttonMargin = EdgeInsets.zero;
   double _buttonOpacity = 1.0;
   double _buttonTextOpacity = 1.0;
+  double _buttonLeft = 450.0;
+  double _buttonTop = 1070.0;
 
   // Image button settings
   String? _buttonImagePath;
@@ -210,7 +188,9 @@ class RegistrationScreenProvider extends ChangeNotifier {
   double get titleLineHeight => _titleLineHeight;
   TextAlign get titleTextAlign => _titleTextAlign;
   Color get titleTextColor => _titleTextColor;
-  EdgeInsets get titleMargin => _titleMargin;
+  double get titleLeft => _titleLeft;
+  double get titleTop => _titleTop;
+  double get titleWidth => _titleWidth;
 
   FontWeight get buttonFontWeight => _buttonFontWeight;
   bool get buttonIsItalic => _buttonIsItalic;
@@ -230,7 +210,8 @@ class RegistrationScreenProvider extends ChangeNotifier {
   double get buttonBorderWidth => _buttonBorderWidth;
   Color get buttonBorderColor => _buttonBorderColor;
   EdgeInsets get buttonPadding => _buttonPadding;
-  EdgeInsets get buttonMargin => _buttonMargin;
+  double get buttonLeft => _buttonLeft;
+  double get buttonTop => _buttonTop;
 
   String? get buttonImagePath => _buttonImagePath;
   bool get isButtonImageAsset => _isButtonImageAsset;
@@ -270,35 +251,19 @@ class RegistrationScreenProvider extends ChangeNotifier {
     _titleTextColor = Color(_prefs.getInt('registration_title_text_color') ??
         _titleTextColor.value);
 
-    // Load title margins
-    final double titleTopMargin =
-        _prefs.getDouble('registration_title_margin_top') ?? 0.0;
-    final double titleBottomMargin =
-        _prefs.getDouble('registration_title_margin_bottom') ?? 20.0;
-    final double titleLeftMargin =
-        _prefs.getDouble('registration_title_margin_left') ?? 0.0;
-    final double titleRightMargin =
-        _prefs.getDouble('registration_title_margin_right') ?? 0.0;
-    _titleMargin = EdgeInsets.fromLTRB(
-        titleLeftMargin, titleTopMargin, titleRightMargin, titleBottomMargin);
+    _titleLeft = _prefs.getDouble('registration_title_left') ?? _titleLeft;
+    _titleTop = _prefs.getDouble('registration_title_top') ?? _titleTop;
+    _titleWidth = _prefs.getDouble('registration_title_width') ?? _titleWidth;
 
-    // Load button margins
-    final double topMargin =
-        _prefs.getDouble('registration_button_margin_top') ?? 0.0;
-    final double bottomMargin =
-        _prefs.getDouble('registration_button_margin_bottom') ?? 0.0;
-    final double leftMargin =
-        _prefs.getDouble('registration_button_margin_left') ?? 0.0;
-    final double rightMargin =
-        _prefs.getDouble('registration_button_margin_right') ?? 0.0;
-    _buttonMargin =
-        EdgeInsets.fromLTRB(leftMargin, topMargin, rightMargin, bottomMargin);
+// Load button position
+    _buttonLeft = _prefs.getDouble('registration_button_left') ?? _buttonLeft;
+    _buttonTop = _prefs.getDouble('registration_button_top') ?? _buttonTop;
 
     // Load button padding
     final double verticalPadding =
-        _prefs.getDouble('registration_button_padding_vertical') ?? 15.0;
+        _prefs.getDouble('registration_button_padding_vertical') ?? 12.0;
     final double horizontalPadding =
-        _prefs.getDouble('registration_button_padding_horizontal') ?? 30.0;
+        _prefs.getDouble('registration_button_padding_horizontal') ?? 18.0;
     _buttonPadding = EdgeInsets.symmetric(
         vertical: verticalPadding, horizontal: horizontalPadding);
 
@@ -369,17 +334,6 @@ class RegistrationScreenProvider extends ChangeNotifier {
         padding['top']?.toDouble() ?? 15.0,
         padding['right']?.toDouble() ?? 30.0,
         padding['bottom']?.toDouble() ?? 15.0,
-      );
-    }
-
-    final String? marginJson = _prefs.getString('registration_button_margin');
-    if (marginJson != null) {
-      final Map<String, dynamic> margin = jsonDecode(marginJson);
-      _buttonMargin = EdgeInsets.fromLTRB(
-        margin['left']?.toDouble() ?? 0.0,
-        margin['top']?.toDouble() ?? 0.0,
-        margin['right']?.toDouble() ?? 0.0,
-        margin['bottom']?.toDouble() ?? 0.0,
       );
     }
 
@@ -461,12 +415,21 @@ class RegistrationScreenProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setTitleMargin(EdgeInsets margin) {
-    _titleMargin = margin;
-    _prefs.setDouble('registration_title_margin_top', margin.top);
-    _prefs.setDouble('registration_title_margin_bottom', margin.bottom);
-    _prefs.setDouble('registration_title_margin_left', margin.left);
-    _prefs.setDouble('registration_title_margin_right', margin.right);
+  void setTitlePosition(double left, double top, double width) {
+    _titleLeft = left;
+    _titleTop = top;
+    _titleWidth = width;
+    _prefs.setDouble('registration_title_left', left);
+    _prefs.setDouble('registration_title_top', top);
+    _prefs.setDouble('registration_title_width', width);
+    notifyListeners();
+  }
+
+  void setButtonPosition(double left, double top) {
+    _buttonLeft = left;
+    _buttonTop = top;
+    _prefs.setDouble('registration_button_left', left);
+    _prefs.setDouble('registration_button_top', top);
     notifyListeners();
   }
 
@@ -491,15 +454,6 @@ class RegistrationScreenProvider extends ChangeNotifier {
   void setButtonFontWeight(FontWeight weight) async {
     _buttonFontWeight = weight;
     await _prefs.setInt('registration_button_font_weight', weight.index);
-    notifyListeners();
-  }
-
-  void setButtonMargin(EdgeInsets margin) async {
-    _buttonMargin = margin;
-    await _prefs.setDouble('registration_button_margin_top', margin.top);
-    await _prefs.setDouble('registration_button_margin_bottom', margin.bottom);
-    await _prefs.setDouble('registration_button_margin_left', margin.left);
-    await _prefs.setDouble('registration_button_margin_right', margin.right);
     notifyListeners();
   }
 
@@ -575,6 +529,38 @@ class RegistrationScreenProvider extends ChangeNotifier {
     _textFields.add(newField);
     await _saveTextFields();
     notifyListeners();
+  }
+
+  void updateTextFieldPosition(String id, double left, double top) {
+    final index = _textFields.indexWhere((field) => field.id == id);
+    if (index != -1) {
+      final field = _textFields[index];
+      final updatedField = CustomTextField(
+        id: field.id,
+        label: field.label,
+        hintText: field.hintText,
+        isEnabled: field.isEnabled,
+        isRequired: field.isRequired,
+        fillColor: field.fillColor,
+        textColor: field.textColor,
+        labelColor: field.labelColor,
+        fontSize: field.fontSize,
+        fontWeight: field.fontWeight,
+        isItalic: field.isItalic,
+        hasBorder: field.hasBorder,
+        borderWidth: field.borderWidth,
+        borderColor: field.borderColor,
+        borderRadius: field.borderRadius,
+        width: field.width,
+        height: field.height,
+        fieldType: field.fieldType,
+        left: left,
+        top: top,
+      );
+      _textFields[index] = updatedField;
+      _saveTextFields();
+      notifyListeners();
+    }
   }
 
   void updateTextField(String id, CustomTextField updatedField) async {
@@ -658,8 +644,6 @@ class RegistrationScreenProvider extends ChangeNotifier {
         fontWeight: fontWeight ?? currentField.fontWeight,
         isItalic: isItalic ?? currentField.isItalic,
         borderRadius: borderRadius ?? currentField.borderRadius,
-        margin: margin ?? currentField.margin,
-        padding: padding ?? currentField.padding,
       );
 
       await _saveTextFields();

@@ -40,7 +40,7 @@ class _RegistrationScreenSettingsState
               child: SettingsPreview(
                 width: 1080,
                 height: 1920,
-                scale: 0.45,
+                // scale: 0.45,
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.transparent),
                   borderRadius: BorderRadius.circular(0),
@@ -214,67 +214,69 @@ class _RegistrationScreenSettingsState
                         },
                       ),
 
-                      // Title Margins
-                      // Title Margins
-                      _buildSectionHeader('Title Margins'),
-                      _buildSliderWithLabel(
-                        label: 'Top Margin',
-                        value: settings.titleMargin.top,
-                        min: 0,
-                        max: 350,
-                        divisions: 60,
-                        onChanged: (value) {
-                          settings.setTitleMargin(EdgeInsets.fromLTRB(
-                            settings.titleMargin.left,
-                            value,
-                            settings.titleMargin.right,
-                            settings.titleMargin.bottom,
-                          ));
-                        },
+                      _buildSectionHeader('Title Position'),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              initialValue: settings.titleLeft.toString(),
+                              decoration: const InputDecoration(
+                                labelText: 'Left Position',
+                                border: OutlineInputBorder(),
+                              ),
+                              keyboardType: TextInputType.number,
+                              onChanged: (value) {
+                                final left = double.tryParse(value);
+                                if (left != null) {
+                                  settings.setTitlePosition(
+                                    left,
+                                    settings.titleTop,
+                                    settings.titleWidth,
+                                  );
+                                }
+                              },
+                            ),
+                          ),
+                          Constants.w16,
+                          Expanded(
+                            child: TextFormField(
+                              initialValue: settings.titleTop.toString(),
+                              decoration: const InputDecoration(
+                                labelText: 'Top Position',
+                                border: OutlineInputBorder(),
+                              ),
+                              keyboardType: TextInputType.number,
+                              onChanged: (value) {
+                                final top = double.tryParse(value);
+                                if (top != null) {
+                                  settings.setTitlePosition(
+                                    settings.titleLeft,
+                                    top,
+                                    settings.titleWidth,
+                                  );
+                                }
+                              },
+                            ),
+                          ),
+                        ],
                       ),
-                      _buildSliderWithLabel(
-                        label: 'Left Margin',
-                        value: settings.titleMargin.left,
-                        min: 0,
-                        max: 350,
-                        divisions: 60,
+                      Constants.h16,
+                      TextFormField(
+                        initialValue: settings.titleWidth.toString(),
+                        decoration: const InputDecoration(
+                          labelText: 'Width',
+                          border: OutlineInputBorder(),
+                        ),
+                        keyboardType: TextInputType.number,
                         onChanged: (value) {
-                          settings.setTitleMargin(EdgeInsets.fromLTRB(
-                            value,
-                            settings.titleMargin.top,
-                            settings.titleMargin.right,
-                            settings.titleMargin.bottom,
-                          ));
-                        },
-                      ),
-                      _buildSliderWithLabel(
-                        label: 'Right Margin',
-                        value: settings.titleMargin.right,
-                        min: 0,
-                        max: 350,
-                        divisions: 60,
-                        onChanged: (value) {
-                          settings.setTitleMargin(EdgeInsets.fromLTRB(
-                            settings.titleMargin.left,
-                            settings.titleMargin.top,
-                            value,
-                            settings.titleMargin.bottom,
-                          ));
-                        },
-                      ),
-                      _buildSliderWithLabel(
-                        label: 'Bottom Margin',
-                        value: settings.titleMargin.bottom,
-                        min: 0,
-                        max: 350,
-                        divisions: 60,
-                        onChanged: (value) {
-                          settings.setTitleMargin(EdgeInsets.fromLTRB(
-                            settings.titleMargin.left,
-                            settings.titleMargin.top,
-                            settings.titleMargin.right,
-                            value,
-                          ));
+                          final width = double.tryParse(value);
+                          if (width != null) {
+                            settings.setTitlePosition(
+                              settings.titleLeft,
+                              settings.titleTop,
+                              width,
+                            );
+                          }
                         },
                       ),
                     ],
@@ -441,6 +443,52 @@ class _RegistrationScreenSettingsState
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     Constants.h8,
+
+// Inside the button settings section, add position settings:
+                    _buildSectionHeader('Button Position'),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            initialValue: settings.buttonLeft.toString(),
+                            decoration: const InputDecoration(
+                              labelText: 'Left Position',
+                              border: OutlineInputBorder(),
+                            ),
+                            keyboardType: TextInputType.number,
+                            onChanged: (value) {
+                              final left = double.tryParse(value);
+                              if (left != null) {
+                                settings.setButtonPosition(
+                                  left,
+                                  settings.buttonTop,
+                                );
+                              }
+                            },
+                          ),
+                        ),
+                        Constants.w16,
+                        Expanded(
+                          child: TextFormField(
+                            initialValue: settings.buttonTop.toString(),
+                            decoration: const InputDecoration(
+                              labelText: 'Top Position',
+                              border: OutlineInputBorder(),
+                            ),
+                            keyboardType: TextInputType.number,
+                            onChanged: (value) {
+                              final top = double.tryParse(value);
+                              if (top != null) {
+                                settings.setButtonPosition(
+                                  settings.buttonLeft,
+                                  top,
+                                );
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
 
                     // Button Type
                     SwitchListTile(
@@ -661,8 +709,7 @@ class _RegistrationScreenSettingsState
                     borderRadius: field.borderRadius,
                     width: field.width,
                     height: field.height,
-                    margin: field.margin,
-                    padding: field.padding,
+
                     fieldType: newValue, // Set the new type
                   );
                   settings.updateTextField(field.id, updatedField);
@@ -695,8 +742,7 @@ class _RegistrationScreenSettingsState
                   borderRadius: field.borderRadius,
                   width: field.width,
                   height: field.height,
-                  margin: field.margin,
-                  padding: field.padding,
+
                   fieldType: field.fieldType, // Preserve existing type
                 );
                 settings.updateTextField(field.id, updatedField);
@@ -729,8 +775,7 @@ class _RegistrationScreenSettingsState
                   borderRadius: field.borderRadius,
                   width: field.width,
                   height: field.height,
-                  margin: field.margin,
-                  padding: field.padding,
+
                   fieldType: field.fieldType, // Preserve existing type
                 );
                 settings.updateTextField(field.id, updatedField);
@@ -1152,162 +1197,52 @@ class _RegistrationScreenSettingsState
               },
             ),
 
-            // Margins
-            _buildSectionHeader('Margins'),
-
-            _buildSliderWithLabel(
-              label: 'Top Margin',
-              value: field.margin.top,
-              min: 0,
-              max: 50,
-              divisions: 50,
-              onChanged: (value) {
-                settings.updateTextFieldStyle(
-                  id: field.id,
-                  margin: EdgeInsets.fromLTRB(
-                    field.margin.left,
-                    value,
-                    field.margin.right,
-                    field.margin.bottom,
+            // Inside the text field card builder, add position settings:
+            _buildSectionHeader('Field Position'),
+            Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    initialValue: field.left.toString(),
+                    decoration: const InputDecoration(
+                      labelText: 'Left Position',
+                      border: OutlineInputBorder(),
+                    ),
+                    keyboardType: TextInputType.number,
+                    onChanged: (value) {
+                      final left = double.tryParse(value);
+                      if (left != null) {
+                        settings.updateTextFieldPosition(
+                          field.id,
+                          left,
+                          field.top,
+                        );
+                      }
+                    },
                   ),
-                );
-              },
-            ),
-
-            _buildSliderWithLabel(
-              label: 'Bottom Margin',
-              value: field.margin.bottom,
-              min: 0,
-              max: 50,
-              divisions: 50,
-              onChanged: (value) {
-                settings.updateTextFieldStyle(
-                  id: field.id,
-                  margin: EdgeInsets.fromLTRB(
-                    field.margin.left,
-                    field.margin.top,
-                    field.margin.right,
-                    value,
+                ),
+                Constants.w16,
+                Expanded(
+                  child: TextFormField(
+                    initialValue: field.top.toString(),
+                    decoration: const InputDecoration(
+                      labelText: 'Top Position',
+                      border: OutlineInputBorder(),
+                    ),
+                    keyboardType: TextInputType.number,
+                    onChanged: (value) {
+                      final top = double.tryParse(value);
+                      if (top != null) {
+                        settings.updateTextFieldPosition(
+                          field.id,
+                          field.left,
+                          top,
+                        );
+                      }
+                    },
                   ),
-                );
-              },
-            ),
-
-            _buildSliderWithLabel(
-              label: 'Left Margin',
-              value: field.margin.left,
-              min: 0,
-              max: 50,
-              divisions: 50,
-              onChanged: (value) {
-                settings.updateTextFieldStyle(
-                  id: field.id,
-                  margin: EdgeInsets.fromLTRB(
-                    value,
-                    field.margin.top,
-                    field.margin.right,
-                    field.margin.bottom,
-                  ),
-                );
-              },
-            ),
-
-            _buildSliderWithLabel(
-              label: 'Right Margin',
-              value: field.margin.right,
-              min: 0,
-              max: 50,
-              divisions: 50,
-              onChanged: (value) {
-                settings.updateTextFieldStyle(
-                  id: field.id,
-                  margin: EdgeInsets.fromLTRB(
-                    field.margin.left,
-                    field.margin.top,
-                    value,
-                    field.margin.bottom,
-                  ),
-                );
-              },
-            ),
-
-            // Padding
-            _buildSectionHeader('Padding'),
-
-            _buildSliderWithLabel(
-              label: 'Top Padding',
-              value: field.padding.top,
-              min: 0,
-              max: 30,
-              divisions: 30,
-              onChanged: (value) {
-                settings.updateTextFieldStyle(
-                  id: field.id,
-                  padding: EdgeInsets.fromLTRB(
-                    field.padding.left,
-                    value,
-                    field.padding.right,
-                    field.padding.bottom,
-                  ),
-                );
-              },
-            ),
-
-            _buildSliderWithLabel(
-              label: 'Bottom Padding',
-              value: field.padding.bottom,
-              min: 0,
-              max: 30,
-              divisions: 30,
-              onChanged: (value) {
-                settings.updateTextFieldStyle(
-                  id: field.id,
-                  padding: EdgeInsets.fromLTRB(
-                    field.padding.left,
-                    field.padding.top,
-                    field.padding.right,
-                    value,
-                  ),
-                );
-              },
-            ),
-
-            _buildSliderWithLabel(
-              label: 'Left Padding',
-              value: field.padding.left,
-              min: 0,
-              max: 30,
-              divisions: 30,
-              onChanged: (value) {
-                settings.updateTextFieldStyle(
-                  id: field.id,
-                  padding: EdgeInsets.fromLTRB(
-                    value,
-                    field.padding.top,
-                    field.padding.right,
-                    field.padding.bottom,
-                  ),
-                );
-              },
-            ),
-
-            _buildSliderWithLabel(
-              label: 'Right Padding',
-              value: field.padding.right,
-              min: 0,
-              max: 30,
-              divisions: 30,
-              onChanged: (value) {
-                settings.updateTextFieldStyle(
-                  id: field.id,
-                  padding: EdgeInsets.fromLTRB(
-                    field.padding.left,
-                    field.padding.top,
-                    value,
-                    field.padding.bottom,
-                  ),
-                );
-              },
+                ),
+              ],
             ),
           ],
         ),
@@ -1565,67 +1500,6 @@ class _RegistrationScreenSettingsState
             settings.setButtonTextOpacity(value);
           },
         ),
-        _buildSectionHeader('Button Margins'),
-        _buildSliderWithLabel(
-          label: 'Top Margin',
-          value: settings.buttonMargin.top,
-          min: 0,
-          max: 50,
-          divisions: 50,
-          onChanged: (value) {
-            settings.setButtonMargin(EdgeInsets.fromLTRB(
-              settings.buttonMargin.left,
-              value,
-              settings.buttonMargin.right,
-              settings.buttonMargin.bottom,
-            ));
-          },
-        ),
-        _buildSliderWithLabel(
-          label: 'Bottom Margin',
-          value: settings.buttonMargin.bottom,
-          min: 0,
-          max: 50,
-          divisions: 50,
-          onChanged: (value) {
-            settings.setButtonMargin(EdgeInsets.fromLTRB(
-              settings.buttonMargin.left,
-              settings.buttonMargin.top,
-              settings.buttonMargin.right,
-              value,
-            ));
-          },
-        ),
-        _buildSliderWithLabel(
-          label: 'Left Margin',
-          value: settings.buttonMargin.left,
-          min: 0,
-          max: 50,
-          divisions: 50,
-          onChanged: (value) {
-            settings.setButtonMargin(EdgeInsets.fromLTRB(
-              value,
-              settings.buttonMargin.top,
-              settings.buttonMargin.right,
-              settings.buttonMargin.bottom,
-            ));
-          },
-        ),
-        _buildSliderWithLabel(
-          label: 'Right Margin',
-          value: settings.buttonMargin.right,
-          min: 0,
-          max: 50,
-          divisions: 50,
-          onChanged: (value) {
-            settings.setButtonMargin(EdgeInsets.fromLTRB(
-              settings.buttonMargin.left,
-              settings.buttonMargin.top,
-              value,
-              settings.buttonMargin.bottom,
-            ));
-          },
-        ),
         _buildSectionHeader('Button Padding'),
         _buildSliderWithLabel(
           label: 'Vertical Padding',
@@ -1845,66 +1719,6 @@ class _RegistrationScreenSettingsState
           },
         ),
         _buildSectionHeader('Image Button Margins'),
-        _buildSliderWithLabel(
-          label: 'Top Margin',
-          value: settings.buttonMargin.top,
-          min: 0,
-          max: 50,
-          divisions: 50,
-          onChanged: (value) {
-            settings.setButtonMargin(EdgeInsets.fromLTRB(
-              settings.buttonMargin.left,
-              value,
-              settings.buttonMargin.right,
-              settings.buttonMargin.bottom,
-            ));
-          },
-        ),
-        _buildSliderWithLabel(
-          label: 'Bottom Margin',
-          value: settings.buttonMargin.bottom,
-          min: 0,
-          max: 50,
-          divisions: 50,
-          onChanged: (value) {
-            settings.setButtonMargin(EdgeInsets.fromLTRB(
-              settings.buttonMargin.left,
-              settings.buttonMargin.top,
-              settings.buttonMargin.right,
-              value,
-            ));
-          },
-        ),
-        _buildSliderWithLabel(
-          label: 'Left Margin',
-          value: settings.buttonMargin.left,
-          min: 0,
-          max: 50,
-          divisions: 50,
-          onChanged: (value) {
-            settings.setButtonMargin(EdgeInsets.fromLTRB(
-              value,
-              settings.buttonMargin.top,
-              settings.buttonMargin.right,
-              settings.buttonMargin.bottom,
-            ));
-          },
-        ),
-        _buildSliderWithLabel(
-          label: 'Right Margin',
-          value: settings.buttonMargin.right,
-          min: 0,
-          max: 50,
-          divisions: 50,
-          onChanged: (value) {
-            settings.setButtonMargin(EdgeInsets.fromLTRB(
-              settings.buttonMargin.left,
-              settings.buttonMargin.top,
-              value,
-              settings.buttonMargin.bottom,
-            ));
-          },
-        ),
       ],
     );
   }

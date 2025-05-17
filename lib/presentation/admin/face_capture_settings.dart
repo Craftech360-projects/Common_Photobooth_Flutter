@@ -74,12 +74,12 @@ class _FaceCaptureSettingsState extends State<FaceCaptureSettings> {
               child: SettingsPreview(
                 width: 1080,
                 height: 1920,
-                scale: 0.45,
+                // scale: 0.45,
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.transparent),
                   borderRadius: BorderRadius.circular(0),
                 ),
-                child: const FaceCaptureScreen(),
+                child: const FaceCaptureScreen(isPreviewMode: true),
               ),
             ),
             Expanded(
@@ -162,42 +162,27 @@ class _FaceCaptureSettingsState extends State<FaceCaptureSettings> {
                             onChanged: (value) =>
                                 settings.setTitleAlignment(value!),
                           ),
-                          _buildSectionTitle('Title Padding'),
+                          _buildSectionTitle('Title Position'),
                           _buildSlider(
-                            label: 'Left Padding',
-                            value: settings.titlePadding.left,
+                            label: 'Top Position',
+                            value: settings.titleTop,
                             min: 0.0,
-                            max: 350.0,
-                            onChanged: (value) => settings.setTitlePadding(
-                              settings.titlePadding.copyWith(left: value),
-                            ),
+                            max: 500.0,
+                            onChanged: (value) => settings.setTitleTop(value),
                           ),
                           _buildSlider(
-                            label: 'Top Padding',
-                            value: settings.titlePadding.top,
+                            label: 'Left Position',
+                            value: settings.titleLeft,
                             min: 0.0,
-                            max: 350.0,
-                            onChanged: (value) => settings.setTitlePadding(
-                              settings.titlePadding.copyWith(top: value),
-                            ),
+                            max: 500.0,
+                            onChanged: (value) => settings.setTitleLeft(value),
                           ),
                           _buildSlider(
-                            label: 'Right Padding',
-                            value: settings.titlePadding.right,
+                            label: 'Right Position',
+                            value: settings.titleRight,
                             min: 0.0,
-                            max: 350.0,
-                            onChanged: (value) => settings.setTitlePadding(
-                              settings.titlePadding.copyWith(right: value),
-                            ),
-                          ),
-                          _buildSlider(
-                            label: 'Bottom Padding',
-                            value: settings.titlePadding.bottom,
-                            min: 0.0,
-                            max: 350.0,
-                            onChanged: (value) => settings.setTitlePadding(
-                              settings.titlePadding.copyWith(bottom: value),
-                            ),
+                            max: 500.0,
+                            onChanged: (value) => settings.setTitleRight(value),
                           ),
                           _buildColorPicker(
                             label: 'Title Color',
@@ -230,14 +215,14 @@ class _FaceCaptureSettingsState extends State<FaceCaptureSettings> {
                           label: 'Preview Width',
                           value: settings.previewWidth,
                           min: 200.0,
-                          max: 600.0,
+                          max: 900.0,
                           onChanged: (value) => settings.setPreviewWidth(value),
                         ),
                         _buildSlider(
                           label: 'Preview Height',
                           value: settings.previewHeight,
                           min: 200.0,
-                          max: 600.0,
+                          max: 900.0,
                           onChanged: (value) =>
                               settings.setPreviewHeight(value),
                         ),
@@ -272,42 +257,20 @@ class _FaceCaptureSettingsState extends State<FaceCaptureSettings> {
                           ),
                         ],
 
-                        _buildSectionTitle('Preview Margins'),
+                        _buildSectionTitle('Preview Position'),
                         _buildSlider(
-                          label: 'Left Margin',
-                          value: settings.previewMargin.left,
+                          label: 'Top Position',
+                          value: settings.previewTop,
                           min: 0.0,
-                          max: 200.0,
-                          onChanged: (value) => settings.setPreviewMargin(
-                            settings.previewMargin.copyWith(left: value),
-                          ),
+                          max: 1000.0,
+                          onChanged: (value) => settings.setPreviewTop(value),
                         ),
                         _buildSlider(
-                          label: 'Top Margin',
-                          value: settings.previewMargin.top,
+                          label: 'Left Position',
+                          value: settings.previewLeft,
                           min: 0.0,
-                          max: 200.0,
-                          onChanged: (value) => settings.setPreviewMargin(
-                            settings.previewMargin.copyWith(top: value),
-                          ),
-                        ),
-                        _buildSlider(
-                          label: 'Right Margin',
-                          value: settings.previewMargin.right,
-                          min: 0.0,
-                          max: 200.0,
-                          onChanged: (value) => settings.setPreviewMargin(
-                            settings.previewMargin.copyWith(right: value),
-                          ),
-                        ),
-                        _buildSlider(
-                          label: 'Bottom Margin',
-                          value: settings.previewMargin.bottom,
-                          min: 0.0,
-                          max: 200.0,
-                          onChanged: (value) => settings.setPreviewMargin(
-                            settings.previewMargin.copyWith(bottom: value),
-                          ),
+                          max: 800.0,
+                          onChanged: (value) => settings.setPreviewLeft(value),
                         ),
 
                         const Divider(),
@@ -404,42 +367,20 @@ class _FaceCaptureSettingsState extends State<FaceCaptureSettings> {
                           onChanged: (value) =>
                               settings.setButtonBorderRadius(value),
                         ),
-                        _buildSectionTitle('Button Margins'),
+                        _buildSectionTitle('Button Position'),
                         _buildSlider(
-                          label: 'Left Margin',
-                          value: settings.buttonMargin.left,
+                          label: 'Top Position',
+                          value: settings.buttonTop,
                           min: 0.0,
-                          max: 100.0,
-                          onChanged: (value) => settings.setButtonMargin(
-                            settings.buttonMargin.copyWith(left: value),
-                          ),
+                          max: 1500.0,
+                          onChanged: (value) => settings.setButtonTop(value),
                         ),
                         _buildSlider(
-                          label: 'Top Margin',
-                          value: settings.buttonMargin.top,
+                          label: 'Left Position',
+                          value: settings.buttonLeft,
                           min: 0.0,
-                          max: 100.0,
-                          onChanged: (value) => settings.setButtonMargin(
-                            settings.buttonMargin.copyWith(top: value),
-                          ),
-                        ),
-                        _buildSlider(
-                          label: 'Right Margin',
-                          value: settings.buttonMargin.right,
-                          min: 0.0,
-                          max: 100.0,
-                          onChanged: (value) => settings.setButtonMargin(
-                            settings.buttonMargin.copyWith(right: value),
-                          ),
-                        ),
-                        _buildSlider(
-                          label: 'Bottom Margin',
-                          value: settings.buttonMargin.bottom,
-                          min: 0.0,
-                          max: 100.0,
-                          onChanged: (value) => settings.setButtonMargin(
-                            settings.buttonMargin.copyWith(bottom: value),
-                          ),
+                          max: 800.0,
+                          onChanged: (value) => settings.setButtonLeft(value),
                         ),
 
                         _buildSectionTitle('Button Padding'),
