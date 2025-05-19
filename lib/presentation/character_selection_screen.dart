@@ -31,42 +31,40 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen> {
         // Main carousel
         Column(
           children: [
-            Expanded(
-              child: Center(
-                child: SizedBox(
-                  height: settings.characterHeight + 20,
-                  // Make the width take the full available width
-                  width: double.infinity,
-                  child: PageView.builder(
-                    controller: _pageController,
-                    // Reduce the spacing by increasing the viewportFraction
-                    itemCount: characters.length * 2000,
-                    itemBuilder: (context, index) {
-                      final actualIndex = index % characters.length;
-                      final character = characters[actualIndex];
-                      final isCenter = actualIndex == _currentIndex;
+            Center(
+              child: SizedBox(
+                height: settings.characterHeight + 20,
+                // Remove or replace this line:
+                // width: double.infinity,
+                child: PageView.builder(
+                  controller: _pageController,
+                  // Reduce the spacing by increasing the viewportFraction
+                  itemCount: characters.length * 2000,
+                  itemBuilder: (context, index) {
+                    final actualIndex = index % characters.length;
+                    final character = characters[actualIndex];
+                    final isCenter = actualIndex == _currentIndex;
 
-                      // Apply scale based on position - center items are larger
-                      final scale = isCenter ? 1.0 : 0.8;
+                    // Apply scale based on position - center items are larger
+                    final scale = isCenter ? 1.0 : 0.8;
 
-                      return Center(
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 500),
-                          curve: Curves.easeOut,
-                          // Reduce horizontal margin to bring images closer
-                          margin: EdgeInsets.symmetric(
-                            horizontal: 0,
-                            vertical: isCenter ? 0 : 20,
-                          ),
-                          child: Transform.scale(
-                            scale: scale,
-                            child: _buildCharacterOption(character, settings,
-                                isCenter: isCenter),
-                          ),
+                    return Center(
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 500),
+                        curve: Curves.easeOut,
+                        // Reduce horizontal margin to bring images closer
+                        margin: EdgeInsets.symmetric(
+                          horizontal: 0,
+                          vertical: isCenter ? 0 : 20,
                         ),
-                      );
-                    },
-                  ),
+                        child: Transform.scale(
+                          scale: scale,
+                          child: _buildCharacterOption(character, settings,
+                              isCenter: isCenter),
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ),
@@ -255,12 +253,9 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen> {
     }
 
     // Return the grid layout
-    return Padding(
-      padding: settings.gridMargin,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: rows,
-      ),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: rows,
     );
   }
 
@@ -288,85 +283,88 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen> {
     }
 
     return Scaffold(
-      // appBar: AppBar(
-      //   leading: IconButton(
-      //     onPressed: () =>
-      //         Navigator.pushNamed(context, AppRoutes.characterScreenSettings),
-      //     icon: const Icon(Icons.star),
-      //   ),
-      //   actions: [
-      //     IconButton(
-      //       onPressed: () => Navigator.pop(context),
-      //       icon: const Icon(Icons.arrow_back),
-      //     ),
-      //   ],
-      // ),
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        padding: EdgeInsets.zero,
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: _getBackgroundImage(settings, globalSettings),
-            fit: BoxFit.cover,
+        body: Stack(
+      children: [
+        Container(
+          width: double.infinity,
+          height: double.infinity,
+          padding: EdgeInsets.zero,
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: _getBackgroundImage(settings, globalSettings),
+              fit: BoxFit.cover,
+            ),
           ),
         ),
-        child: Column(
-          children: [
-            Container(
-              margin: settings.titleMargin,
-              padding: EdgeInsets.zero,
-              child: Text(
-                settings.titleText,
-                style: TextStyle(
-                  fontSize: settings.titleFontSize,
-                  fontWeight: settings.titleFontWeight,
-                  color: settings.titleColor
-                      .withValues(alpha: settings.titleOpacity),
-                  fontStyle: settings.titleItalic
-                      ? FontStyle.italic
-                      : FontStyle.normal,
-                  height: settings.titleLineHeight,
-                ),
-                textAlign: settings.titleAlignment,
-              ),
-            ),
 
-            // Character Selection
-            SizedBox(
-              height: settings.characterHeight + 20,
-              child: characters.length > 3 && settings.useCarousel
-                  ? Container(
-                      margin: settings.carouselMargin,
-                      padding: settings.carouselPadding,
-                      child: _buildCarouselSelection(characters, settings),
-                    )
-                  : _buildGridSelection(characters, settings),
+        Positioned(
+          left: settings.titleLeft,
+          top: settings.titleTop,
+          width: settings.titleWidth,
+          child: Text(
+            settings.titleText,
+            style: TextStyle(
+              fontSize: settings.titleFontSize,
+              fontWeight: settings.titleFontWeight,
+              color:
+                  settings.titleColor.withValues(alpha: settings.titleOpacity),
+              fontStyle:
+                  settings.titleItalic ? FontStyle.italic : FontStyle.normal,
+              height: settings.titleLineHeight,
             ),
-
-            // Error message
-            if (_showError)
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  'Please select a character to continue!',
-                  style: TextStyle(
-                    color: settings.titleColor
-                        .withValues(alpha: settings.titleOpacity),
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-
-            // Add the button with proper margin
-            Container(
-              margin: settings.buttonMargin,
-              child: _buildButton(settings, appProvider),
-            ),
-          ],
+            textAlign: settings.titleAlignment,
+          ),
         ),
-      ),
-    );
+
+        // Character Selection
+        Positioned(
+          left: settings.characterLeft,
+          top: settings.characterTop,
+          right: settings.characterRight,
+          child: SizedBox(
+            height: settings.characterHeight + 20,
+            child: characters.length > 3 && settings.useCarousel
+                ? _buildCarouselSelection(characters, settings)
+                : _buildGridSelection(characters, settings),
+          ),
+        ),
+
+        if (_showError)
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              'Please select a character to continue!',
+              style: TextStyle(
+                color: settings.titleColor
+                    .withValues(alpha: settings.titleOpacity),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+
+        Positioned(
+          left: settings.buttonLeft,
+          bottom: settings.buttonBottom,
+          child: _buildButton(settings, appProvider),
+        ),
+
+        Positioned(
+          right: 0,
+          top: 0,
+          child: GestureDetector(
+            onTap: () =>
+                Navigator.pushNamed(context, AppRoutes.characterScreenSettings),
+            child: Container(
+              width: 50,
+              height: 50,
+              decoration: const BoxDecoration(
+                color: Colors.transparent,
+              ),
+            ),
+          ),
+        ),
+      ],
+    ));
   }
 
   Widget _buildCharacterOption(

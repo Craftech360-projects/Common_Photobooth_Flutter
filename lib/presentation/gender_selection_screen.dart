@@ -29,83 +29,90 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
     final watermarkProvider = context.watch<AdminWatermarkProvider>();
 
     return Scaffold(
-      // appBar: AppBar(
-      //   leading: IconButton(
-      //       onPressed: () =>
-      //           Navigator.pushNamed(context, AppRoutes.genderScreenSettings),
-      //       icon: const Icon(Icons.star)),
-      // ),
       body: WatermarkOverlay(
         show: watermarkProvider.showWatermark,
-        child: Container(
-          width: double.infinity,
-          height: double.infinity,
-          padding: EdgeInsets.all(settings.screenPadding),
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: _getBackgroundImage(settings, globalSettings),
-              fit: BoxFit.cover,
+        child: Stack(
+          children: [
+            Container(
+              width: double.infinity,
+              height: double.infinity,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: _getBackgroundImage(settings, globalSettings),
+                  fit: BoxFit.cover,
+                ),
+              ),
             ),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Title with updated styling
-              Container(
-                margin: settings.titleMargin,
-                padding: EdgeInsets.only(bottom: settings.titlePadding),
-                child: Text(
-                  settings.titleText,
-                  style: TextStyle(
-                    fontSize: settings.titleFontSize,
-                    fontWeight: settings.titleFontWeight,
-                    color: settings.titleColor
-                        .withValues(alpha: settings.titleOpacity),
-                    fontStyle: settings.titleItalic
-                        ? FontStyle.italic
-                        : FontStyle.normal,
-                    height: settings.titleLineHeight,
+
+            // Title with updated styling
+            Positioned(
+              left: settings.titleLeft,
+              top: settings.titleTop,
+              width: settings.titleWidth,
+              child: Text(
+                settings.titleText,
+                style: TextStyle(
+                  fontSize: settings.titleFontSize,
+                  fontWeight: settings.titleFontWeight,
+                  color: settings.titleColor
+                      .withValues(alpha: settings.titleOpacity),
+                  fontStyle: settings.titleItalic
+                      ? FontStyle.italic
+                      : FontStyle.normal,
+                  height: settings.titleLineHeight,
+                ),
+                textAlign: settings.titleAlignment,
+              ),
+            ),
+
+            // Gender Selection with margins and padding
+            Positioned(
+              left: settings.genderSelectionLeft,
+              top: settings.genderSelectionTop,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Male Option
+                  _buildGenderOption('male', settings),
+
+                  // Female Option
+                  _buildGenderOption('female', settings),
+                ],
+              ),
+            ),
+
+            // Error message
+            if (_showError)
+              const Text(
+                'Please select a gender to continue',
+                style: TextStyle(
+                  color: AppColors.red,
+                  fontSize: 16,
+                ),
+              ),
+
+            // Continue Button with margins
+            Positioned(
+                left: settings.buttonLeft,
+                bottom: settings.buttonBottom,
+                child: _buildButton(settings, appProvider)),
+
+            Positioned(
+              right: 0,
+              top: 0,
+              child: GestureDetector(
+                onTap: () => Navigator.pushNamed(
+                    context, AppRoutes.genderScreenSettings),
+                child: Container(
+                  width: 50,
+                  height: 50,
+                  decoration: const BoxDecoration(
+                    color: Colors.transparent,
                   ),
-                  textAlign: settings.titleAlignment,
                 ),
               ),
-
-              // Gender Selection with margins and padding
-              Container(
-                margin: settings.imagesRowMargin,
-                padding: settings.imagesRowPadding,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Male Option
-                    _buildGenderOption('male', settings),
-
-                    // Female Option
-                    _buildGenderOption('female', settings),
-                  ],
-                ),
-              ),
-
-              // Error message
-              if (_showError)
-                const Padding(
-                  padding: EdgeInsets.only(top: 16.0),
-                  child: Text(
-                    'Please select a gender to continue',
-                    style: TextStyle(
-                      color: AppColors.red,
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
-
-              // Continue Button with margins
-              Container(
-                margin: settings.buttonMargin,
-                child: _buildButton(settings, appProvider),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -210,21 +217,6 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
       ),
     );
   }
-
-  // void _validateAndContinue(PhotoboothProvider appProvider) {
-  //   if (_selectedGender == null) {
-  //     setState(() {
-  //       _showError = true;
-  //     });
-  //   } else {
-  //     _continueToNextScreen(appProvider);
-  //   }
-  // }
-
-  // void _continueToNextScreen(PhotoboothProvider appProvider) {
-  //   appProvider.setGender(_selectedGender!);
-  //   Navigator.pushNamed(context, AppRoutes.characterSelection);
-  // }
 
   ImageProvider _getBackgroundImage(
       GenderSelectionProvider settings, GlobalSettingsProvider globalSettings) {

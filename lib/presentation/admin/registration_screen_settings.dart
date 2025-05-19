@@ -215,70 +215,43 @@ class _RegistrationScreenSettingsState
                       ),
 
                       _buildSectionHeader('Title Position'),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextFormField(
-                              initialValue: settings.titleLeft.toString(),
-                              decoration: const InputDecoration(
-                                labelText: 'Left Position',
-                                border: OutlineInputBorder(),
-                              ),
-                              keyboardType: TextInputType.number,
-                              onChanged: (value) {
-                                final left = double.tryParse(value);
-                                if (left != null) {
-                                  settings.setTitlePosition(
-                                    left,
-                                    settings.titleTop,
-                                    settings.titleWidth,
-                                  );
-                                }
-                              },
-                            ),
-                          ),
-                          Constants.w16,
-                          Expanded(
-                            child: TextFormField(
-                              initialValue: settings.titleTop.toString(),
-                              decoration: const InputDecoration(
-                                labelText: 'Top Position',
-                                border: OutlineInputBorder(),
-                              ),
-                              keyboardType: TextInputType.number,
-                              onChanged: (value) {
-                                final top = double.tryParse(value);
-                                if (top != null) {
-                                  settings.setTitlePosition(
-                                    settings.titleLeft,
-                                    top,
-                                    settings.titleWidth,
-                                  );
-                                }
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                      Constants.h16,
-                      TextFormField(
-                        initialValue: settings.titleWidth.toString(),
-                        decoration: const InputDecoration(
-                          labelText: 'Width',
-                          border: OutlineInputBorder(),
-                        ),
-                        keyboardType: TextInputType.number,
-                        onChanged: (value) {
-                          final width = double.tryParse(value);
-                          if (width != null) {
+
+                      _buildSliderWithLabel(
+                          label: 'From Left',
+                          value: settings.titleLeft,
+                          min: 0.0,
+                          max: 1000.0,
+                          onChanged: (value) {
+                            settings.setTitlePosition(
+                              value,
+                              settings.titleTop,
+                              settings.titleWidth,
+                            );
+                          }),
+                      _buildSliderWithLabel(
+                          label: 'From Top',
+                          value: settings.titleTop,
+                          min: 0.0,
+                          max: 1000.0,
+                          onChanged: (value) {
+                            settings.setTitlePosition(
+                              settings.titleLeft,
+                              value,
+                              settings.titleWidth,
+                            );
+                          }),
+                      _buildSliderWithLabel(
+                          label: 'Title Width',
+                          value: settings.titleWidth,
+                          min: 0.0,
+                          max: 1000.0,
+                          onChanged: (value) {
                             settings.setTitlePosition(
                               settings.titleLeft,
                               settings.titleTop,
-                              width,
+                              value,
                             );
-                          }
-                        },
-                      ),
+                          }),
                     ],
 
                     const Divider(),
@@ -530,7 +503,7 @@ class _RegistrationScreenSettingsState
     required double value,
     required double min,
     required double max,
-    required int divisions,
+    int? divisions,
     required Function(double) onChanged,
   }) {
     return Column(
@@ -1199,51 +1172,32 @@ class _RegistrationScreenSettingsState
 
             // Inside the text field card builder, add position settings:
             _buildSectionHeader('Field Position'),
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    initialValue: field.left.toString(),
-                    decoration: const InputDecoration(
-                      labelText: 'Left Position',
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.number,
-                    onChanged: (value) {
-                      final left = double.tryParse(value);
-                      if (left != null) {
-                        settings.updateTextFieldPosition(
-                          field.id,
-                          left,
-                          field.top,
-                        );
-                      }
-                    },
-                  ),
-                ),
-                Constants.w16,
-                Expanded(
-                  child: TextFormField(
-                    initialValue: field.top.toString(),
-                    decoration: const InputDecoration(
-                      labelText: 'Top Position',
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.number,
-                    onChanged: (value) {
-                      final top = double.tryParse(value);
-                      if (top != null) {
-                        settings.updateTextFieldPosition(
-                          field.id,
-                          field.left,
-                          top,
-                        );
-                      }
-                    },
-                  ),
-                ),
-              ],
-            ),
+
+            _buildSliderWithLabel(
+                label: 'From Left',
+                value: field.left,
+                min: 0.0,
+                max: 1000.0,
+                onChanged: (value) {
+                  settings.updateTextFieldPosition(
+                    field.id,
+                    value,
+                    field.top,
+                  );
+                }),
+
+            _buildSliderWithLabel(
+                label: 'From Top',
+                value: field.top,
+                min: 0.0,
+                max: 1000.0,
+                onChanged: (value) {
+                  settings.updateTextFieldPosition(
+                    field.id,
+                    field.left,
+                    value,
+                  );
+                }),
           ],
         ),
       ),

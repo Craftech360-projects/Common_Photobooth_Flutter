@@ -101,82 +101,40 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
                     },
                   ),
 
-                  // Title Padding
-                  // _buildSliderWithLabel(
-                  //   label: 'Padding',
-                  //   value: settings.titlePadding,
-                  //   min: 0.0,
-                  //   max: 50.0,
-                  //   divisions: 50,
-                  //   onChanged: (value) {
-                  //     settings.setTitleStyle(padding: value);
-                  //   },
-                  // ),
-
-                  // Title Margin
-                  _buildSectionSubtitle('Title Margins'),
+                  _buildSectionSubtitle('Title Position'),
 
                   _buildSliderWithLabel(
-                    label: 'Top Margin',
-                    value: settings.titleMargin.top,
+                    label: 'Title Left',
+                    value: settings.titleLeft,
                     min: 0.0,
-                    max: 350.0,
-                    divisions: 60,
+                    max: 1000.0,
+                    // divisions: 60,
                     onChanged: (value) {
-                      settings.setTitleMargin(EdgeInsets.fromLTRB(
-                        settings.titleMargin.left,
-                        value,
-                        settings.titleMargin.right,
-                        settings.titleMargin.bottom,
-                      ));
+                      settings.setTitlePosition(
+                          value, settings.titleTop, settings.titleWidth);
+                    },
+                  ),
+                  _buildSliderWithLabel(
+                    label: 'Title Top',
+                    value: settings.titleTop,
+                    min: 0.0,
+                    max: 1000.0,
+                    // divisions: 60,
+                    onChanged: (value) {
+                      settings.setTitlePosition(
+                          settings.titleLeft, value, settings.titleWidth);
                     },
                   ),
 
                   _buildSliderWithLabel(
-                    label: 'Bottom Margin',
-                    value: settings.titleMargin.bottom,
+                    label: 'Title Width',
+                    value: settings.titleWidth,
                     min: 0.0,
-                    max: 350.0,
-                    divisions: 60,
+                    max: 900.0,
+                    // divisions: 60,
                     onChanged: (value) {
-                      settings.setTitleMargin(EdgeInsets.fromLTRB(
-                        settings.titleMargin.left,
-                        settings.titleMargin.top,
-                        settings.titleMargin.right,
-                        value,
-                      ));
-                    },
-                  ),
-
-                  _buildSliderWithLabel(
-                    label: 'Left Margin',
-                    value: settings.titleMargin.left,
-                    min: 0.0,
-                    max: 350.0,
-                    divisions: 60,
-                    onChanged: (value) {
-                      settings.setTitleMargin(EdgeInsets.fromLTRB(
-                        value,
-                        settings.titleMargin.top,
-                        settings.titleMargin.right,
-                        settings.titleMargin.bottom,
-                      ));
-                    },
-                  ),
-
-                  _buildSliderWithLabel(
-                    label: 'Right Margin',
-                    value: settings.titleMargin.right,
-                    min: 0.0,
-                    max: 350.0,
-                    divisions: 60,
-                    onChanged: (value) {
-                      settings.setTitleMargin(EdgeInsets.fromLTRB(
-                        settings.titleMargin.left,
-                        settings.titleMargin.top,
-                        value,
-                        settings.titleMargin.bottom,
-                      ));
+                      settings.setTitlePosition(
+                          settings.titleLeft, settings.titleTop, value);
                     },
                   ),
 
@@ -341,135 +299,29 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
                   _buildSectionTitle('Gender Images Settings'),
 
                   // Images Row Margin and Padding
-                  _buildSectionSubtitle('Images Row Margins'),
+                  _buildSectionSubtitle('Gender Section Position'),
 
                   _buildSliderWithLabel(
-                    label: 'Top Margin',
-                    value: settings.imagesRowMargin.top,
+                    label: 'From Left',
+                    value: settings.genderSelectionLeft,
                     min: 0.0,
-                    max: 350.0,
-                    divisions: 60,
+                    max: 1000.0,
+                    // divisions: 60,
                     onChanged: (value) {
-                      settings.setImagesRowMargin(EdgeInsets.fromLTRB(
-                        settings.imagesRowMargin.left,
-                        value,
-                        settings.imagesRowMargin.right,
-                        settings.imagesRowMargin.bottom,
-                      ));
+                      settings.setGenderCardPosition(
+                          value, settings.genderSelectionTop);
                     },
                   ),
 
                   _buildSliderWithLabel(
-                    label: 'Bottom Margin',
-                    value: settings.imagesRowMargin.bottom,
+                    label: 'From Top',
+                    value: settings.genderSelectionTop,
                     min: 0.0,
-                    max: 350.0,
-                    divisions: 60,
+                    max: 1000.0,
+                    // divisions: 60,
                     onChanged: (value) {
-                      settings.setImagesRowMargin(EdgeInsets.fromLTRB(
-                        settings.imagesRowMargin.left,
-                        settings.imagesRowMargin.top,
-                        settings.imagesRowMargin.right,
-                        value,
-                      ));
-                    },
-                  ),
-
-                  _buildSliderWithLabel(
-                    label: 'Left Margin',
-                    value: settings.imagesRowMargin.left,
-                    min: 0.0,
-                    max: 350.0,
-                    divisions: 60,
-                    onChanged: (value) {
-                      settings.setImagesRowMargin(EdgeInsets.fromLTRB(
-                        value,
-                        settings.imagesRowMargin.top,
-                        settings.imagesRowMargin.right,
-                        settings.imagesRowMargin.bottom,
-                      ));
-                    },
-                  ),
-
-                  _buildSliderWithLabel(
-                    label: 'Right Margin',
-                    value: settings.imagesRowMargin.right,
-                    min: 0.0,
-                    max: 350.0,
-                    divisions: 60,
-                    onChanged: (value) {
-                      settings.setImagesRowMargin(EdgeInsets.fromLTRB(
-                        settings.imagesRowMargin.left,
-                        settings.imagesRowMargin.top,
-                        value,
-                        settings.imagesRowMargin.bottom,
-                      ));
-                    },
-                  ),
-
-                  _buildSectionSubtitle('Images Row Padding'),
-
-                  _buildSliderWithLabel(
-                    label: 'Top Padding',
-                    value: settings.imagesRowPadding.top,
-                    min: 0.0,
-                    max: 50.0,
-                    divisions: 50,
-                    onChanged: (value) {
-                      settings.setImagesRowPadding(EdgeInsets.fromLTRB(
-                        settings.imagesRowPadding.left,
-                        value,
-                        settings.imagesRowPadding.right,
-                        settings.imagesRowPadding.bottom,
-                      ));
-                    },
-                  ),
-
-                  _buildSliderWithLabel(
-                    label: 'Bottom Padding',
-                    value: settings.imagesRowPadding.bottom,
-                    min: 0.0,
-                    max: 50.0,
-                    divisions: 50,
-                    onChanged: (value) {
-                      settings.setImagesRowPadding(EdgeInsets.fromLTRB(
-                        settings.imagesRowPadding.left,
-                        settings.imagesRowPadding.top,
-                        settings.imagesRowPadding.right,
-                        value,
-                      ));
-                    },
-                  ),
-
-                  _buildSliderWithLabel(
-                    label: 'Left Padding',
-                    value: settings.imagesRowPadding.left,
-                    min: 0.0,
-                    max: 50.0,
-                    divisions: 50,
-                    onChanged: (value) {
-                      settings.setImagesRowPadding(EdgeInsets.fromLTRB(
-                        value,
-                        settings.imagesRowPadding.top,
-                        settings.imagesRowPadding.right,
-                        settings.imagesRowPadding.bottom,
-                      ));
-                    },
-                  ),
-
-                  _buildSliderWithLabel(
-                    label: 'Right Padding',
-                    value: settings.imagesRowPadding.right,
-                    min: 0.0,
-                    max: 50.0,
-                    divisions: 50,
-                    onChanged: (value) {
-                      settings.setImagesRowPadding(EdgeInsets.fromLTRB(
-                        settings.imagesRowPadding.left,
-                        settings.imagesRowPadding.top,
-                        value,
-                        settings.imagesRowPadding.bottom,
-                      ));
+                      settings.setGenderCardPosition(
+                          settings.genderSelectionLeft, value);
                     },
                   ),
 
@@ -959,139 +811,29 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
                   ],
 
                   // Button Margin
-                  _buildSectionSubtitle('Button Margins'),
+                  _buildSectionSubtitle('Button Positions'),
 
                   _buildSliderWithLabel(
-                    label: 'Top Margin',
-                    value: settings.buttonMargin.top,
+                    label: 'From Left',
+                    value: settings.buttonLeft,
                     min: 0.0,
-                    max: 350.0,
-                    divisions: 60,
+                    max: 1000.0,
+                    // divisions: 60,
                     onChanged: (value) {
-                      settings.setButtonMargin(EdgeInsets.fromLTRB(
-                        settings.buttonMargin.left,
-                        value,
-                        settings.buttonMargin.right,
-                        settings.buttonMargin.bottom,
-                      ));
+                      settings.setButtonPosition(value, settings.buttonBottom);
                     },
                   ),
 
                   _buildSliderWithLabel(
-                    label: 'Bottom Margin',
-                    value: settings.buttonMargin.bottom,
+                    label: 'From Bottom',
+                    value: settings.buttonBottom,
                     min: 0.0,
-                    max: 350.0,
-                    divisions: 60,
+                    max: 1000.0,
+                    // divisions: 60,
                     onChanged: (value) {
-                      settings.setButtonMargin(EdgeInsets.fromLTRB(
-                        settings.buttonMargin.left,
-                        settings.buttonMargin.top,
-                        settings.buttonMargin.right,
-                        value,
-                      ));
+                      settings.setButtonPosition(settings.buttonLeft, value);
                     },
                   ),
-
-                  _buildSliderWithLabel(
-                    label: 'Left Margin',
-                    value: settings.buttonMargin.left,
-                    min: 0.0,
-                    max: 350.0,
-                    divisions: 60,
-                    onChanged: (value) {
-                      settings.setButtonMargin(EdgeInsets.fromLTRB(
-                        value,
-                        settings.buttonMargin.top,
-                        settings.buttonMargin.right,
-                        settings.buttonMargin.bottom,
-                      ));
-                    },
-                  ),
-
-                  _buildSliderWithLabel(
-                    label: 'Right Margin',
-                    value: settings.buttonMargin.right,
-                    min: 0.0,
-                    max: 350.0,
-                    divisions: 60,
-                    onChanged: (value) {
-                      settings.setButtonMargin(EdgeInsets.fromLTRB(
-                        settings.buttonMargin.left,
-                        settings.buttonMargin.top,
-                        value,
-                        settings.buttonMargin.bottom,
-                      ));
-                    },
-                  ),
-
-                  // _buildSectionSubtitle('Button Padding'),
-
-                  // _buildSliderWithLabel(
-                  //   label: 'Top Padding',
-                  //   value: settings.buttonPadding.top,
-                  //   min: 0.0,
-                  //   max: 50.0,
-                  //   divisions: 50,
-                  //   onChanged: (value) {
-                  //     settings.setButtonPadding(EdgeInsets.fromLTRB(
-                  //       settings.buttonPadding.left,
-                  //       value,
-                  //       settings.buttonPadding.right,
-                  //       settings.buttonPadding.bottom,
-                  //     ));
-                  //   },
-                  // ),
-
-                  // _buildSliderWithLabel(
-                  //   label: 'Bottom Padding',
-                  //   value: settings.buttonPadding.bottom,
-                  //   min: 0.0,
-                  //   max: 50.0,
-                  //   divisions: 50,
-                  //   onChanged: (value) {
-                  //     settings.setButtonPadding(EdgeInsets.fromLTRB(
-                  //       settings.buttonPadding.left,
-                  //       settings.buttonPadding.top,
-                  //       settings.buttonPadding.right,
-                  //       value,
-                  //     ));
-                  //   },
-                  // ),
-
-                  // _buildSliderWithLabel(
-                  //   label: 'Left Padding',
-                  //   value: settings.buttonPadding.left,
-                  //   min: 0.0,
-                  //   max: 50.0,
-                  //   divisions: 50,
-                  //   onChanged: (value) {
-                  //     settings.setButtonPadding(EdgeInsets.fromLTRB(
-                  //       value,
-                  //       settings.buttonPadding.top,
-                  //       settings.buttonPadding.right,
-                  //       settings.buttonPadding.bottom,
-                  //     ));
-                  //   },
-                  // ),
-
-                  // _buildSliderWithLabel(
-                  //   label: 'Right Padding',
-                  //   value: settings.buttonPadding.right,
-                  //   min: 0.0,
-                  //   max: 50.0,
-                  //   divisions: 50,
-                  //   onChanged: (value) {
-                  //     settings.setButtonPadding(EdgeInsets.fromLTRB(
-                  //       settings.buttonPadding.left,
-                  //       settings.buttonPadding.top,
-                  //       value,
-                  //       settings.buttonPadding.bottom,
-                  //     ));
-                  //   },
-                  // ),
-
-                  // Constants.h16,
 
                   // Common Button Settings
                   Row(

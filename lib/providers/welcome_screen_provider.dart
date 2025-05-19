@@ -28,8 +28,8 @@ class WelcomeScreenProvider extends ChangeNotifier {
   double _welcomeMessageWidth = 300.0;
 
   // Position properties for button
-  double _buttonLeft = 460.0;
-  double _buttonTop = 970.0;
+  double _buttonLeft = 455.0;
+  double _buttonBottom = 910.0;
 
   // Button settings
   bool _useImageButton = false;
@@ -72,7 +72,7 @@ class WelcomeScreenProvider extends ChangeNotifier {
   double get welcomeMessageTop => _welcomeMessageTop;
   double get welcomeMessageWidth => _welcomeMessageWidth;
   double get buttonLeft => _buttonLeft;
-  double get buttonTop => _buttonTop;
+  double get buttonBottom => _buttonBottom;
 
   // Getters for button styling
   double get buttonTextFontSize => _buttonTextFontSize;
@@ -140,7 +140,7 @@ class WelcomeScreenProvider extends ChangeNotifier {
     _welcomeMessageWidth =
         _prefs.getDouble('welcome_message_width') ?? _welcomeMessageWidth;
     _buttonLeft = _prefs.getDouble('welcome_button_left') ?? _buttonLeft;
-    _buttonTop = _prefs.getDouble('welcome_button_top') ?? _buttonTop;
+    _buttonBottom = _prefs.getDouble('welcome_button_bottom') ?? _buttonBottom;
 
     /// Load button settings
     _useImageButton =
@@ -280,11 +280,11 @@ class WelcomeScreenProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setButtonPosition(double left, double top) async {
+  void setButtonPosition(double left, double bottom) async {
     _buttonLeft = left;
-    _buttonTop = top;
+    _buttonBottom = bottom;
     await _prefs.setDouble('welcome_button_left', left);
-    await _prefs.setDouble('welcome_button_top', top);
+    await _prefs.setDouble('welcome_button_bottom', bottom);
     notifyListeners();
   }
 

@@ -59,7 +59,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               left: welcomeSettings.welcomeMessageLeft,
               top: welcomeSettings.welcomeMessageTop,
               width: welcomeSettings.welcomeMessageWidth,
-             
               child: Text(
                 welcomeSettings.welcomeMessage,
                 style: TextStyle(
@@ -78,7 +77,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
             Positioned(
               left: welcomeSettings.buttonLeft,
-              top: welcomeSettings.buttonTop,
+              bottom: welcomeSettings.buttonBottom,
               child: welcomeSettings.useImageButton
                   ? _buildImageButton(welcomeSettings)
                   : _buildTextButton(welcomeSettings),

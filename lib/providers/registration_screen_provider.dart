@@ -56,7 +56,7 @@ class CustomTextField {
     this.width = 0.4, // Percentage of screen width
     this.height = 60.0,
     this.left = 350.0,
-    this.top = 0.0,
+    this.top = 940.0,
     this.fieldType = TextFieldType.custom,
   });
 
@@ -83,7 +83,8 @@ class CustomTextField {
         'top': top,
         'fieldType': fieldType.name, // --- SERIALIZE ENUM NAME ---
       };
-// Helper method for deserialization (optional but good practice)
+
+  // Helper method for deserialization (optional but good practice)
   factory CustomTextField.fromJson(Map<String, dynamic> json) {
     // Helper to safely get enum from name
     TextFieldType getTextFieldTypeFromName(String? name) {
@@ -162,7 +163,7 @@ class RegistrationScreenProvider extends ChangeNotifier {
   double _buttonOpacity = 1.0;
   double _buttonTextOpacity = 1.0;
   double _buttonLeft = 450.0;
-  double _buttonTop = 1070.0;
+  double _buttonTop = 999.0;
 
   // Image button settings
   String? _buttonImagePath;
@@ -440,13 +441,7 @@ class RegistrationScreenProvider extends ChangeNotifier {
         label: 'Full Name',
         hintText: 'Enter full name',
         fieldType: TextFieldType.name, // --- SET TYPE ---
-      ),
-      CustomTextField(
-        id: 'email', // Keep original IDs
-        label: 'Email',
-        hintText: 'Enter email address',
-        fieldType: TextFieldType.email, // --- SET TYPE ---
-      ),
+      )
     ];
   }
 

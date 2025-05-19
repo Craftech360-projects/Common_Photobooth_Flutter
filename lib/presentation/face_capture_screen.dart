@@ -6,7 +6,6 @@ import 'package:camera/camera.dart';
 import 'package:camera_platform_interface/camera_platform_interface.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:photobooth_flutter/providers/face_capture_provider.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/providers/photobooth_provider.dart';
@@ -301,6 +300,27 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
   Widget build(BuildContext context) {
     final settings = context.watch<FaceCaptureProvider>();
     final globalSettings = context.watch<GlobalSettingsProvider>();
+
+    // Show loading indicator if camera is not initialized
+    if (!_cameraInitialized || _controller == null || !_controller!.value.isInitialized) {
+      return Scaffold(
+        body: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: _getBackgroundImage(settings, globalSettings),
+              fit: BoxFit.cover,
+            ),
+          ),
+          child: Center(
+            child: CircularProgressIndicator(
+              color: settings.previewBorderColor,
+            ),
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       body: Stack(

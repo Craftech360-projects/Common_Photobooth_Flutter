@@ -30,15 +30,6 @@ class OutputScreenSettings extends StatelessWidget {
                       onPressed: () => Navigator.of(context).pop(),
                       child: const Text('Cancel'),
                     ),
-                    TextButton(
-                      onPressed: () {
-                        Provider.of<OutputScreenProvider>(context,
-                                listen: false)
-                            .resetToDefaults();
-                        Navigator.of(context).pop();
-                      },
-                      child: const Text('Reset'),
-                    ),
                   ],
                 ),
               );
@@ -59,7 +50,8 @@ class OutputScreenSettings extends StatelessWidget {
                 border: Border.all(color: Colors.transparent),
                 borderRadius: BorderRadius.circular(0),
               ),
-              child: const SwappedFaceScreen(),
+              // In the SettingsPreview widget
+              child: const SwappedFaceScreen(isPreviewMode: true),
             ),
           ),
           Expanded(
@@ -68,381 +60,423 @@ class OutputScreenSettings extends StatelessWidget {
               child: Consumer<OutputScreenProvider>(
                 builder: (context, settings, child) {
                   return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Title Settings
-                      _buildSectionTitle('Title Settings'),
-                      _buildSwitch(
-                        label: 'Show Title',
-                        value: settings.showTitle,
-                        onChanged: (value) => settings.setShowTitle(value),
-                      ),
-                      if (settings.showTitle) ...[
-                        _buildTextField(
-                          label: 'Title Text',
-                          value: settings.titleText,
-                          onChanged: (value) => settings.setTitleText(value),
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Title Settings
+                        _buildSectionTitle('Title Settings'),
+                        _buildSwitch(
+                          label: 'Show Title',
+                          value: settings.showTitle,
+                          onChanged: (value) => settings.setShowTitle(value),
                         ),
-                        _buildSlider(
-                          label: 'Font Size',
-                          value: settings.titleFontSize,
-                          min: 16.0,
-                          max: 48.0,
-                          onChanged: (value) =>
-                              settings.setTitleStyle(fontSize: value),
-                        ),
-                        _buildDropdown<FontWeight>(
-                          label: 'Font Weight',
-                          value: settings.titleFontWeight,
-                          items: {
-                            FontWeight.normal: 'Normal',
-                            FontWeight.bold: 'Bold',
-                          },
-                          onChanged: (value) =>
-                              settings.setTitleStyle(fontWeight: value),
-                        ),
-                        _buildColorPickerWithLabel(
-                          context: context,
-                          label: 'Text Color',
-                          color: settings.titleColor,
-                          onColorChanged: (color) =>
-                              settings.setTitleStyle(color: color),
-                        ),
-
-                        _buildSlider(
-                          label: 'Title Padding',
-                          value: settings.titlePadding,
-                          min: 0.0,
-                          max: 50.0,
-                          onChanged: (value) =>
-                              settings.setTitleStyle(padding: value),
-                        ),
-                        // Remove dropdown for position and keep only the fine-tuning controls
-                        _buildSectionTitle('Title Position'),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _buildSlider(
-                                label: 'Horizontal Offset',
-                                value: settings.titleOffsetX,
-                                min: -300.0,
-                                max: 300.0,
-                                onChanged: (value) => settings.setTitleOffset(
-                                    value, settings.titleOffsetY),
-                              ),
-                            ),
-                            Expanded(
-                              child: _buildSlider(
-                                label: 'Vertical Offset',
-                                value: settings.titleOffsetY,
-                                min: -300.0,
-                                max: 300.0,
-                                onChanged: (value) => settings.setTitleOffset(
-                                    settings.titleOffsetX, value),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-
-                      const Divider(),
-
-                      // Image Settings
-                      _buildSectionTitle('Image Settings'),
-                      _buildSlider(
-                        label: 'Image Width',
-                        value: settings.imageWidth,
-                        min: 200.0,
-                        max: 600.0,
-                        onChanged: (value) => settings.setImageDimensions(
-                            value, settings.imageHeight),
-                      ),
-                      _buildSlider(
-                        label: 'Image Height',
-                        value: settings.imageHeight,
-                        min: 200.0,
-                        max: 800.0,
-                        onChanged: (value) => settings.setImageDimensions(
-                            settings.imageWidth, value),
-                      ),
-                      _buildSlider(
-                        label: 'Border Radius',
-                        value: settings.imageBorderRadius,
-                        min: 0.0,
-                        max: 50.0,
-                        onChanged: (value) =>
-                            settings.setImageBorder(radius: value),
-                      ),
-                      _buildColorPickerWithLabel(
-                        context: context,
-                        label: 'Border Color',
-                        color: settings.imageBorderColor,
-                        onColorChanged: (color) =>
-                            settings.setImageBorder(color: color),
-                      ),
-
-                      _buildSlider(
-                        label: 'Border Width',
-                        value: settings.imageBorderWidth,
-                        min: 0.0,
-                        max: 10.0,
-                        onChanged: (value) =>
-                            settings.setImageBorder(width: value),
-                      ),
-                      _buildSlider(
-                        label: 'Image Spacing',
-                        value: settings.imageSpacing,
-                        min: 0.0,
-                        max: 100.0,
-                        onChanged: (value) => settings.setImageSpacing(value),
-                      ),
-
-                      // Fine-tuning controls for image position
-                      _buildSectionTitle('Fine-tune Image Position'),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildSlider(
-                              label: 'Horizontal Offset',
-                              value: settings.imageOffsetX,
-                              min: -300.0,
-                              max: 300.0,
-                              onChanged: (value) => settings.setImageOffset(
-                                  value, settings.imageOffsetY),
-                            ),
+                        if (settings.showTitle) ...[
+                          _buildTextField(
+                            label: 'Title Text',
+                            value: settings.titleText,
+                            onChanged: (value) => settings.setTitleText(value),
                           ),
-                          Expanded(
-                            child: _buildSlider(
-                              label: 'Vertical Offset',
-                              value: settings.imageOffsetY,
-                              min: -300.0,
-                              max: 300.0,
-                              onChanged: (value) => settings.setImageOffset(
-                                  settings.imageOffsetX, value),
-                            ),
+                          _buildSlider(
+                            label: 'Font Size',
+                            value: settings.titleFontSize,
+                            min: 16.0,
+                            max: 48.0,
+                            onChanged: (value) =>
+                                settings.setTitleStyle(fontSize: value),
                           ),
-                        ],
-                      ),
-
-                      const Divider(),
-
-                      // QR Code Settings
-                      _buildSectionTitle('QR Code Settings'),
-                      _buildSlider(
-                        label: 'QR Code Size',
-                        value: settings.qrCodeSize,
-                        min: 100.0,
-                        max: 300.0,
-                        onChanged: (value) => settings.setQrCodeSize(value),
-                      ),
-                      _buildColorPickerWithLabel(
-                        context: context,
-                        label: 'QR Background Color',
-                        color: settings.qrCodeBackgroundColor,
-                        onColorChanged: (color) =>
-                            settings.setQrCodeColors(backgroundColor: color),
-                      ),
-
-                      _buildColorPickerWithLabel(
-                        context: context,
-                        label: 'QR Foreground Color',
-                        color: settings.qrCodeForegroundColor,
-                        onColorChanged: (color) =>
-                            settings.setQrCodeColors(foregroundColor: color),
-                      ),
-                      _buildTextField(
-                        label: 'QR Code Text',
-                        value: settings.qrCodeText,
-                        onChanged: (value) => settings.setQrCodeText(value),
-                      ),
-                      _buildSlider(
-                        label: 'Text Font Size',
-                        value: settings.qrCodeTextFontSize,
-                        min: 12.0,
-                        max: 24.0,
-                        onChanged: (value) =>
-                            settings.setQrCodeTextStyle(fontSize: value),
-                      ),
-                      _buildColorPickerWithLabel(
-                        context: context,
-                        label: 'Text Color',
-                        color: settings.qrCodeTextColor,
-                        onColorChanged: (color) =>
-                            settings.setQrCodeTextStyle(color: color),
-                      ),
-                      _buildDropdown<QrCodeLayout>(
-                        label: 'QR Code Layout',
-                        value: settings.qrCodeLayout,
-                        items: {
-                          QrCodeLayout.below: 'Text Below QR',
-                          QrCodeLayout.above: 'Text Above QR',
-                          QrCodeLayout.leftOfQr: 'Text Left of QR',
-                          QrCodeLayout.rightOfQr: 'Text Right of QR',
-                          QrCodeLayout.sideBySide: 'Side by Side',
-                        },
-                        onChanged: (value) => settings.setQrCodeLayout(value!),
-                      ),
-                      _buildSlider(
-                        label: 'QR Code Spacing',
-                        value: settings.qrCodeSpacing,
-                        min: 0.0,
-                        max: 100.0,
-                        onChanged: (value) => settings.setQrCodeSpacing(value),
-                      ),
-
-                      // Fine-tuning controls for QR code position
-                      _buildSectionTitle('Fine-tune QR Code Position'),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildSlider(
-                              label: 'Horizontal Offset',
-                              value: settings.qrCodeOffsetX,
-                              min: -100.0,
-                              max: 100.0,
-                              onChanged: (value) => settings.setQrCodeOffset(
-                                  value, settings.qrCodeOffsetY),
-                            ),
+                          _buildDropdown<FontWeight>(
+                            label: 'Font Weight',
+                            value: settings.titleFontWeight,
+                            items: {
+                              FontWeight.normal: 'Normal',
+                              FontWeight.bold: 'Bold',
+                            },
+                            onChanged: (value) =>
+                                settings.setTitleStyle(fontWeight: value),
                           ),
-                          Expanded(
-                            child: _buildSlider(
-                              label: 'Vertical Offset',
-                              value: settings.qrCodeOffsetY,
-                              min: -100.0,
-                              max: 100.0,
-                              onChanged: (value) => settings.setQrCodeOffset(
-                                  settings.qrCodeOffsetX, value),
-                            ),
+                          _buildColorPickerWithLabel(
+                            context: context,
+                            label: 'Text Color',
+                            color: settings.titleColor,
+                            onColorChanged: (color) =>
+                                settings.setTitleStyle(color: color),
                           ),
-                        ],
-                      ),
 
-                      const Divider(),
-
-                      // Button Settings
-                      _buildSectionTitle('Button Settings'),
-                      _buildTextField(
-                        label: 'Button Text',
-                        value: settings.buttonText,
-                        onChanged: (value) => settings.setButtonText(value),
-                      ),
-                      _buildSlider(
-                        label: 'Font Size',
-                        value: settings.buttonFontSize,
-                        min: 16.0,
-                        max: 32.0,
-                        onChanged: (value) =>
-                            settings.setButtonStyle(fontSize: value),
-                      ),
-                      _buildColorPickerWithLabel(
-                        context: context,
-                        label: 'Button Color',
-                        color: settings.buttonColor,
-                        onColorChanged: (color) =>
-                            settings.setButtonStyle(color: color),
-                      ),
-                      _buildColorPickerWithLabel(
-                        context: context,
-                        label: 'Text Color',
-                        color: settings.buttonTextColor,
-                        onColorChanged: (color) =>
-                            settings.setButtonStyle(textColor: color),
-                      ),
-                      _buildSlider(
-                        label: 'Horizontal Padding',
-                        value: settings.buttonPaddingHorizontal,
-                        min: 10.0,
-                        max: 100.0,
-                        onChanged: (value) =>
-                            settings.setButtonStyle(paddingHorizontal: value),
-                      ),
-                      _buildSlider(
-                        label: 'Vertical Padding',
-                        value: settings.buttonPaddingVertical,
-                        min: 5.0,
-                        max: 50.0,
-                        onChanged: (value) =>
-                            settings.setButtonStyle(paddingVertical: value),
-                      ),
-                      _buildSlider(
-                        label: 'Button Spacing',
-                        value: settings.buttonSpacing,
-                        min: 0.0,
-                        max: 100.0,
-                        onChanged: (value) => settings.setButtonSpacing(value),
-                      ),
-
-                      // Fine-tuning controls for button position
-                      _buildSectionTitle('Fine-tune Button Position'),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildSlider(
-                              label: 'Horizontal Offset',
-                              value: settings.buttonOffsetX,
-                              min: -300.0, // Changed from -100
-                              max: 300.0, // Changed from 100
-                              onChanged: (value) => settings.setButtonOffset(
-                                  value, settings.buttonOffsetY),
-                            ),
+                          _buildSlider(
+                            label: 'Title Padding',
+                            value: settings.titlePadding,
+                            min: 0.0,
+                            max: 50.0,
+                            onChanged: (value) =>
+                                settings.setTitleStyle(padding: value),
                           ),
-                          Expanded(
-                            child: _buildSlider(
-                              label: 'Vertical Offset',
-                              value: settings.buttonOffsetY,
-                              min: -300.0, // Changed from -100
-                              max: 300.0, // Changed from 100
-                              onChanged: (value) => settings.setButtonOffset(
-                                  settings.buttonOffsetX, value),
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const Divider(),
-
-                      // Background Settings
-                      _buildSectionTitle('Background Settings'),
-                      _buildSwitch(
-                        label: 'Show Custom Background',
-                        value: settings.showBackground,
-                        onChanged: (value) => settings.setShowBackground(value),
-                      ),
-                      if (settings.showBackground) ...[
-                        ListTile(
-                          title: const Text('Background Image'),
-                          subtitle: Text(settings.backgroundImagePath ??
-                              'No custom background selected'),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
+                          // Remove dropdown for position and keep only the fine-tuning controls
+                          _buildSectionTitle('Title Position'),
+                          Row(
                             children: [
-                              IconButton(
-                                icon: const Icon(Icons.folder_open),
-                                onPressed: () async {
-                                  final result =
-                                      await FilePicker.platform.pickFiles(
-                                    type: FileType.image,
-                                    allowMultiple: false,
-                                  );
-                                  if (result != null &&
-                                      result.files.isNotEmpty) {
-                                    settings.setBackgroundImage(
-                                        result.files.first.path,
-                                        isAsset: false);
-                                  }
-                                },
+                              Expanded(
+                                child: _buildSlider(
+                                  label: 'From Left',
+                                  value: settings.titleLeft,
+                                  min: 0.0,
+                                  max: 1080.0,
+                                  onChanged: (value) =>
+                                      settings.setTitlePosition(
+                                    value,
+                                    settings.titleTop,
+                                    settings.titleWidth,
+                                  ),
+                                ),
                               ),
-                              IconButton(
-                                icon: const Icon(Icons.clear),
-                                onPressed: () => settings
-                                    .setBackgroundImage(null, isAsset: true),
+                              Expanded(
+                                child: _buildSlider(
+                                  label: 'From Top',
+                                  value: settings.titleTop,
+                                  min: 0.0,
+                                  max: 1920.0,
+                                  onChanged: (value) =>
+                                      settings.setTitlePosition(
+                                    settings.titleLeft,
+                                    value,
+                                    settings.titleWidth,
+                                  ),
+                                ),
                               ),
                             ],
                           ),
-                        ),
-                      ],
-                    ],
-                  );
+                          _buildSlider(
+                            label: 'Width',
+                            value: settings.titleWidth,
+                            min: 100.0,
+                            max: 1000.0,
+                            onChanged: (value) => settings.setTitlePosition(
+                              settings.titleLeft,
+                              settings.titleTop,
+                              value,
+                            ),
+                          ),
+
+                          const Divider(),
+
+                          // Image Settings
+                          _buildSectionTitle('Image Settings'),
+                          _buildSlider(
+                            label: 'Image Width',
+                            value: settings.imageWidth,
+                            min: 200.0,
+                            max: 1200.0,
+                            onChanged: (value) => settings.setImageDimensions(
+                                value, settings.imageHeight),
+                          ),
+                          _buildSlider(
+                            label: 'Image Height',
+                            value: settings.imageHeight,
+                            min: 200.0,
+                            max: 1200.0,
+                            onChanged: (value) => settings.setImageDimensions(
+                                settings.imageWidth, value),
+                          ),
+                          _buildSlider(
+                            label: 'Border Radius',
+                            value: settings.imageBorderRadius,
+                            min: 0.0,
+                            max: 50.0,
+                            onChanged: (value) =>
+                                settings.setImageBorder(radius: value),
+                          ),
+                          _buildColorPickerWithLabel(
+                            context: context,
+                            label: 'Border Color',
+                            color: settings.imageBorderColor,
+                            onColorChanged: (color) =>
+                                settings.setImageBorder(color: color),
+                          ),
+
+                          _buildSlider(
+                            label: 'Border Width',
+                            value: settings.imageBorderWidth,
+                            min: 0.0,
+                            max: 10.0,
+                            onChanged: (value) =>
+                                settings.setImageBorder(width: value),
+                          ),
+                          _buildSlider(
+                            label: 'Image Spacing',
+                            value: settings.imageSpacing,
+                            min: 0.0,
+                            max: 100.0,
+                            onChanged: (value) =>
+                                settings.setImageSpacing(value),
+                          ),
+
+                          // Fine-tuning controls for image position
+                          _buildSectionTitle('Image Position'),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildSlider(
+                                  label: 'From Left',
+                                  value: settings.imageLeft,
+                                  min: 0.0,
+                                  max: 1080.0,
+                                  onChanged: (value) =>
+                                      settings.setImagePosition(
+                                    value,
+                                    settings.imageTop,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: _buildSlider(
+                                  label: 'From Top',
+                                  value: settings.imageTop,
+                                  min: 0.0,
+                                  max: 1920.0,
+                                  onChanged: (value) =>
+                                      settings.setImagePosition(
+                                    settings.imageLeft,
+                                    value,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const Divider(),
+
+                          // QR Code Settings
+                          _buildSectionTitle('QR Code Settings'),
+                          _buildSlider(
+                            label: 'QR Code Size',
+                            value: settings.qrCodeSize,
+                            min: 100.0,
+                            max: 300.0,
+                            onChanged: (value) => settings.setQrCodeSize(value),
+                          ),
+                          _buildColorPickerWithLabel(
+                            context: context,
+                            label: 'QR Background Color',
+                            color: settings.qrCodeBackgroundColor,
+                            onColorChanged: (color) => settings.setQrCodeColors(
+                                backgroundColor: color),
+                          ),
+
+                          _buildColorPickerWithLabel(
+                            context: context,
+                            label: 'QR Foreground Color',
+                            color: settings.qrCodeForegroundColor,
+                            onColorChanged: (color) => settings.setQrCodeColors(
+                                foregroundColor: color),
+                          ),
+                          _buildTextField(
+                            label: 'QR Code Text',
+                            value: settings.qrCodeText,
+                            onChanged: (value) => settings.setQrCodeText(value),
+                          ),
+                          _buildSlider(
+                            label: 'Text Font Size',
+                            value: settings.qrCodeTextFontSize,
+                            min: 12.0,
+                            max: 24.0,
+                            onChanged: (value) =>
+                                settings.setQrCodeTextStyle(fontSize: value),
+                          ),
+                          _buildColorPickerWithLabel(
+                            context: context,
+                            label: 'Text Color',
+                            color: settings.qrCodeTextColor,
+                            onColorChanged: (color) =>
+                                settings.setQrCodeTextStyle(color: color),
+                          ),
+                          _buildDropdown<QrCodeLayout>(
+                            label: 'QR Code Layout',
+                            value: settings.qrCodeLayout,
+                            items: {
+                              QrCodeLayout.below: 'Text Below QR',
+                              QrCodeLayout.above: 'Text Above QR',
+                              QrCodeLayout.leftOfQr: 'Text Left of QR',
+                              QrCodeLayout.rightOfQr: 'Text Right of QR',
+                              QrCodeLayout.sideBySide: 'Side by Side',
+                            },
+                            onChanged: (value) =>
+                                settings.setQrCodeLayout(value!),
+                          ),
+                          _buildSlider(
+                            label: 'QR Code Spacing',
+                            value: settings.qrCodeSpacing,
+                            min: 0.0,
+                            max: 100.0,
+                            onChanged: (value) =>
+                                settings.setQrCodeSpacing(value),
+                          ),
+
+                          // Fine-tuning controls for QR code position
+                          _buildSectionTitle('QR Code Position'),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildSlider(
+                                  label: 'From Left',
+                                  value: settings.qrCodeLeft,
+                                  min: 0.0,
+                                  max: 1080.0,
+                                  onChanged: (value) =>
+                                      settings.setQrCodePosition(
+                                    value,
+                                    settings.qrCodeBottom,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: _buildSlider(
+                                  label: 'From Bottom',
+                                  value: settings.qrCodeBottom,
+                                  min: 0.0,
+                                  max: 1920.0,
+                                  onChanged: (value) =>
+                                      settings.setQrCodePosition(
+                                    settings.qrCodeLeft,
+                                    value,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const Divider(),
+
+                          // Button Settings
+                          _buildSectionTitle('Button Settings'),
+                          _buildTextField(
+                            label: 'Button Text',
+                            value: settings.buttonText,
+                            onChanged: (value) => settings.setButtonText(value),
+                          ),
+                          _buildSlider(
+                            label: 'Font Size',
+                            value: settings.buttonFontSize,
+                            min: 16.0,
+                            max: 32.0,
+                            onChanged: (value) =>
+                                settings.setButtonStyle(fontSize: value),
+                          ),
+                          _buildColorPickerWithLabel(
+                            context: context,
+                            label: 'Button Color',
+                            color: settings.buttonColor,
+                            onColorChanged: (color) =>
+                                settings.setButtonStyle(color: color),
+                          ),
+                          _buildColorPickerWithLabel(
+                            context: context,
+                            label: 'Text Color',
+                            color: settings.buttonTextColor,
+                            onColorChanged: (color) =>
+                                settings.setButtonStyle(textColor: color),
+                          ),
+                          _buildSlider(
+                            label: 'Horizontal Padding',
+                            value: settings.buttonPaddingHorizontal,
+                            min: 10.0,
+                            max: 100.0,
+                            onChanged: (value) => settings.setButtonStyle(
+                                paddingHorizontal: value),
+                          ),
+                          _buildSlider(
+                            label: 'Vertical Padding',
+                            value: settings.buttonPaddingVertical,
+                            min: 5.0,
+                            max: 50.0,
+                            onChanged: (value) =>
+                                settings.setButtonStyle(paddingVertical: value),
+                          ),
+                          _buildSlider(
+                            label: 'Button Border Radius',
+                            value: settings.buttonBorderRadius,
+                            min: 0.0,
+                            max: 30.0,
+                            onChanged: (value) =>
+                                settings.setButtonStyle(borderRadius: value),
+                          ),
+
+                          // Fine-tuning controls for button position
+                          _buildSectionTitle('Button Position'),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildSlider(
+                                  label: 'From Left',
+                                  value: settings.buttonLeft,
+                                  min: 0.0,
+                                  max: 1080.0,
+                                  onChanged: (value) =>
+                                      settings.setButtonPosition(
+                                    value,
+                                    settings.buttonBottom,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: _buildSlider(
+                                  label: 'From Bottom',
+                                  value: settings.buttonBottom,
+                                  min: 0.0,
+                                  max: 1920.0,
+                                  onChanged: (value) =>
+                                      settings.setButtonPosition(
+                                    settings.buttonLeft,
+                                    value,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const Divider(),
+
+                          // Background Settings
+                          _buildSectionTitle('Background Settings'),
+                          _buildSwitch(
+                            label: 'Show Custom Background',
+                            value: settings.showBackground,
+                            onChanged: (value) =>
+                                settings.setShowBackground(value),
+                          ),
+                          if (settings.showBackground) ...[
+                            ListTile(
+                              title: const Text('Background Image'),
+                              subtitle: Text(settings.backgroundImagePath ??
+                                  'No custom background selected'),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.folder_open),
+                                    onPressed: () async {
+                                      final result =
+                                          await FilePicker.platform.pickFiles(
+                                        type: FileType.image,
+                                        allowMultiple: false,
+                                      );
+                                      if (result != null &&
+                                          result.files.isNotEmpty) {
+                                        settings.setBackgroundImage(
+                                            result.files.first.path,
+                                            isAsset: false);
+                                      }
+                                    },
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.clear),
+                                    onPressed: () =>
+                                        settings.setBackgroundImage(null,
+                                            isAsset: true),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ],
+                      ]);
                 },
               ),
             ),

@@ -288,6 +288,22 @@ class WelcomeScreenSettings extends StatelessWidget {
                       Constants.h24,
                       _buildSectionHeader('Button Settings'),
                       Constants.h8,
+                      _buildSliderWithLabel(
+                        label: 'Button Position From Left',
+                        value: welcomeSettings.buttonLeft,
+                        min: 0,
+                        max: 1000,
+                        onChanged: (value) => welcomeSettings.setButtonPosition(
+                            value, welcomeSettings.buttonBottom),
+                      ),
+                      _buildSliderWithLabel(
+                        label: 'Button Position From Bottom',
+                        value: welcomeSettings.buttonBottom,
+                        min: 0,
+                        max: 1000,
+                        onChanged: (value) => welcomeSettings.setButtonPosition(
+                            welcomeSettings.buttonLeft, value),
+                      ),
 
                       // Button Type Selection
                       Row(
@@ -347,9 +363,6 @@ class WelcomeScreenSettings extends StatelessWidget {
                         onChanged: (value) =>
                             welcomeSettings.setButtonBorderRadius(value),
                       ),
-
-                      // Button Margins
-                     
 
                       _buildSliderWithLabel(
                         label: 'Button Opacity',
@@ -562,7 +575,7 @@ class WelcomeScreenSettings extends StatelessWidget {
     required double value,
     required double min,
     required double max,
-    required int divisions,
+    int? divisions,
     required Function(double) onChanged,
   }) {
     return Column(

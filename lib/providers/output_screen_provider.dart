@@ -4,18 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-enum WidgetPosition {
-  topLeft,
-  topCenter,
-  topRight,
-  centerLeft,
-  center,
-  centerRight,
-  bottomLeft,
-  bottomCenter,
-  bottomRight,
-}
-
 enum QrCodeLayout {
   below,
   above,
@@ -27,15 +15,18 @@ enum QrCodeLayout {
 class OutputScreenProvider extends ChangeNotifier {
   late SharedPreferences _prefs;
 
-  // Offset properties for fine-tuning positions
-  double _titleOffsetX = 0.0;
-  double _titleOffsetY = 0.0;
-  double _imageOffsetX = 0.0;
-  double _imageOffsetY = 0.0;
-  double _qrCodeOffsetX = 0.0;
-  double _qrCodeOffsetY = 0.0;
-  double _buttonOffsetX = 0.0;
-  double _buttonOffsetY = 0.0;
+  double _titleLeft = 279.0;
+  double _titleTop = 434.0;
+  double _titleWidth = 500.0;
+
+  double _imageLeft = 119.0;
+  double _imageTop = 540.0;
+
+  double _qrCodeLeft = 408.0;
+  double _qrCodeBottom = 380.0;
+
+  double _buttonLeft = 458.0;
+  double _buttonBottom = 310.0;
 
   // Title settings
   String _titleText = 'Your Image has been created';
@@ -44,7 +35,6 @@ class OutputScreenProvider extends ChangeNotifier {
   Color _titleColor = AppColors.white;
   double _titlePadding = 20.0;
   bool _showTitle = true;
-  WidgetPosition _titlePosition = WidgetPosition.topCenter;
 
   // Image settings
   double _imageWidth = 400.0;
@@ -53,7 +43,6 @@ class OutputScreenProvider extends ChangeNotifier {
   Color _imageBorderColor = AppColors.yellow;
   double _imageBorderWidth = 3.0;
   double _imageSpacing = 30.0;
-  WidgetPosition _imagePosition = WidgetPosition.center;
 
   // QR code settings
   double _qrCodeSize = 150.0;
@@ -64,32 +53,20 @@ class OutputScreenProvider extends ChangeNotifier {
   Color _qrCodeTextColor = AppColors.white;
   QrCodeLayout _qrCodeLayout = QrCodeLayout.below;
   double _qrCodeSpacing = 20.0;
-  WidgetPosition _qrCodePosition = WidgetPosition.bottomCenter;
 
   // Button settings
-  String _buttonText = 'START OVER';
-  double _buttonFontSize = 24.0;
+  String _buttonText = 'Start Over';
+  double _buttonFontSize = 18.0;
   Color _buttonColor = AppColors.yellow;
   Color _buttonTextColor = AppColors.black;
-  double _buttonPaddingHorizontal = 40.0;
-  double _buttonPaddingVertical = 15.0;
-  double _buttonSpacing = 30.0;
-  WidgetPosition _buttonPosition = WidgetPosition.bottomCenter;
+  double _buttonPaddingHorizontal = 32.0;
+  double _buttonPaddingVertical = 18.0;
+  double _buttonBorderRadius = 4.0;
 
   // Background settings
   String? _backgroundImagePath;
   bool _isBackgroundImageAsset = true;
-  bool _showBackground = true;
-
-  // Getters for offset properties
-  double get titleOffsetX => _titleOffsetX;
-  double get titleOffsetY => _titleOffsetY;
-  double get imageOffsetX => _imageOffsetX;
-  double get imageOffsetY => _imageOffsetY;
-  double get qrCodeOffsetX => _qrCodeOffsetX;
-  double get qrCodeOffsetY => _qrCodeOffsetY;
-  double get buttonOffsetX => _buttonOffsetX;
-  double get buttonOffsetY => _buttonOffsetY;
+  bool _showBackground = false;
 
   // Getters for other properties
   String get titleText => _titleText;
@@ -98,7 +75,20 @@ class OutputScreenProvider extends ChangeNotifier {
   Color get titleColor => _titleColor;
   double get titlePadding => _titlePadding;
   bool get showTitle => _showTitle;
-  WidgetPosition get titlePosition => _titlePosition;
+
+  // Getters for position properties
+  double get titleLeft => _titleLeft;
+  double get titleTop => _titleTop;
+  double get titleWidth => _titleWidth;
+
+  double get imageLeft => _imageLeft;
+  double get imageTop => _imageTop;
+
+  double get qrCodeLeft => _qrCodeLeft;
+  double get qrCodeBottom => _qrCodeBottom;
+
+  double get buttonLeft => _buttonLeft;
+  double get buttonBottom => _buttonBottom;
 
   double get imageWidth => _imageWidth;
   double get imageHeight => _imageHeight;
@@ -106,7 +96,6 @@ class OutputScreenProvider extends ChangeNotifier {
   Color get imageBorderColor => _imageBorderColor;
   double get imageBorderWidth => _imageBorderWidth;
   double get imageSpacing => _imageSpacing;
-  WidgetPosition get imagePosition => _imagePosition;
 
   double get qrCodeSize => _qrCodeSize;
   Color get qrCodeBackgroundColor => _qrCodeBackgroundColor;
@@ -116,7 +105,6 @@ class OutputScreenProvider extends ChangeNotifier {
   Color get qrCodeTextColor => _qrCodeTextColor;
   QrCodeLayout get qrCodeLayout => _qrCodeLayout;
   double get qrCodeSpacing => _qrCodeSpacing;
-  WidgetPosition get qrCodePosition => _qrCodePosition;
 
   String get buttonText => _buttonText;
   double get buttonFontSize => _buttonFontSize;
@@ -124,8 +112,7 @@ class OutputScreenProvider extends ChangeNotifier {
   Color get buttonTextColor => _buttonTextColor;
   double get buttonPaddingHorizontal => _buttonPaddingHorizontal;
   double get buttonPaddingVertical => _buttonPaddingVertical;
-  double get buttonSpacing => _buttonSpacing;
-  WidgetPosition get buttonPosition => _buttonPosition;
+  double get buttonBorderRadius => _buttonBorderRadius;
 
   String? get backgroundImagePath => _backgroundImagePath;
   bool get isBackgroundImageAsset => _isBackgroundImageAsset;
@@ -141,15 +128,19 @@ class OutputScreenProvider extends ChangeNotifier {
     if (settingsJson != null) {
       final Map<String, dynamic> settings = jsonDecode(settingsJson);
 
-      // Load offset values
-      _titleOffsetX = settings['titleOffsetX'] ?? _titleOffsetX;
-      _titleOffsetY = settings['titleOffsetY'] ?? _titleOffsetY;
-      _imageOffsetX = settings['imageOffsetX'] ?? _imageOffsetX;
-      _imageOffsetY = settings['imageOffsetY'] ?? _imageOffsetY;
-      _qrCodeOffsetX = settings['qrCodeOffsetX'] ?? _qrCodeOffsetX;
-      _qrCodeOffsetY = settings['qrCodeOffsetY'] ?? _qrCodeOffsetY;
-      _buttonOffsetX = settings['buttonOffsetX'] ?? _buttonOffsetX;
-      _buttonOffsetY = settings['buttonOffsetY'] ?? _buttonOffsetY;
+      // Load position properties
+      _titleLeft = _prefs.getDouble('output_title_left') ?? _titleLeft;
+      _titleTop = _prefs.getDouble('output_title_top') ?? _titleTop;
+      _titleWidth = _prefs.getDouble('output_title_width') ?? _titleWidth;
+
+      _imageLeft = _prefs.getDouble('output_image_left') ?? _imageLeft;
+      _imageTop = _prefs.getDouble('output_image_top') ?? _imageTop;
+
+      _qrCodeLeft = _prefs.getDouble('output_qrcode_left') ?? _qrCodeLeft;
+      _qrCodeBottom = _prefs.getDouble('output_qrcode_bottom') ?? _qrCodeBottom;
+
+      _buttonLeft = _prefs.getDouble('output_button_left') ?? _buttonLeft;
+      _buttonBottom = _prefs.getDouble('output_button_bottom') ?? _buttonBottom;
 
       // Title settings
       _titleText = settings['titleText'] ?? _titleText;
@@ -159,9 +150,6 @@ class OutputScreenProvider extends ChangeNotifier {
       _titleColor = Color(settings['titleColor'] ?? _titleColor.value);
       _titlePadding = settings['titlePadding'] ?? _titlePadding;
       _showTitle = settings['showTitle'] ?? _showTitle;
-      _titlePosition = settings['titlePosition'] != null
-          ? WidgetPosition.values[settings['titlePosition']]
-          : _titlePosition;
 
       // Image settings
       _imageWidth = settings['imageWidth'] ?? _imageWidth;
@@ -171,9 +159,6 @@ class OutputScreenProvider extends ChangeNotifier {
           Color(settings['imageBorderColor'] ?? _imageBorderColor.value);
       _imageBorderWidth = settings['imageBorderWidth'] ?? _imageBorderWidth;
       _imageSpacing = settings['imageSpacing'] ?? _imageSpacing;
-      _imagePosition = settings['imagePosition'] != null
-          ? WidgetPosition.values[settings['imagePosition']]
-          : _imagePosition;
 
       // QR code settings
       _qrCodeSize = settings['qrCodeSize'] ?? _qrCodeSize;
@@ -189,9 +174,6 @@ class OutputScreenProvider extends ChangeNotifier {
       _qrCodeLayout =
           QrCodeLayout.values[settings['qrCodeLayout'] ?? _qrCodeLayout.index];
       _qrCodeSpacing = settings['qrCodeSpacing'] ?? _qrCodeSpacing;
-      _qrCodePosition = settings['qrCodePosition'] != null
-          ? WidgetPosition.values[settings['qrCodePosition']]
-          : _qrCodePosition;
 
       // Button settings
       _buttonText = settings['buttonText'] ?? _buttonText;
@@ -203,10 +185,8 @@ class OutputScreenProvider extends ChangeNotifier {
           settings['buttonPaddingHorizontal'] ?? _buttonPaddingHorizontal;
       _buttonPaddingVertical =
           settings['buttonPaddingVertical'] ?? _buttonPaddingVertical;
-      _buttonSpacing = settings['buttonSpacing'] ?? _buttonSpacing;
-      _buttonPosition = settings['buttonPosition'] != null
-          ? WidgetPosition.values[settings['buttonPosition']]
-          : _buttonPosition;
+      _buttonBorderRadius =
+          settings['buttonBorderRadius'] ?? _buttonBorderRadius;
 
       // Background settings
       _backgroundImagePath = settings['backgroundImagePath'];
@@ -220,16 +200,6 @@ class OutputScreenProvider extends ChangeNotifier {
 
   Future<void> _saveSettings() async {
     final settings = {
-      // Offset values
-      'titleOffsetX': _titleOffsetX,
-      'titleOffsetY': _titleOffsetY,
-      'imageOffsetX': _imageOffsetX,
-      'imageOffsetY': _imageOffsetY,
-      'qrCodeOffsetX': _qrCodeOffsetX,
-      'qrCodeOffsetY': _qrCodeOffsetY,
-      'buttonOffsetX': _buttonOffsetX,
-      'buttonOffsetY': _buttonOffsetY,
-
       // Title settings
       'titleText': _titleText,
       'titleFontSize': _titleFontSize,
@@ -237,7 +207,6 @@ class OutputScreenProvider extends ChangeNotifier {
       'titleColor': _titleColor.value,
       'titlePadding': _titlePadding,
       'showTitle': _showTitle,
-      'titlePosition': _titlePosition.index,
 
       // Image settings
       'imageWidth': _imageWidth,
@@ -246,7 +215,6 @@ class OutputScreenProvider extends ChangeNotifier {
       'imageBorderColor': _imageBorderColor.value,
       'imageBorderWidth': _imageBorderWidth,
       'imageSpacing': _imageSpacing,
-      'imagePosition': _imagePosition.index,
 
       // QR code settings
       'qrCodeSize': _qrCodeSize,
@@ -257,7 +225,6 @@ class OutputScreenProvider extends ChangeNotifier {
       'qrCodeTextColor': _qrCodeTextColor.value,
       'qrCodeLayout': _qrCodeLayout.index,
       'qrCodeSpacing': _qrCodeSpacing,
-      'qrCodePosition': _qrCodePosition.index,
 
       // Button settings
       'buttonText': _buttonText,
@@ -266,8 +233,7 @@ class OutputScreenProvider extends ChangeNotifier {
       'buttonTextColor': _buttonTextColor.value,
       'buttonPaddingHorizontal': _buttonPaddingHorizontal,
       'buttonPaddingVertical': _buttonPaddingVertical,
-      'buttonSpacing': _buttonSpacing,
-      'buttonPosition': _buttonPosition.index,
+      'buttonBorderRadius': _buttonBorderRadius,
 
       // Background settings
       'backgroundImagePath': _backgroundImagePath,
@@ -276,35 +242,53 @@ class OutputScreenProvider extends ChangeNotifier {
     };
 
     await _prefs.setString('output_screen_settings', jsonEncode(settings));
+    // Save position properties
+    await _prefs.setDouble('output_title_left', _titleLeft);
+    await _prefs.setDouble('output_title_top', _titleTop);
+    await _prefs.setDouble('output_title_width', _titleWidth);
+
+    await _prefs.setDouble('output_image_left', _imageLeft);
+    await _prefs.setDouble('output_image_top', _imageTop);
+
+    await _prefs.setDouble('output_qrcode_left', _qrCodeLeft);
+    await _prefs.setDouble('output_qrcode_bottom', _qrCodeBottom);
+
+    await _prefs.setDouble('output_button_left', _buttonLeft);
+    await _prefs.setDouble('output_button_bottom', _buttonBottom);
   }
 
-  // Setters for offset properties
-  void setTitleOffset(double x, double y) {
-    _titleOffsetX = x;
-    _titleOffsetY = y;
+  void setTitlePosition(double left, double top, double width) async {
+    _titleLeft = left;
+    _titleTop = top;
+    _titleWidth = width;
+    await _prefs.setDouble('output_title_left', left);
+    await _prefs.setDouble('output_title_top', top);
+    await _prefs.setDouble('output_title_width', width);
     notifyListeners();
-    _saveSettings();
   }
 
-  void setImageOffset(double x, double y) {
-    _imageOffsetX = x;
-    _imageOffsetY = y;
+  void setImagePosition(double left, double top) async {
+    _imageLeft = left;
+    _imageTop = top;
+    await _prefs.setDouble('output_image_left', left);
+    await _prefs.setDouble('output_image_top', top);
     notifyListeners();
-    _saveSettings();
   }
 
-  void setQrCodeOffset(double x, double y) {
-    _qrCodeOffsetX = x;
-    _qrCodeOffsetY = y;
+  void setQrCodePosition(double left, double bottom) async {
+    _qrCodeLeft = left;
+    _qrCodeBottom = bottom;
+    await _prefs.setDouble('output_qrcode_left', left);
+    await _prefs.setDouble('output_qrcode_bottom', bottom);
     notifyListeners();
-    _saveSettings();
   }
 
-  void setButtonOffset(double x, double y) {
-    _buttonOffsetX = x;
-    _buttonOffsetY = y;
+  void setButtonPosition(double left, double bottom) async {
+    _buttonLeft = left;
+    _buttonBottom = bottom;
+    await _prefs.setDouble('output_button_left', left);
+    await _prefs.setDouble('output_button_bottom', bottom);
     notifyListeners();
-    _saveSettings();
   }
 
   // Title setters
@@ -334,12 +318,6 @@ class OutputScreenProvider extends ChangeNotifier {
     _saveSettings();
   }
 
-  void setTitlePosition(WidgetPosition position) {
-    _titlePosition = position;
-    notifyListeners();
-    _saveSettings();
-  }
-
   // Image setters
   void setImageDimensions(double width, double height) {
     _imageWidth = width;
@@ -362,12 +340,6 @@ class OutputScreenProvider extends ChangeNotifier {
 
   void setImageSpacing(double spacing) {
     _imageSpacing = spacing;
-    notifyListeners();
-    _saveSettings();
-  }
-
-  void setImagePosition(WidgetPosition position) {
-    _imagePosition = position;
     notifyListeners();
     _saveSettings();
   }
@@ -417,12 +389,6 @@ class OutputScreenProvider extends ChangeNotifier {
     _saveSettings();
   }
 
-  void setQrCodePosition(WidgetPosition position) {
-    _qrCodePosition = position;
-    notifyListeners();
-    _saveSettings();
-  }
-
   // Button setters
   void setButtonText(String text) {
     _buttonText = text;
@@ -436,24 +402,14 @@ class OutputScreenProvider extends ChangeNotifier {
     Color? textColor,
     double? paddingHorizontal,
     double? paddingVertical,
+    double? borderRadius,
   }) {
     if (fontSize != null) _buttonFontSize = fontSize;
     if (color != null) _buttonColor = color;
     if (textColor != null) _buttonTextColor = textColor;
     if (paddingHorizontal != null) _buttonPaddingHorizontal = paddingHorizontal;
     if (paddingVertical != null) _buttonPaddingVertical = paddingVertical;
-    notifyListeners();
-    _saveSettings();
-  }
-
-  void setButtonSpacing(double spacing) {
-    _buttonSpacing = spacing;
-    notifyListeners();
-    _saveSettings();
-  }
-
-  void setButtonPosition(WidgetPosition position) {
-    _buttonPosition = position;
+    if (borderRadius != null) _buttonBorderRadius = borderRadius;
     notifyListeners();
     _saveSettings();
   }
@@ -468,64 +424,6 @@ class OutputScreenProvider extends ChangeNotifier {
 
   void setShowBackground(bool show) {
     _showBackground = show;
-    notifyListeners();
-    _saveSettings();
-  }
-
-  // Reset to defaults
-  void resetToDefaults() {
-    // Title settings
-    _titleText = 'Your Image has been created';
-    _titleFontSize = 32.0;
-    _titleFontWeight = FontWeight.bold;
-    _titleColor = AppColors.white;
-    _titlePadding = 20.0;
-    _showTitle = true;
-    _titlePosition = WidgetPosition.topCenter;
-    _titleOffsetX = 0.0;
-    _titleOffsetY = 0.0;
-
-    // Image settings
-    _imageWidth = 400.0;
-    _imageHeight = 500.0;
-    _imageBorderRadius = 20.0;
-    _imageBorderColor = AppColors.yellow;
-    _imageBorderWidth = 3.0;
-    _imageSpacing = 30.0;
-    _imagePosition = WidgetPosition.center;
-    _imageOffsetX = 0.0;
-    _imageOffsetY = 0.0;
-
-    // QR code settings
-    _qrCodeSize = 150.0;
-    _qrCodeBackgroundColor = AppColors.white;
-    _qrCodeForegroundColor = AppColors.black;
-    _qrCodeText = 'Scan QR code to download your image';
-    _qrCodeTextFontSize = 18.0;
-    _qrCodeTextColor = AppColors.white;
-    _qrCodeLayout = QrCodeLayout.below;
-    _qrCodeSpacing = 20.0;
-    _qrCodePosition = WidgetPosition.bottomCenter;
-    _qrCodeOffsetX = 0.0;
-    _qrCodeOffsetY = 0.0;
-
-    // Button settings
-    _buttonText = 'START OVER';
-    _buttonFontSize = 24.0;
-    _buttonColor = AppColors.yellow;
-    _buttonTextColor = AppColors.black;
-    _buttonPaddingHorizontal = 40.0;
-    _buttonPaddingVertical = 15.0;
-    _buttonSpacing = 30.0;
-    _buttonPosition = WidgetPosition.bottomCenter;
-    _buttonOffsetX = 0.0;
-    _buttonOffsetY = 0.0;
-
-    // Background settings
-    _backgroundImagePath = null;
-    _isBackgroundImageAsset = true;
-    _showBackground = true;
-
     notifyListeners();
     _saveSettings();
   }

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:photobooth_flutter/core/constants/constants.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/providers/admin_watermark_provider.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
@@ -11,7 +12,12 @@ import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 class SwappedFaceScreen extends StatefulWidget {
-  const SwappedFaceScreen({super.key});
+  final bool isPreviewMode;
+
+  const SwappedFaceScreen({
+    super.key,
+    this.isPreviewMode = false,
+  });
 
   @override
   State<SwappedFaceScreen> createState() => _SwappedFaceScreenState();
@@ -24,7 +30,11 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
   @override
   void initState() {
     super.initState();
-    _processImage();
+    if (!widget.isPreviewMode) {
+      _processImage();
+    } else {
+      setState(() => _isLoading = false);
+    }
   }
 
   Future<void> _processImage() async {
@@ -57,13 +67,6 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
     final globalSettings = Provider.of<GlobalSettingsProvider>(context);
     final watermarkProvider = context.watch<AdminWatermarkProvider>();
     return Scaffold(
-      // appBar: AppBar(
-      //   leading: IconButton(
-      //     onPressed: () =>
-      //         Navigator.pushNamed(context, AppRoutes.outputScreenSettings),
-      //     icon: const Icon(Icons.star),
-      //   ),
-      // ),
       body: WatermarkOverlay(
         show: watermarkProvider.showWatermark,
         child: Container(
@@ -75,71 +78,119 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
               fit: BoxFit.cover,
             ),
           ),
-          child: _isLoading
-              ? const Center(
-                  child:
-                      CircularProgressIndicator(color: AppColors.goldenYellow))
-              : _errorMessage != null
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            _errorMessage!,
-                            style: const TextStyle(
-                                color: AppColors.red, fontSize: 18),
-                          ),
-                          const SizedBox(height: 20),
-                          ElevatedButton(
-                            onPressed: () =>
-                                Navigator.of(context).pushReplacementNamed('/'),
-                            child: const Text('Start Over'),
-                          ),
-                        ],
-                      ),
-                    )
-                  : _buildSuccessContent(context, outputSettings),
+          child: widget.isPreviewMode
+              ? _buildPreviewContent(outputSettings)
+              : _buildMainContent(),
         ),
       ),
     );
   }
 
+  Widget _buildPreviewContent(OutputScreenProvider settings) {
+    return Stack(
+      children: [
+        if (settings.showTitle)
+          Positioned(
+            left: settings.titleLeft,
+            top: settings.titleTop,
+            width: settings.titleWidth,
+            child: Text(
+              settings.titleText,
+              style: TextStyle(
+                fontSize: settings.titleFontSize,
+                fontWeight: settings.titleFontWeight,
+                color: settings.titleColor,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        Positioned(
+          left: settings.imageLeft,
+          top: settings.imageTop,
+          child: Container(
+            width: settings.imageWidth,
+            height: settings.imageHeight,
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.circular(settings.imageBorderRadius),
+              border: Border.all(
+                color: settings.imageBorderColor,
+                width: settings.imageBorderWidth,
+              ),
+            ),
+            child: const Center(
+              child: Icon(Icons.image, size: 48, color: AppColors.grey),
+            ),
+          ),
+        ),
+        // QR code placeholder
+        Positioned(
+            left: settings.qrCodeLeft,
+            bottom: settings.qrCodeBottom,
+            child: _buildQrCodeWithText(settings)),
+        // Button placeholder
+        Positioned(
+          left: settings.buttonLeft,
+          bottom: settings.buttonBottom,
+          child: ElevatedButton(
+            onPressed: () {},
+            style: ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius:
+                    BorderRadius.circular(settings.buttonBorderRadius),
+              ),
+              backgroundColor: settings.buttonColor,
+              foregroundColor: settings.buttonTextColor,
+              padding: EdgeInsets.symmetric(
+                horizontal: settings.buttonPaddingHorizontal,
+                vertical: settings.buttonPaddingVertical,
+              ),
+            ),
+            child: Text(
+              settings.buttonText,
+              style: TextStyle(fontSize: settings.buttonFontSize),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMainContent() {
+    return _isLoading
+        ? const Center(
+            child: CircularProgressIndicator(color: AppColors.goldenYellow))
+        : _errorMessage != null
+            ? const Center(/* existing error content */)
+            : _buildSuccessContent(
+                context, Provider.of<OutputScreenProvider>(context));
+  }
+
   Widget _buildSuccessContent(
       BuildContext context, OutputScreenProvider settings) {
-    final screenSize = MediaQuery.of(context).size;
-
-    // Use Stack for all layouts to allow for fine-tuning with offsets
     return Stack(
       children: [
         // Title
         if (settings.showTitle)
           Positioned(
-            left: screenSize.width / 2 -
-                150 +
-                settings.titleOffsetX, // Center horizontally by default
-            top: 50 + settings.titleOffsetY, // Position from top by default
-            child: SizedBox(
-              width: 300, // Fixed width for title
-              child: Text(
-                settings.titleText,
-                style: TextStyle(
-                  fontSize: settings.titleFontSize,
-                  fontWeight: settings.titleFontWeight,
-                  color: settings.titleColor,
-                ),
-                textAlign: TextAlign.center,
+            left: settings.titleLeft,
+            top: settings.titleTop,
+            width: settings.titleWidth,
+            child: Text(
+              settings.titleText,
+              style: TextStyle(
+                fontSize: settings.titleFontSize,
+                fontWeight: settings.titleFontWeight,
+                color: settings.titleColor,
               ),
+              textAlign: TextAlign.center,
             ),
           ),
 
         // Output Image
         Positioned(
-          left: screenSize.width / 2 -
-              settings.imageWidth / 2 +
-              settings.imageOffsetX, // Center horizontally
-          top: screenSize.height / 2 -
-              settings.imageHeight / 2 +
-              settings.imageOffsetY, // Center vertically
+          left: settings.imageLeft,
+          top: settings.imageTop,
           child: Container(
             width: settings.imageWidth,
             height: settings.imageHeight,
@@ -155,43 +206,36 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
           ),
         ),
 
-        // QR Code and Text - Use Align widget for better centering
+        // QR Code and Text
         Positioned(
-          left: 0,
-          right: 0,
-          bottom: 150 + settings.qrCodeOffsetY,
-          child: Container(
-            alignment: Alignment.center,
-            transform: Matrix4.translationValues(settings.qrCodeOffsetX, 0, 0),
-            child: _buildQrCodeWithText(settings),
-          ),
+          left: settings.qrCodeLeft,
+          bottom: settings.qrCodeBottom,
+          child: _buildQrCodeWithText(settings),
         ),
 
         // Start Over Button
         Positioned(
-          left: (screenSize.width / 2) - 100 + settings.buttonOffsetX,
-          bottom: 50 + settings.buttonOffsetY,
-          child: SizedBox(
-            child: Align(
-              alignment: Alignment.center,
-              child: ElevatedButton(
-                onPressed: () =>
-                    Navigator.of(context).pushReplacementNamed('/'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: settings.buttonColor,
-                  foregroundColor: settings.buttonTextColor,
-                  padding: EdgeInsets.symmetric(
-                    horizontal: settings.buttonPaddingHorizontal,
-                    vertical: settings.buttonPaddingVertical,
-                  ),
-                  textStyle: TextStyle(
-                    fontSize: settings.buttonFontSize,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                child: Text(settings.buttonText),
+          left: settings.buttonLeft,
+          bottom: settings.buttonBottom,
+          child: ElevatedButton(
+            onPressed: () => Navigator.of(context).pushReplacementNamed('/'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: settings.buttonColor,
+              foregroundColor: settings.buttonTextColor,
+              padding: EdgeInsets.symmetric(
+                horizontal: settings.buttonPaddingHorizontal,
+                vertical: settings.buttonPaddingVertical,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius:
+                    BorderRadius.circular(settings.buttonBorderRadius),
+              ),
+              textStyle: TextStyle(
+                fontSize: settings.buttonFontSize,
+                fontWeight: FontWeight.bold,
               ),
             ),
+            child: Text(settings.buttonText),
           ),
         ),
       ],
@@ -220,7 +264,7 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const Icon(Icons.error, color: AppColors.red, size: 50),
-                const SizedBox(height: 10),
+                Constants.h8,
                 Text('Error: $error',
                     style: const TextStyle(color: AppColors.white)),
               ],
@@ -251,7 +295,7 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const Icon(Icons.error, color: AppColors.red, size: 50),
-                const SizedBox(height: 10),
+                Constants.h8,
                 Text('Error: $error',
                     style: const TextStyle(color: AppColors.white)),
               ],
@@ -311,7 +355,7 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             qrCode,
-            const SizedBox(height: 10),
+            Constants.h8,
             qrText,
           ],
         );
@@ -320,7 +364,7 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             qrText,
-            const SizedBox(height: 10),
+            Constants.h8,
             qrCode,
           ],
         );

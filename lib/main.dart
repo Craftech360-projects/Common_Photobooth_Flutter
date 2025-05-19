@@ -161,7 +161,7 @@ class _MyAppState extends State<MyApp> {
       initialRoute: authProvider.isAuthenticated
           ? AppRoutes.welcomeScreen
           : AppRoutes.authScreen,
-      // home: const LoadingScreen(),
+      // home: const CharacterSelectionScreen(),
       debugShowCheckedModeBanner: false,
     );
   }

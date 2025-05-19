@@ -171,69 +171,38 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                   Constants.h16,
 
                   // Title Margin
-                  _buildSectionSubtitle('Title Margins'),
+                  _buildSectionSubtitle('Title Positions'),
 
                   _buildSliderWithLabel(
-                    label: 'Top Margin',
-                    value: settings.titleMargin.top,
+                    label: 'From Left',
+                    value: settings.titleLeft,
                     min: 0.0,
-                    max: 350.0,
-                    divisions: 60,
+                    max: 1000.0,
                     onChanged: (value) {
-                      settings.setTitleMargin(EdgeInsets.fromLTRB(
-                        settings.titleMargin.left,
-                        value,
-                        settings.titleMargin.right,
-                        settings.titleMargin.bottom,
-                      ));
+                      settings.setTitlePosition(
+                          value, settings.titleTop, settings.titleWidth);
                     },
                   ),
 
                   _buildSliderWithLabel(
-                    label: 'Bottom Margin',
-                    value: settings.titleMargin.bottom,
+                    label: 'From Top',
+                    value: settings.titleTop,
                     min: 0.0,
-                    max: 350.0,
-                    divisions: 60,
+                    max: 1000.0,
                     onChanged: (value) {
-                      settings.setTitleMargin(EdgeInsets.fromLTRB(
-                        settings.titleMargin.left,
-                        settings.titleMargin.top,
-                        settings.titleMargin.right,
-                        value,
-                      ));
+                      settings.setTitlePosition(
+                          settings.titleLeft, value, settings.titleWidth);
                     },
                   ),
 
                   _buildSliderWithLabel(
-                    label: 'Left Margin',
-                    value: settings.titleMargin.left,
+                    label: 'Title Width',
+                    value: settings.titleWidth,
                     min: 0.0,
-                    max: 350.0,
-                    divisions: 60,
+                    max: 1000.0,
                     onChanged: (value) {
-                      settings.setTitleMargin(EdgeInsets.fromLTRB(
-                        value,
-                        settings.titleMargin.top,
-                        settings.titleMargin.right,
-                        settings.titleMargin.bottom,
-                      ));
-                    },
-                  ),
-
-                  _buildSliderWithLabel(
-                    label: 'Right Margin',
-                    value: settings.titleMargin.right,
-                    min: 0.0,
-                    max: 350.0,
-                    divisions: 60,
-                    onChanged: (value) {
-                      settings.setTitleMargin(EdgeInsets.fromLTRB(
-                        settings.titleMargin.left,
-                        settings.titleMargin.top,
-                        value,
-                        settings.titleMargin.bottom,
-                      ));
+                      settings.setTitlePosition(
+                          settings.titleLeft, settings.titleTop, value);
                     },
                   ),
 
@@ -541,6 +510,41 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                     },
                   ),
 
+                  _buildSectionSubtitle('Character Position'),
+
+                  _buildSliderWithLabel(
+                    label: 'From Left',
+                    value: settings.characterLeft,
+                    min: 0.0,
+                    max: 1000.0,
+                    onChanged: (value) {
+                      settings.setCarouselPosition(value, settings.characterTop,
+                          settings.characterRight);
+                    },
+                  ),
+
+                  _buildSliderWithLabel(
+                    label: 'From Top',
+                    value: settings.characterTop,
+                    min: 0.0,
+                    max: 1000.0,
+                    onChanged: (value) {
+                      settings.setCarouselPosition(settings.characterLeft,
+                          value, settings.characterRight);
+                    },
+                  ),
+
+                  _buildSliderWithLabel(
+                    label: 'From Right',
+                    value: settings.characterRight,
+                    min: 0.0,
+                    max: 1000.0,
+                    onChanged: (value) {
+                      settings.setCarouselPosition(
+                          settings.characterLeft, settings.characterTop, value);
+                    },
+                  ),
+
                   // Grid Layout Settings (only show when carousel is disabled)
                   if (!settings.useCarousel) ...[
                     _buildSectionSubtitle('Grid Layout Settings'),
@@ -638,73 +642,6 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                       divisions: 50,
                       onChanged: (value) {
                         settings.setGridSpacing(vertical: value);
-                      },
-                    ),
-
-                    // Grid Margin
-                    _buildSectionSubtitle('Grid Margins'),
-
-                    _buildSliderWithLabel(
-                      label: 'Top Margin',
-                      value: settings.gridMargin.top,
-                      min: 0.0,
-                      max: 150.0,
-                      divisions: 50,
-                      onChanged: (value) {
-                        settings.setGridMargin(EdgeInsets.fromLTRB(
-                          settings.gridMargin.left,
-                          value,
-                          settings.gridMargin.right,
-                          settings.gridMargin.bottom,
-                        ));
-                      },
-                    ),
-
-                    _buildSliderWithLabel(
-                      label: 'Bottom Margin',
-                      value: settings.gridMargin.bottom,
-                      min: 0.0,
-                      max: 150.0,
-                      divisions: 50,
-                      onChanged: (value) {
-                        settings.setGridMargin(EdgeInsets.fromLTRB(
-                          settings.gridMargin.left,
-                          settings.gridMargin.top,
-                          settings.gridMargin.right,
-                          value,
-                        ));
-                      },
-                    ),
-
-                    _buildSliderWithLabel(
-                      label: 'Left Margin',
-                      value: settings.gridMargin.left,
-                      min: 0.0,
-                      max: 150.0,
-                      divisions: 50,
-                      onChanged: (value) {
-                        settings.setGridMargin(EdgeInsets.fromLTRB(
-                          value,
-                          settings.gridMargin.top,
-                          settings.gridMargin.right,
-                          settings.gridMargin.bottom,
-                        ));
-                      },
-                    ),
-
-                    _buildSliderWithLabel(
-                      label: 'Right Margin',
-                      value: settings.gridMargin.right,
-                      min: 0.0,
-                      max: 150.0,
-                      divisions: 50,
-                      onChanged: (value) {
-                        settings.setGridMargin(EdgeInsets.fromLTRB(
-                          settings.gridMargin.left,
-                          settings.gridMargin.top,
-                          value,
-                          settings.gridMargin.bottom,
-                        ));
                       },
                     ),
 
@@ -824,103 +761,28 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                   Constants.h16,
 
                   // Button Margin
-                  _buildSectionSubtitle('Button Margins'),
+                  _buildSectionSubtitle('Button Positions'),
 
                   _buildSliderWithLabel(
-                    label: 'Top Margin',
-                    value: settings.buttonMargin.top,
+                    label: 'From Left',
+                    value: settings.buttonLeft,
                     min: 0.0,
-                    max: 350.0,
-                    divisions: 60,
+                    max: 1000.0,
                     onChanged: (value) {
-                      settings.setButtonMargin(EdgeInsets.fromLTRB(
-                        settings.buttonMargin.left,
-                        value,
-                        settings.buttonMargin.right,
-                        settings.buttonMargin.bottom,
-                      ));
+                      settings.setButtonPosition(value, settings.buttonBottom);
                     },
                   ),
 
                   _buildSliderWithLabel(
-                    label: 'Bottom Margin',
-                    value: settings.buttonMargin.bottom,
+                    label: 'From Bottom',
+                    value: settings.buttonBottom,
                     min: 0.0,
-                    max: 350.0,
-                    divisions: 60,
+                    max: 1000.0,
                     onChanged: (value) {
-                      settings.setButtonMargin(EdgeInsets.fromLTRB(
-                        settings.buttonMargin.left,
-                        settings.buttonMargin.top,
-                        settings.buttonMargin.right,
-                        value,
-                      ));
+                      settings.setButtonPosition(settings.buttonLeft, value);
                     },
                   ),
 
-                  _buildSliderWithLabel(
-                    label: 'Left Margin',
-                    value: settings.buttonMargin.left,
-                    min: 0.0,
-                    max: 350.0,
-                    divisions: 60,
-                    onChanged: (value) {
-                      settings.setButtonMargin(EdgeInsets.fromLTRB(
-                        value,
-                        settings.buttonMargin.top,
-                        settings.buttonMargin.right,
-                        settings.buttonMargin.bottom,
-                      ));
-                    },
-                  ),
-
-                  _buildSliderWithLabel(
-                    label: 'Right Margin',
-                    value: settings.buttonMargin.right,
-                    min: 0.0,
-                    max: 350.0,
-                    divisions: 60,
-                    onChanged: (value) {
-                      settings.setButtonMargin(EdgeInsets.fromLTRB(
-                        settings.buttonMargin.left,
-                        settings.buttonMargin.top,
-                        value,
-                        settings.buttonMargin.bottom,
-                      ));
-                    },
-                  ),
-
-                  // Button Padding
-                  // _buildSectionSubtitle('Button Padding'),
-
-                  // _buildSliderWithLabel(
-                  //   label: 'Vertical Padding',
-                  //   value: settings.buttonPadding.top,
-                  //   min: 0.0,
-                  //   max: 30.0,
-                  //   divisions: 30,
-                  //   onChanged: (value) {
-                  //     settings.setButtonPadding(EdgeInsets.symmetric(
-                  //       vertical: value,
-                  //       horizontal: settings.buttonPadding.left,
-                  //     ));
-                  //   },
-                  // ),
-
-                  // _buildSliderWithLabel(
-                  //   label: 'Horizontal Padding',
-                  //   value: settings.buttonPadding.left,
-                  //   min: 0.0,
-                  //   max: 50.0,
-                  //   divisions: 50,
-                  //   onChanged: (value) {
-                  //     settings.setButtonPadding(EdgeInsets.symmetric(
-                  //       vertical: settings.buttonPadding.top,
-                  //       horizontal: value,
-                  //     ));
-                  //   },
-                  // ),
-                  // Constants.h16,
                   Row(
                     children: [
                       Expanded(

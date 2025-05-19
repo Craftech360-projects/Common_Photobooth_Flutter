@@ -11,12 +11,14 @@ class GenderSelectionProvider extends ChangeNotifier {
   double _titleFontSize = 22.0;
   Color _titleColor = AppColors.white;
   FontWeight _titleFontWeight = FontWeight.w500;
-  double _titlePadding = 0.0;
   double _titleLineHeight = 1.0;
   bool _titleItalic = false;
   double _titleOpacity = 1.0;
   TextAlign _titleAlignment = TextAlign.center;
-  EdgeInsets _titleMargin = const EdgeInsets.fromLTRB(0, 0, 0, 20);
+  // Position properties for welcome message
+  double _titleLeft = 395.0;
+  double _titleTop = 795.0;
+  double _titleWidth = 300.0;
 
   // Gender images settings
   String? _maleImagePath = 'assets/images/male_avatar.png';
@@ -30,8 +32,8 @@ class GenderSelectionProvider extends ChangeNotifier {
   bool _showImageBorder = false;
   double _imageBorderWidth = 2.0;
   Color _imageBorderColor = AppColors.yellow;
-  EdgeInsets _imagesRowMargin = const EdgeInsets.fromLTRB(0, 0, 0, 20);
-  EdgeInsets _imagesRowPadding = const EdgeInsets.all(0);
+  double _genderSelectionLeft = 373.0;
+  double _genderSelectionTop = 830.0;
 
   // Selection effect settings
   bool _useSelectionEffect = true;
@@ -53,13 +55,15 @@ class GenderSelectionProvider extends ChangeNotifier {
   bool _buttonHasBorder = false;
   double _buttonBorderWidth = 1.0;
   Color _buttonBorderColor = AppColors.black;
-  double _buttonMarginTop = 10.0;
   bool _useImageButton = false;
   String? _buttonImagePath;
   bool _isButtonImageAsset = true;
-  EdgeInsets _buttonMargin = const EdgeInsets.all(0);
   EdgeInsets _buttonPadding =
       const EdgeInsets.symmetric(vertical: 0, horizontal: 0);
+
+  // Position properties for button
+  double _buttonLeft = 440.0;
+  double _buttonBottom = 868.0;
 
   // Layout settings
   double _screenPadding = 0.0;
@@ -72,7 +76,9 @@ class GenderSelectionProvider extends ChangeNotifier {
   double get titleFontSize => _titleFontSize;
   Color get titleColor => _titleColor;
   FontWeight get titleFontWeight => _titleFontWeight;
-  double get titlePadding => _titlePadding;
+  double get titleLeft => _titleLeft;
+  double get titleTop => _titleTop;
+  double get titleWidth => _titleWidth;
 
   String? get maleImagePath => _maleImagePath;
   String? get femaleImagePath => _femaleImagePath;
@@ -91,6 +97,8 @@ class GenderSelectionProvider extends ChangeNotifier {
   Color get selectionGlowColor => _selectionGlowColor;
   double get selectionGlowIntensity => _selectionGlowIntensity;
   double get selectionGlowSpread => _selectionGlowSpread;
+  double get genderSelectionLeft => _genderSelectionLeft;
+  double get genderSelectionTop => _genderSelectionTop;
 
   String get buttonText => _buttonText;
   double get buttonWidth => _buttonWidth;
@@ -103,7 +111,8 @@ class GenderSelectionProvider extends ChangeNotifier {
   bool get buttonHasBorder => _buttonHasBorder;
   double get buttonBorderWidth => _buttonBorderWidth;
   Color get buttonBorderColor => _buttonBorderColor;
-  double get buttonMarginTop => _buttonMarginTop;
+  double get buttonLeft => _buttonLeft;
+  double get buttonBottom => _buttonBottom;
   bool get useImageButton => _useImageButton;
   String? get buttonImagePath => _buttonImagePath;
   bool get isButtonImageAsset => _isButtonImageAsset;
@@ -117,12 +126,6 @@ class GenderSelectionProvider extends ChangeNotifier {
   bool get titleItalic => _titleItalic;
   double get titleOpacity => _titleOpacity;
   TextAlign get titleAlignment => _titleAlignment;
-  EdgeInsets get titleMargin => _titleMargin;
-
-  EdgeInsets get imagesRowMargin => _imagesRowMargin;
-  EdgeInsets get imagesRowPadding => _imagesRowPadding;
-
-  EdgeInsets get buttonMargin => _buttonMargin;
   EdgeInsets get buttonPadding => _buttonPadding;
 
   // Setters
@@ -145,7 +148,6 @@ class GenderSelectionProvider extends ChangeNotifier {
     if (fontSize != null) _titleFontSize = fontSize;
     if (color != null) _titleColor = color;
     if (fontWeight != null) _titleFontWeight = fontWeight;
-    if (padding != null) _titlePadding = padding;
     if (lineHeight != null) _titleLineHeight = lineHeight;
     if (italic != null) _titleItalic = italic;
     if (opacity != null) _titleOpacity = opacity;
@@ -154,27 +156,24 @@ class GenderSelectionProvider extends ChangeNotifier {
     _saveSettings();
   }
 
-  // New setters for margins and paddings
-  void setTitleMargin(EdgeInsets margin) {
-    _titleMargin = margin;
+  void setTitlePosition(double left, double top, double width) async {
+    _titleLeft = left;
+    _titleTop = top;
+    _titleWidth = width;
+    notifyListeners();
+    await _saveSettings();
+  }
+
+  void setGenderCardPosition(double left, double top) {
+    _genderSelectionLeft = left;
+    _genderSelectionTop = top;
     notifyListeners();
     _saveSettings();
   }
 
-  void setImagesRowMargin(EdgeInsets margin) {
-    _imagesRowMargin = margin;
-    notifyListeners();
-    _saveSettings();
-  }
-
-  void setImagesRowPadding(EdgeInsets padding) {
-    _imagesRowPadding = padding;
-    notifyListeners();
-    _saveSettings();
-  }
-
-  void setButtonMargin(EdgeInsets margin) {
-    _buttonMargin = margin;
+  void setButtonPosition(double left, double bottom) {
+    _buttonLeft = left;
+    _buttonBottom = bottom;
     notifyListeners();
     _saveSettings();
   }
@@ -285,12 +284,6 @@ class GenderSelectionProvider extends ChangeNotifier {
     _saveSettings();
   }
 
-  void setButtonMarginTop(double margin) {
-    _buttonMarginTop = margin;
-    notifyListeners();
-    _saveSettings();
-  }
-
   void setUseImageButton(bool useImage) {
     _useImageButton = useImage;
     notifyListeners();
@@ -353,22 +346,23 @@ class GenderSelectionProvider extends ChangeNotifier {
       _titleColor = Color(settings['titleColor'] ?? _titleColor.value);
       _titleFontWeight = FontWeight
           .values[settings['titleFontWeight'] ?? _titleFontWeight.index];
-      _titlePadding = settings['titlePadding'] ?? _titlePadding;
+
       _titleLineHeight = settings['titleLineHeight'] ?? _titleLineHeight;
       _titleItalic = settings['titleItalic'] ?? _titleItalic;
       _titleOpacity = settings['titleOpacity'] ?? _titleOpacity;
       _titleAlignment =
           TextAlign.values[settings['titleAlignment'] ?? _titleAlignment.index];
 
-      // Load title margin
-      if (settings.containsKey('titleMarginTop')) {
-        _titleMargin = EdgeInsets.fromLTRB(
-          settings['titleMarginLeft'] ?? 0.0,
-          settings['titleMarginTop'] ?? 0.0,
-          settings['titleMarginRight'] ?? 0.0,
-          settings['titleMarginBottom'] ?? 20.0,
-        );
-      }
+      // Load position properties
+      _titleLeft = settings['titleLeft'] ?? _titleLeft;
+      _titleTop = settings['titleTop'] ?? _titleTop;
+      _titleWidth = settings['titleWidth'] ?? _titleWidth;
+      // Gender selection position
+      _genderSelectionLeft = settings['genderSelectionLeft'] ?? _genderSelectionLeft;
+      _genderSelectionTop = settings['genderSelectionTop'] ?? _genderSelectionTop;
+      // Button position
+      _buttonLeft = settings['buttonLeft'] ?? _buttonLeft;
+      _buttonBottom = settings['buttonBottom'] ?? _buttonBottom;
 
       // Gender images settings - with validation
       if (settings.containsKey('maleImagePath')) {
@@ -439,7 +433,7 @@ class GenderSelectionProvider extends ChangeNotifier {
       _buttonBorderWidth = settings['buttonBorderWidth'] ?? _buttonBorderWidth;
       _buttonBorderColor =
           Color(settings['buttonBorderColor'] ?? _buttonBorderColor.value);
-      _buttonMarginTop = settings['buttonMarginTop'] ?? _buttonMarginTop;
+      
       _useImageButton = settings['useImageButton'] ?? _useImageButton;
       _buttonImagePath = settings['buttonImagePath'];
       _isButtonImageAsset =
@@ -451,34 +445,6 @@ class GenderSelectionProvider extends ChangeNotifier {
       _backgroundImagePath = settings['backgroundImagePath'];
       _isBackgroundImageAsset =
           settings['isBackgroundImageAsset'] ?? _isBackgroundImageAsset;
-
-      if (settings.containsKey('imagesRowMarginTop')) {
-        _imagesRowMargin = EdgeInsets.fromLTRB(
-          settings['imagesRowMarginLeft'] ?? 0.0,
-          settings['imagesRowMarginTop'] ?? 0.0,
-          settings['imagesRowMarginRight'] ?? 0.0,
-          settings['imagesRowMarginBottom'] ?? 20.0,
-        );
-      }
-
-      if (settings.containsKey('imagesRowPaddingTop')) {
-        _imagesRowPadding = EdgeInsets.fromLTRB(
-          settings['imagesRowPaddingLeft'] ?? 0.0,
-          settings['imagesRowPaddingTop'] ?? 0.0,
-          settings['imagesRowPaddingRight'] ?? 0.0,
-          settings['imagesRowPaddingBottom'] ?? 0.0,
-        );
-      }
-
-      // Load button margin and padding
-      if (settings.containsKey('buttonMarginTop')) {
-        _buttonMargin = EdgeInsets.fromLTRB(
-          settings['buttonMarginLeft'] ?? 0.0,
-          settings['buttonMarginTop'] ?? 0.0,
-          settings['buttonMarginRight'] ?? 0.0,
-          settings['buttonMarginBottom'] ?? 0.0,
-        );
-      }
 
       if (settings.containsKey('buttonPaddingTop')) {
         _buttonPadding = EdgeInsets.fromLTRB(
@@ -510,15 +476,19 @@ class GenderSelectionProvider extends ChangeNotifier {
         'titleFontSize': _titleFontSize,
         'titleColor': _titleColor.value,
         'titleFontWeight': _titleFontWeight.index,
-        'titlePadding': _titlePadding,
         'titleLineHeight': _titleLineHeight,
         'titleItalic': _titleItalic,
         'titleOpacity': _titleOpacity,
         'titleAlignment': _titleAlignment.index,
-        'titleMarginTop': _titleMargin.top,
-        'titleMarginBottom': _titleMargin.bottom,
-        'titleMarginLeft': _titleMargin.left,
-        'titleMarginRight': _titleMargin.right,
+        'titleLeft': _titleLeft,
+        'titleTop': _titleTop,
+        'titleWidth': _titleWidth,
+        // Gender selection position
+        'genderSelectionLeft': _genderSelectionLeft,
+        'genderSelectionTop': _genderSelectionTop,
+        // Button position
+        'buttonLeft': _buttonLeft,
+        'buttonBottom': _buttonBottom,
 
         // Gender images settings
         'maleImagePath': _maleImagePath,
@@ -533,21 +503,10 @@ class GenderSelectionProvider extends ChangeNotifier {
         'imageBorderWidth': _imageBorderWidth,
         'imageBorderColor': _imageBorderColor.value,
 
-        // Images row margin and padding
-        'imagesRowMarginTop': _imagesRowMargin.top,
-        'imagesRowMarginBottom': _imagesRowMargin.bottom,
-        'imagesRowMarginLeft': _imagesRowMargin.left,
-        'imagesRowMarginRight': _imagesRowMargin.right,
-        'imagesRowPaddingTop': _imagesRowPadding.top,
-        'imagesRowPaddingBottom': _imagesRowPadding.bottom,
-        'imagesRowPaddingLeft': _imagesRowPadding.left,
-        'imagesRowPaddingRight': _imagesRowPadding.right,
+      
 
         // Button margin and padding
-        'buttonMarginTop': _buttonMargin.top,
-        'buttonMarginBottom': _buttonMargin.bottom,
-        'buttonMarginLeft': _buttonMargin.left,
-        'buttonMarginRight': _buttonMargin.right,
+       
         'buttonPaddingTop': _buttonPadding.top,
         'buttonPaddingBottom': _buttonPadding.bottom,
         'buttonPaddingLeft': _buttonPadding.left,

@@ -11,13 +11,14 @@ class CharacterSelectionProvider extends ChangeNotifier {
   double _titleFontSize = 22.0;
   Color _titleColor = AppColors.white;
   FontWeight _titleFontWeight = FontWeight.w500;
-  double _titlePadding = 0.0;
   // New title properties
-  EdgeInsets _titleMargin = const EdgeInsets.all(0);
   double _titleLineHeight = 1.0;
   bool _titleItalic = false;
   double _titleOpacity = 1.0;
   TextAlign _titleAlignment = TextAlign.center;
+  double _titleLeft = 390.0;
+  double _titleTop = 685.0;
+  double _titleWidth = 300.0;
 
   // Character settings
   List<CharacterModel> _maleCharacters = [
@@ -73,7 +74,7 @@ class CharacterSelectionProvider extends ChangeNotifier {
   double _characterBorderRadius = 6.0;
   bool _showCharacterBorder = false;
   double _characterBorderWidth = 2.0;
-  Color _characterBorderColor = AppColors.yellow; // Golden yellow
+  Color _characterBorderColor = AppColors.yellow;
 
   // Selection effect settings
   bool _useSelectionEffect = true;
@@ -85,17 +86,17 @@ class CharacterSelectionProvider extends ChangeNotifier {
 
   // Carousel settings
   bool _useCarousel = true;
-  double _carouselVisibleWidth = 0.5; // Percentage of side character visible
-  // New carousel properties
-  EdgeInsets _carouselMargin = const EdgeInsets.all(0);
-  EdgeInsets _carouselPadding = const EdgeInsets.all(0);
+  double _carouselVisibleWidth = 0.5;
+  double _characterLeft = 112.0;
+  double _characterTop = 745.0;
+  double _characterRight = 112.0;
 
   // Grid layout settings
   int _gridRowCount = 1;
   List<int> _gridRowDistribution = [3]; // Default: all characters in one row
   double _gridHorizontalSpacing = 20.0;
   double _gridVerticalSpacing = 20.0;
-  EdgeInsets _gridMargin = const EdgeInsets.all(20.0);
+  // EdgeInsets _gridMargin = const EdgeInsets.all(20.0);
   bool _gridCenterLastRow = false;
 
   // Button settings
@@ -109,15 +110,16 @@ class CharacterSelectionProvider extends ChangeNotifier {
   bool _buttonHasBorder = false;
   double _buttonBorderWidth = 1.0;
   Color _buttonBorderColor = AppColors.black;
-  double _buttonMarginTop = 0.0;
   bool _useImageButton = false;
   String? _buttonImagePath;
   bool _isButtonImageAsset = true;
   // New button properties
   FontWeight _buttonFontWeight = FontWeight.w500;
-  EdgeInsets _buttonMargin = const EdgeInsets.only(top: 0.0);
   EdgeInsets _buttonPadding =
       const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0);
+
+  double _buttonLeft = 444.0;
+  double _buttonBottom = 590.0;
 
   // Layout settings
   double _screenPadding = 0.0;
@@ -130,29 +132,31 @@ class CharacterSelectionProvider extends ChangeNotifier {
   double get titleFontSize => _titleFontSize;
   Color get titleColor => _titleColor;
   FontWeight get titleFontWeight => _titleFontWeight;
-  double get titlePadding => _titlePadding;
-  // New getters for title
-  EdgeInsets get titleMargin => _titleMargin;
+  double get titleLeft => _titleLeft;
+  double get titleTop => _titleTop;
+  double get titleWidth => _titleWidth;
   double get titleLineHeight => _titleLineHeight;
   bool get titleItalic => _titleItalic;
   double get titleOpacity => _titleOpacity;
   TextAlign get titleAlignment => _titleAlignment;
 
   // New getters for carousel
-  EdgeInsets get carouselMargin => _carouselMargin;
-  EdgeInsets get carouselPadding => _carouselPadding;
+  double get characterLeft => _characterLeft;
+  double get characterTop => _characterTop;
+  double get characterRight => _characterRight;
 
   // Grid layout getters
   int get gridRowCount => _gridRowCount;
   List<int> get gridRowDistribution => _gridRowDistribution;
   double get gridHorizontalSpacing => _gridHorizontalSpacing;
   double get gridVerticalSpacing => _gridVerticalSpacing;
-  EdgeInsets get gridMargin => _gridMargin;
+  // EdgeInsets get gridMargin => _gridMargin;
   bool get gridCenterLastRow => _gridCenterLastRow;
 
   // New getters for button
   FontWeight get buttonFontWeight => _buttonFontWeight;
-  EdgeInsets get buttonMargin => _buttonMargin;
+  double get buttonLeft => _buttonLeft;
+  double get buttonBottom => _buttonBottom;
   EdgeInsets get buttonPadding => _buttonPadding;
 
   List<CharacterModel> get maleCharacters => _maleCharacters;
@@ -185,7 +189,6 @@ class CharacterSelectionProvider extends ChangeNotifier {
   bool get buttonHasBorder => _buttonHasBorder;
   double get buttonBorderWidth => _buttonBorderWidth;
   Color get buttonBorderColor => _buttonBorderColor;
-  double get buttonMarginTop => _buttonMarginTop;
   bool get useImageButton => _useImageButton;
   String? get buttonImagePath => _buttonImagePath;
   bool get isButtonImageAsset => _isButtonImageAsset;
@@ -215,7 +218,6 @@ class CharacterSelectionProvider extends ChangeNotifier {
     if (fontSize != null) _titleFontSize = fontSize;
     if (color != null) _titleColor = color;
     if (fontWeight != null) _titleFontWeight = fontWeight;
-    if (padding != null) _titlePadding = padding;
     if (lineHeight != null) _titleLineHeight = lineHeight;
     if (italic != null) _titleItalic = italic;
     if (opacity != null) _titleOpacity = opacity;
@@ -225,15 +227,19 @@ class CharacterSelectionProvider extends ChangeNotifier {
   }
 
   // New setter for title margin
-  void setTitleMargin(EdgeInsets margin) {
-    _titleMargin = margin;
+  void setTitlePosition(double left, double top, double width) {
+    _titleLeft = left;
+    _titleTop = top;
+    _titleWidth = width;
     notifyListeners();
     _saveSettings();
   }
 
   // New setters for carousel
-  void setCarouselMargin(EdgeInsets margin) {
-    _carouselMargin = margin;
+  void setCarouselPosition(double left, double top, double right) {
+    _characterLeft = left;
+    _characterTop = top;
+    _characterRight = right;
     notifyListeners();
     _saveSettings();
   }
@@ -247,12 +253,6 @@ class CharacterSelectionProvider extends ChangeNotifier {
   // You might also want to add a method to set the carousel visible width
   void setCarouselVisibleWidth(double width) {
     _carouselVisibleWidth = width;
-    notifyListeners();
-    _saveSettings();
-  }
-
-  void setCarouselPadding(EdgeInsets padding) {
-    _carouselPadding = padding;
     notifyListeners();
     _saveSettings();
   }
@@ -304,12 +304,6 @@ class CharacterSelectionProvider extends ChangeNotifier {
   void setGridSpacing({double? horizontal, double? vertical}) {
     if (horizontal != null) _gridHorizontalSpacing = horizontal;
     if (vertical != null) _gridVerticalSpacing = vertical;
-    notifyListeners();
-    _saveSettings();
-  }
-
-  void setGridMargin(EdgeInsets margin) {
-    _gridMargin = margin;
     notifyListeners();
     _saveSettings();
   }
@@ -468,8 +462,9 @@ class CharacterSelectionProvider extends ChangeNotifier {
   }
 
   // New setters for button margin and padding
-  void setButtonMargin(EdgeInsets margin) {
-    _buttonMargin = margin;
+  void setButtonPosition(double left, double bottom) {
+    _buttonLeft = left;
+    _buttonBottom = bottom;
     notifyListeners();
     _saveSettings();
   }
@@ -488,12 +483,6 @@ class CharacterSelectionProvider extends ChangeNotifier {
     if (hasBorder != null) _buttonHasBorder = hasBorder;
     if (borderWidth != null) _buttonBorderWidth = borderWidth;
     if (borderColor != null) _buttonBorderColor = borderColor;
-    notifyListeners();
-    _saveSettings();
-  }
-
-  void setButtonMarginTop(double margin) {
-    _buttonMarginTop = margin;
     notifyListeners();
     _saveSettings();
   }
@@ -544,41 +533,14 @@ class CharacterSelectionProvider extends ChangeNotifier {
       _titleColor = Color(settings['titleColor'] ?? _titleColor.value);
       _titleFontWeight = FontWeight
           .values[settings['titleFontWeight'] ?? _titleFontWeight.index];
-      _titlePadding = settings['titlePadding'] ?? _titlePadding;
+      _titleLeft = settings['titleLeft'] ?? _titleLeft;
+      _titleTop = settings['titleTop'] ?? _titleTop;
+      _titleWidth = settings['titleWidth'] ?? _titleWidth;
       _titleLineHeight = settings['titleLineHeight'] ?? _titleLineHeight;
       _titleItalic = settings['titleItalic'] ?? _titleItalic;
       _titleOpacity = settings['titleOpacity'] ?? _titleOpacity;
       _titleAlignment =
           TextAlign.values[settings['titleAlignment'] ?? _titleAlignment.index];
-
-      // Load title margin
-      if (settings.containsKey('titleMarginTop')) {
-        _titleMargin = EdgeInsets.fromLTRB(
-          settings['titleMarginLeft'] ?? 0.0,
-          settings['titleMarginTop'] ?? 0.0,
-          settings['titleMarginRight'] ?? 0.0,
-          settings['titleMarginBottom'] ?? 0.0,
-        );
-      }
-
-      // Load carousel margin and padding
-      if (settings.containsKey('carouselMarginTop')) {
-        _carouselMargin = EdgeInsets.fromLTRB(
-          settings['carouselMarginLeft'] ?? 0.0,
-          settings['carouselMarginTop'] ?? 0.0,
-          settings['carouselMarginRight'] ?? 0.0,
-          settings['carouselMarginBottom'] ?? 0.0,
-        );
-      }
-
-      if (settings.containsKey('carouselPaddingTop')) {
-        _carouselPadding = EdgeInsets.fromLTRB(
-          settings['carouselPaddingLeft'] ?? 0.0,
-          settings['carouselPaddingTop'] ?? 0.0,
-          settings['carouselPaddingRight'] ?? 0.0,
-          settings['carouselPaddingBottom'] ?? 0.0,
-        );
-      }
 
       // Character settings
       if (settings['maleCharacters'] != null) {
@@ -641,6 +603,9 @@ class CharacterSelectionProvider extends ChangeNotifier {
           settings['characterBorderWidth'] ?? _characterBorderWidth;
       _characterBorderColor = Color(
           settings['characterBorderColor'] ?? _characterBorderColor.value);
+      _characterLeft = settings['characterLeft'] ?? _characterLeft;
+      _characterTop = settings['characterTop'] ?? _characterTop;
+      _characterRight = settings['characterRight']?? _characterRight;
 
       // Selection effect settings
       _useSelectionEffect =
@@ -676,7 +641,8 @@ class CharacterSelectionProvider extends ChangeNotifier {
       _buttonBorderWidth = settings['buttonBorderWidth'] ?? _buttonBorderWidth;
       _buttonBorderColor =
           Color(settings['buttonBorderColor'] ?? _buttonBorderColor.value);
-      _buttonMarginTop = settings['buttonMarginTop'] ?? _buttonMarginTop;
+      _buttonLeft = settings['buttonLeft'] ?? _buttonLeft;
+      _buttonBottom = settings['buttonBottom'] ?? _buttonBottom;
       _useImageButton = settings['useImageButton'] ?? _useImageButton;
       _buttonImagePath = settings['buttonImagePath'];
       _isButtonImageAsset =
@@ -688,16 +654,6 @@ class CharacterSelectionProvider extends ChangeNotifier {
       _backgroundImagePath = settings['backgroundImagePath'];
       _isBackgroundImageAsset =
           settings['isBackgroundImageAsset'] ?? _isBackgroundImageAsset;
-
-      // Load button margin
-      if (settings.containsKey('buttonMarginTop')) {
-        _buttonMargin = EdgeInsets.fromLTRB(
-          settings['buttonMarginLeft'] ?? 0.0,
-          settings['buttonMarginTop'] ?? _buttonMarginTop,
-          settings['buttonMarginRight'] ?? 0.0,
-          settings['buttonMarginBottom'] ?? 0.0,
-        );
-      }
 
       // Load button padding
       if (settings.containsKey('buttonPaddingVertical')) {
@@ -717,16 +673,6 @@ class CharacterSelectionProvider extends ChangeNotifier {
     }
     _gridHorizontalSpacing = prefs.getDouble('grid_horizontal_spacing') ?? 20.0;
     _gridVerticalSpacing = prefs.getDouble('grid_vertical_spacing') ?? 20.0;
-    final gridMarginStr = prefs.getString('grid_margin');
-    if (gridMarginStr != null) {
-      final Map<String, dynamic> map = jsonDecode(gridMarginStr);
-      _gridMargin = EdgeInsets.fromLTRB(
-        map['left'] ?? 20.0,
-        map['top'] ?? 20.0,
-        map['right'] ?? 20.0,
-        map['bottom'] ?? 20.0,
-      );
-    }
     _gridCenterLastRow = prefs.getBool('grid_center_last_row') ?? true;
 
     notifyListeners();
@@ -742,15 +688,21 @@ class CharacterSelectionProvider extends ChangeNotifier {
       'titleFontSize': _titleFontSize,
       'titleColor': _titleColor.value,
       'titleFontWeight': _titleFontWeight.index,
-      'titlePadding': _titlePadding,
+      
       'titleLineHeight': _titleLineHeight,
       'titleItalic': _titleItalic,
       'titleOpacity': _titleOpacity,
       'titleAlignment': _titleAlignment.index,
-      'titleMarginTop': _titleMargin.top,
-      'titleMarginBottom': _titleMargin.bottom,
-      'titleMarginLeft': _titleMargin.left,
-      'titleMarginRight': _titleMargin.right,
+      'titleLeft': _titleLeft,
+      'titleTop': _titleTop,
+      'titleWidth': _titleWidth,
+      // Button settings
+      'buttonLeft': _buttonLeft,
+      'buttonBottom': _buttonBottom,
+      //
+      'characterLeft': _characterLeft,
+      'characterTop': _characterTop,
+      'characterRight': _characterRight,
 
       // Character settings
       'maleCharacters': _maleCharacters.map((e) => e.toJson()).toList(),
@@ -776,14 +728,7 @@ class CharacterSelectionProvider extends ChangeNotifier {
       // Carousel settings
       'useCarousel': _useCarousel,
       'carouselVisibleWidth': _carouselVisibleWidth,
-      'carouselMarginTop': _carouselMargin.top,
-      'carouselMarginBottom': _carouselMargin.bottom,
-      'carouselMarginLeft': _carouselMargin.left,
-      'carouselMarginRight': _carouselMargin.right,
-      'carouselPaddingTop': _carouselPadding.top,
-      'carouselPaddingBottom': _carouselPadding.bottom,
-      'carouselPaddingLeft': _carouselPadding.left,
-      'carouselPaddingRight': _carouselPadding.right,
+     
 
       // Button settings
       'buttonText': _buttonText,
@@ -797,10 +742,7 @@ class CharacterSelectionProvider extends ChangeNotifier {
       'buttonHasBorder': _buttonHasBorder,
       'buttonBorderWidth': _buttonBorderWidth,
       'buttonBorderColor': _buttonBorderColor.value,
-      'buttonMarginTop': _buttonMarginTop,
-      'buttonMarginLeft': _buttonMargin.left,
-      'buttonMarginRight': _buttonMargin.right,
-      'buttonMarginBottom': _buttonMargin.bottom,
+      
       'buttonPaddingVertical': _buttonPadding.top,
       'buttonPaddingHorizontal': _buttonPadding.left,
       'useImageButton': _useImageButton,
@@ -820,14 +762,7 @@ class CharacterSelectionProvider extends ChangeNotifier {
         'grid_row_distribution', jsonEncode(_gridRowDistribution));
     await prefs.setDouble('grid_horizontal_spacing', _gridHorizontalSpacing);
     await prefs.setDouble('grid_vertical_spacing', _gridVerticalSpacing);
-    await prefs.setString(
-        'grid_margin',
-        jsonEncode({
-          'top': _gridMargin.top,
-          'bottom': _gridMargin.bottom,
-          'left': _gridMargin.left,
-          'right': _gridMargin.right,
-        }));
+   
     await prefs.setBool('grid_center_last_row', _gridCenterLastRow);
 
     await prefs.setString('character_selection_settings', jsonEncode(settings));
