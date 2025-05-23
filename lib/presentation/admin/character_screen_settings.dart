@@ -312,8 +312,7 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                     label: 'Character Width',
                     value: settings.characterWidth,
                     min: 0.0,
-                    max: 300.0,
-                    divisions: 80,
+                    max: 600.0,
                     onChanged: (value) {
                       settings.setCharacterDimensions(
                           value, settings.characterHeight);
@@ -323,8 +322,7 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                     label: 'Character Height',
                     value: settings.characterHeight,
                     min: 0.0,
-                    max: 600.0,
-                    divisions: 80,
+                    max: 900.0,
                     onChanged: (value) {
                       settings.setCharacterDimensions(
                           settings.characterWidth, value);
@@ -510,41 +508,6 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                     },
                   ),
 
-                  _buildSectionSubtitle('Character Position'),
-
-                  _buildSliderWithLabel(
-                    label: 'From Left',
-                    value: settings.characterLeft,
-                    min: 0.0,
-                    max: 1000.0,
-                    onChanged: (value) {
-                      settings.setCarouselPosition(value, settings.characterTop,
-                          settings.characterRight);
-                    },
-                  ),
-
-                  _buildSliderWithLabel(
-                    label: 'From Top',
-                    value: settings.characterTop,
-                    min: 0.0,
-                    max: 1000.0,
-                    onChanged: (value) {
-                      settings.setCarouselPosition(settings.characterLeft,
-                          value, settings.characterRight);
-                    },
-                  ),
-
-                  _buildSliderWithLabel(
-                    label: 'From Right',
-                    value: settings.characterRight,
-                    min: 0.0,
-                    max: 1000.0,
-                    onChanged: (value) {
-                      settings.setCarouselPosition(
-                          settings.characterLeft, settings.characterTop, value);
-                    },
-                  ),
-
                   // Grid Layout Settings (only show when carousel is disabled)
                   if (!settings.useCarousel) ...[
                     _buildSectionSubtitle('Grid Layout Settings'),
@@ -656,6 +619,41 @@ class _CharacterScreenSettingsState extends State<CharacterScreenSettings> {
                       },
                     ),
                   ],
+
+                  _buildSectionSubtitle('Character Position'),
+
+                  _buildSliderWithLabel(
+                    label: 'From Left',
+                    value: settings.characterLeft,
+                    min: 0.0,
+                    max: 1000.0,
+                    onChanged: (value) {
+                      settings.setCarouselPosition(value, settings.characterTop,
+                          settings.characterRight);
+                    },
+                  ),
+
+                  _buildSliderWithLabel(
+                    label: 'From Top',
+                    value: settings.characterTop,
+                    min: 0.0,
+                    max: 1000.0,
+                    onChanged: (value) {
+                      settings.setCarouselPosition(settings.characterLeft,
+                          value, settings.characterRight);
+                    },
+                  ),
+
+                  _buildSliderWithLabel(
+                    label: 'From Right',
+                    value: settings.characterRight,
+                    min: 0.0,
+                    max: 1000.0,
+                    onChanged: (value) {
+                      settings.setCarouselPosition(
+                          settings.characterLeft, settings.characterTop, value);
+                    },
+                  ),
                   const Divider(height: 32),
 
                   // Button Settings

@@ -64,3 +64,10 @@ flutter:
           weight: 600
         - asset: assets/fonts/Satoshi-Regular.otf
           weight: 500
+    - family: Heineken
+      fonts:
+        - asset: assets/fonts/heineken-regular.ttf
+          weight: 500
+        - asset: assets/fonts/heineken-bold.ttf
+      
+         

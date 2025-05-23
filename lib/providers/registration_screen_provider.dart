@@ -163,7 +163,7 @@ class RegistrationScreenProvider extends ChangeNotifier {
   double _buttonOpacity = 1.0;
   double _buttonTextOpacity = 1.0;
   double _buttonLeft = 450.0;
-  double _buttonTop = 999.0;
+  double _buttonBottom = 999.0;
 
   // Image button settings
   String? _buttonImagePath;
@@ -212,7 +212,7 @@ class RegistrationScreenProvider extends ChangeNotifier {
   Color get buttonBorderColor => _buttonBorderColor;
   EdgeInsets get buttonPadding => _buttonPadding;
   double get buttonLeft => _buttonLeft;
-  double get buttonTop => _buttonTop;
+  double get buttonBottom => _buttonBottom;
 
   String? get buttonImagePath => _buttonImagePath;
   bool get isButtonImageAsset => _isButtonImageAsset;
@@ -258,7 +258,7 @@ class RegistrationScreenProvider extends ChangeNotifier {
 
 // Load button position
     _buttonLeft = _prefs.getDouble('registration_button_left') ?? _buttonLeft;
-    _buttonTop = _prefs.getDouble('registration_button_top') ?? _buttonTop;
+    _buttonBottom = _prefs.getDouble('registration_button_bottom') ?? _buttonBottom;
 
     // Load button padding
     final double verticalPadding =
@@ -426,11 +426,11 @@ class RegistrationScreenProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setButtonPosition(double left, double top) {
+  void setButtonPosition(double left, double bottom) {
     _buttonLeft = left;
-    _buttonTop = top;
+    _buttonBottom = bottom;
     _prefs.setDouble('registration_button_left', left);
-    _prefs.setDouble('registration_button_top', top);
+    _prefs.setDouble('registration_button_bottom', bottom);
     notifyListeners();
   }
 

@@ -195,7 +195,7 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
             // Button with positioning
             Positioned(
               left: registrationSettings.buttonLeft,
-              top: registrationSettings.buttonTop,
+              bottom: registrationSettings.buttonBottom,
               child: registrationSettings.useImageButton
                   ? _buildImageButton(registrationSettings)
                   : _buildTextButton(registrationSettings),
@@ -206,8 +206,8 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
               right: 0,
               top: 0,
               child: GestureDetector(
-                onTap: () => Navigator.pushNamed(
-                    context, AppRoutes.registrationScreenSettings),
+                onTap: () =>
+                    Navigator.pushNamed(context, AppRoutes.adminScreen),
                 child: Container(
                   width: 50,
                   height: 50,

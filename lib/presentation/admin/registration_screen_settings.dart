@@ -56,7 +56,7 @@ class _RegistrationScreenSettingsState
                   children: [
                     // Enable/Disable Registration Screen
                     SwitchListTile(
-                      title: const Text('Show Registration Screen'),
+                      title: const Text('Enable Registration Screen'),
                       subtitle: const Text(
                           'Enable or disable the registration screen'),
                       value: settings.showRegistrationScreen,
@@ -344,71 +344,6 @@ class _RegistrationScreenSettingsState
 
                     const Divider(),
 
-                    // Spacing Settings
-                    const Text(
-                      'Spacing Settings',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    Constants.h8,
-
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextFormField(
-                            initialValue: settings.fieldSpacing.toString(),
-                            decoration: const InputDecoration(
-                              labelText: 'Field Spacing',
-                              border: OutlineInputBorder(),
-                            ),
-                            keyboardType: TextInputType.number,
-                            onChanged: (value) {
-                              final spacing = double.tryParse(value);
-                              if (spacing != null) {
-                                settings.setFieldSpacing(spacing);
-                              }
-                            },
-                          ),
-                        ),
-                        Constants.w16,
-                        Expanded(
-                          child: TextFormField(
-                            initialValue: settings.buttonSpacing.toString(),
-                            decoration: const InputDecoration(
-                              labelText: 'Button Spacing',
-                              border: OutlineInputBorder(),
-                            ),
-                            keyboardType: TextInputType.number,
-                            onChanged: (value) {
-                              final spacing = double.tryParse(value);
-                              if (spacing != null) {
-                                settings.setButtonSpacing(spacing);
-                              }
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    Constants.h16,
-
-                    TextFormField(
-                      initialValue: settings.borderRadius.toString(),
-                      decoration: const InputDecoration(
-                        labelText: 'Border Radius',
-                        border: OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.number,
-                      onChanged: (value) {
-                        final radius = double.tryParse(value);
-                        if (radius != null) {
-                          settings.setBorderRadius(radius);
-                        }
-                      },
-                    ),
-
-                    const Divider(),
-
                     // Button Settings
                     const Text(
                       'Button Settings',
@@ -417,50 +352,24 @@ class _RegistrationScreenSettingsState
                     ),
                     Constants.h8,
 
-// Inside the button settings section, add position settings:
                     _buildSectionHeader('Button Position'),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextFormField(
-                            initialValue: settings.buttonLeft.toString(),
-                            decoration: const InputDecoration(
-                              labelText: 'Left Position',
-                              border: OutlineInputBorder(),
-                            ),
-                            keyboardType: TextInputType.number,
-                            onChanged: (value) {
-                              final left = double.tryParse(value);
-                              if (left != null) {
-                                settings.setButtonPosition(
-                                  left,
-                                  settings.buttonTop,
-                                );
-                              }
-                            },
-                          ),
-                        ),
-                        Constants.w16,
-                        Expanded(
-                          child: TextFormField(
-                            initialValue: settings.buttonTop.toString(),
-                            decoration: const InputDecoration(
-                              labelText: 'Top Position',
-                              border: OutlineInputBorder(),
-                            ),
-                            keyboardType: TextInputType.number,
-                            onChanged: (value) {
-                              final top = double.tryParse(value);
-                              if (top != null) {
-                                settings.setButtonPosition(
-                                  settings.buttonLeft,
-                                  top,
-                                );
-                              }
-                            },
-                          ),
-                        ),
-                      ],
+                    _buildSliderWithLabel(
+                      label: 'From Left',
+                      value: settings.buttonLeft,
+                      min: 0,
+                      max: 1100,
+                      onChanged: (value) {
+                        settings.setButtonPosition(value, settings.buttonBottom);
+                      },
+                    ),
+                    _buildSliderWithLabel(
+                      label: 'From Bottom',
+                      value: settings.buttonBottom,
+                      min: 0,
+                      max: 1100,
+                      onChanged: (value) {
+                        settings.setButtonPosition(settings.buttonLeft, value);
+                      },
                     ),
 
                     // Button Type
@@ -891,6 +800,38 @@ class _RegistrationScreenSettingsState
                 ),
               ],
             ),
+            // Font Weight
+            _buildDropdownWithLabel<FontWeight>(
+              label: 'Font Weight',
+              value: field.fontWeight,
+              items: {
+                FontWeight.w100: 'Thin',
+                FontWeight.w300: 'Light',
+                FontWeight.w400: 'Regular',
+                FontWeight.w500: 'Medium',
+                FontWeight.w700: 'Bold',
+                FontWeight.w900: 'Black',
+              },
+              onChanged: (value) {
+                if (value != null) {
+                  settings.updateTextFieldStyle(
+                    id: field.id,
+                    fontWeight: value,
+                  );
+                }
+              },
+            ),
+            // Font Style (Italic)
+            _buildSwitchWithLabel(
+              label: 'Italic',
+              value: field.isItalic,
+              onChanged: (value) {
+                settings.updateTextFieldStyle(
+                  id: field.id,
+                  isItalic: value,
+                );
+              },
+            ),
             Constants.h16,
             Row(
               children: [
@@ -1119,41 +1060,7 @@ class _RegistrationScreenSettingsState
                   ),
                 ],
               ),
-            _buildSectionHeader('Text Field Styling'),
-
-            // Font Weight
-            _buildDropdownWithLabel<FontWeight>(
-              label: 'Font Weight',
-              value: field.fontWeight,
-              items: {
-                FontWeight.w100: 'Thin',
-                FontWeight.w300: 'Light',
-                FontWeight.w400: 'Regular',
-                FontWeight.w500: 'Medium',
-                FontWeight.w700: 'Bold',
-                FontWeight.w900: 'Black',
-              },
-              onChanged: (value) {
-                if (value != null) {
-                  settings.updateTextFieldStyle(
-                    id: field.id,
-                    fontWeight: value,
-                  );
-                }
-              },
-            ),
-
-            // Font Style (Italic)
-            _buildSwitchWithLabel(
-              label: 'Italic',
-              value: field.isItalic,
-              onChanged: (value) {
-                settings.updateTextFieldStyle(
-                  id: field.id,
-                  isItalic: value,
-                );
-              },
-            ),
+            Constants.h4,
 
             // Border Radius
             _buildSliderWithLabel(
@@ -1177,7 +1084,7 @@ class _RegistrationScreenSettingsState
                 label: 'From Left',
                 value: field.left,
                 min: 0.0,
-                max: 1000.0,
+                max: 2000.0,
                 onChanged: (value) {
                   settings.updateTextFieldPosition(
                     field.id,
@@ -1190,7 +1097,7 @@ class _RegistrationScreenSettingsState
                 label: 'From Top',
                 value: field.top,
                 min: 0.0,
-                max: 1000.0,
+                max: 2000.0,
                 onChanged: (value) {
                   settings.updateTextFieldPosition(
                     field.id,

@@ -21,12 +21,9 @@ Gender Screen
 * Btn Border is not working.
 
 Character screen
-* Title fsize as 22 ✅
-* Fix Main Axis Alignment ✅
-* Add Controls for Main Axis Alignment ⚠️
-* Turn off the default show background ✅
-* Turn off the default center last row ✅
-* Something wrong with Character Border ✅
+* If character length is 3 can I toggle the Use Carousel View switch
+* Character Border is not working.
+* 2 x 2 row: 2nd row selection has a problem.
 
 Capture Screen
 * Preview margins has no effect ✅

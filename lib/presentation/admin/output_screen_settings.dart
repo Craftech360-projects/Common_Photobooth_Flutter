@@ -87,8 +87,15 @@ class OutputScreenSettings extends StatelessWidget {
                             label: 'Font Weight',
                             value: settings.titleFontWeight,
                             items: {
-                              FontWeight.normal: 'Normal',
-                              FontWeight.bold: 'Bold',
+                              FontWeight.w100: 'Thin (100)',
+                              FontWeight.w200: 'Extra Light (200)',
+                              FontWeight.w300: 'Light (300)',
+                              FontWeight.w400: 'Regular (400)',
+                              FontWeight.w500: 'Medium (500)',
+                              FontWeight.w600: 'Semi Bold (600)',
+                              FontWeight.w700: 'Bold (700)',
+                              FontWeight.w800: 'Extra Bold (800)',
+                              FontWeight.w900: 'Black (900)',
                             },
                             onChanged: (value) =>
                                 settings.setTitleStyle(fontWeight: value),
@@ -101,14 +108,6 @@ class OutputScreenSettings extends StatelessWidget {
                                 settings.setTitleStyle(color: color),
                           ),
 
-                          _buildSlider(
-                            label: 'Title Padding',
-                            value: settings.titlePadding,
-                            min: 0.0,
-                            max: 50.0,
-                            onChanged: (value) =>
-                                settings.setTitleStyle(padding: value),
-                          ),
                           // Remove dropdown for position and keep only the fine-tuning controls
                           _buildSectionTitle('Title Position'),
                           Row(
@@ -198,14 +197,6 @@ class OutputScreenSettings extends StatelessWidget {
                             max: 10.0,
                             onChanged: (value) =>
                                 settings.setImageBorder(width: value),
-                          ),
-                          _buildSlider(
-                            label: 'Image Spacing',
-                            value: settings.imageSpacing,
-                            min: 0.0,
-                            max: 100.0,
-                            onChanged: (value) =>
-                                settings.setImageSpacing(value),
                           ),
 
                           // Fine-tuning controls for image position
@@ -299,14 +290,6 @@ class OutputScreenSettings extends StatelessWidget {
                             },
                             onChanged: (value) =>
                                 settings.setQrCodeLayout(value!),
-                          ),
-                          _buildSlider(
-                            label: 'QR Code Spacing',
-                            value: settings.qrCodeSpacing,
-                            min: 0.0,
-                            max: 100.0,
-                            onChanged: (value) =>
-                                settings.setQrCodeSpacing(value),
                           ),
 
                           // Fine-tuning controls for QR code position

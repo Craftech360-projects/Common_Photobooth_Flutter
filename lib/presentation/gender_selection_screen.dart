@@ -93,9 +93,14 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
 
             // Continue Button with margins
             Positioned(
-                left: settings.buttonLeft,
-                bottom: settings.buttonBottom,
-                child: _buildButton(settings, appProvider)),
+              left: settings.buttonLeft,
+              bottom: settings.buttonBottom,
+              child: settings.useImageButton
+                  ? _buildImageButton(settings, appProvider)
+                  : _buildButton(settings, appProvider),
+            ),
+
+            // _buildButton(settings, appProvider)),
 
             Positioned(
               right: 0,
@@ -155,7 +160,7 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
             image: isAsset
                 ? AssetImage(imagePath!)
                 : FileImage(File(imagePath!)) as ImageProvider,
-            fit: BoxFit.cover,
+            fit: BoxFit.contain,
           ),
           boxShadow: isSelected &&
                   settings.useSelectionEffect &&
@@ -169,6 +174,57 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
                   )
                 ]
               : null,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildImageButton(
+      GenderSelectionProvider settings, PhotoboothProvider appProvider) {
+    if (settings.buttonImagePath == null) {
+      // Fallback to text button if no image is selected
+      return _buildButton(settings, appProvider);
+    }
+
+    return Opacity(
+      opacity: 1.0,
+      child: GestureDetector(
+        onTap: () {
+          if (_selectedGender == null) {
+            setState(() {
+              _showError = true;
+            });
+            return;
+          }
+
+          // Set the gender in the provider
+          appProvider.setGender(_selectedGender!);
+
+          // Navigate directly to face capture screen instead of character selection
+          Navigator.pushNamed(context, AppRoutes.faceCapture);
+        },
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
+          child: Container(
+            width: settings.buttonWidth,
+            height: settings.buttonHeight,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
+              image: DecorationImage(
+                image: settings.isButtonImageAsset
+                    ? AssetImage(settings.buttonImagePath!)
+                    : FileImage(File(settings.buttonImagePath!))
+                        as ImageProvider,
+                fit: BoxFit.cover,
+              ),
+              border: settings.buttonHasBorder
+                  ? Border.all(
+                      color: settings.buttonBorderColor,
+                      width: settings.buttonBorderWidth,
+                    )
+                  : null,
+            ),
+          ),
         ),
       ),
     );
@@ -195,7 +251,7 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
           Navigator.pushNamed(context, AppRoutes.faceCapture);
         },
         style: ElevatedButton.styleFrom(
-          padding: settings.buttonPadding,
+          // padding: settings.buttonPadding,
           backgroundColor: settings.buttonColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
@@ -204,7 +260,7 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
         child: settings.useImageButton && settings.buttonImagePath != null
             ? Image.file(
                 File(settings.buttonImagePath!),
-                fit: BoxFit.contain,
+                fit: BoxFit.cover,
               )
             : Text(
                 settings.buttonText,

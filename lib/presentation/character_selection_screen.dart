@@ -21,7 +21,7 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen> {
   int _currentIndex = 0;
   bool _showError = false;
   // In the class declaration, update the PageController initialization
-  final PageController _pageController = PageController(viewportFraction: 0.5);
+  final PageController _pageController = PageController(viewportFraction: 0.32);
 
   // Then update the _buildCarouselSelection method
   Widget _buildCarouselSelection(
@@ -211,10 +211,11 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen> {
             Expanded(
               child: Padding(
                 padding: EdgeInsets.symmetric(
-                  horizontal: settings.gridHorizontalSpacing / 2,
+                  horizontal: settings.gridHorizontalSpacing,
                 ),
                 child: _buildCharacterOption(character, settings,
-                    isCenter: isSelected),
+                    isCenter:
+                        isSelected), // Changed from isCenter to isSelected
               ),
             ),
           );
@@ -321,12 +322,12 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen> {
           left: settings.characterLeft,
           top: settings.characterTop,
           right: settings.characterRight,
-          child: SizedBox(
-            height: settings.characterHeight + 20,
-            child: characters.length > 3 && settings.useCarousel
-                ? _buildCarouselSelection(characters, settings)
-                : _buildGridSelection(characters, settings),
-          ),
+          child: characters.length > 3 && settings.useCarousel
+              ? SizedBox(
+                  height: settings.characterHeight + 20,
+                  child: _buildCarouselSelection(characters, settings),
+                )
+              : _buildGridSelection(characters, settings),
         ),
 
         if (_showError)
@@ -421,9 +422,8 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen> {
               child: character.isAsset
                   ? Image.asset(
                       character.imagePath,
-                      fit: BoxFit.cover,
+                      fit: BoxFit.cover, // Keep consistent BoxFit
                       errorBuilder: (context, error, stackTrace) {
-                        // Handle missing asset files
                         return Container(
                           color: AppColors.greyOffWhite,
                           child: const Center(
@@ -436,7 +436,8 @@ class _CharacterSelectionScreenState extends State<CharacterSelectionScreen> {
                   : File(character.imagePath).existsSync()
                       ? Image.file(
                           File(character.imagePath),
-                          fit: BoxFit.contain,
+                          fit: BoxFit
+                              .cover, // Changed from BoxFit.contain to BoxFit.cover
                         )
                       : Container(
                           color: AppColors.greyOffWhite,

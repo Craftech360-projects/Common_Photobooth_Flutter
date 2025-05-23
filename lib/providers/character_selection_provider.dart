@@ -673,7 +673,7 @@ class CharacterSelectionProvider extends ChangeNotifier {
     }
     _gridHorizontalSpacing = prefs.getDouble('grid_horizontal_spacing') ?? 20.0;
     _gridVerticalSpacing = prefs.getDouble('grid_vertical_spacing') ?? 20.0;
-    _gridCenterLastRow = prefs.getBool('grid_center_last_row') ?? true;
+    _gridCenterLastRow = prefs.getBool('grid_center_last_row') ?? false;
 
     notifyListeners();
   }

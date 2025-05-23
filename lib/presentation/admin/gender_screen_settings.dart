@@ -546,7 +546,7 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
                   _buildSectionTitle('Selection Effect Settings'),
 
                   SwitchListTile(
-                    title: const Text('Use Selection Effect'),
+                    title: const Text('Enable Highlighting'),
                     subtitle: const Text('Scale up selected gender image'),
                     value: settings.useSelectionEffect,
                     onChanged: (value) {

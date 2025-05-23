@@ -43,6 +43,7 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
 
     // Skip camera initialization in preview mode
     if (widget.isPreviewMode) {
+      print("preview mode ${widget.isPreviewMode}");
       return;
     }
 
@@ -302,25 +303,27 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
     final globalSettings = context.watch<GlobalSettingsProvider>();
 
     // Show loading indicator if camera is not initialized
-    if (!_cameraInitialized || _controller == null || !_controller!.value.isInitialized) {
-      return Scaffold(
-        body: Container(
-          width: double.infinity,
-          height: double.infinity,
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: _getBackgroundImage(settings, globalSettings),
-              fit: BoxFit.cover,
-            ),
-          ),
-          child: Center(
-            child: CircularProgressIndicator(
-              color: settings.previewBorderColor,
-            ),
-          ),
-        ),
-      );
-    }
+    // if (!_cameraInitialized ||
+    //     _controller == null ||
+    //     !_controller!.value.isInitialized) {
+    //   return Scaffold(
+    //     body: Container(
+    //       width: double.infinity,
+    //       height: double.infinity,
+    //       decoration: BoxDecoration(
+    //         image: DecorationImage(
+    //           image: _getBackgroundImage(settings, globalSettings),
+    //           fit: BoxFit.cover,
+    //         ),
+    //       ),
+    //       child: Center(
+    //         child: CircularProgressIndicator(
+    //           color: settings.previewBorderColor,
+    //         ),
+    //       ),
+    //     ),
+    //   );
+    // }
 
     return Scaffold(
       body: Stack(
@@ -401,7 +404,7 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
                   color: settings.previewBorderColor,
                   width: settings.previewBorderWidth,
                 ),
-                color: Colors.black38, // Add a background color for visibility
+                color: Colors.white, // Add a background color for visibility
               )
             : BoxDecoration(
                 borderRadius:

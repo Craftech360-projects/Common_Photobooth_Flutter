@@ -19,30 +19,28 @@ class OutputScreenProvider extends ChangeNotifier {
   double _titleTop = 434.0;
   double _titleWidth = 500.0;
 
-  double _imageLeft = 119.0;
-  double _imageTop = 540.0;
+  double _imageLeft = 114.0;
+  double _imageTop = 531.0;
 
-  double _qrCodeLeft = 408.0;
-  double _qrCodeBottom = 380.0;
+  double _qrCodeLeft = 373.0;
+  double _qrCodeBottom = 310.0;
 
-  double _buttonLeft = 458.0;
-  double _buttonBottom = 310.0;
+  double _buttonLeft = 462.0;
+  double _buttonBottom = 239.0;
 
   // Title settings
   String _titleText = 'Your Image has been created';
-  double _titleFontSize = 32.0;
-  FontWeight _titleFontWeight = FontWeight.bold;
+  double _titleFontSize = 22.0;
+  FontWeight _titleFontWeight = FontWeight.w500;
   Color _titleColor = AppColors.white;
-  double _titlePadding = 20.0;
   bool _showTitle = true;
 
   // Image settings
-  double _imageWidth = 400.0;
-  double _imageHeight = 500.0;
+  double _imageWidth = 849.0;
+  double _imageHeight = 854.0;
   double _imageBorderRadius = 20.0;
   Color _imageBorderColor = AppColors.yellow;
   double _imageBorderWidth = 3.0;
-  double _imageSpacing = 30.0;
 
   // QR code settings
   double _qrCodeSize = 150.0;
@@ -51,8 +49,7 @@ class OutputScreenProvider extends ChangeNotifier {
   String _qrCodeText = 'Scan QR code to download your image';
   double _qrCodeTextFontSize = 18.0;
   Color _qrCodeTextColor = AppColors.white;
-  QrCodeLayout _qrCodeLayout = QrCodeLayout.below;
-  double _qrCodeSpacing = 20.0;
+  QrCodeLayout _qrCodeLayout = QrCodeLayout.above;
 
   // Button settings
   String _buttonText = 'Start Over';
@@ -73,7 +70,6 @@ class OutputScreenProvider extends ChangeNotifier {
   double get titleFontSize => _titleFontSize;
   FontWeight get titleFontWeight => _titleFontWeight;
   Color get titleColor => _titleColor;
-  double get titlePadding => _titlePadding;
   bool get showTitle => _showTitle;
 
   // Getters for position properties
@@ -95,7 +91,6 @@ class OutputScreenProvider extends ChangeNotifier {
   double get imageBorderRadius => _imageBorderRadius;
   Color get imageBorderColor => _imageBorderColor;
   double get imageBorderWidth => _imageBorderWidth;
-  double get imageSpacing => _imageSpacing;
 
   double get qrCodeSize => _qrCodeSize;
   Color get qrCodeBackgroundColor => _qrCodeBackgroundColor;
@@ -104,7 +99,6 @@ class OutputScreenProvider extends ChangeNotifier {
   double get qrCodeTextFontSize => _qrCodeTextFontSize;
   Color get qrCodeTextColor => _qrCodeTextColor;
   QrCodeLayout get qrCodeLayout => _qrCodeLayout;
-  double get qrCodeSpacing => _qrCodeSpacing;
 
   String get buttonText => _buttonText;
   double get buttonFontSize => _buttonFontSize;
@@ -148,7 +142,6 @@ class OutputScreenProvider extends ChangeNotifier {
       _titleFontWeight = FontWeight
           .values[settings['titleFontWeight'] ?? _titleFontWeight.index];
       _titleColor = Color(settings['titleColor'] ?? _titleColor.value);
-      _titlePadding = settings['titlePadding'] ?? _titlePadding;
       _showTitle = settings['showTitle'] ?? _showTitle;
 
       // Image settings
@@ -158,7 +151,6 @@ class OutputScreenProvider extends ChangeNotifier {
       _imageBorderColor =
           Color(settings['imageBorderColor'] ?? _imageBorderColor.value);
       _imageBorderWidth = settings['imageBorderWidth'] ?? _imageBorderWidth;
-      _imageSpacing = settings['imageSpacing'] ?? _imageSpacing;
 
       // QR code settings
       _qrCodeSize = settings['qrCodeSize'] ?? _qrCodeSize;
@@ -173,7 +165,6 @@ class OutputScreenProvider extends ChangeNotifier {
           Color(settings['qrCodeTextColor'] ?? _qrCodeTextColor.value);
       _qrCodeLayout =
           QrCodeLayout.values[settings['qrCodeLayout'] ?? _qrCodeLayout.index];
-      _qrCodeSpacing = settings['qrCodeSpacing'] ?? _qrCodeSpacing;
 
       // Button settings
       _buttonText = settings['buttonText'] ?? _buttonText;
@@ -205,7 +196,7 @@ class OutputScreenProvider extends ChangeNotifier {
       'titleFontSize': _titleFontSize,
       'titleFontWeight': _titleFontWeight.index,
       'titleColor': _titleColor.value,
-      'titlePadding': _titlePadding,
+
       'showTitle': _showTitle,
 
       // Image settings
@@ -214,7 +205,6 @@ class OutputScreenProvider extends ChangeNotifier {
       'imageBorderRadius': _imageBorderRadius,
       'imageBorderColor': _imageBorderColor.value,
       'imageBorderWidth': _imageBorderWidth,
-      'imageSpacing': _imageSpacing,
 
       // QR code settings
       'qrCodeSize': _qrCodeSize,
@@ -224,7 +214,6 @@ class OutputScreenProvider extends ChangeNotifier {
       'qrCodeTextFontSize': _qrCodeTextFontSize,
       'qrCodeTextColor': _qrCodeTextColor.value,
       'qrCodeLayout': _qrCodeLayout.index,
-      'qrCodeSpacing': _qrCodeSpacing,
 
       // Button settings
       'buttonText': _buttonText,
@@ -313,7 +302,7 @@ class OutputScreenProvider extends ChangeNotifier {
     if (fontSize != null) _titleFontSize = fontSize;
     if (fontWeight != null) _titleFontWeight = fontWeight;
     if (color != null) _titleColor = color;
-    if (padding != null) _titlePadding = padding;
+
     notifyListeners();
     _saveSettings();
   }
@@ -334,12 +323,6 @@ class OutputScreenProvider extends ChangeNotifier {
     if (radius != null) _imageBorderRadius = radius;
     if (color != null) _imageBorderColor = color;
     if (width != null) _imageBorderWidth = width;
-    notifyListeners();
-    _saveSettings();
-  }
-
-  void setImageSpacing(double spacing) {
-    _imageSpacing = spacing;
     notifyListeners();
     _saveSettings();
   }
@@ -379,12 +362,6 @@ class OutputScreenProvider extends ChangeNotifier {
 
   void setQrCodeLayout(QrCodeLayout layout) {
     _qrCodeLayout = layout;
-    notifyListeners();
-    _saveSettings();
-  }
-
-  void setQrCodeSpacing(double spacing) {
-    _qrCodeSpacing = spacing;
     notifyListeners();
     _saveSettings();
   }

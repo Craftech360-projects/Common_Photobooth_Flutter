@@ -53,7 +53,7 @@ void main() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
     await globalSettings.init();
-  }
+  }   
 
   // Initialize auth provider
   final authProvider = AuthProvider();
