@@ -171,6 +171,12 @@ class _LoadingScreenState extends State<LoadingScreen> {
       // Send offline workflow to ComfyAPI
       if (ComfyApiService.isInitialized && serviceId != null) {
         try {
+          debugPrint('Sending offline workflow to ComfyAPI with:');
+          debugPrint('  faceImagePath: $faceImagePath');
+          debugPrint('  outputPathPrefix: $outputPathPrefix');
+          debugPrint('  serviceId: $serviceId');
+          debugPrint('  seed: $seed');
+
           // Send the workflow and get the response with sent time
           final response = await ComfyApiService.instance.sendOfflineWorkflow(
             faceImagePath: faceImagePath,
@@ -189,7 +195,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
           // Start polling for the new image in the output directory
           int attempts = 0;
           const maxAttempts =
-              30; // 30 attempts with 2 second delay = 1 minute max
+            160; //0 attempts with 2 second delay = 1 minute max
           const pollDelay = Duration(seconds: 2);
 
           final outputPrefix = path.basename(outputPathPrefix);
@@ -305,8 +311,12 @@ class _LoadingScreenState extends State<LoadingScreen> {
           // Send workflow based on serviceId
           if (ComfyApiService.isInitialized) {
             try {
-              debugPrint(
-                  'Sending workflow for serviceId: $serviceId to ComfyAPI...');
+              debugPrint('Sending online workflow to ComfyAPI with:');
+              debugPrint('  serviceId: $serviceId');
+              debugPrint('  faceImageUrl: $faceImageUrl');
+              debugPrint('  seed: $seed');
+              debugPrint('  uniqueId: $uniqueId');
+
               // Send the workflow and get the response with sent time
               final response =
                   await ComfyApiService.instance.sendWorkflowByServiceId(

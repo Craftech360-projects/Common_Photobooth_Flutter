@@ -3,6 +3,7 @@ import 'package:camera_platform_interface/camera_platform_interface.dart';
 import 'package:camera_windows/camera_windows.dart';
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/core/themes/app_theme.dart';
+import 'package:photobooth_flutter/presentation/welcome_screen.dart';
 import 'package:photobooth_flutter/providers/admin_settings_provider.dart';
 import 'package:photobooth_flutter/providers/admin_watermark_provider.dart';
 import 'package:photobooth_flutter/providers/app_flow_provider.dart';
@@ -53,7 +54,7 @@ void main() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
     await globalSettings.init();
-  }   
+  }
 
   // Initialize auth provider
   final authProvider = AuthProvider();
@@ -161,7 +162,7 @@ class _MyAppState extends State<MyApp> {
       initialRoute: authProvider.isAuthenticated
           ? AppRoutes.welcomeScreen
           : AppRoutes.authScreen,
-      // home: const CharacterSelectionScreen(),
+      // home: const WelcomeScreen(),
       debugShowCheckedModeBanner: false,
     );
   }
