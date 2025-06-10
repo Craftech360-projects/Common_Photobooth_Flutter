@@ -217,52 +217,20 @@ class _GlobalSettingsSection extends StatelessWidget {
         ),
 
         // Show directory settings if in offline mode
-        if (globalSettings.isOfflineMode) ...[
+        if (globalSettings.isOfflineMode) ...[  
           ListTile(
             title: const Text('Input Directory'),
             subtitle: Text(globalSettings.inputDirectory ?? 'Not set'),
-            trailing: ElevatedButton(
-              onPressed: () async {
-                try {
-                  final result = await FilePicker.platform.getDirectoryPath(
-                    dialogTitle: 'Select Input Directory',
-                  );
-
-                  if (result != null) {
-                    await globalSettings.setInputDirectory(result);
-                    showSnackBar(context, 'Input directory updated');
-                  }
-                } on Exception catch (e) {
-                  debugPrint('Error selecting directory: $e');
-                  showSnackBar(context, 'Error selecting directory: $e');
-                }
-              },
-              child: const Text('Choose Directory'),
-            ),
+            // Remove the trailing ElevatedButton for directory selection
           ),
           ListTile(
             title: const Text('Output Directory'),
             subtitle: Text(globalSettings.outputDirectory ?? 'Not set'),
-            trailing: ElevatedButton(
-              onPressed: () async {
-                try {
-                  final result = await FilePicker.platform.getDirectoryPath(
-                    dialogTitle: 'Select Output Directory',
-                  );
-
-                  if (result != null) {
-                    await globalSettings.setOutputDirectory(result);
-                    showSnackBar(context, 'Output directory updated');
-                  }
-                } on Exception catch (e) {
-                  debugPrint('Error selecting directory: $e');
-                  showSnackBar(context, 'Error selecting directory: $e');
-                }
-              },
-              child: const Text('Choose Directory'),
-            ),
+            // Remove the trailing ElevatedButton for directory selection
           ),
         ],
+
+        // YOU CAN CONTINUE NOW
 
         // Show Supabase settings if not in offline mode
         if (!globalSettings.isOfflineMode) ...[

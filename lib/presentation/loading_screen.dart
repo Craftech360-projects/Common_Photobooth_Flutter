@@ -58,9 +58,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
   Future<void> _processImage() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final serviceId = prefs.getString('authenticated_service_id');
-
       final provider = Provider.of<PhotoboothProvider>(context, listen: false);
       final globalSettings =
           Provider.of<GlobalSettingsProvider>(context, listen: false);
@@ -88,16 +85,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
         return;
       }
 
-      // For faceswap workflow, verify we have a character image
-      if (serviceId == 'LjCIQ5ONsqCHIHd6Rmyu' &&
-          provider.characterImagePath == null) {
-        setState(() {
-          _isProcessing = false;
-          _errorMessage = 'No character image selected for faceswap';
-        });
-        return;
-      }
-
       // Get participant details from provider
       final name = provider.name ?? '';
       final email = provider.email ?? '';
@@ -107,7 +94,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
       if (!ComfyApiService.isInitialized) {
         await ComfyApiService.initialize(
           apiUrl: globalSettings.comfyApiUrl ?? "http://127.0.0.1:8188",
-          context: context,
         );
       }
 
@@ -116,12 +102,11 @@ class _LoadingScreenState extends State<LoadingScreen> {
       // Check if we're in offline mode
       if (globalSettings.isOfflineMode) {
         // Process in offline mode
-        await _processOfflineMode(
-            serviceId, imageFile, provider, globalSettings, seed);
+        await _processOfflineMode(imageFile, provider, globalSettings, seed);
       } else {
         // Process in online mode (Supabase)
-        await _processOnlineMode(serviceId, imageFile, provider, globalSettings,
-            name, email, gender, seed);
+        await _processOnlineMode(
+            imageFile, provider, globalSettings, name, email, gender, seed);
       }
     } on Exception catch (e) {
       debugPrint('Error processing image: $e');
@@ -134,7 +119,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
   // Handle offline mode processing
   Future<void> _processOfflineMode(
-      String? serviceId,
       File imageFile,
       PhotoboothProvider provider,
       GlobalSettingsProvider globalSettings,
@@ -169,19 +153,17 @@ class _LoadingScreenState extends State<LoadingScreen> {
           LocalStorageService.instance.getOutputPathPrefix();
 
       // Send offline workflow to ComfyAPI
-      if (ComfyApiService.isInitialized && serviceId != null) {
+      if (ComfyApiService.isInitialized) {
         try {
           debugPrint('Sending offline workflow to ComfyAPI with:');
           debugPrint('  faceImagePath: $faceImagePath');
           debugPrint('  outputPathPrefix: $outputPathPrefix');
-          debugPrint('  serviceId: $serviceId');
           debugPrint('  seed: $seed');
 
           // Send the workflow and get the response with sent time
           final response = await ComfyApiService.instance.sendOfflineWorkflow(
             faceImagePath: faceImagePath,
             outputPathPrefix: outputPathPrefix,
-            serviceId: serviceId,
             seed: seed,
           );
 
@@ -195,7 +177,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
           // Start polling for the new image in the output directory
           int attempts = 0;
           const maxAttempts =
-            160; //0 attempts with 2 second delay = 1 minute max
+              160; // 160 attempts with 2 second delay = ~5 minutes max
           const pollDelay = Duration(seconds: 2);
 
           final outputPrefix = path.basename(outputPathPrefix);
@@ -240,8 +222,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
       } else {
         setState(() {
           _isProcessing = false;
-          _errorMessage =
-              'ComfyAPI service not initialized or service ID not available';
+          _errorMessage = 'ComfyAPI service not initialized';
         });
       }
     } on Exception catch (e) {
@@ -254,7 +235,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
   // Handle online mode processing (existing Supabase flow)
   Future<void> _processOnlineMode(
-      String? serviceId,
       File imageFile,
       PhotoboothProvider provider,
       GlobalSettingsProvider globalSettings,
@@ -307,20 +287,18 @@ class _LoadingScreenState extends State<LoadingScreen> {
           imageUrl: faceImageUrl,
         );
 
-        if (uniqueId != null && serviceId != null) {
-          // Send workflow based on serviceId
+        if (uniqueId != null) {
+          // Send workflow
           if (ComfyApiService.isInitialized) {
             try {
               debugPrint('Sending online workflow to ComfyAPI with:');
-              debugPrint('  serviceId: $serviceId');
               debugPrint('  faceImageUrl: $faceImageUrl');
               debugPrint('  seed: $seed');
               debugPrint('  uniqueId: $uniqueId');
 
               // Send the workflow and get the response with sent time
               final response =
-                  await ComfyApiService.instance.sendWorkflowByServiceId(
-                serviceId,
+                  await ComfyApiService.instance.sendOnlineWorkflow(
                 faceImageUrl,
                 seed,
                 uniqueId: uniqueId, // Pass the uniqueId from Supabase
@@ -465,8 +443,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
                       style: TextStyle(
                         fontSize: loadingSettings.titleFontSize,
                         fontWeight: loadingSettings.titleFontWeight,
-                        color: loadingSettings.titleColor
-                            .withValues(alpha: loadingSettings.titleOpacity),
+                        color: loadingSettings.titleColor,
                         height: loadingSettings.titleLineHeight,
                       ),
                       textAlign: TextAlign.center,
@@ -493,6 +470,33 @@ class _LoadingScreenState extends State<LoadingScreen> {
   }
 
   Widget _buildLoader(LoadingScreenProvider settings) {
+    if (_errorMessage != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error, color: Colors.red, size: 48),
+            const SizedBox(height: 16),
+            Text(
+              'An Error Occurred',
+              style: TextStyle(
+                  color: settings.titleColor,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32.0),
+              child: Text(
+                _errorMessage!,
+                textAlign: TextAlign.center,
+                style: TextStyle(color: settings.titleColor, fontSize: 16),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
     if (settings.loaderFilePath == null) {
       return const Center(
           child: CircularProgressIndicator(
@@ -548,11 +552,12 @@ class _LoadingScreenState extends State<LoadingScreen> {
     }
 
     // Fall back to global background if available
-    else if (globalSettings.backgroundImage != null) {
+    else if (globalSettings.backgroundImagePath != null) {
       return DecorationImage(
-        image: globalSettings.isAssetImage
-            ? AssetImage(globalSettings.backgroundImage!)
-            : FileImage(File(globalSettings.backgroundImage!)) as ImageProvider,
+        image: globalSettings.isBackgroundImageAsset
+            ? AssetImage(globalSettings.backgroundImagePath!)
+            : FileImage(File(globalSettings.backgroundImagePath!))
+                as ImageProvider,
         fit: BoxFit.cover,
       );
     }

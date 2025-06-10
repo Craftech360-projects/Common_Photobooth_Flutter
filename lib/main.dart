@@ -3,7 +3,6 @@ import 'package:camera_platform_interface/camera_platform_interface.dart';
 import 'package:camera_windows/camera_windows.dart';
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/core/themes/app_theme.dart';
-import 'package:photobooth_flutter/presentation/welcome_screen.dart';
 import 'package:photobooth_flutter/providers/admin_settings_provider.dart';
 import 'package:photobooth_flutter/providers/admin_watermark_provider.dart';
 import 'package:photobooth_flutter/providers/app_flow_provider.dart';

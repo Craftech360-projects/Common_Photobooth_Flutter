@@ -97,18 +97,9 @@ class GlobalSettingsProvider with ChangeNotifier {
 
   // Initialize default directories for offline mode
   Future<void> _initializeOfflineDirectories() async {
-    final appDir = await getApplicationDocumentsDirectory();
-    final baseDir = path.join(appDir.path, 'photobooth');
-
-    // Create base directory if it doesn't exist
-    final baseDirFile = Directory(baseDir);
-    if (!await baseDirFile.exists()) {
-      await baseDirFile.create(recursive: true);
-    }
-
-    // Set input and output directories
-    _inputDirectory = path.join(baseDir, 'inputs');
-    _outputDirectory = path.join(baseDir, 'outputs');
+    // Set fixed paths for input and output directories
+    _inputDirectory = "C:\\storage\\input";
+    _outputDirectory = "C:\\storage\\output";
 
     // Create directories if they don't exist
     final inputDir = Directory(_inputDirectory!);
@@ -206,12 +197,13 @@ class GlobalSettingsProvider with ChangeNotifier {
   }
 
   // Set offline mode
+  // Set offline mode
   Future<void> setOfflineMode(bool isOffline) async {
     _isOfflineMode = isOffline;
     await _prefs.setBool('is_offline_mode', isOffline);
 
-    // Initialize directories if switching to offline mode
-    if (isOffline && (_inputDirectory == null || _outputDirectory == null)) {
+    // Always initialize directories when switching to offline mode
+    if (isOffline) {
       await _initializeOfflineDirectories();
     }
 
@@ -219,32 +211,32 @@ class GlobalSettingsProvider with ChangeNotifier {
   }
 
   // Set input directory
-  Future<void> setInputDirectory(String directory) async {
-    _inputDirectory = directory;
-    await _prefs.setString('input_directory', directory);
+  // Future<void> setInputDirectory(String directory) async {
+  //   _inputDirectory = directory;
+  //   await _prefs.setString('input_directory', directory);
 
-    // Create directory if it doesn't exist
-    final dir = Directory(directory);
-    if (!await dir.exists()) {
-      await dir.create(recursive: true);
-    }
+  //   // Create directory if it doesn't exist
+  //   final dir = Directory(directory);
+  //   if (!await dir.exists()) {
+  //     await dir.create(recursive: true);
+  //   }
 
-    notifyListeners();
-  }
+  //   notifyListeners();
+  // }
 
-  // Set output directory
-  Future<void> setOutputDirectory(String directory) async {
-    _outputDirectory = directory;
-    await _prefs.setString('output_directory', directory);
+  // // Set output directory
+  // Future<void> setOutputDirectory(String directory) async {
+  //   _outputDirectory = directory;
+  //   await _prefs.setString('output_directory', directory);
 
-    // Create directory if it doesn't exist
-    final dir = Directory(directory);
-    if (!await dir.exists()) {
-      await dir.create(recursive: true);
-    }
+  //   // Create directory if it doesn't exist
+  //   final dir = Directory(directory);
+  //   if (!await dir.exists()) {
+  //     await dir.create(recursive: true);
+  //   }
 
-    notifyListeners();
-  }
+  //   notifyListeners();
+  // }
 
   Future<void> clearAllPreferences() async {
     await _prefs.clear();
