@@ -1,4 +1,4 @@
-{
+      {
   "5": {
     "inputs": {
       "width": [
@@ -102,7 +102,7 @@
   },
   "25": {
     "inputs": {
-      "noise_seed": 170176719912216
+      "noise_seed": 126918550896445
     },
     "class_type": "RandomNoise",
     "_meta": {
@@ -247,7 +247,7 @@
         0
       ],
       "image": [
-        "289",
+        "283",
         0
       ]
     },
@@ -275,13 +275,13 @@
       "num_beams": 3,
       "do_sample": true,
       "output_mask_select": "",
-      "seed": 864659030512298,
+      "seed": 33373286664912,
       "image": [
         "256",
         0
       ],
       "florence2_model": [
-        "291",
+        "282",
         0
       ]
     },
@@ -406,13 +406,13 @@
       "num_beams": 3,
       "do_sample": true,
       "output_mask_select": "",
-      "seed": 530865286603370,
+      "seed": 1074246607987400,
       "image": [
         "281",
         0
       ],
       "florence2_model": [
-        "291",
+        "282",
         0
       ]
     },
@@ -456,7 +456,7 @@
   "278": {
     "inputs": {
       "image": [
-        "289",
+        "283",
         0
       ]
     },
@@ -487,7 +487,7 @@
         0
       ],
       "layer_image": [
-        "289",
+        "283",
         0
       ]
     },
@@ -496,53 +496,64 @@
       "title": "LayerUtility: ImageBlend V2"
     }
   },
+  "282": {
+    "inputs": {
+      "model": "microsoft/Florence-2-base",
+      "precision": "fp16",
+      "attention": "sdpa"
+    },
+    "class_type": "DownloadAndLoadFlorence2Model",
+    "_meta": {
+      "title": "DownloadAndLoadFlorence2Model"
+    }
+  },
+  "283": {
+    "inputs": {
+      "supabase_url": "https://kdkkutcmxtsfrqzbxmox.supabase.co",
+      "supabase_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtka2t1dGNteHRzZnJxemJ4bW94Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0OTU1NzM3NCwiZXhwIjoyMDY1MTMzMzc0fQ.aAMtFygC6smIHh9c132dWBZGqru_MtzLocboPW1epXU",
+      "table_name": "inputimagetable",
+      "image_column": "image_url",
+      "id_column": "unique_id",
+      "unique_id": "de4c0cad-93c5-45e4-85cb-e11e9b0a888d"
+    },
+    "class_type": "SupabaseTableWatcherNode",
+    "_meta": {
+      "title": "Supabase Table Watcher"
+    }
+  },
+  "284": {
+    "inputs": {
+      "unique_id": [
+        "283",
+        2
+      ],
+      "supabase_url": "https://kdkkutcmxtsfrqzbxmox.supabase.co",
+      "supabase_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtka2t1dGNteHRzZnJxemJ4bW94Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0OTU1NzM3NCwiZXhwIjoyMDY1MTMzMzc0fQ.aAMtFygC6smIHh9c132dWBZGqru_MtzLocboPW1epXU",
+      "bucket": "outputimages",
+      "base_file_name": "image",
+      "table_name": "inputimagetable",
+      "unique_id_column": "unique_id",
+      "table_column": "output",
+      "image": [
+        "147",
+        0
+      ]
+    },
+    "class_type": "SupabaseImageUploader",
+    "_meta": {
+      "title": "Upload Image to Supabase"
+    }
+  },
   "285": {
     "inputs": {
       "images": [
-        "289",
+        "283",
         0
       ]
     },
     "class_type": "PreviewImage",
     "_meta": {
       "title": "Preview Image"
-    }
-  },
-  "288": {
-    "inputs": {
-      "path": "output/image111.png",
-      "overwrite": "true",
-      "image": [
-        "147",
-        0
-      ]
-    },
-    "class_type": "JWImageSaveToPath",
-    "_meta": {
-      "title": "Image Save To Path"
-    }
-  },
-  "289": {
-    "inputs": {
-      "image_path": "input/input_1749552671240.jpeg",
-      "RGBA": "false",
-      "filename_text_extension": "true"
-    },
-    "class_type": "Image Load",
-    "_meta": {
-      "title": "Image Load"
-    }
-  },
-  "291": {
-    "inputs": {
-      "model": "Florence-2-base",
-      "precision": "fp16",
-      "attention": "sdpa",
-      "convert_to_safetensors": true
-    },
-    "class_type": "Florence2ModelLoader",
-    "_meta": {
-      "title": "Florence2ModelLoader"
     }
   }
 }

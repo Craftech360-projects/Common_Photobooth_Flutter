@@ -133,7 +133,7 @@ class LocalStorageService {
       }
   
       return null;
-    } on Exception catch (e) {
+    } on Exception {
       return null;
     }
   }

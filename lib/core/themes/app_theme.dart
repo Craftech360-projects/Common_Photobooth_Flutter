@@ -7,7 +7,7 @@ class AppTheme {
     // Base Theme Configuration
     useMaterial3: true,
     brightness: Brightness.light,
-    fontFamily: "Heineken",
+    fontFamily: "CascadiaCode",
     primaryColor: AppColors.deepPurple,
     scaffoldBackgroundColor: AppColors.lightWhite,
 
@@ -34,7 +34,7 @@ class AppTheme {
       style: ButtonStyle(
         iconColor: const WidgetStatePropertyAll(AppColors.black),
         textStyle: WidgetStateProperty.all(
-          const TextStyle(color: AppColors.black, fontFamily: "Heineken"),
+          const TextStyle(color: AppColors.black, fontFamily: "CascadiaCode"),
         ),
         foregroundColor: WidgetStateProperty.all(AppColors.black),
       ),
@@ -49,18 +49,10 @@ class AppTheme {
         textStyle: const TextStyle(
           fontWeight: FontWeight.w600,
           fontSize: 15,
-          fontFamily: "Heineken",
+          fontFamily: "CascadiaCode",
           color: AppColors.white,
         ),
         shape: RoundedRectangleBorder(borderRadius: Constants.br12),
-      ),
-    ),
-
-    // Card Theme
-    cardTheme: CardTheme(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: Constants.br12,
       ),
     ),
 
@@ -132,7 +124,7 @@ class AppTheme {
     // Base Theme Configuration
     useMaterial3: true,
     brightness: Brightness.dark,
-    fontFamily: "Heineken",
+    fontFamily: "CascadiaCode",
     primaryColor: AppColors.deepPurple,
     scaffoldBackgroundColor: AppColors.darkBg,
 
@@ -161,7 +153,7 @@ class AppTheme {
         textStyle: WidgetStateProperty.all(
           const TextStyle(
             color: AppColors.white,
-            fontFamily: "Heineken",
+            fontFamily: "CascadiaCode",
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -181,14 +173,6 @@ class AppTheme {
           color: AppColors.black,
         ),
         shape: RoundedRectangleBorder(borderRadius: Constants.br12),
-      ),
-    ),
-
-    // Card Theme
-    cardTheme: CardTheme(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: Constants.br12,
       ),
     ),
 

@@ -6,7 +6,7 @@ class AdminWatermarkProvider extends ChangeNotifier {
   bool get showWatermark => _showWatermark;
 
   void setShowWatermark(bool show) {
-    _showWatermark = false;
+    _showWatermark = show;
     notifyListeners();
   }
 }

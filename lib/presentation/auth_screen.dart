@@ -155,7 +155,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      fontFamily: 'Satoshi',
+                      
                     ),
                   ),
                   Constants.h8,
@@ -280,7 +280,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             authProvider.error!,
                             style: const TextStyle(
                               color: AppColors.red,
-                              fontFamily: 'Satoshi',
+                       
                             ),
                           ),
                         ],
@@ -313,7 +313,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                       color: AppColors.black,
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
-                                      fontFamily: 'Satoshi',
+                             
                                     ),
                                   ),
                           ),

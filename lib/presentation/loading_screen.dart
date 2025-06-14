@@ -2,17 +2,14 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:path/path.dart' as path;
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/providers/loading_screen_provider.dart';
 import 'package:photobooth_flutter/providers/photobooth_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
 import 'package:photobooth_flutter/services/comfy_api_service.dart';
-import 'package:photobooth_flutter/services/local_storage_service.dart'; // Add this import
 import 'package:photobooth_flutter/services/supabase_service.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/video_player.dart';
 
 class LoadingScreen extends StatefulWidget {
@@ -99,15 +96,18 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
       final seed = DateTime.now().millisecondsSinceEpoch;
 
+      await _processOnlineMode(
+          imageFile, provider, globalSettings, name, email, gender, seed);
+
       // Check if we're in offline mode
-      if (globalSettings.isOfflineMode) {
-        // Process in offline mode
-        await _processOfflineMode(imageFile, provider, globalSettings, seed);
-      } else {
-        // Process in online mode (Supabase)
-        await _processOnlineMode(
-            imageFile, provider, globalSettings, name, email, gender, seed);
-      }
+      // if (globalSettings.isOfflineMode) {
+      //   // Process in offline mode
+      //   await _processOfflineMode(imageFile, provider, globalSettings, seed);
+      // } else {
+      //   // Process in online mode (Supabase)
+      //   await _processOnlineMode(
+      //       imageFile, provider, globalSettings, name, email, gender, seed);
+      // }
     } on Exception catch (e) {
       debugPrint('Error processing image: $e');
       setState(() {
@@ -118,120 +118,117 @@ class _LoadingScreenState extends State<LoadingScreen> {
   }
 
   // Handle offline mode processing
-  Future<void> _processOfflineMode(
-      File imageFile,
-      PhotoboothProvider provider,
-      GlobalSettingsProvider globalSettings,
-      int seed) async {
-    try {
-      // Check if LocalStorageService is initialized using the static method
-      if (!LocalStorageService.isServiceInitialized) {
-        // Check if input and output directories are set
-        if (globalSettings.inputDirectory == null ||
-            globalSettings.outputDirectory == null) {
-          setState(() {
-            _isProcessing = false;
-            _errorMessage =
-                'Input or output directories not configured. Please set them in the admin screen.';
-          });
-          return;
-        }
+  // Future<void> _processOfflineMode(File imageFile, PhotoboothProvider provider,
+  //     GlobalSettingsProvider globalSettings, int seed) async {
+  //   try {
+  //     // Check if LocalStorageService is initialized using the static method
+  //     if (!LocalStorageService.isServiceInitialized) {
+  //       // Check if input and output directories are set
+  //       if (globalSettings.inputDirectory == null ||
+  //           globalSettings.outputDirectory == null) {
+  //         setState(() {
+  //           _isProcessing = false;
+  //           _errorMessage =
+  //               'Input or output directories not configured. Please set them in the admin screen.';
+  //         });
+  //         return;
+  //       }
 
-        await LocalStorageService.initialize(
-          inputDirectory: globalSettings.inputDirectory!,
-          outputDirectory: globalSettings.outputDirectory!,
-        );
-      }
+  //       await LocalStorageService.initialize(
+  //         inputDirectory: globalSettings.inputDirectory!,
+  //         outputDirectory: globalSettings.outputDirectory!,
+  //       );
+  //     }
 
-      // Now it's safe to use the instance
-      // Save face image to input directory
-      final faceImagePath =
-          await LocalStorageService.instance.saveFaceImage(imageFile);
+  //     // Now it's safe to use the instance
+  //     // Save face image to input directory
+  //     final faceImagePath =
+  //         await LocalStorageService.instance.saveFaceImage(imageFile);
 
-      // Get output path prefix
-      final outputPathPrefix =
-          LocalStorageService.instance.getOutputPathPrefix();
+  //     // Get output path prefix
+  //     final outputPathPrefix =
+  //         LocalStorageService.instance.getOutputPathPrefix();
 
-      // Send offline workflow to ComfyAPI
-      if (ComfyApiService.isInitialized) {
-        try {
-          debugPrint('Sending offline workflow to ComfyAPI with:');
-          debugPrint('  faceImagePath: $faceImagePath');
-          debugPrint('  outputPathPrefix: $outputPathPrefix');
-          debugPrint('  seed: $seed');
+  //     // Send offline workflow to ComfyAPI
+  //     if (ComfyApiService.isInitialized) {
+  //       try {
+  //         debugPrint('Sending offline workflow to ComfyAPI with:');
+  //         debugPrint('  faceImagePath: $faceImagePath');
+  //         debugPrint('  outputPathPrefix: $outputPathPrefix');
+  //         debugPrint('  seed: $seed');
 
-          // Send the workflow and get the response with sent time
-          final response = await ComfyApiService.instance.sendOfflineWorkflow(
-            faceImagePath: faceImagePath,
-            outputPathPrefix: outputPathPrefix,
-            seed: seed,
-          );
+  //         // Send the workflow and get the response with sent time
+  //         final response = await ComfyApiService.instance.sendOfflineWorkflow(
+  //           faceImagePath: faceImagePath,
+  //           outputPathPrefix: outputPathPrefix,
+  //           seed: seed,
+  //         );
 
-          // Store the workflow sent time in the provider
-          if (response.containsKey('sentTime')) {
-            final sentTimeStr = response['sentTime'] as String;
-            final sentTime = DateTime.parse(sentTimeStr);
-            provider.setWorkflowSentTime(sentTime);
-          }
+  //         // Store the workflow sent time in the provider
+  //         if (response.containsKey('sentTime')) {
+  //           final sentTimeStr = response['sentTime'] as String;
+  //           final sentTime = DateTime.parse(sentTimeStr);
+  //           provider.setWorkflowSentTime(sentTime);
+  //         }
 
-          // Start polling for the new image in the output directory
-          int attempts = 0;
-          const maxAttempts =
-              160; // 160 attempts with 2 second delay = ~5 minutes max
-          const pollDelay = Duration(seconds: 2);
+  //         // Start polling for the new image in the output directory
+  //         int attempts = 0;
+  //         const maxAttempts =
+  //             160; // 160 attempts with 2 second delay = ~5 minutes max
+  //         const pollDelay = Duration(seconds: 2);
 
-          final outputPrefix = path.basename(outputPathPrefix);
+  //         final outputPrefix = path.basename(outputPathPrefix);
 
-          while (attempts < maxAttempts) {
-            // Check for new image in output directory
-            final localImagePath =
-                await LocalStorageService.instance.getLatestOutputImage(
-              outputPrefix,
-              afterTime: provider.workflowSentTime,
-            );
+  //         while (attempts < maxAttempts) {
+  //           // Check for new image in output directory
+  //           final localImagePath =
+  //               await LocalStorageService.instance.getLatestOutputImage(
+  //             outputPrefix,
+  //             afterTime: provider.workflowSentTime,
+  //           );
 
-            if (localImagePath != null) {
-              // Update the provider with local file path
-              provider.setSwappedImage(localImagePath);
-              provider.setCapturedImageUrl(localImagePath);
+  //           if (localImagePath != null) {
+  //             // Update the provider with local file path
+  //             provider.setSwappedImage(localImagePath);
+  //             provider.setCapturedImageUrl(localImagePath);
 
-              // Navigate to output screen
-              if (mounted) {
-                await Navigator.of(context)
-                    .pushReplacementNamed(AppRoutes.swappedFace);
-              }
-              return;
-            }
+  //             // Navigate to output screen
+  //             if (mounted) {
+  //               await Navigator.of(context)
+  //                   .pushReplacementNamed(AppRoutes.swappedFace);
+  //             }
+  //             return;
+  //           }
 
-            // Wait before next attempt
-            await Future.delayed(pollDelay);
-            attempts++;
-          }
+  //           // Wait before next attempt
+  //           await Future.delayed(pollDelay);
+  //           attempts++;
+  //         }
 
-          // If we get here, we've timed out waiting for the image
-          setState(() {
-            _isProcessing = false;
-            _errorMessage = 'Timed out waiting for image processing';
-          });
-        } catch (e) {
-          setState(() {
-            _isProcessing = false;
-            _errorMessage = 'Error sending workflow: $e';
-          });
-        }
-      } else {
-        setState(() {
-          _isProcessing = false;
-          _errorMessage = 'ComfyAPI service not initialized';
-        });
-      }
-    } on Exception catch (e) {
-      setState(() {
-        _isProcessing = false;
-        _errorMessage = 'Error processing image in offline mode: $e';
-      });
-    }
-  }
+  //         // If we get here, we've timed out waiting for the image
+  //         setState(() {
+  //           _isProcessing = false;
+  //           _errorMessage = 'Timed out waiting for image processing';
+  //         });
+  //       } catch (e) {
+  //         setState(() {
+  //           _isProcessing = false;
+  //           _errorMessage = 'Error sending workflow: $e';
+  //         });
+  //       }
+  //     } else {
+  //       setState(() {
+  //         _isProcessing = false;
+  //         _errorMessage = 'ComfyAPI service not initialized';
+  //       });
+  //     }
+  //   } on Exception catch (e) {
+  //     setState(() {
+  //       _isProcessing = false;
+  //       _errorMessage = 'Error processing image in offline mode: $e';
+  //     });
+  //   }
+  // }
 
   // Handle online mode processing (existing Supabase flow)
   Future<void> _processOnlineMode(
@@ -299,9 +296,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
               // Send the workflow and get the response with sent time
               final response =
                   await ComfyApiService.instance.sendOnlineWorkflow(
-                faceImageUrl,
                 seed,
-                uniqueId: uniqueId, // Pass the uniqueId from Supabase
+                uniqueId: uniqueId,
               );
 
               // Store the workflow sent time in the provider
@@ -315,7 +311,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
               // Start polling Supabase for the new image
               int attempts = 0;
               const maxAttempts =
-                  30; // 30 attempts with 2 second delay = 1 minute max
+                  90; // 30 attempts with 2 second delay = 1 minute max
               const pollDelay = Duration(seconds: 2);
 
               while (attempts < maxAttempts) {

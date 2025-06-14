@@ -1,5 +1,6 @@
 // ignore_for_file: unused_field
 import 'dart:async';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:camera/camera.dart';
@@ -43,7 +44,7 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
 
     // Skip camera initialization in preview mode
     if (widget.isPreviewMode) {
-      print("preview mode ${widget.isPreviewMode}");
+      log("preview mode ${widget.isPreviewMode}");
       return;
     }
 

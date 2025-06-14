@@ -1,4 +1,3 @@
-import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:camera_platform_interface/camera_platform_interface.dart';
 import 'package:camera_windows/camera_windows.dart';
 import 'package:flutter/material.dart';
@@ -17,7 +16,6 @@ import 'package:photobooth_flutter/providers/photobooth_provider.dart';
 import 'package:photobooth_flutter/providers/registration_screen_provider.dart';
 import 'package:photobooth_flutter/providers/welcome_screen_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
-import 'package:photobooth_flutter/services/auth_service.dart';
 import 'package:photobooth_flutter/services/supabase_service.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -26,9 +24,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize auth service
-  await AuthService.instance.initialize(
-    apiUrl: 'http://localhost:2321',
-  );
+  // await AuthService.instance.initialize(
+  //   apiUrl: 'http://localhost:2321',
+  // );
 
   // Initialize providers
   final globalSettings = GlobalSettingsProvider();
@@ -122,13 +120,13 @@ void main() async {
     ),
   );
 
-  doWhenWindowReady(() {
-    const initialSize = Size(1080, 1920);
-    appWindow.minSize = initialSize;
-    appWindow.size = initialSize;
-    appWindow.alignment = Alignment.center;
-    appWindow.show();
-  });
+  // doWhenWindowReady(() {
+  //   const initialSize = Size(1080, 1920);
+  //   appWindow.minSize = initialSize;
+  //   appWindow.size = initialSize;
+  //   appWindow.alignment = Alignment.center;
+  //   appWindow.show();
+  // });
 }
 
 class MyApp extends StatefulWidget {
@@ -154,7 +152,7 @@ class _MyAppState extends State<MyApp> {
     });
 
     return MaterialApp(
-      title: 'Photobooth App',
+      title: 'AI Photobooth',
       theme: AppTheme.lightTheme,
       onGenerateRoute: AppRoutes.onGenerateRoute,
       // initialRoute: AppRoutes.welcomeScreen,
