@@ -357,12 +357,7 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
       // Set user details in provider
       provider.setUserDetails(name, email);
 
-      // Navigate based on the current flow
-      if (appFlowProvider.currentFlow == AppFlow.defaultFlow) {
-        Navigator.pushNamed(context, AppRoutes.genderSelection);
-      } else {
-        Navigator.pushNamed(context, AppRoutes.faceCapture);
-      }
+      Navigator.pushNamed(context, AppRoutes.categoriesScreen);
     }
   }
 

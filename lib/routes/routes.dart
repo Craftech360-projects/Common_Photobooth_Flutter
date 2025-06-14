@@ -8,6 +8,7 @@ import 'package:photobooth_flutter/presentation/admin/output_screen_settings.dar
 import 'package:photobooth_flutter/presentation/admin/registration_screen_settings.dart';
 import 'package:photobooth_flutter/presentation/admin/welcome_screen_settings.dart';
 import 'package:photobooth_flutter/presentation/auth_screen.dart';
+import 'package:photobooth_flutter/presentation/category_screen.dart';
 import 'package:photobooth_flutter/presentation/character_selection_screen.dart';
 import 'package:photobooth_flutter/presentation/face_capture_screen.dart';
 import 'package:photobooth_flutter/presentation/gender_selection_screen.dart';
@@ -23,6 +24,8 @@ class AppRoutes {
   static const String welcomeScreen = '/';
 
   static const String participantDetails = '/participant_details';
+
+  static const String categoriesScreen = '/categories';
 
   static const String genderSelection = '/gender_selection';
 
@@ -65,6 +68,9 @@ class AppRoutes {
       case participantDetails:
         return MaterialPageRoute(
             builder: (_) => const ParticipantDetailsScreen());
+
+      case categoriesScreen: // ADD THIS CASE
+        return MaterialPageRoute(builder: (_) => const CategoriesScreen());
 
       case genderSelection:
         return MaterialPageRoute(builder: (_) => const GenderSelectionScreen());

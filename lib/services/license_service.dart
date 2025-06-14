@@ -370,12 +370,12 @@ class LicenseService {
 
     // Clear secure storage
     await _secureStorage.delete(key: 'license_user_id');
-    await _secureStorage.delete(key: 'license_service_id');
-    await _secureStorage.delete(key: 'license_security_key');
-    await _secureStorage.delete(key: 'license_expiration');
     await _secureStorage.delete(key: 'license_request_id');
+    await _secureStorage.delete(key: 'license_service_id');
     await _secureStorage.delete(key: 'license_device_id');
     await _secureStorage.delete(key: 'license_start_date');
+    await _secureStorage.delete(key: 'license_security_key');
+    await _secureStorage.delete(key: 'license_expiration');
     await _secureStorage.delete(key: 'license_issued_at');
     await _secureStorage.delete(key: 'last_verification_time');
   }

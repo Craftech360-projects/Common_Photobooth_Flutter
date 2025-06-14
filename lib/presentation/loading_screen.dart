@@ -10,6 +10,7 @@ import 'package:photobooth_flutter/routes/routes.dart';
 import 'package:photobooth_flutter/services/comfy_api_service.dart';
 import 'package:photobooth_flutter/services/supabase_service.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/video_player.dart';
 
 class LoadingScreen extends StatefulWidget {
@@ -98,16 +99,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
       await _processOnlineMode(
           imageFile, provider, globalSettings, name, email, gender, seed);
-
-      // Check if we're in offline mode
-      // if (globalSettings.isOfflineMode) {
-      //   // Process in offline mode
-      //   await _processOfflineMode(imageFile, provider, globalSettings, seed);
-      // } else {
-      //   // Process in online mode (Supabase)
-      //   await _processOnlineMode(
-      //       imageFile, provider, globalSettings, name, email, gender, seed);
-      // }
     } on Exception catch (e) {
       debugPrint('Error processing image: $e');
       setState(() {
@@ -116,6 +107,24 @@ class _LoadingScreenState extends State<LoadingScreen> {
       });
     }
   }
+
+  //     // Check if we're in offline mode
+  //     // if (globalSettings.isOfflineMode) {
+  //     //   // Process in offline mode
+  //     //   await _processOfflineMode(imageFile, provider, globalSettings, seed);
+  //     // } else {
+  //     //   // Process in online mode (Supabase)
+  //     //   await _processOnlineMode(
+  //     //       imageFile, provider, globalSettings, name, email, gender, seed);
+  //     // }
+  //   } on Exception catch (e) {
+  //     debugPrint('Error processing image: $e');
+  //     setState(() {
+  //       _isProcessing = false;
+  //       _errorMessage = 'Error: $e';
+  //     });
+  //   }
+  // }
 
   // Handle offline mode processing
   // Future<void> _processOfflineMode(File imageFile, PhotoboothProvider provider,
@@ -276,7 +285,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
           await SupabaseService.instance.uploadUserFaceImage(imageFile);
 
       if (faceImageUrl != null) {
-        // Store participant details in Supabase
         final uniqueId = await SupabaseService.instance.storeParticipantDetails(
           name: name,
           email: email,
@@ -285,19 +293,31 @@ class _LoadingScreenState extends State<LoadingScreen> {
         );
 
         if (uniqueId != null) {
-          // Send workflow
           if (ComfyApiService.isInitialized) {
             try {
-              debugPrint('Sending online workflow to ComfyAPI with:');
-              debugPrint('  faceImageUrl: $faceImageUrl');
-              debugPrint('  seed: $seed');
-              debugPrint('  uniqueId: $uniqueId');
+              // ADDED: Read the selected workflow from SharedPreferences.
+              final prefs = await SharedPreferences.getInstance();
+              final workflowFileName = prefs.getString('selected_workflow');
 
-              // Send the workflow and get the response with sent time
+              // REASON: Ensure a workflow was selected during authentication.
+              if (workflowFileName == null) {
+                setState(() {
+                  _isProcessing = false;
+                  _errorMessage =
+                      'Error: No workflow selected. Please re-authenticate.';
+                });
+                return;
+              }
+
+              debugPrint('Sending online workflow to ComfyAPI with:');
+              debugPrint('  uniqueId: $uniqueId');
+              debugPrint('  workflow: $workflowFileName');
+
               final response =
                   await ComfyApiService.instance.sendOnlineWorkflow(
                 seed,
                 uniqueId: uniqueId,
+                workflowFileName: workflowFileName,
               );
 
               // Store the workflow sent time in the provider
@@ -310,12 +330,10 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
               // Start polling Supabase for the new image
               int attempts = 0;
-              const maxAttempts =
-                  90; // 30 attempts with 2 second delay = 1 minute max
+              const maxAttempts = 90;
               const pollDelay = Duration(seconds: 2);
 
               while (attempts < maxAttempts) {
-                // Check for new image in Supabase, passing the workflow sent time
                 final supabaseImageUrl =
                     await SupabaseService.instance.getLatestOutputImage(
                   uniqueId,
@@ -328,7 +346,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
                   provider.setSwappedImage(supabaseImageUrl);
                   provider.setCapturedImageUrl(supabaseImageUrl);
 
-                  // Navigate to output screen
                   if (mounted) {
                     debugPrint('Navigating to output screen...');
                     await Navigator.of(context)

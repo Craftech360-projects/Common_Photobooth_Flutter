@@ -8,10 +8,8 @@ class ComfyApiService {
   static ComfyApiService? _instance;
   final String _apiUrl;
 
-  // Private constructor
   ComfyApiService._({required String apiUrl}) : _apiUrl = apiUrl;
 
-  // Singleton instance
   static ComfyApiService get instance {
     if (_instance == null) {
       throw Exception('ComfyApiService not initialized');
@@ -19,12 +17,10 @@ class ComfyApiService {
     return _instance!;
   }
 
-  // Initialize the service
   static Future<void> initialize({required String apiUrl}) async {
     _instance = ComfyApiService._(apiUrl: apiUrl);
   }
 
-  // Check if the service is initialized
   static bool get isInitialized => _instance != null;
 
   // Generic method to post a workflow to the ComfyUI API
@@ -64,23 +60,25 @@ class ComfyApiService {
     }
   }
 
-  // Send workflow for online mode (Supabase)
-  Future<Map<String, dynamic>> sendOnlineWorkflow(int seed,
-      {required String uniqueId}) async {
+  Future<Map<String, dynamic>> sendOnlineWorkflow(
+    int seed, {
+    required String uniqueId,
+    required String workflowFileName, // ADDED
+  }) async {
     try {
-      final workflow = await Workflow.getWorkflow();
+      // REASON: We now load the specific workflow passed from the LoadingScreen.
+      final workflow = await Workflow.getWorkflow(workflowFileName); // CHANGED
 
-      // CORRECT: Update the workflow with the unique_id for the watcher node.
       workflow.updateSupabaseWatcherNode(uniqueId);
-
-      // CORRECT: Update the noise seed.
       workflow.updateNoiseSeed(seed);
 
-      debugPrint('======= SENDING ONLINE WORKFLOW =======');
+      debugPrint(
+          '======= SENDING ONLINE WORKFLOW ($workflowFileName) ======='); // CHANGED
       final workflowJson =
           const JsonEncoder.withIndent('  ').convert(workflow.toMap());
       debugPrint('Workflow JSON: $workflowJson');
-      debugPrint('=======================================');
+      debugPrint(
+          '==========================================================='); // CHANGED
 
       return await _postWorkflow(workflow.toMap());
     } catch (e) {
@@ -88,6 +86,7 @@ class ComfyApiService {
       rethrow;
     }
   }
+}
 
   // // Send workflow in offline mode
   // Future<Map<String, dynamic>> sendOfflineWorkflow({
@@ -137,4 +136,3 @@ class ComfyApiService {
   //     rethrow;
   //   }
   // }
-}

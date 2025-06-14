@@ -20,12 +20,12 @@ class AppFlowProvider extends ChangeNotifier {
 
       // Set the flow based on serviceId
       if (serviceId == 'LjCIQ5ONsqCHIHd6Rmyu') {
-        _currentFlow = AppFlow.defaultFlow;
+        _currentFlow = AppFlow.defaultFlow; // S W A P L A B
       } else if (serviceId != null) {
-        _currentFlow = AppFlow.alternativeFlow;
+        _currentFlow = AppFlow.alternativeFlow; // 
       } else {
         // Default to default flow if no serviceId is found
-        _currentFlow = AppFlow.defaultFlow;
+        _currentFlow = AppFlow.defaultFlow; 
       }
 
       _isInitialized = true;

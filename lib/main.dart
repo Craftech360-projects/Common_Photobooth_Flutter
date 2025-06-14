@@ -6,6 +6,7 @@ import 'package:photobooth_flutter/providers/admin_settings_provider.dart';
 import 'package:photobooth_flutter/providers/admin_watermark_provider.dart';
 import 'package:photobooth_flutter/providers/app_flow_provider.dart';
 import 'package:photobooth_flutter/providers/auth_provider.dart';
+import 'package:photobooth_flutter/providers/category_provider.dart';
 import 'package:photobooth_flutter/providers/character_selection_provider.dart';
 import 'package:photobooth_flutter/providers/face_capture_provider.dart';
 import 'package:photobooth_flutter/providers/gender_selection_provider.dart';
@@ -106,6 +107,7 @@ void main() async {
         ChangeNotifierProvider.value(value: globalSettings),
         ChangeNotifierProvider.value(value: authProvider),
         ChangeNotifierProvider.value(value: appFlowProvider),
+        ChangeNotifierProvider(create: (_) => CategoryProvider()),
         ChangeNotifierProvider.value(value: welcomeSettings),
         ChangeNotifierProvider.value(value: adminSettings),
         ChangeNotifierProvider.value(value: registrationSettings),
