@@ -12,6 +12,7 @@ dependencies:
   camera_macos: ^0.0.9
   camera_platform_interface: ^2.7.0
   camera_windows: ^0.2.6+2
+  carousel_slider:
   crypto: ^3.0.6
   file_picker: ^9.2.1
   flutter:
@@ -43,7 +44,13 @@ flutter:
     - assets/images/
     - assets/characters/
     - assets/videos/
-    - lib/api/workflow.json
+    - lib/api/chibi.json
+    - lib/api/ghibli.json
+    - lib/api/packaging.json
+    - lib/api/pixar.json
+    - lib/api/snoopy.json
+    - lib/api/swaplab.json
+    
 
   fonts:
     - family: CascadiaCode

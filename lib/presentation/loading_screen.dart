@@ -1,14 +1,17 @@
 // ignore_for_file: unused_field
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:path/path.dart' as path;
+import 'package:photobooth_flutter/api/workflow.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/providers/loading_screen_provider.dart';
 import 'package:photobooth_flutter/providers/photobooth_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
 import 'package:photobooth_flutter/services/comfy_api_service.dart';
-import 'package:photobooth_flutter/services/supabase_service.dart';
+import 'package:photobooth_flutter/services/local_storage_service.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/video_player.dart';
@@ -97,8 +100,11 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
       final seed = DateTime.now().millisecondsSinceEpoch;
 
-      await _processOnlineMode(
-          imageFile, provider, globalSettings, name, email, gender, seed);
+      if (provider.selectedTheme != null) {
+        await _processSwaplab(imageFile, provider, globalSettings, seed);
+      } else {
+        await _processOfflineMode(imageFile, provider, globalSettings, seed);
+      }
     } on Exception catch (e) {
       debugPrint('Error processing image: $e');
       setState(() {
@@ -108,290 +114,234 @@ class _LoadingScreenState extends State<LoadingScreen> {
     }
   }
 
-  //     // Check if we're in offline mode
-  //     // if (globalSettings.isOfflineMode) {
-  //     //   // Process in offline mode
-  //     //   await _processOfflineMode(imageFile, provider, globalSettings, seed);
-  //     // } else {
-  //     //   // Process in online mode (Supabase)
-  //     //   await _processOnlineMode(
-  //     //       imageFile, provider, globalSettings, name, email, gender, seed);
-  //     // }
-  //   } on Exception catch (e) {
-  //     debugPrint('Error processing image: $e');
-  //     setState(() {
-  //       _isProcessing = false;
-  //       _errorMessage = 'Error: $e';
-  //     });
-  //   }
-  // }
-
-  // Handle offline mode processing
-  // Future<void> _processOfflineMode(File imageFile, PhotoboothProvider provider,
-  //     GlobalSettingsProvider globalSettings, int seed) async {
-  //   try {
-  //     // Check if LocalStorageService is initialized using the static method
-  //     if (!LocalStorageService.isServiceInitialized) {
-  //       // Check if input and output directories are set
-  //       if (globalSettings.inputDirectory == null ||
-  //           globalSettings.outputDirectory == null) {
-  //         setState(() {
-  //           _isProcessing = false;
-  //           _errorMessage =
-  //               'Input or output directories not configured. Please set them in the admin screen.';
-  //         });
-  //         return;
-  //       }
-
-  //       await LocalStorageService.initialize(
-  //         inputDirectory: globalSettings.inputDirectory!,
-  //         outputDirectory: globalSettings.outputDirectory!,
-  //       );
-  //     }
-
-  //     // Now it's safe to use the instance
-  //     // Save face image to input directory
-  //     final faceImagePath =
-  //         await LocalStorageService.instance.saveFaceImage(imageFile);
-
-  //     // Get output path prefix
-  //     final outputPathPrefix =
-  //         LocalStorageService.instance.getOutputPathPrefix();
-
-  //     // Send offline workflow to ComfyAPI
-  //     if (ComfyApiService.isInitialized) {
-  //       try {
-  //         debugPrint('Sending offline workflow to ComfyAPI with:');
-  //         debugPrint('  faceImagePath: $faceImagePath');
-  //         debugPrint('  outputPathPrefix: $outputPathPrefix');
-  //         debugPrint('  seed: $seed');
-
-  //         // Send the workflow and get the response with sent time
-  //         final response = await ComfyApiService.instance.sendOfflineWorkflow(
-  //           faceImagePath: faceImagePath,
-  //           outputPathPrefix: outputPathPrefix,
-  //           seed: seed,
-  //         );
-
-  //         // Store the workflow sent time in the provider
-  //         if (response.containsKey('sentTime')) {
-  //           final sentTimeStr = response['sentTime'] as String;
-  //           final sentTime = DateTime.parse(sentTimeStr);
-  //           provider.setWorkflowSentTime(sentTime);
-  //         }
-
-  //         // Start polling for the new image in the output directory
-  //         int attempts = 0;
-  //         const maxAttempts =
-  //             160; // 160 attempts with 2 second delay = ~5 minutes max
-  //         const pollDelay = Duration(seconds: 2);
-
-  //         final outputPrefix = path.basename(outputPathPrefix);
-
-  //         while (attempts < maxAttempts) {
-  //           // Check for new image in output directory
-  //           final localImagePath =
-  //               await LocalStorageService.instance.getLatestOutputImage(
-  //             outputPrefix,
-  //             afterTime: provider.workflowSentTime,
-  //           );
-
-  //           if (localImagePath != null) {
-  //             // Update the provider with local file path
-  //             provider.setSwappedImage(localImagePath);
-  //             provider.setCapturedImageUrl(localImagePath);
-
-  //             // Navigate to output screen
-  //             if (mounted) {
-  //               await Navigator.of(context)
-  //                   .pushReplacementNamed(AppRoutes.swappedFace);
-  //             }
-  //             return;
-  //           }
-
-  //           // Wait before next attempt
-  //           await Future.delayed(pollDelay);
-  //           attempts++;
-  //         }
-
-  //         // If we get here, we've timed out waiting for the image
-  //         setState(() {
-  //           _isProcessing = false;
-  //           _errorMessage = 'Timed out waiting for image processing';
-  //         });
-  //       } catch (e) {
-  //         setState(() {
-  //           _isProcessing = false;
-  //           _errorMessage = 'Error sending workflow: $e';
-  //         });
-  //       }
-  //     } else {
-  //       setState(() {
-  //         _isProcessing = false;
-  //         _errorMessage = 'ComfyAPI service not initialized';
-  //       });
-  //     }
-  //   } on Exception catch (e) {
-  //     setState(() {
-  //       _isProcessing = false;
-  //       _errorMessage = 'Error processing image in offline mode: $e';
-  //     });
-  //   }
-  // }
-
-  // Handle online mode processing (existing Supabase flow)
-  Future<void> _processOnlineMode(
-      File imageFile,
-      PhotoboothProvider provider,
-      GlobalSettingsProvider globalSettings,
-      String name,
-      String email,
-      String gender,
-      int seed) async {
-    // Get Supabase credentials from global settings
-    final supabaseUrl = globalSettings.supabaseUrl;
-    final supabaseAnonKey = globalSettings.supabaseAnonKey;
-
-    // Check if Supabase credentials are available
-    if (supabaseUrl == null || supabaseAnonKey == null) {
-      setState(() {
-        _isProcessing = false;
-        _errorMessage =
-            'Supabase credentials not configured. Please set them in the admin screen.';
-      });
-      return;
-    }
-
-    // Initialize Supabase if not already initialized
-    if (!SupabaseService.instance.isInitialized) {
-      try {
-        await SupabaseService.instance.initialize(
-          url: supabaseUrl,
-          anonKey: supabaseAnonKey,
-        );
-      } on Exception catch (e) {
-        setState(() {
-          _isProcessing = false;
-          _errorMessage = 'Failed to initialize Supabase: $e';
-        });
-        return;
-      }
-    }
-
-    // Check if Supabase is initialized
-    if (SupabaseService.instance.isInitialized) {
-      // Upload face image to Supabase using the new method
-      final faceImageUrl =
-          await SupabaseService.instance.uploadUserFaceImage(imageFile);
-
-      if (faceImageUrl != null) {
-        final uniqueId = await SupabaseService.instance.storeParticipantDetails(
-          name: name,
-          email: email,
-          gender: gender,
-          imageUrl: faceImageUrl,
-        );
-
-        if (uniqueId != null) {
-          if (ComfyApiService.isInitialized) {
-            try {
-              // ADDED: Read the selected workflow from SharedPreferences.
-              final prefs = await SharedPreferences.getInstance();
-              final workflowFileName = prefs.getString('selected_workflow');
-
-              // REASON: Ensure a workflow was selected during authentication.
-              if (workflowFileName == null) {
-                setState(() {
-                  _isProcessing = false;
-                  _errorMessage =
-                      'Error: No workflow selected. Please re-authenticate.';
-                });
-                return;
-              }
-
-              debugPrint('Sending online workflow to ComfyAPI with:');
-              debugPrint('  uniqueId: $uniqueId');
-              debugPrint('  workflow: $workflowFileName');
-
-              final response =
-                  await ComfyApiService.instance.sendOnlineWorkflow(
-                seed,
-                uniqueId: uniqueId,
-                workflowFileName: workflowFileName,
-              );
-
-              // Store the workflow sent time in the provider
-              if (response.containsKey('sentTime')) {
-                final sentTimeStr = response['sentTime'] as String;
-                final sentTime = DateTime.parse(sentTimeStr);
-                Provider.of<PhotoboothProvider>(context, listen: false)
-                    .setWorkflowSentTime(sentTime);
-              }
-
-              // Start polling Supabase for the new image
-              int attempts = 0;
-              const maxAttempts = 90;
-              const pollDelay = Duration(seconds: 2);
-
-              while (attempts < maxAttempts) {
-                final supabaseImageUrl =
-                    await SupabaseService.instance.getLatestOutputImage(
-                  uniqueId,
-                  afterTime: provider.workflowSentTime,
-                );
-
-                if (supabaseImageUrl != null) {
-                  debugPrint('Found new image in Supabase: $supabaseImageUrl');
-                  // Update the URLs in the provider
-                  provider.setSwappedImage(supabaseImageUrl);
-                  provider.setCapturedImageUrl(supabaseImageUrl);
-
-                  if (mounted) {
-                    debugPrint('Navigating to output screen...');
-                    await Navigator.of(context)
-                        .pushReplacementNamed(AppRoutes.swappedFace);
-                  }
-                  return;
-                }
-
-                // Wait before next attempt
-                await Future.delayed(pollDelay);
-                attempts++;
-              }
-
-              // If we get here, we've timed out waiting for the image
-              setState(() {
-                _isProcessing = false;
-                _errorMessage = 'Timed out waiting for image processing';
-              });
-            } on Exception catch (e) {
-              setState(() {
-                _isProcessing = false;
-                _errorMessage = 'Error processing image: $e';
-              });
-            }
-          } else {
-            setState(() {
-              _isProcessing = false;
-              _errorMessage = 'ComfyAPI service not initialized';
-            });
-          }
-        } else {
+  Future<void> _processSwaplab(File imageFile, PhotoboothProvider provider,
+      GlobalSettingsProvider globalSettings, int seed) async {
+    try {
+      if (!LocalStorageService.isServiceInitialized) {
+        if (globalSettings.inputDirectory == null ||
+            globalSettings.outputDirectory == null) {
           setState(() {
             _isProcessing = false;
-            _errorMessage = 'Failed to store participant details';
+            _errorMessage =
+                'Input or output directories not configured. Please set them in the admin screen.';
+          });
+          return;
+        }
+
+        await LocalStorageService.initialize(
+          inputDirectory: globalSettings.inputDirectory!,
+          outputDirectory: globalSettings.outputDirectory!,
+        );
+      }
+
+      final faceImagePath =
+          await LocalStorageService.instance.saveFaceImage(imageFile);
+
+      final themeName =
+          provider.selectedTheme!.name.toLowerCase().replaceAll(' ', '_');
+      final gender = provider.selectedGender;
+      final characterNumber = Random().nextInt(4) + 1;
+      final characterImageName =
+          '${gender == 'male' ? 'm' : 'f'}$characterNumber.png';
+      final characterImagePath =
+          'C:\\storage\\themes\\$gender\\$themeName\\$characterImageName';
+
+      final outputPathPrefix =
+          LocalStorageService.instance.getOutputPathPrefix();
+
+      if (ComfyApiService.isInitialized) {
+        try {
+          final workflow = await Workflow.getWorkflow('swaplab.json');
+          workflow.updateInputImagePath(faceImagePath, nodeId: '35');
+          workflow.updateSwaplabCharacterImage(characterImagePath);
+          workflow.updateOutputImagePath(outputPathPrefix, nodeId: '37');
+
+          final response = await ComfyApiService.instance.sendOfflineWorkflow(
+            workflow: workflow.toMap(),
+          );
+
+          if (response.containsKey('sentTime')) {
+            final sentTimeStr = response['sentTime'] as String;
+            final sentTime = DateTime.parse(sentTimeStr);
+            provider.setWorkflowSentTime(sentTime);
+          }
+
+          int attempts = 0;
+          const maxAttempts = 90;
+          const pollDelay = Duration(seconds: 2);
+
+          final outputPrefix = path.basename(outputPathPrefix);
+
+          while (attempts < maxAttempts) {
+            final localImagePath =
+                await LocalStorageService.instance.getLatestOutputImage(
+              outputPrefix,
+              afterTime: provider.workflowSentTime,
+            );
+
+            if (localImagePath != null) {
+              provider.setSwappedImage(localImagePath);
+              provider.setCapturedImageUrl(localImagePath);
+
+              if (mounted) {
+                await Navigator.of(context)
+                    .pushReplacementNamed(AppRoutes.swappedFace);
+              }
+              return;
+            }
+
+            await Future.delayed(pollDelay);
+            attempts++;
+          }
+
+          setState(() {
+            _isProcessing = false;
+            _errorMessage = 'Timed out waiting for image processing';
+          });
+        } catch (e) {
+          setState(() {
+            _isProcessing = false;
+            _errorMessage = 'Error sending workflow: $e';
           });
         }
       } else {
         setState(() {
           _isProcessing = false;
-          _errorMessage = 'Failed to upload face image';
+          _errorMessage = 'ComfyAPI service not initialized';
         });
       }
-    } else {
+    } catch (e) {
       setState(() {
         _isProcessing = false;
-        _errorMessage = 'Supabase not initialized';
+        _errorMessage = 'Error processing image in Swaplab mode: $e';
+      });
+    }
+  }
+
+  // Handle offline mode processing
+  Future<void> _processOfflineMode(File imageFile, PhotoboothProvider provider,
+      GlobalSettingsProvider globalSettings, int seed) async {
+    try {
+      // Check if LocalStorageService is initialized using the static method
+      if (!LocalStorageService.isServiceInitialized) {
+        // Check if input and output directories are set
+        if (globalSettings.inputDirectory == null ||
+            globalSettings.outputDirectory == null) {
+          setState(() {
+            _isProcessing = false;
+            _errorMessage =
+                'Input or output directories not configured. Please set them in the admin screen.';
+          });
+          return;
+        }
+
+        await LocalStorageService.initialize(
+          inputDirectory: globalSettings.inputDirectory!,
+          outputDirectory: globalSettings.outputDirectory!,
+        );
+      }
+
+      // Now it's safe to use the instance
+      // Save face image to input directory
+      final faceImagePath =
+          await LocalStorageService.instance.saveFaceImage(imageFile);
+
+      // Get output path prefix
+      final outputPathPrefix =
+          LocalStorageService.instance.getOutputPathPrefix();
+
+      // Send offline workflow to ComfyAPI
+      if (ComfyApiService.isInitialized) {
+        try {
+          // ADDED: Read the selected workflow from SharedPreferences.
+          final prefs = await SharedPreferences.getInstance();
+          final workflowFileName = prefs.getString('selected_workflow');
+          // REASON: Ensure a workflow was selected during authentication.
+          if (workflowFileName == null) {
+            setState(() {
+              _isProcessing = false;
+              _errorMessage =
+                  'Error: No workflow selected. Please re-authenticate.';
+            });
+            return;
+          }
+
+          final workflow = await Workflow.getWorkflow(workflowFileName);
+          workflow.updateInputImagePath(faceImagePath);
+          workflow.updateNoiseSeed(seed);
+          workflow.updateOutputImagePath(outputPathPrefix);
+
+          debugPrint('  workflow: $workflowFileName');
+          debugPrint('  faceImagePath: $faceImagePath');
+          debugPrint('  outputPathPrefix: $outputPathPrefix');
+          debugPrint('  seed: $seed');
+
+          // Send the workflow and get the response with sent time
+          final response = await ComfyApiService.instance.sendOfflineWorkflow(
+            workflow: workflow.toMap(),
+          );
+
+          // Store the workflow sent time in the provider
+          if (response.containsKey('sentTime')) {
+            final sentTimeStr = response['sentTime'] as String;
+            final sentTime = DateTime.parse(sentTimeStr);
+            provider.setWorkflowSentTime(sentTime);
+          }
+
+          // Start polling for the new image in the output directory
+          int attempts = 0;
+          const maxAttempts = 90;
+          const pollDelay = Duration(seconds: 2);
+
+          final outputPrefix = path.basename(outputPathPrefix);
+
+          while (attempts < maxAttempts) {
+            // Check for new image in output directory
+            final localImagePath =
+                await LocalStorageService.instance.getLatestOutputImage(
+              outputPrefix,
+              afterTime: provider.workflowSentTime,
+            );
+
+            if (localImagePath != null) {
+              // Update the provider with local file path
+              provider.setSwappedImage(localImagePath);
+              provider.setCapturedImageUrl(localImagePath);
+
+              // Navigate to output screen
+              if (mounted) {
+                await Navigator.of(context)
+                    .pushReplacementNamed(AppRoutes.swappedFace);
+              }
+              return;
+            }
+
+            // Wait before next attempt
+            await Future.delayed(pollDelay);
+            attempts++;
+          }
+
+          // If we get here, we've timed out waiting for the image
+          setState(() {
+            _isProcessing = false;
+            _errorMessage = 'Timed out waiting for image processing';
+          });
+        } catch (e) {
+          setState(() {
+            _isProcessing = false;
+            _errorMessage = 'Error sending workflow: $e';
+          });
+        }
+      } else {
+        setState(() {
+          _isProcessing = false;
+          _errorMessage = 'ComfyAPI service not initialized';
+        });
+      }
+    } on Exception catch (e) {
+      setState(() {
+        _isProcessing = false;
+        _errorMessage = 'Error processing image in offline mode: $e';
       });
     }
   }

@@ -15,6 +15,7 @@ import 'package:photobooth_flutter/presentation/gender_selection_screen.dart';
 import 'package:photobooth_flutter/presentation/loading_screen.dart';
 import 'package:photobooth_flutter/presentation/output_screen.dart';
 import 'package:photobooth_flutter/presentation/registration_screen.dart';
+import 'package:photobooth_flutter/presentation/theme_selection_screen.dart';
 import 'package:photobooth_flutter/presentation/welcome_screen.dart';
 
 class AppRoutes {
@@ -26,6 +27,8 @@ class AppRoutes {
   static const String participantDetails = '/participant_details';
 
   static const String categoriesScreen = '/categories';
+
+  static const String themeSelection = '/theme_selection';
 
   static const String genderSelection = '/gender_selection';
 
@@ -71,6 +74,9 @@ class AppRoutes {
 
       case categoriesScreen: // ADD THIS CASE
         return MaterialPageRoute(builder: (_) => const CategoriesScreen());
+
+      case themeSelection:
+        return MaterialPageRoute(builder: (_) => const ThemeSelectionScreen());
 
       case genderSelection:
         return MaterialPageRoute(builder: (_) => const GenderSelectionScreen());

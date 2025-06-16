@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:photobooth_flutter/api/workflow.dart';
 
 class ComfyApiService {
   static ComfyApiService? _instance;
@@ -60,79 +59,20 @@ class ComfyApiService {
     }
   }
 
-  Future<Map<String, dynamic>> sendOnlineWorkflow(
-    int seed, {
-    required String uniqueId,
-    required String workflowFileName, // ADDED
-  }) async {
+  // Send workflow in offline mode
+  Future<Map<String, dynamic>> sendOfflineWorkflow(
+      {required Map<String, dynamic> workflow}) async {
     try {
-      // REASON: We now load the specific workflow passed from the LoadingScreen.
-      final workflow = await Workflow.getWorkflow(workflowFileName); // CHANGED
-
-      workflow.updateSupabaseWatcherNode(uniqueId);
-      workflow.updateNoiseSeed(seed);
-
-      debugPrint(
-          '======= SENDING ONLINE WORKFLOW ($workflowFileName) ======='); // CHANGED
-      final workflowJson =
-          const JsonEncoder.withIndent('  ').convert(workflow.toMap());
+      debugPrint('======= SENDING OFFLINE WORKFLOW ======');
+      final workflowJson = const JsonEncoder.withIndent('  ').convert(workflow);
       debugPrint('Workflow JSON: $workflowJson');
-      debugPrint(
-          '==========================================================='); // CHANGED
+      debugPrint('========================================');
 
-      return await _postWorkflow(workflow.toMap());
+      final response = await _postWorkflow(workflow);
+      return response;
     } catch (e) {
-      debugPrint('Exception sending online workflow: $e');
+      debugPrint('Exception sending offline workflow: $e');
       rethrow;
     }
   }
 }
-
-  // // Send workflow in offline mode
-  // Future<Map<String, dynamic>> sendOfflineWorkflow({
-  //   required String faceImagePath,
-  //   required String outputPathPrefix,
-  //   required int seed,
-  // }) async {
-  //   try {
-  //     final workflow = await Workflow.getWorkflow();
-
-  //     // --- Input Path Processing ---
-  //     // Get the filename and its immediate parent directory.
-  //     final inputFileName = path.basename(faceImagePath);
-  //     final inputDirectoryName = path.basename(path.dirname(faceImagePath));
-  //     // Create the relative path and ensure it uses forward slashes.
-  //     final relativeInputPath =
-  //         path.join(inputDirectoryName, inputFileName).replaceAll('\\', '/');
-
-  //     workflow.updateInputImagePath(relativeInputPath);
-  //     workflow.updateNoiseSeed(seed);
-
-  //     // --- Output Path Processing ---
-  //     // Get the filename prefix and its immediate parent directory.
-  //     final outputPrefixBase = path.basename(outputPathPrefix);
-  //     final outputDirectoryName = path.basename(path.dirname(outputPathPrefix));
-  //     // Create the final output filename.
-  //     final outputFileName = '$outputPrefixBase$seed.png';
-  //     // Create the relative path and ensure it uses forward slashes.
-  //     final relativeOutputPath =
-  //         path.join(outputDirectoryName, outputFileName).replaceAll('\\', '/');
-
-  //     workflow.updateOutputImagePath(relativeOutputPath);
-
-  //     debugPrint('======= SENDING OFFLINE WORKFLOW ======');
-  //     debugPrint('Relative Input Path: $relativeInputPath');
-  //     debugPrint('Relative Output Path: $relativeOutputPath');
-  //     final workflowJson =
-  //         const JsonEncoder.withIndent('  ').convert(workflow.toMap());
-  //     debugPrint('Workflow JSON: $workflowJson');
-  //     debugPrint('========================================');
-
-  //     final response = await _postWorkflow(workflow.toMap());
-  //     response['outputPathPrefix'] = outputPathPrefix; // For polling logic
-  //     return response;
-  //   } catch (e) {
-  //     debugPrint('Exception sending offline workflow: $e');
-  //     rethrow;
-  //   }
-  // }

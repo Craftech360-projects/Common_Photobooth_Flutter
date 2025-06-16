@@ -30,6 +30,8 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
         onTap: onTap,
         borderRadius: Constants.br16,
         child: Container(
+          // REMOVED: The height property from here is no longer needed
+          // as the parent will constrain it.
           padding: const EdgeInsets.all(24.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -104,36 +106,43 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     return Padding(
       key: const ValueKey('main_categories'),
       padding: const EdgeInsets.all(32.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Expanded(
-            child: _buildCategoryCard(
-              title: 'AI Artistry',
-              subtitle: 'Transform your photo into a unique art style.',
-              icon: Icons.palette,
-              onTap: () {
-                provider.selectMainCategory(MainCategory.aIArtistry);
-                setState(() {
-                  _showAiArtistrySubCategories = true;
-                });
-              },
+      // --- MODIFICATION START ---
+      // REASON: This Container constrains the height of the Row and its children.
+      child: SizedBox(
+        height: 300, // You can adjust this height as needed
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment
+              .stretch, // Makes cards fill the container's height
+          children: [
+            Expanded(
+              child: _buildCategoryCard(
+                title: 'AI Artistry',
+                subtitle: 'Transform your photo into a unique art style.',
+                icon: Icons.palette,
+                onTap: () {
+                  provider.selectMainCategory(MainCategory.aIArtistry);
+                  setState(() {
+                    _showAiArtistrySubCategories = true;
+                  });
+                },
+              ),
             ),
-          ),
-          Constants.w24,
-          Expanded(
-            child: _buildCategoryCard(
-              title: 'Swaplab',
-              subtitle: 'Swap your face with a character.',
-              icon: Icons.switch_account,
-              onTap: () {
-                provider.selectWorkflow('swaplab.json');
-                Navigator.pushNamed(context, AppRoutes.genderSelection);
-              },
+            Constants.w24,
+            Expanded(
+              child: _buildCategoryCard(
+                title: 'Swaplab',
+                subtitle: 'Swap your face with a character.',
+                icon: Icons.switch_account,
+                onTap: () {
+                  Navigator.pushNamed(context, AppRoutes.themeSelection);
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
+      // --- MODIFICATION END ---
     );
   }
 
@@ -153,46 +162,54 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                 color: AppColors.darkGrey),
           ),
           Constants.h32,
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Expanded(
-                child: _buildCategoryCard(
-                  title: 'Ghibli',
-                  subtitle: 'Whimsical, hand-drawn anime style.',
-                  icon: Icons.auto_awesome,
-                  onTap: () {
-                    provider.selectWorkflow('ghibli.json');
-                    Navigator.pushNamed(context, AppRoutes.genderSelection);
-                  },
+          // --- MODIFICATION START ---
+          // REASON: This Container constrains the height of the Row and its children.
+          SizedBox(
+            height: 300, // You can adjust this height as needed
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment
+                  .stretch, // Makes cards fill the container's height
+              children: [
+                Expanded(
+                  child: _buildCategoryCard(
+                    title: 'Ghibli',
+                    subtitle: 'Whimsical, hand-drawn anime style.',
+                    icon: Icons.auto_awesome,
+                    onTap: () {
+                      provider.selectWorkflow('ghibli.json');
+                      Navigator.pushNamed(context, AppRoutes.genderSelection);
+                    },
+                  ),
                 ),
-              ),
-              Constants.w24,
-              Expanded(
-                child: _buildCategoryCard(
-                  title: 'Pixar',
-                  subtitle: 'Cute and expressive 3D cartoon style.',
-                  icon: Icons.movie_filter,
-                  onTap: () {
-                    provider.selectWorkflow('pixar.json');
-                    Navigator.pushNamed(context, AppRoutes.genderSelection);
-                  },
+                Constants.w24,
+                Expanded(
+                  child: _buildCategoryCard(
+                    title: 'Pixar',
+                    subtitle: 'Cute and expressive 3D cartoon style.',
+                    icon: Icons.movie_filter,
+                    onTap: () {
+                      provider.selectWorkflow('pixar.json');
+                      Navigator.pushNamed(context, AppRoutes.genderSelection);
+                    },
+                  ),
                 ),
-              ),
-              Constants.w24,
-              Expanded(
-                child: _buildCategoryCard(
-                  title: 'Packaging',
-                  subtitle: 'Become a collectible action figure.',
-                  icon: Icons.inventory_2,
-                  onTap: () {
-                    provider.selectWorkflow('packaging.json');
-                    Navigator.pushNamed(context, AppRoutes.genderSelection);
-                  },
+                Constants.w24,
+                Expanded(
+                  child: _buildCategoryCard(
+                    title: 'Packaging',
+                    subtitle: 'Become a collectible action figure.',
+                    icon: Icons.inventory_2,
+                    onTap: () {
+                      provider.selectWorkflow('packaging.json');
+                      Navigator.pushNamed(context, AppRoutes.genderSelection);
+                    },
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
+          // --- MODIFICATION END ---
         ],
       ),
     );

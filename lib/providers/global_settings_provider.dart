@@ -35,11 +35,9 @@ class GlobalSettingsProvider with ChangeNotifier {
   String? get runpodApiUrl => _runpodApiUrl;
   String? get runpodApiKey => _runpodApiKey;
   String? get backgroundImage => _backgroundImage;
-  String? get backgroundImagePath =>
-      _backgroundImage; // Added for consistency with other providers
+  String? get backgroundImagePath => _backgroundImage;
   bool get isAssetImage => _isAssetImage;
-  bool get isBackgroundImageAsset =>
-      _isAssetImage; // Added for consistency with other providers
+  bool get isBackgroundImageAsset => _isAssetImage;
   double get fieldSpacing => _fieldSpacing;
   double get buttonSpacing => _buttonSpacing;
   double get borderRadius => _borderRadius;
@@ -98,8 +96,8 @@ class GlobalSettingsProvider with ChangeNotifier {
   // Initialize default directories for offline mode
   Future<void> _initializeOfflineDirectories() async {
     // Set fixed paths for input and output directories
-    _inputDirectory = "C:\\storage\\input";
-    _outputDirectory = "C:\\storage\\output";
+    _inputDirectory = "C:\\eventbooth_app\\storage\\input";
+    _outputDirectory = "C:\\eventbooth_app\\storage\\output";
 
     // Create directories if they don't exist
     final inputDir = Directory(_inputDirectory!);
@@ -240,8 +238,6 @@ class GlobalSettingsProvider with ChangeNotifier {
 
   Future<void> clearAllPreferences() async {
     await _prefs.clear();
-
-    // Reset to default values
     _backgroundImage = null;
     _isAssetImage = true;
     _fieldSpacing = 20.0;
@@ -252,7 +248,6 @@ class GlobalSettingsProvider with ChangeNotifier {
     _isOfflineMode = false;
     _inputDirectory = null;
     _outputDirectory = null;
-
     notifyListeners();
   }
 }

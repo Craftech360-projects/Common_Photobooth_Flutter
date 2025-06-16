@@ -1,42 +1,3 @@
-// import 'dart:convert';
-
-// import 'package:flutter/services.dart';
-
-// class Workflow {
-//   final Map<String, dynamic> _workflow;
-
-//   Workflow(this._workflow);
-
-//   /// Load the workflow from the JSON file
-//   static Future<Workflow> getWorkflow() async {
-//     final jsonString = await rootBundle.loadString('lib/api/workflow.json');
-//     final workflow = jsonDecode(jsonString);
-//     return Workflow(workflow);
-//   }
-
-//   /// Update the Supabase watcher node with the unique ID of the database row.
-//   /// Node 283 is the SupabaseTableWatcherNode.
-//   void updateSupabaseWatcherNode(String uniqueId) {
-//     if (_workflow.containsKey('283') &&
-//         _workflow['283'].containsKey('inputs')) {
-//       _workflow['283']['inputs']['unique_id'] = uniqueId;
-//     }
-//   }
-
-//   /// Update the noise seed in the workflow
-//   /// Node 25 is the RandomNoise node.
-//   void updateNoiseSeed(int seed) {
-//     if (_workflow.containsKey('25') && _workflow['25'].containsKey('inputs')) {
-//       _workflow['25']['inputs']['noise_seed'] = seed;
-//     }
-//   }
-
-//   /// Get the workflow as a Map
-//   Map<String, dynamic> toMap() {
-//     return _workflow;
-//   }
-// }
-
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
@@ -56,20 +17,50 @@ class Workflow {
 
   /// Update the Supabase watcher node with the unique ID of the database row.
   /// Node 283 is the SupabaseTableWatcherNode.
-  void updateSupabaseWatcherNode(String uniqueId) {
-    if (_workflow.containsKey('283') &&
-        _workflow['283'].containsKey('inputs')) {
-      _workflow['283']['inputs']['unique_id'] = uniqueId;
+  // void updateSupabaseWatcherNode(String uniqueId) {
+  //   if (_workflow.containsKey('283') &&
+  //       _workflow['283'].containsKey('inputs')) {
+  //     _workflow['283']['inputs']['unique_id'] = uniqueId;
+  //   }
+  // }
+
+  void updateInputImagePath(String path, {String nodeId = '289'}) {
+    if (_workflow.containsKey(nodeId) &&
+        _workflow[nodeId].containsKey('inputs')) {
+      _workflow[nodeId]['inputs']['image_path'] = path;
+    }
+  }
+
+  void updateSwaplabCharacterImage(String path) {
+    if (_workflow.containsKey('36') && _workflow['36'].containsKey('inputs')) {
+      _workflow['36']['inputs']['image_path'] = path;
+    }
+  }
+
+  /// Update the output image path in the workflow.
+  /// Node 288 is the JWImageSaveToPath node.
+  void updateOutputImagePath(String path, {String nodeId = '288'}) {
+    if (_workflow.containsKey(nodeId) &&
+        _workflow[nodeId].containsKey('inputs')) {
+      _workflow[nodeId]['inputs']['path'] = path;
     }
   }
 
   /// Update the noise seed in the workflow
-  /// Node 25 is the RandomNoise node.
   void updateNoiseSeed(int seed) {
+    // Node 25 is the RandomNoise node
     if (_workflow.containsKey('25') && _workflow['25'].containsKey('inputs')) {
       _workflow['25']['inputs']['noise_seed'] = seed;
     }
   }
+
+  // /// Update the noise seed in the workflow
+  // /// Node 25 is the RandomNoise node.
+  // void updateNoiseSeed(int seed) {
+  //   if (_workflow.containsKey('25') && _workflow['25'].containsKey('inputs')) {
+  //     _workflow['25']['inputs']['noise_seed'] = seed;
+  //   }
+  // }
 
   Map<String, dynamic> toMap() {
     return _workflow;

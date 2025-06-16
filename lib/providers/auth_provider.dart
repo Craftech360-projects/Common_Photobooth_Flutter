@@ -11,7 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class AuthProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _error;
-  bool _isAuthenticated = false;
+  bool _isAuthenticated = true;
   BuildContext? _context;
 
   bool get isLoading => _isLoading;

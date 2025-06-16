@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:photobooth_flutter/providers/theme_selection_provider.dart'
+    as theme_provider;
 
 class PhotoboothProvider extends ChangeNotifier {
   String? name;
@@ -9,8 +11,10 @@ class PhotoboothProvider extends ChangeNotifier {
   bool? isCharacterAsset;
   String? faceImagePath;
   String? swappedImageUrl;
-  String? capturedImageUrl; // Add this property to store the captured image URL
+  String?
+      capturedImageUrl; // Add this property to store the captured image URL
   DateTime? workflowSentTime; // Add this to track when workflow was sent
+  theme_provider.Theme? selectedTheme;
 
   String get selectedGender => gender ?? 'male'; // Default to male if not set
 
@@ -23,6 +27,11 @@ class PhotoboothProvider extends ChangeNotifier {
 
   void setGender(String gender) {
     this.gender = gender;
+    notifyListeners();
+  }
+
+  void setTheme(theme_provider.Theme theme) {
+    selectedTheme = theme;
     notifyListeners();
   }
 
@@ -66,6 +75,7 @@ class PhotoboothProvider extends ChangeNotifier {
     swappedImageUrl = null;
     capturedImageUrl = null; // Clear this as well
     workflowSentTime = null; // Clear this as well
+    selectedTheme = null;
     notifyListeners();
   }
 }

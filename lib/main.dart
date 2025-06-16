@@ -2,7 +2,6 @@ import 'package:camera_platform_interface/camera_platform_interface.dart';
 import 'package:camera_windows/camera_windows.dart';
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/core/themes/app_theme.dart';
-import 'package:photobooth_flutter/providers/admin_settings_provider.dart';
 import 'package:photobooth_flutter/providers/admin_watermark_provider.dart';
 import 'package:photobooth_flutter/providers/app_flow_provider.dart';
 import 'package:photobooth_flutter/providers/auth_provider.dart';
@@ -15,6 +14,7 @@ import 'package:photobooth_flutter/providers/loading_screen_provider.dart';
 import 'package:photobooth_flutter/providers/output_screen_provider.dart';
 import 'package:photobooth_flutter/providers/photobooth_provider.dart';
 import 'package:photobooth_flutter/providers/registration_screen_provider.dart';
+import 'package:photobooth_flutter/providers/theme_selection_provider.dart';
 import 'package:photobooth_flutter/providers/welcome_screen_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
 import 'package:photobooth_flutter/services/supabase_service.dart';
@@ -69,9 +69,6 @@ void main() async {
     debugPrint('Error initializing welcome settings: $e');
   }
 
-  final adminSettings = AdminSettingsProvider();
-  await adminSettings.init();
-
   final registrationSettings = RegistrationScreenProvider();
   await registrationSettings.init();
 
@@ -104,12 +101,12 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => PhotoboothProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeSelectionProvider()),
         ChangeNotifierProvider.value(value: globalSettings),
         ChangeNotifierProvider.value(value: authProvider),
         ChangeNotifierProvider.value(value: appFlowProvider),
         ChangeNotifierProvider(create: (_) => CategoryProvider()),
         ChangeNotifierProvider.value(value: welcomeSettings),
-        ChangeNotifierProvider.value(value: adminSettings),
         ChangeNotifierProvider.value(value: registrationSettings),
         ChangeNotifierProvider.value(value: genderSettings),
         ChangeNotifierProvider.value(value: characterSettings),

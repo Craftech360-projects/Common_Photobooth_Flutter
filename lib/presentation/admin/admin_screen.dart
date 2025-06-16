@@ -82,9 +82,33 @@ class _AdminScreenState extends State<AdminScreen> {
   }
 
   Widget _buildAdvancedSettings() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
       children: [
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.black,
+            foregroundColor: AppColors.white,
+          ),
+          // --- MODIFICATION START ---
+          onPressed: () async {
+            // Get the provider
+            final authProvider =
+                Provider.of<AuthProvider>(context, listen: false);
+
+            // Call the logout method
+            await authProvider.logout();
+
+            // Navigate to the auth screen and remove all previous routes
+            if (mounted) {
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                AppRoutes.authScreen,
+                (Route<dynamic> route) => false,
+              );
+            }
+          },
+          child: const Text('Add New Key'),
+        ),
+        Constants.w8,
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.red,
@@ -217,7 +241,7 @@ class _GlobalSettingsSection extends StatelessWidget {
         ),
 
         // Show directory settings if in offline mode
-        if (globalSettings.isOfflineMode) ...[  
+        if (globalSettings.isOfflineMode) ...[
           ListTile(
             title: const Text('Input Directory'),
             subtitle: Text(globalSettings.inputDirectory ?? 'Not set'),
@@ -229,8 +253,6 @@ class _GlobalSettingsSection extends StatelessWidget {
             // Remove the trailing ElevatedButton for directory selection
           ),
         ],
-
-        // YOU CAN CONTINUE NOW
 
         // Show Supabase settings if not in offline mode
         if (!globalSettings.isOfflineMode) ...[

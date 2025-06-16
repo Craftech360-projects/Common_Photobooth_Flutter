@@ -30,4 +30,3 @@ linter:
 
     # Anti-Patterns
     avoid_function_literals_in_foreach_calls: true
-    unawaited_futures: true

@@ -13,11 +13,11 @@
       "source_faces_index": "0",
       "console_log_level": 1,
       "input_image": [
-        "45",
+        "36",
         0
       ],
       "source_image": [
-        "44",
+        "35",
         0
       ]
     },
@@ -38,55 +38,40 @@
       "title": "Preview Image"
     }
   },
-  "43": {
+  "35": {
     "inputs": {
-      "unique_id": [
-        "44",
-        2
-      ],
-      "supabase_url": "https://kdkkutcmxtsfrqzbxmox.supabase.co",
-      "supabase_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtka2t1dGNteHRzZnJxemJ4bW94Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0OTU1NzM3NCwiZXhwIjoyMDY1MTMzMzc0fQ.aAMtFygC6smIHh9c132dWBZGqru_MtzLocboPW1epXU",
-      "bucket": "outputimages",
-      "base_file_name": "image",
-      "table_name": "inputimagetable",
-      "unique_id_column": "unique_id",
-      "table_column": "output",
+      "image_path": "input/input_1749552671240.jpeg",
+      "RGBA": "false",
+      "filename_text_extension": "true"
+    },
+    "class_type": "Image Load",
+    "_meta": {
+      "title": "Image Load"
+    }
+  },
+  "36": {
+    "inputs": {
+      "image_path": "themes/gender/selectedtheme/randomimage.png",
+      "RGBA": "false",
+      "filename_text_extension": "true"
+    },
+    "class_type": "Image Load",
+    "_meta": {
+      "title": "Image Load"
+    }
+  },
+  "37": {
+    "inputs": {
+      "path": "./image.png",
+      "overwrite": "true",
       "image": [
         "1",
         0
       ]
     },
-    "class_type": "SupabaseImageUploader",
+    "class_type": "JWImageSaveToPath",
     "_meta": {
-      "title": "Upload Image to Supabase"
-    }
-  },
-  "44": {
-    "inputs": {
-      "supabase_url": "https://kdkkutcmxtsfrqzbxmox.supabase.co",
-      "supabase_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtka2t1dGNteHRzZnJxemJ4bW94Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0OTU1NzM3NCwiZXhwIjoyMDY1MTMzMzc0fQ.aAMtFygC6smIHh9c132dWBZGqru_MtzLocboPW1epXU",
-      "table_name": "inputimagetable",
-      "image_column": "image_url",
-      "id_column": "unique_id",
-      "unique_id": "4c678108-c1ca-458e-90b1-1ca81e620282"
-    },
-    "class_type": "SupabaseTableWatcherNode",
-    "_meta": {
-      "title": "Supabase Table Watcher"
-    }
-  },
-  "45": {
-    "inputs": {
-      "supabase_url": "https://kdkkutcmxtsfrqzbxmox.supabase.co",
-      "supabase_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtka2t1dGNteHRzZnJxemJ4bW94Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0OTU1NzM3NCwiZXhwIjoyMDY1MTMzMzc0fQ.aAMtFygC6smIHh9c132dWBZGqru_MtzLocboPW1epXU",
-      "table_name": "inputimagetable",
-      "image_column": "faceswapimage",
-      "id_column": "unique_id",
-      "unique_id": "4c678108-c1ca-458e-90b1-1ca81e620282"
-    },
-    "class_type": "SupabaseTableWatcherNode",
-    "_meta": {
-      "title": "Supabase Table Watcher"
+      "title": "Image Save To Path"
     }
   }
 }

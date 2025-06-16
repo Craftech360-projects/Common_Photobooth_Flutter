@@ -102,7 +102,7 @@
   },
   "25": {
     "inputs": {
-      "noise_seed": 7864921173817
+      "noise_seed": 990096376533512
     },
     "class_type": "RandomNoise",
     "_meta": {
@@ -174,7 +174,7 @@
   },
   "216": {
     "inputs": {
-      "aspect_ratio": "2:3"
+      "aspect_ratio": "16:9"
     },
     "class_type": "SDXLAspectRatioSelector",
     "_meta": {
@@ -247,7 +247,7 @@
         0
       ],
       "image": [
-        "296",
+        "289",
         0
       ]
     },
@@ -275,7 +275,7 @@
       "num_beams": 3,
       "do_sample": true,
       "output_mask_select": "",
-      "seed": 409316023138869,
+      "seed": 563267165392817,
       "image": [
         "256",
         0
@@ -406,7 +406,7 @@
       "num_beams": 3,
       "do_sample": true,
       "output_mask_select": "",
-      "seed": 322603326376530,
+      "seed": 308395717991501,
       "image": [
         "281",
         0
@@ -442,7 +442,7 @@
   "278": {
     "inputs": {
       "image": [
-        "296",
+        "289",
         0
       ]
     },
@@ -473,7 +473,7 @@
         0
       ],
       "layer_image": [
-        "296",
+        "289",
         0
       ]
     },
@@ -485,7 +485,7 @@
   "285": {
     "inputs": {
       "images": [
-        "296",
+        "289",
         0
       ]
     },
@@ -494,11 +494,37 @@
       "title": "Preview Image"
     }
   },
+  "288": {
+    "inputs": {
+      "path": "output/image111.png",
+      "overwrite": "true",
+      "image": [
+        "147",
+        0
+      ]
+    },
+    "class_type": "JWImageSaveToPath",
+    "_meta": {
+      "title": "Image Save To Path"
+    }
+  },
+  "289": {
+    "inputs": {
+      "image_path": "input/input_1749552671240.jpeg",
+      "RGBA": "false",
+      "filename_text_extension": "true"
+    },
+    "class_type": "Image Load",
+    "_meta": {
+      "title": "Image Load"
+    }
+  },
   "291": {
     "inputs": {
       "model": "Florence-2-base",
       "precision": "fp16",
-      "attention": "sdpa"
+      "attention": "sdpa",
+      "convert_to_safetensors": true
     },
     "class_type": "Florence2ModelLoader",
     "_meta": {
@@ -520,7 +546,7 @@
     "inputs": {
       "question": "a doll, 3d, {ethnicity} {gender}, weared {garment color} {garment}, {eye color} eyes, {hair style} {hair color} hair, ((full body, Chibi)), Doll blind box",
       "image": [
-        "296",
+        "289",
         0
       ],
       "vqa_model": [
@@ -531,43 +557,6 @@
     "class_type": "LayerUtility: VQAPrompt",
     "_meta": {
       "title": "LayerUtility: VQA Prompt"
-    }
-  },
-  "295": {
-    "inputs": {
-      "unique_id": [
-        "296",
-        2
-      ],
-      "supabase_url": "https://kdkkutcmxtsfrqzbxmox.supabase.co",
-      "supabase_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtka2t1dGNteHRzZnJxemJ4bW94Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0OTU1NzM3NCwiZXhwIjoyMDY1MTMzMzc0fQ.aAMtFygC6smIHh9c132dWBZGqru_MtzLocboPW1epXU",
-      "bucket": "outputimages",
-      "base_file_name": "image",
-      "table_name": "inputimagetable",
-      "unique_id_column": "unique_id",
-      "table_column": "output",
-      "image": [
-        "147",
-        0
-      ]
-    },
-    "class_type": "SupabaseImageUploader",
-    "_meta": {
-      "title": "Upload Image to Supabase"
-    }
-  },
-  "296": {
-    "inputs": {
-      "supabase_url": "https://kdkkutcmxtsfrqzbxmox.supabase.co",
-      "supabase_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtka2t1dGNteHRzZnJxemJ4bW94Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0OTU1NzM3NCwiZXhwIjoyMDY1MTMzMzc0fQ.aAMtFygC6smIHh9c132dWBZGqru_MtzLocboPW1epXU",
-      "table_name": "inputimagetable",
-      "image_column": "image_url",
-      "id_column": "unique_id",
-      "unique_id": "4c678108-c1ca-458e-90b1-1ca81e620282"
-    },
-    "class_type": "SupabaseTableWatcherNode",
-    "_meta": {
-      "title": "Supabase Table Watcher"
     }
   }
 }

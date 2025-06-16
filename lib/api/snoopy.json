@@ -102,7 +102,7 @@
   },
   "25": {
     "inputs": {
-      "noise_seed": 821014653188699
+      "noise_seed": 977982511892734
     },
     "class_type": "RandomNoise",
     "_meta": {
@@ -174,7 +174,7 @@
   },
   "216": {
     "inputs": {
-      "aspect_ratio": "2:3"
+      "aspect_ratio": "16:9"
     },
     "class_type": "SDXLAspectRatioSelector",
     "_meta": {
@@ -247,7 +247,7 @@
         0
       ],
       "image": [
-        "283",
+        "289",
         0
       ]
     },
@@ -275,13 +275,13 @@
       "num_beams": 3,
       "do_sample": true,
       "output_mask_select": "",
-      "seed": 359620718725884,
+      "seed": 502639508492908,
       "image": [
         "256",
         0
       ],
       "florence2_model": [
-        "282",
+        "291",
         0
       ]
     },
@@ -406,13 +406,13 @@
       "num_beams": 3,
       "do_sample": true,
       "output_mask_select": "",
-      "seed": 982724649213105,
+      "seed": 182056351666546,
       "image": [
         "281",
         0
       ],
       "florence2_model": [
-        "282",
+        "291",
         0
       ]
     },
@@ -456,13 +456,25 @@
   "278": {
     "inputs": {
       "image": [
-        "283",
+        "289",
         0
       ]
     },
     "class_type": "easy imageSize",
     "_meta": {
       "title": "ImageSize"
+    }
+  },
+  "280": {
+    "inputs": {
+      "images": [
+        "256",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Preview Image"
     }
   },
   "281": {
@@ -475,7 +487,7 @@
         0
       ],
       "layer_image": [
-        "283",
+        "289",
         0
       ]
     },
@@ -484,52 +496,53 @@
       "title": "LayerUtility: ImageBlend V2"
     }
   },
-  "282": {
+  "285": {
     "inputs": {
-      "model": "microsoft/Florence-2-base",
-      "precision": "fp16",
-      "attention": "sdpa"
+      "images": [
+        "289",
+        0
+      ]
     },
-    "class_type": "DownloadAndLoadFlorence2Model",
+    "class_type": "PreviewImage",
     "_meta": {
-      "title": "DownloadAndLoadFlorence2Model"
+      "title": "Preview Image"
     }
   },
-  "283": {
+  "288": {
     "inputs": {
-      "supabase_url": "https://kdkkutcmxtsfrqzbxmox.supabase.co",
-      "supabase_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtka2t1dGNteHRzZnJxemJ4bW94Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0OTU1NzM3NCwiZXhwIjoyMDY1MTMzMzc0fQ.aAMtFygC6smIHh9c132dWBZGqru_MtzLocboPW1epXU",
-      "table_name": "inputimagetable",
-      "image_column": "image_url",
-      "id_column": "unique_id",
-      "unique_id": "4c678108-c1ca-458e-90b1-1ca81e620282"
-    },
-    "class_type": "SupabaseTableWatcherNode",
-    "_meta": {
-      "title": "Supabase Table Watcher"
-    }
-  },
-  "284": {
-    "inputs": {
-      "unique_id": [
-        "283",
-        2
-      ],
-      "supabase_url": "https://kdkkutcmxtsfrqzbxmox.supabase.co",
-      "supabase_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtka2t1dGNteHRzZnJxemJ4bW94Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0OTU1NzM3NCwiZXhwIjoyMDY1MTMzMzc0fQ.aAMtFygC6smIHh9c132dWBZGqru_MtzLocboPW1epXU",
-      "bucket": "outputimages",
-      "base_file_name": "image",
-      "table_name": "inputimagetable",
-      "unique_id_column": "unique_id",
-      "table_column": "output",
+      "path": "output/image111.png",
+      "overwrite": "true",
       "image": [
         "147",
         0
       ]
     },
-    "class_type": "SupabaseImageUploader",
+    "class_type": "JWImageSaveToPath",
     "_meta": {
-      "title": "Upload Image to Supabase"
+      "title": "Image Save To Path"
+    }
+  },
+  "289": {
+    "inputs": {
+      "image_path": "input/input_1749552671240.jpeg",
+      "RGBA": "false",
+      "filename_text_extension": "true"
+    },
+    "class_type": "Image Load",
+    "_meta": {
+      "title": "Image Load"
+    }
+  },
+  "291": {
+    "inputs": {
+      "model": "Florence-2-base",
+      "precision": "fp16",
+      "attention": "sdpa",
+      "convert_to_safetensors": true
+    },
+    "class_type": "Florence2ModelLoader",
+    "_meta": {
+      "title": "Florence2ModelLoader"
     }
   }
 }
