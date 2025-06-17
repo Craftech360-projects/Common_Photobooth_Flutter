@@ -31,13 +31,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     }
 
     return Scaffold(
-      // appBar: AppBar(
-      //   leading: IconButton(
-      //     onPressed: () =>
-      //         Navigator.pushNamed(context, AppRoutes.welcomeScreenSettings),
-      //     icon: const Icon(Icons.star),
-      //   ),
-      // ),
       body: WatermarkOverlay(
         show: watermarkProvider.showWatermark,
         child: Stack(
@@ -192,6 +185,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     }
 
     // Default background
-    return const AssetImage('assets/images/background.jpg');
+    return const AssetImage('assets/images/common_bg.png');
   }
 }

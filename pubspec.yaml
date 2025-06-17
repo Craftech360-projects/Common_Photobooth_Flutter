@@ -53,13 +53,12 @@ flutter:
     
 
   fonts:
-    - family: CascadiaCode
+    - family: PolySans
       fonts:
-        - asset: assets/fonts/CascadiaCode-Bold.otf
-        - asset: assets/fonts/CascadiaCode-Semibold.otf
-        - asset: assets/fonts/CascadiaCode-Regular.otf
-        - asset: assets/fonts/CascadiaCode-Italic.otf
-        - asset: assets/fonts/CascadiaCode-Light.otf
+        - asset: assets/fonts/PolySans-Regular.ttf
+        - asset: assets/fonts/PolySans-Medium.ttf
+        - asset: assets/fonts/PolySans-Bold.ttf
+        - asset: assets/fonts/PolySans-Light.ttf
     # - family: Heineken
     #   fonts:
     #     - asset: assets/fonts/heineken-regular.ttf

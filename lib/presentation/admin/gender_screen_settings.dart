@@ -452,8 +452,7 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
                     label: 'Image Width',
                     value: settings.imageWidth,
                     min: 80.0,
-                    max: 300.0,
-                    divisions: 22,
+                    max: 900.0,
                     onChanged: (value) {
                       settings.setImageDimensions(value, settings.imageHeight);
                     },
@@ -463,8 +462,7 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
                     label: 'Image Height',
                     value: settings.imageHeight,
                     min: 80.0,
-                    max: 300.0,
-                    divisions: 22,
+                    max: 900.0,
                     onChanged: (value) {
                       settings.setImageDimensions(settings.imageWidth, value);
                     },
@@ -657,7 +655,7 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
                             );
                             if (result != null && result.files.isNotEmpty) {
                               settings.setButtonImage(
-                                result.files.first.path,
+                                result.files.first.path!,
                                 isAsset: false,
                               );
                             }
@@ -668,7 +666,7 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
                         if (settings.buttonImagePath != null)
                           ElevatedButton(
                             onPressed: () {
-                              settings.setButtonImage(null);
+                              settings.setButtonImage('assets/images/next_btn.png', isAsset: true);
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.red,

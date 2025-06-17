@@ -7,7 +7,7 @@ class AppTheme {
     // Base Theme Configuration
     useMaterial3: true,
     brightness: Brightness.light,
-    fontFamily: "CascadiaCode",
+    fontFamily: "PolySans",
     primaryColor: AppColors.deepPurple,
     scaffoldBackgroundColor: AppColors.lightWhite,
 
@@ -34,7 +34,7 @@ class AppTheme {
       style: ButtonStyle(
         iconColor: const WidgetStatePropertyAll(AppColors.black),
         textStyle: WidgetStateProperty.all(
-          const TextStyle(color: AppColors.black, fontFamily: "CascadiaCode"),
+          const TextStyle(color: AppColors.black, fontFamily: "PolySans"),
         ),
         foregroundColor: WidgetStateProperty.all(AppColors.black),
       ),
@@ -49,7 +49,7 @@ class AppTheme {
         textStyle: const TextStyle(
           fontWeight: FontWeight.w600,
           fontSize: 15,
-          fontFamily: "CascadiaCode",
+          fontFamily: "PolySans",
           color: AppColors.white,
         ),
         shape: RoundedRectangleBorder(borderRadius: Constants.br12),
@@ -124,7 +124,7 @@ class AppTheme {
     // Base Theme Configuration
     useMaterial3: true,
     brightness: Brightness.dark,
-    fontFamily: "CascadiaCode",
+    fontFamily: "PolySans",
     primaryColor: AppColors.deepPurple,
     scaffoldBackgroundColor: AppColors.darkBg,
 
@@ -153,7 +153,7 @@ class AppTheme {
         textStyle: WidgetStateProperty.all(
           const TextStyle(
             color: AppColors.white,
-            fontFamily: "CascadiaCode",
+            fontFamily: "PolySans",
             fontWeight: FontWeight.w600,
           ),
         ),

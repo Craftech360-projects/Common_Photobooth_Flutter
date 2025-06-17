@@ -21,17 +21,30 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
   String? _selectedGender;
   bool _showError = false;
 
+  void _handleContinue() {
+    if (_selectedGender == null) {
+      setState(() {
+        _showError = true;
+      });
+      return;
+    }
+    final appProvider = context.read<PhotoboothProvider>();
+    appProvider.setGender(_selectedGender!);
+
+    Navigator.pushNamed(context, AppRoutes.categoriesScreen);
+  }
+
   @override
   Widget build(BuildContext context) {
     final settings = context.watch<GenderSelectionProvider>();
     final globalSettings = context.watch<GlobalSettingsProvider>();
-    final appProvider = context.watch<PhotoboothProvider>();
     final watermarkProvider = context.watch<AdminWatermarkProvider>();
 
     return Scaffold(
       body: WatermarkOverlay(
         show: watermarkProvider.showWatermark,
         child: Stack(
+          alignment: Alignment.center,
           children: [
             Container(
               width: double.infinity,
@@ -54,8 +67,7 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
                 style: TextStyle(
                   fontSize: settings.titleFontSize,
                   fontWeight: settings.titleFontWeight,
-                  color: settings.titleColor
-                      .withValues(alpha: settings.titleOpacity),
+                  color: settings.titleColor.withOpacity(settings.titleOpacity),
                   fontStyle: settings.titleItalic
                       ? FontStyle.italic
                       : FontStyle.normal,
@@ -72,22 +84,22 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Male Option
                   _buildGenderOption('male', settings),
-
-                  // Female Option
+                  SizedBox(width: settings.imageSpacing),
                   _buildGenderOption('female', settings),
                 ],
               ),
             ),
 
-            // Error message
             if (_showError)
-              const Text(
-                'Please select a gender to continue',
-                style: TextStyle(
-                  color: AppColors.red,
-                  fontSize: 16,
+              Positioned(
+                bottom: settings.buttonBottom + 80,
+                child: const Text(
+                  'Please select a gender to continue',
+                  style: TextStyle(
+                    color: AppColors.red,
+                    fontSize: 16,
+                  ),
                 ),
               ),
 
@@ -96,11 +108,9 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
               left: settings.buttonLeft,
               bottom: settings.buttonBottom,
               child: settings.useImageButton
-                  ? _buildImageButton(settings, appProvider)
-                  : _buildButton(settings, appProvider),
+                  ? _buildImageButton(settings)
+                  : _buildTextButton(settings),
             ),
-
-            // _buildButton(settings, appProvider)),
 
             Positioned(
               right: 0,
@@ -111,9 +121,7 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
                 child: Container(
                   width: 50,
                   height: 50,
-                  decoration: const BoxDecoration(
-                    color: Colors.transparent,
-                  ),
+                  decoration: const BoxDecoration(color: Colors.transparent),
                 ),
               ),
             ),
@@ -124,13 +132,20 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
   }
 
   Widget _buildGenderOption(String gender, GenderSelectionProvider settings) {
-    final bool isSelected = _selectedGender == gender;
-    final bool isMale = gender == 'male';
+    final isSelected = _selectedGender == gender;
+    final isMale = gender == 'male';
 
     final imagePath =
         isMale ? settings.maleImagePath : settings.femaleImagePath;
     final isAsset =
         isMale ? settings.isMaleImageAsset : settings.isFemaleImageAsset;
+
+    if (imagePath == null) {
+      return Container(
+          width: settings.imageWidth,
+          height: settings.imageHeight,
+          color: Colors.grey[200]);
+    }
 
     return GestureDetector(
       onTap: () {
@@ -147,7 +162,6 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
         height: isSelected && settings.useSelectionEffect
             ? settings.imageHeight * settings.selectedImageScale
             : settings.imageHeight,
-        margin: EdgeInsets.symmetric(horizontal: settings.imageSpacing / 2),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(settings.imageBorderRadius),
           border: settings.showImageBorder
@@ -158,8 +172,8 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
               : null,
           image: DecorationImage(
             image: isAsset
-                ? AssetImage(imagePath!)
-                : FileImage(File(imagePath!)) as ImageProvider,
+                ? AssetImage(imagePath)
+                : FileImage(File(imagePath)) as ImageProvider,
             fit: BoxFit.contain,
           ),
           boxShadow: isSelected &&
@@ -168,7 +182,7 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
               ? [
                   BoxShadow(
                     color: settings.selectionGlowColor
-                        .withValues(alpha: settings.selectionGlowIntensity),
+                        .withOpacity(settings.selectionGlowIntensity),
                     blurRadius: settings.selectionGlowSpread,
                     spreadRadius: settings.selectionGlowSpread / 2,
                   )
@@ -179,30 +193,15 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
     );
   }
 
-  Widget _buildImageButton(
-      GenderSelectionProvider settings, PhotoboothProvider appProvider) {
+  Widget _buildImageButton(GenderSelectionProvider settings) {
     if (settings.buttonImagePath == null) {
-      // Fallback to text button if no image is selected
-      return _buildButton(settings, appProvider);
+      return _buildTextButton(settings);
     }
 
     return Opacity(
       opacity: 1.0,
       child: GestureDetector(
-        onTap: () {
-          if (_selectedGender == null) {
-            setState(() {
-              _showError = true;
-            });
-            return;
-          }
-
-          // Set the gender in the provider
-          appProvider.setGender(_selectedGender!);
-
-          // Navigate directly to face capture screen instead of character selection
-          Navigator.pushNamed(context, AppRoutes.faceCapture);
-        },
+        onTap: _handleContinue,
         child: ClipRRect(
           borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
           child: Container(
@@ -230,53 +229,32 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
     );
   }
 
-  Widget _buildButton(
-      GenderSelectionProvider settings, PhotoboothProvider appProvider) {
+  Widget _buildTextButton(GenderSelectionProvider settings) {
     return SizedBox(
       width: settings.buttonWidth,
       height: settings.buttonHeight,
       child: ElevatedButton(
-        onPressed: () {
-          if (_selectedGender == null) {
-            setState(() {
-              _showError = true;
-            });
-            return;
-          }
-
-          // Set the gender in the provider
-          appProvider.setGender(_selectedGender!);
-
-          // Navigate directly to face capture screen instead of character selection
-          Navigator.pushNamed(context, AppRoutes.faceCapture);
-        },
+        onPressed: _handleContinue,
         style: ElevatedButton.styleFrom(
-          // padding: settings.buttonPadding,
           backgroundColor: settings.buttonColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
           ),
         ),
-        child: settings.useImageButton && settings.buttonImagePath != null
-            ? Image.file(
-                File(settings.buttonImagePath!),
-                fit: BoxFit.cover,
-              )
-            : Text(
-                settings.buttonText,
-                style: TextStyle(
-                  color: settings.buttonTextColor,
-                  fontSize: settings.buttonFontSize,
-                  fontWeight: settings.buttonFontWeight,
-                ),
-              ),
+        child: Text(
+          settings.buttonText,
+          style: TextStyle(
+            color: settings.buttonTextColor,
+            fontSize: settings.buttonFontSize,
+            fontWeight: settings.buttonFontWeight,
+          ),
+        ),
       ),
     );
   }
 
   ImageProvider _getBackgroundImage(
       GenderSelectionProvider settings, GlobalSettingsProvider globalSettings) {
-    // First try to use gender screen specific background
     if (settings.showBackground && settings.backgroundImagePath != null) {
       if (settings.isBackgroundImageAsset) {
         return AssetImage(settings.backgroundImagePath!);
@@ -285,7 +263,6 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
       }
     }
 
-    // Fall back to global background if available
     if (globalSettings.backgroundImage != null) {
       if (globalSettings.isAssetImage) {
         return AssetImage(globalSettings.backgroundImage!);
@@ -293,8 +270,6 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
         return FileImage(File(globalSettings.backgroundImage!));
       }
     }
-
-    // Default background
-    return const AssetImage('assets/images/background.jpg');
+    return const AssetImage('assets/images/common_bg.png');
   }
 }

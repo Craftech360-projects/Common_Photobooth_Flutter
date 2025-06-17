@@ -1,3 +1,3 @@
-# photobooth_flutter
+# AI Photobooth by Craftech360
 
-A new Flutter project.
+Head to https://eventbooth.cft.com for details.

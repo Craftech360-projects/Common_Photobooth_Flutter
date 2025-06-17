@@ -214,83 +214,83 @@ class LoadingScreenSettings extends StatelessWidget {
 
                       const Divider(height: 32),
 
-                      // Loader File Settings
-                      const Text(
-                        'Loader File',
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
-                      Constants.h16,
-                      _buildDropdown<String>(
-                        label: 'Loader File Type',
-                        value: settings.loaderFileType,
-                        items: {
-                          'gif': 'GIF Animation',
-                          'json': 'Lottie Animation (JSON)',
-                          'mp4': 'MP4 Video',
-                          'mov': 'MOV Video',
-                        },
-                        onChanged: (value) => settings.setLoaderFile(
-                          settings.loaderFilePath,
-                          settings.isLoaderFileAsset,
-                          value!,
-                        ),
-                      ),
-                      Constants.h16,
-                      ElevatedButton(
-                        onPressed: () async {
-                          FileType fileType;
-                          String fileExtension;
+                      // // Loader File Settings
+                      // const Text(
+                      //   'Loader File',
+                      //   style: TextStyle(
+                      //       fontSize: 20, fontWeight: FontWeight.bold),
+                      // ),
+                      // Constants.h16,
+                      // _buildDropdown<String>(
+                      //   label: 'Loader File Type',
+                      //   value: settings.loaderFileType,
+                      //   items: {
+                      //     'gif': 'GIF Animation',
+                      //     'json': 'Lottie Animation (JSON)',
+                      //     'mp4': 'MP4 Video',
+                      //     'mov': 'MOV Video',
+                      //   },
+                      //   onChanged: (value) => settings.setLoaderFile(
+                      //     settings.loaderFilePath,
+                      //     settings.isLoaderFileAsset,
+                      //     value!,
+                      //   ),
+                      // ),
+                      // Constants.h16,
+                      // ElevatedButton(
+                      //   onPressed: () async {
+                      //     FileType fileType;
+                      //     String fileExtension;
 
-                          switch (settings.loaderFileType) {
-                            case 'gif':
-                              fileType = FileType.image;
-                              fileExtension = 'gif';
-                              break;
-                            case 'json':
-                              fileType = FileType.custom;
-                              fileExtension = 'json';
-                              break;
-                            case 'mp4':
-                              fileType = FileType.video;
-                              fileExtension = 'mp4';
-                              break;
-                            case 'mov':
-                              fileType = FileType.custom;
-                              fileExtension = 'mov';
-                              break;
-                            default:
-                              fileType = FileType.any;
-                              fileExtension = '*';
-                          }
+                      //     switch (settings.loaderFileType) {
+                      //       case 'gif':
+                      //         fileType = FileType.image;
+                      //         fileExtension = 'gif';
+                      //         break;
+                      //       case 'json':
+                      //         fileType = FileType.custom;
+                      //         fileExtension = 'json';
+                      //         break;
+                      //       case 'mp4':
+                      //         fileType = FileType.video;
+                      //         fileExtension = 'mp4';
+                      //         break;
+                      //       case 'mov':
+                      //         fileType = FileType.custom;
+                      //         fileExtension = 'mov';
+                      //         break;
+                      //       default:
+                      //         fileType = FileType.any;
+                      //         fileExtension = '*';
+                      //     }
 
-                          final result = await FilePicker.platform.pickFiles(
-                            type: fileType,
-                            allowedExtensions: fileType == FileType.custom
-                                ? [fileExtension]
-                                : null,
-                          );
+                      //     final result = await FilePicker.platform.pickFiles(
+                      //       type: fileType,
+                      //       allowedExtensions: fileType == FileType.custom
+                      //           ? [fileExtension]
+                      //           : null,
+                      //     );
 
-                          if (result != null && result.files.isNotEmpty) {
-                            final file = result.files.first;
-                            if (file.path != null) {
-                              settings.setLoaderFile(
-                                file.path,
-                                false,
-                                settings.loaderFileType,
-                              );
-                            }
-                          }
-                        },
-                        child: const Text('Choose Loader File'),
-                      ),
-                      if (settings.loaderFilePath != null)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8.0),
-                          child: Text('Selected: ${settings.loaderFilePath}'),
-                        ),
+                      //     if (result != null && result.files.isNotEmpty) {
+                      //       final file = result.files.first;
+                      //       if (file.path != null) {
+                      //         settings.setLoaderFile(
+                      //           file.path,
+                      //           false,
+                      //           settings.loaderFileType,
+                      //         );
+                      //       }
+                      //     }
+                      //   },
+                      //   child: const Text('Choose Loader File'),
+                      // ),
+                      // if (settings.loaderFilePath != null)
+                      //   Padding(
+                      //     padding: const EdgeInsets.only(top: 8.0),
+                      //     child: Text('Selected: ${settings.loaderFilePath}'),
+                      //   ),
 
-                      const Divider(height: 32),
+                      // const Divider(height: 32),
 
                       // Background Settings
                       const Text(
@@ -311,7 +311,6 @@ class LoadingScreenSettings extends StatelessWidget {
                             final result = await FilePicker.platform.pickFiles(
                               type: FileType.image,
                             );
-
                             if (result != null && result.files.isNotEmpty) {
                               final file = result.files.first;
                               if (file.path != null) {

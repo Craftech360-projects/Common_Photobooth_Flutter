@@ -6,7 +6,7 @@ import 'package:photobooth_flutter/providers/admin_watermark_provider.dart';
 import 'package:photobooth_flutter/providers/app_flow_provider.dart';
 import 'package:photobooth_flutter/providers/auth_provider.dart';
 import 'package:photobooth_flutter/providers/category_provider.dart';
-import 'package:photobooth_flutter/providers/character_selection_provider.dart';
+import 'package:photobooth_flutter/providers/category_settings_provider.dart';
 import 'package:photobooth_flutter/providers/face_capture_provider.dart';
 import 'package:photobooth_flutter/providers/gender_selection_provider.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
@@ -24,17 +24,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize auth service
-  // await AuthService.instance.initialize(
-  //   apiUrl: 'http://localhost:2321',
-  // );
-
   // Initialize providers
   final globalSettings = GlobalSettingsProvider();
   try {
     await globalSettings.init();
 
-    // Initialize Supabase if URL and key are available
     if (globalSettings.supabaseUrl != null &&
         globalSettings.supabaseAnonKey != null) {
       try {
@@ -42,49 +36,31 @@ void main() async {
           url: globalSettings.supabaseUrl!,
           anonKey: globalSettings.supabaseAnonKey!,
         );
-      } on Exception catch (e) {
+      } catch (e) {
         debugPrint('Failed to initialize Supabase: $e');
       }
     }
-  } on Exception catch (e) {
+  } catch (e) {
     debugPrint('Error initializing global settings: $e');
-
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
     await globalSettings.init();
   }
 
-  // Initialize auth provider
   final authProvider = AuthProvider();
   await authProvider.init();
 
-  // Initialize app flow provider
   final appFlowProvider = AppFlowProvider();
   await appFlowProvider.init();
 
   final welcomeSettings = WelcomeScreenProvider();
-  try {
-    await welcomeSettings.init();
-  } on Exception catch (e) {
-    debugPrint('Error initializing welcome settings: $e');
-  }
+  await welcomeSettings.init();
 
   final registrationSettings = RegistrationScreenProvider();
   await registrationSettings.init();
 
   final genderSettings = GenderSelectionProvider();
   await genderSettings.init();
-
-  final characterSettings = CharacterSelectionProvider();
-  try {
-    await characterSettings.init();
-  } on Exception catch (e) {
-    debugPrint('Error initializing character settings: $e');
-
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('character_selection_settings');
-    await characterSettings.init();
-  }
 
   final faceCaptureProvider = FaceCaptureProvider();
   await faceCaptureProvider.init();
@@ -94,6 +70,9 @@ void main() async {
 
   final outputScreenProvider = OutputScreenProvider();
   await outputScreenProvider.init();
+
+  final categorySettingsProvider = CategorySettingsProvider();
+  await categorySettingsProvider.init();
 
   CameraPlatform.instance = CameraWindows();
 
@@ -106,10 +85,10 @@ void main() async {
         ChangeNotifierProvider.value(value: authProvider),
         ChangeNotifierProvider.value(value: appFlowProvider),
         ChangeNotifierProvider(create: (_) => CategoryProvider()),
+        ChangeNotifierProvider.value(value: categorySettingsProvider),
         ChangeNotifierProvider.value(value: welcomeSettings),
         ChangeNotifierProvider.value(value: registrationSettings),
         ChangeNotifierProvider.value(value: genderSettings),
-        ChangeNotifierProvider.value(value: characterSettings),
         ChangeNotifierProvider.value(value: faceCaptureProvider),
         ChangeNotifierProvider.value(value: loadingScreenProvider),
         ChangeNotifierProvider.value(value: outputScreenProvider),
@@ -118,14 +97,6 @@ void main() async {
       child: const MyApp(),
     ),
   );
-
-  // doWhenWindowReady(() {
-  //   const initialSize = Size(1080, 1920);
-  //   appWindow.minSize = initialSize;
-  //   appWindow.size = initialSize;
-  //   appWindow.alignment = Alignment.center;
-  //   appWindow.show();
-  // });
 }
 
 class MyApp extends StatefulWidget {
@@ -140,11 +111,8 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
 
-    // Set context in AuthProvider for watermark control
     WidgetsBinding.instance.addPostFrameCallback((_) {
       authProvider.setContext(context);
-
-      // Initialize watermark state based on current authentication
       final watermarkProvider =
           Provider.of<AdminWatermarkProvider>(context, listen: false);
       watermarkProvider.setShowWatermark(!authProvider.isAuthenticated);
@@ -154,11 +122,9 @@ class _MyAppState extends State<MyApp> {
       title: 'AI Photobooth',
       theme: AppTheme.lightTheme,
       onGenerateRoute: AppRoutes.onGenerateRoute,
-      // initialRoute: AppRoutes.welcomeScreen,
       initialRoute: authProvider.isAuthenticated
           ? AppRoutes.welcomeScreen
-          : AppRoutes.authScreen,
-      // home: const WelcomeScreen(),
+          : AppRoutes.welcomeScreen,
       debugShowCheckedModeBanner: false,
     );
   }

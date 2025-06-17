@@ -1,8 +1,11 @@
-import 'package:carousel_slider/carousel_slider.dart';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
+import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/providers/photobooth_provider.dart';
-import 'package:photobooth_flutter/providers/theme_selection_provider.dart';
+import 'package:photobooth_flutter/providers/theme_selection_provider.dart'
+    as theme_provider;
 import 'package:photobooth_flutter/routes/routes.dart';
 import 'package:provider/provider.dart';
 
@@ -10,102 +13,248 @@ class ThemeSelectionScreen extends StatefulWidget {
   const ThemeSelectionScreen({super.key});
 
   @override
-  ThemeSelectionScreenState createState() => ThemeSelectionScreenState();
+  State<ThemeSelectionScreen> createState() => _ThemeSelectionScreenState();
 }
 
-class ThemeSelectionScreenState extends State<ThemeSelectionScreen> {
+class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> {
   int _currentIndex = 0;
-  final CarouselController _controller = CarouselController();
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeSelectionProvider>(context);
-    final photoboothProvider =
-        Provider.of<PhotoboothProvider>(context, listen: false);
+    final settings = context.watch<theme_provider.ThemeSelectionProvider>();
+    final photoboothProvider = context.read<PhotoboothProvider>();
+    final globalSettings = context.read<GlobalSettingsProvider>();
 
     return Scaffold(
-      backgroundColor: AppColors.darkBg,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('Select a Theme'),
+        title: settings.showTitle
+            ? Text(
+                settings.titleText,
+                style: TextStyle(
+                  color: settings.titleColor,
+                  fontSize: settings.titleFontSize,
+                  fontWeight: settings.titleFontWeight,
+                ),
+              )
+            : null,
         backgroundColor: Colors.transparent,
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white, size: 30),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          image: _getBackgroundImage(settings, globalSettings),
+        ),
+        child: Stack(
+          alignment: Alignment.center,
           children: [
-            CarouselSlider.builder(
-              itemCount: themeProvider.themes.length,
-              itemBuilder: (context, index, realIndex) {
-                final theme = themeProvider.themes[index];
-                final isSelected = _currentIndex == index;
-                return GestureDetector(
-                  onTap: () {
-                    _controller.animateToItem(index);
-                  },
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    margin: const EdgeInsets.symmetric(horizontal: 10),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: isSelected
-                            ? AppColors.goldenYellow
-                            : Colors.transparent,
-                        width: 3,
-                      ),
-                      boxShadow: [
-                        if (isSelected)
-                          BoxShadow(
-                            color: AppColors.goldenYellow.withValues(alpha: 0.5),
-                            blurRadius: 10,
-                            spreadRadius: 2,
-                          ),
-                      ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: Image.asset(
-                        theme.imagePath,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
+            if (settings.showTitle)
+              Positioned(
+                top: settings.titleTop,
+                child: Text(
+                  settings.titleText,
+                  style: TextStyle(
+                    fontSize: settings.titleFontSize,
+                    color: settings.titleColor,
+                    fontWeight: settings.titleFontWeight,
                   ),
-                );
-              },
-              options: CarouselOptions(
-                height: 400,
-                enlargeCenterPage: true,
-                viewportFraction: 0.6,
-                onPageChanged: (index, reason) {
-                  setState(() {
-                    _currentIndex = index;
-                  });
-                },
-              ),
-            ),
-            const SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: () {
-                final selectedTheme = themeProvider.themes[_currentIndex];
-                photoboothProvider.setTheme(selectedTheme);
-                Navigator.pushNamed(context, AppRoutes.genderSelection);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.goldenYellow,
-                foregroundColor: AppColors.black,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
-                textStyle: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
                 ),
               ),
-              child: const Text('Select'),
+            Positioned(
+              top: settings.carouselTop,
+              height: settings.carouselHeight,
+              left: 0,
+              right: 0,
+              child: _buildThemeCarousel(context, settings),
+            ),
+            Positioned(
+              bottom: settings.buttonBottom,
+              child: _buildSelectButton(context, settings, photoboothProvider),
+            ),
+            Positioned(
+              right: 0,
+              top: 0,
+              child: GestureDetector(
+                onTap: () => Navigator.pushNamed(
+                    context, AppRoutes.themeSelectionSettings),
+                child: Container(
+                  width: 50,
+                  height: 50,
+                  decoration: const BoxDecoration(color: Colors.transparent),
+                ),
+              ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  DecorationImage _getBackgroundImage(
+      theme_provider.ThemeSelectionProvider settings,
+      GlobalSettingsProvider globalSettings) {
+    ImageProvider provider;
+    String? path;
+    bool isAsset = true;
+
+    if (settings.showBackground && settings.backgroundImagePath != null) {
+      path = settings.backgroundImagePath;
+      isAsset = settings.isBackgroundImageAsset;
+    } else if (globalSettings.backgroundImage != null) {
+      path = globalSettings.backgroundImage;
+      isAsset = globalSettings.isAssetImage;
+    }
+
+    if (path != null && path.isNotEmpty) {
+      provider = isAsset ? AssetImage(path) : FileImage(File(path));
+    } else {
+      provider = const AssetImage('assets/images/common_bg.png');
+    }
+
+    return DecorationImage(image: provider, fit: BoxFit.cover);
+  }
+
+  Widget _buildThemeCarousel(
+      BuildContext context, theme_provider.ThemeSelectionProvider settings) {
+    final themes = settings.themes;
+    final orderedStackChildren = <Widget>[];
+    final count = themes.length;
+    final paintOrder = List.generate(count, (i) => (count - 1 - i));
+
+    for (var z in paintOrder) {
+      final cardIndex = (_currentIndex + z) % count;
+      final theme = themes[cardIndex];
+      final displayIndex = z;
+      double scale = 1.0, yOffset = 0, xOffset = 0;
+
+      switch (displayIndex) {
+        case 0:
+          scale = 1.0;
+          yOffset = 0;
+          xOffset = 0;
+          break;
+        case 1:
+          scale = 0.9;
+          yOffset = 30;
+          xOffset = -120;
+          break;
+        case 2:
+          scale = 0.9;
+          yOffset = 30;
+          xOffset = 120;
+          break;
+        default:
+          scale = 0.8;
+          yOffset = 60;
+      }
+
+      orderedStackChildren.add(
+        AnimatedContainer(
+          key: ValueKey(theme.name),
+          duration: const Duration(milliseconds: 350),
+          curve: Curves.easeInOut,
+          transform: Matrix4.identity()
+            ..translate(xOffset, yOffset)
+            ..scale(scale),
+          child: _buildThemeCard(
+              theme: theme,
+              isSelected: displayIndex == 0,
+              onTap: () => setState(() => _currentIndex = cardIndex),
+              settings: settings),
+        ),
+      );
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        IconButton(
+          icon: Image.asset('assets/images/backward_arrow.png',
+              width: 50, height: 50),
+          onPressed: () => setState(() => _currentIndex =
+              (_currentIndex - 1 + themes.length) % themes.length),
+        ),
+        SizedBox(width: settings.arrowSpacing),
+        SizedBox(
+            width: 500,
+            height: settings.carouselHeight,
+            child: Stack(
+                alignment: Alignment.center, children: orderedStackChildren)),
+        SizedBox(width: settings.arrowSpacing),
+        IconButton(
+          icon: Image.asset('assets/images/forward_arrow.png',
+              width: 50, height: 50),
+          onPressed: () => setState(
+              () => _currentIndex = (_currentIndex + 1) % themes.length),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildThemeCard(
+      {required theme_provider.Theme theme,
+      required bool isSelected,
+      required VoidCallback onTap,
+      required theme_provider.ThemeSelectionProvider settings}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        width: settings.cardWidth,
+        height: settings.cardHeight,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(settings.cardBorderRadius),
+          image: DecorationImage(
+              image: AssetImage(theme.imagePath), fit: BoxFit.contain),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                      color: AppColors.goldenYellow.withOpacity(0.6),
+                      blurRadius: 15,
+                      spreadRadius: 2)
+                ]
+              : [],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSelectButton(
+      BuildContext context,
+      theme_provider.ThemeSelectionProvider settings,
+      PhotoboothProvider photoboothProvider) {
+    onPressed() {
+      final selectedTheme = settings.themes[_currentIndex];
+      photoboothProvider.setTheme(selectedTheme);
+      Navigator.pushNamed(context, AppRoutes.faceCapture);
+    }
+
+    if (settings.useImageButton && settings.buttonImagePath != null) {
+      return GestureDetector(
+        onTap: onPressed,
+        child: Image.asset(settings.buttonImagePath!,
+            width: settings.buttonWidth,
+            height: settings.buttonHeight,
+            fit: BoxFit.contain),
+      );
+    } else {
+      return ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.goldenYellow,
+          foregroundColor: AppColors.black,
+          minimumSize: Size(settings.buttonWidth, settings.buttonHeight),
+          textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        child: const Text('Select'),
+      );
+    }
   }
 }

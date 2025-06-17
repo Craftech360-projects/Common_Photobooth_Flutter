@@ -9,7 +9,6 @@ import 'package:photobooth_flutter/providers/output_screen_provider.dart';
 import 'package:photobooth_flutter/providers/photobooth_provider.dart';
 import 'package:photobooth_flutter/widgets/watermark_overlay.dart';
 import 'package:provider/provider.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 
 class SwappedFaceScreen extends StatefulWidget {
   final bool isPreviewMode;
@@ -124,33 +123,17 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
           ),
         ),
         // QR code placeholder
-        Positioned(
-            left: settings.qrCodeLeft,
-            bottom: settings.qrCodeBottom,
-            child: _buildQrCodeWithText(settings)),
+        // Positioned(
+        //     left: settings.qrCodeLeft,
+        //     bottom: settings.qrCodeBottom,
+        //     child: _buildQrCodeWithText(settings)),
         // Button placeholder
         Positioned(
           left: settings.buttonLeft,
           bottom: settings.buttonBottom,
-          child: ElevatedButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius:
-                    BorderRadius.circular(settings.buttonBorderRadius),
-              ),
-              backgroundColor: settings.buttonColor,
-              foregroundColor: settings.buttonTextColor,
-              padding: EdgeInsets.symmetric(
-                horizontal: settings.buttonPaddingHorizontal,
-                vertical: settings.buttonPaddingVertical,
-              ),
-            ),
-            child: Text(
-              settings.buttonText,
-              style: TextStyle(fontSize: settings.buttonFontSize),
-            ),
-          ),
+          child: settings.useImageButton
+              ? _buildImageButton(settings)
+              : _buildTextButton(settings),
         ),
       ],
     );
@@ -205,40 +188,59 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
             child: _buildOutputImage(),
           ),
         ),
-
-        // QR Code and Text
-        Positioned(
-          left: settings.qrCodeLeft,
-          bottom: settings.qrCodeBottom,
-          child: _buildQrCodeWithText(settings),
-        ),
-
-        // Start Over Button
         Positioned(
           left: settings.buttonLeft,
           bottom: settings.buttonBottom,
-          child: ElevatedButton(
-            onPressed: () => Navigator.of(context).pushReplacementNamed('/'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: settings.buttonColor,
-              foregroundColor: settings.buttonTextColor,
-              padding: EdgeInsets.symmetric(
-                horizontal: settings.buttonPaddingHorizontal,
-                vertical: settings.buttonPaddingVertical,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius:
-                    BorderRadius.circular(settings.buttonBorderRadius),
-              ),
-              textStyle: TextStyle(
-                fontSize: settings.buttonFontSize,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            child: Text(settings.buttonText),
-          ),
+          child: settings.useImageButton
+              ? _buildImageButton(settings)
+              : _buildTextButton(settings),
         ),
       ],
+    );
+  }
+
+  Widget _buildTextButton(OutputScreenProvider settings) {
+    return ElevatedButton(
+      onPressed: () => Navigator.of(context).pushReplacementNamed('/'),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: settings.buttonColor,
+        foregroundColor: settings.buttonTextColor,
+        minimumSize: Size(settings.buttonWidth, settings.buttonHeight),
+        padding: EdgeInsets.symmetric(
+          horizontal: settings.buttonPaddingHorizontal,
+          vertical: settings.buttonPaddingVertical,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
+        ),
+        textStyle: TextStyle(
+          fontSize: settings.buttonFontSize,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      child: Text(settings.buttonText),
+    );
+  }
+
+  Widget _buildImageButton(OutputScreenProvider settings) {
+    if (settings.buttonImagePath == null) {
+      return _buildTextButton(settings); // Fallback to text button
+    }
+    return GestureDetector(
+      onTap: () => Navigator.of(context).pushReplacementNamed('/'),
+      child: Container(
+        width: settings.buttonWidth,
+        height: settings.buttonHeight,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
+          image: DecorationImage(
+            image: settings.isButtonImageAsset
+                ? AssetImage(settings.buttonImagePath!)
+                : FileImage(File(settings.buttonImagePath!)) as ImageProvider,
+            fit: BoxFit.contain,
+          ),
+        ),
+      ),
     );
   }
 
@@ -257,7 +259,7 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
         // Display local file image
         return Image.file(
           File(imageUrl),
-          fit: BoxFit.fill,
+          fit: BoxFit.contain,
           errorBuilder: (context, error, stackTrace) {
             debugPrint('Error loading local image: $error');
             return Column(
@@ -275,7 +277,7 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
         // Display online image from URL
         return Image.network(
           imageUrl,
-          fit: BoxFit.fill,
+          fit: BoxFit.contain,
           loadingBuilder: (context, child, loadingProgress) {
             if (loadingProgress == null) return child;
             debugPrint(
@@ -311,107 +313,6 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
     }
   }
 
-  Widget _buildQrCodeWithText(OutputScreenProvider settings) {
-    final provider = Provider.of<PhotoboothProvider>(context);
-    final globalSettings = Provider.of<GlobalSettingsProvider>(context);
-    final swappedImage = provider.swappedImageUrl;
-
-    // For QR code data, use the image URL directly for online mode
-    // For offline mode, use a placeholder or local file path
-    final qrData = globalSettings.isOfflineMode
-        ? 'Image saved locally at: ${swappedImage ?? "unknown location"}'
-        : swappedImage ?? 'https://example.com/download-image';
-
-    final qrCode = QrImageView(
-      data: qrData,
-      version: QrVersions.auto,
-      size: settings.qrCodeSize,
-      backgroundColor: settings.qrCodeBackgroundColor,
-      eyeStyle: QrEyeStyle(
-        eyeShape: QrEyeShape.square,
-        color: settings.qrCodeForegroundColor,
-      ),
-      dataModuleStyle: QrDataModuleStyle(
-        dataModuleShape: QrDataModuleShape.square,
-        color: settings.qrCodeForegroundColor,
-      ),
-    );
-
-    // Adjust QR code text based on mode
-    final qrText = Text(
-      globalSettings.isOfflineMode
-          ? 'Image saved locally'
-          : settings.qrCodeText,
-      style: TextStyle(
-        fontSize: settings.qrCodeTextFontSize,
-        color: settings.qrCodeTextColor,
-      ),
-      textAlign: TextAlign.center,
-    );
-
-    switch (settings.qrCodeLayout) {
-      case QrCodeLayout.below:
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            qrCode,
-            Constants.h8,
-            qrText,
-          ],
-        );
-      case QrCodeLayout.above:
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            qrText,
-            Constants.h8,
-            qrCode,
-          ],
-        );
-      case QrCodeLayout.leftOfQr:
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              width: 150,
-              child: qrText,
-            ),
-            const SizedBox(width: 10),
-            qrCode,
-          ],
-        );
-      case QrCodeLayout.rightOfQr:
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            qrCode,
-            const SizedBox(width: 10),
-            SizedBox(
-              width: 150,
-              child: qrText,
-            ),
-          ],
-        );
-      case QrCodeLayout.sideBySide:
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                qrCode,
-                const SizedBox(width: 20),
-                SizedBox(
-                  width: 150,
-                  child: qrText,
-                ),
-              ],
-            ),
-          ],
-        );
-    }
-  }
-
   ImageProvider _getBackgroundImage(
       OutputScreenProvider settings, GlobalSettingsProvider globalSettings) {
     // First try to use gender screen specific background
@@ -433,6 +334,6 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
     }
 
     // Default background
-    return const AssetImage('assets/images/background.jpg');
+    return const AssetImage('assets/images/common_bg.png');
   }
 }

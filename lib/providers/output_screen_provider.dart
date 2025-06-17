@@ -1,69 +1,51 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-enum QrCodeLayout {
-  below,
-  above,
-  leftOfQr,
-  rightOfQr,
-  sideBySide,
-}
+enum QrCodeLayout { below, above, leftOfQr, rightOfQr, sideBySide }
 
 class OutputScreenProvider extends ChangeNotifier {
   late SharedPreferences _prefs;
 
-  double _titleLeft = 279.0;
-  double _titleTop = 434.0;
-  double _titleWidth = 500.0;
-
-  double _imageLeft = 114.0;
-  double _imageTop = 531.0;
-
-  double _qrCodeLeft = 373.0;
-  double _qrCodeBottom = 310.0;
-
-  double _buttonLeft = 462.0;
-  double _buttonBottom = 239.0;
-
-  // Title settings
-  String _titleText = 'Your Image has been created';
+  double _titleLeft = 279.0, _titleTop = 434.0, _titleWidth = 500.0;
+  double _imageLeft = 90.0, _imageTop = 710.0;
+  double _qrCodeLeft = 373.0, _qrCodeBottom = 310.0;
+  double _buttonLeft = 250.0, _buttonBottom = 420.0;
+  String _titleText = '';
   double _titleFontSize = 22.0;
   FontWeight _titleFontWeight = FontWeight.w500;
   Color _titleColor = AppColors.white;
-  bool _showTitle = true;
-
-  // Image settings
-  double _imageWidth = 849.0;
-  double _imageHeight = 854.0;
-  double _imageBorderRadius = 20.0;
-  Color _imageBorderColor = AppColors.yellow;
-  double _imageBorderWidth = 3.0;
-
-  // QR code settings
-  double _qrCodeSize = 150.0;
-  Color _qrCodeBackgroundColor = AppColors.white;
-  Color _qrCodeForegroundColor = AppColors.black;
-  String _qrCodeText = 'Scan QR code to download your image';
-  double _qrCodeTextFontSize = 18.0;
-  Color _qrCodeTextColor = AppColors.white;
-  QrCodeLayout _qrCodeLayout = QrCodeLayout.above;
-
-  // Button settings
+  bool _showTitle = false;
+  double _imageWidth = 900.0, _imageHeight = 506.0;
+  double _imageBorderRadius = 12.0;
+  Color _imageBorderColor = Colors.transparent;
+  double _imageBorderWidth = 0.0;
   String _buttonText = 'Start Over';
   double _buttonFontSize = 18.0;
-  Color _buttonColor = AppColors.yellow;
-  Color _buttonTextColor = AppColors.black;
-  double _buttonPaddingHorizontal = 32.0;
-  double _buttonPaddingVertical = 18.0;
+  Color _buttonColor = AppColors.yellow, _buttonTextColor = AppColors.black;
+  double _buttonPaddingHorizontal = 32.0, _buttonPaddingVertical = 18.0;
   double _buttonBorderRadius = 4.0;
+  double _buttonWidth = 580.0, _buttonHeight = 150.0;
+
+  // NEW: Image Button Defaults
+  bool _useImageButton = true;
+  String? _buttonImagePath = 'assets/images/home_btn.png';
+  bool _isButtonImageAsset = true;
 
   // Background settings
   String? _backgroundImagePath;
   bool _isBackgroundImageAsset = true;
   bool _showBackground = false;
+
+  // Getters
+  bool get useImageButton => _useImageButton;
+  String? get buttonImagePath => _buttonImagePath;
+  bool get isButtonImageAsset => _isButtonImageAsset;
 
   // Getters for other properties
   String get titleText => _titleText;
@@ -92,16 +74,10 @@ class OutputScreenProvider extends ChangeNotifier {
   Color get imageBorderColor => _imageBorderColor;
   double get imageBorderWidth => _imageBorderWidth;
 
-  double get qrCodeSize => _qrCodeSize;
-  Color get qrCodeBackgroundColor => _qrCodeBackgroundColor;
-  Color get qrCodeForegroundColor => _qrCodeForegroundColor;
-  String get qrCodeText => _qrCodeText;
-  double get qrCodeTextFontSize => _qrCodeTextFontSize;
-  Color get qrCodeTextColor => _qrCodeTextColor;
-  QrCodeLayout get qrCodeLayout => _qrCodeLayout;
-
   String get buttonText => _buttonText;
   double get buttonFontSize => _buttonFontSize;
+  double get buttonWidth => _buttonWidth;
+  double get buttonHeight => _buttonHeight;
   Color get buttonColor => _buttonColor;
   Color get buttonTextColor => _buttonTextColor;
   double get buttonPaddingHorizontal => _buttonPaddingHorizontal;
@@ -115,6 +91,39 @@ class OutputScreenProvider extends ChangeNotifier {
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
     await loadSettings();
+  }
+
+  // Setters
+  void setUseImageButton(bool use) {
+    _useImageButton = use;
+    notifyListeners();
+    _saveSettings();
+  }
+
+  Future<void> setButtonImage(String? sourcePath,
+      {required bool isAsset}) async {
+    if (sourcePath == null) {
+      _buttonImagePath = null;
+      _isButtonImageAsset = true;
+    } else if (isAsset) {
+      _buttonImagePath = sourcePath;
+      _isButtonImageAsset = true;
+    } else {
+      try {
+        final appDir = await getApplicationDocumentsDirectory();
+        final fileName =
+            'output_btn_${DateTime.now().millisecondsSinceEpoch}${path.extension(sourcePath)}';
+        final destinationPath = path.join(appDir.path, fileName);
+        await File(sourcePath).copy(destinationPath);
+        _buttonImagePath = destinationPath;
+        _isButtonImageAsset = false;
+      } catch (e) {
+        debugPrint('Error copying button image: $e');
+        return;
+      }
+    }
+    _saveSettings();
+    notifyListeners();
   }
 
   Future<void> loadSettings() async {
@@ -152,21 +161,14 @@ class OutputScreenProvider extends ChangeNotifier {
           Color(settings['imageBorderColor'] ?? _imageBorderColor.value);
       _imageBorderWidth = settings['imageBorderWidth'] ?? _imageBorderWidth;
 
-      // QR code settings
-      _qrCodeSize = settings['qrCodeSize'] ?? _qrCodeSize;
-      _qrCodeBackgroundColor = Color(
-          settings['qrCodeBackgroundColor'] ?? _qrCodeBackgroundColor.value);
-      _qrCodeForegroundColor = Color(
-          settings['qrCodeForegroundColor'] ?? _qrCodeForegroundColor.value);
-      _qrCodeText = settings['qrCodeText'] ?? _qrCodeText;
-      _qrCodeTextFontSize =
-          settings['qrCodeTextFontSize'] ?? _qrCodeTextFontSize;
-      _qrCodeTextColor =
-          Color(settings['qrCodeTextColor'] ?? _qrCodeTextColor.value);
-      _qrCodeLayout =
-          QrCodeLayout.values[settings['qrCodeLayout'] ?? _qrCodeLayout.index];
-
       // Button settings
+      _useImageButton = settings['useImageButton'] ?? _useImageButton;
+      _buttonImagePath = settings['buttonImagePath'] ?? _buttonImagePath;
+      _isButtonImageAsset =
+          settings['isButtonImageAsset'] ?? _isButtonImageAsset;
+      _buttonWidth = settings['buttonWidth'] ?? _buttonWidth;
+      _buttonHeight = settings['buttonHeight'] ?? _buttonHeight;
+
       _buttonText = settings['buttonText'] ?? _buttonText;
       _buttonFontSize = settings['buttonFontSize'] ?? _buttonFontSize;
       _buttonColor = Color(settings['buttonColor'] ?? _buttonColor.value);
@@ -205,17 +207,11 @@ class OutputScreenProvider extends ChangeNotifier {
       'imageBorderRadius': _imageBorderRadius,
       'imageBorderColor': _imageBorderColor.value,
       'imageBorderWidth': _imageBorderWidth,
-
-      // QR code settings
-      'qrCodeSize': _qrCodeSize,
-      'qrCodeBackgroundColor': _qrCodeBackgroundColor.value,
-      'qrCodeForegroundColor': _qrCodeForegroundColor.value,
-      'qrCodeText': _qrCodeText,
-      'qrCodeTextFontSize': _qrCodeTextFontSize,
-      'qrCodeTextColor': _qrCodeTextColor.value,
-      'qrCodeLayout': _qrCodeLayout.index,
-
-      // Button settings
+      'useImageButton': _useImageButton,
+      'buttonImagePath': _buttonImagePath,
+      'isButtonImageAsset': _isButtonImageAsset,
+      'buttonWidth': _buttonWidth,
+      'buttonHeight': _buttonHeight,
       'buttonText': _buttonText,
       'buttonFontSize': _buttonFontSize,
       'buttonColor': _buttonColor.value,
@@ -327,45 +323,6 @@ class OutputScreenProvider extends ChangeNotifier {
     _saveSettings();
   }
 
-  // QR code setters
-  void setQrCodeSize(double size) {
-    _qrCodeSize = size;
-    notifyListeners();
-    _saveSettings();
-  }
-
-  void setQrCodeColors({
-    Color? backgroundColor,
-    Color? foregroundColor,
-  }) {
-    if (backgroundColor != null) _qrCodeBackgroundColor = backgroundColor;
-    if (foregroundColor != null) _qrCodeForegroundColor = foregroundColor;
-    notifyListeners();
-    _saveSettings();
-  }
-
-  void setQrCodeText(String text) {
-    _qrCodeText = text;
-    notifyListeners();
-    _saveSettings();
-  }
-
-  void setQrCodeTextStyle({
-    double? fontSize,
-    Color? color,
-  }) {
-    if (fontSize != null) _qrCodeTextFontSize = fontSize;
-    if (color != null) _qrCodeTextColor = color;
-    notifyListeners();
-    _saveSettings();
-  }
-
-  void setQrCodeLayout(QrCodeLayout layout) {
-    _qrCodeLayout = layout;
-    notifyListeners();
-    _saveSettings();
-  }
-
   // Button setters
   void setButtonText(String text) {
     _buttonText = text;
@@ -374,6 +331,8 @@ class OutputScreenProvider extends ChangeNotifier {
   }
 
   void setButtonStyle({
+    double? width,
+    double? height,
     double? fontSize,
     Color? color,
     Color? textColor,
@@ -384,6 +343,8 @@ class OutputScreenProvider extends ChangeNotifier {
     if (fontSize != null) _buttonFontSize = fontSize;
     if (color != null) _buttonColor = color;
     if (textColor != null) _buttonTextColor = textColor;
+    if (width != null) _buttonWidth = width;
+    if (height != null) _buttonHeight = height;
     if (paddingHorizontal != null) _buttonPaddingHorizontal = paddingHorizontal;
     if (paddingVertical != null) _buttonPaddingVertical = paddingVertical;
     if (borderRadius != null) _buttonBorderRadius = borderRadius;

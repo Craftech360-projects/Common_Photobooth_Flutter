@@ -9,11 +9,11 @@ class LoadingScreenProvider extends ChangeNotifier {
   late SharedPreferences _prefs;
 
   // Title settings
-  String _titleText = 'Processing Your Image...';
+  String _titleText = '';
   double _titleFontSize = 22.0;
   FontWeight _titleFontWeight = FontWeight.w500;
   Color _titleColor = AppColors.white;
-  bool _showTitle = true;
+  bool _showTitle = false;
   double _titleLineHeight = 1.0;
   double _titleOpacity = 1.0;
   double _titleTop = 455.0;
@@ -37,10 +37,10 @@ class LoadingScreenProvider extends ChangeNotifier {
   String? _backgroundImagePath;
   bool _isBackgroundImageAsset = true;
 
-  // Loader file settings
-  String? _loaderFilePath;
-  bool _isLoaderFileAsset = true;
-  String _loaderFileType = 'gif'; // gif, json, mp4, mov
+  // // Loader file settings (COMMENTED OUT)
+  // String? _loaderFilePath;
+  // bool _isLoaderFileAsset = true;
+  // String _loaderFileType = 'gif'; // gif, json, mp4, mov
 
   // Getters
   String get titleText => _titleText;
@@ -68,9 +68,10 @@ class LoadingScreenProvider extends ChangeNotifier {
   String? get backgroundImagePath => _backgroundImagePath;
   bool get isBackgroundImageAsset => _isBackgroundImageAsset;
 
-  String? get loaderFilePath => _loaderFilePath;
-  bool get isLoaderFileAsset => _isLoaderFileAsset;
-  String get loaderFileType => _loaderFileType;
+  // // Loader file getters (COMMENTED OUT)
+  // String? get loaderFilePath => _loaderFilePath;
+  // bool get isLoaderFileAsset => _isLoaderFileAsset;
+  // String get loaderFileType => _loaderFileType;
 
   // Setters
   void setTitleText(String text) {
@@ -200,33 +201,22 @@ class LoadingScreenProvider extends ChangeNotifier {
     _saveSettings();
   }
 
-  void setLoaderFile(String? path, bool isAsset, String fileType) {
-    _loaderFilePath = path;
-    _isLoaderFileAsset = isAsset;
-    _loaderFileType = fileType;
-    notifyListeners();
-    _saveSettings();
-  }
+  // // Loader file setter (COMMENTED OUT)
+  // void setLoaderFile(String? path, bool isAsset, String fileType) {
+  //   _loaderFilePath = path;
+  //   _isLoaderFileAsset = isAsset;
+  //   _loaderFileType = fileType;
+  //   notifyListeners();
+  //   _saveSettings();
+  // }
 
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
     await _loadSettings();
-
-    // Verify file paths exist
     await _verifyFilePaths();
   }
 
   Future<void> _verifyFilePaths() async {
-    // Check if loader file path exists
-    if (_loaderFilePath != null && !_isLoaderFileAsset) {
-      final file = File(_loaderFilePath!);
-      if (!file.existsSync()) {
-        _loaderFilePath = null;
-        notifyListeners();
-        await _saveSettings();
-      }
-    }
-
     // Check if background image path exists
     if (_backgroundImagePath != null && !_isBackgroundImageAsset) {
       final file = File(_backgroundImagePath!);
@@ -252,8 +242,6 @@ class LoadingScreenProvider extends ChangeNotifier {
         _titleLineHeight = settings['titleLineHeight'] ?? _titleLineHeight;
         _titleOpacity = settings['titleOpacity'] ?? _titleOpacity;
 
-        // Load title padding properly
-       // Load title position
         _titleTop = settings['titleTop'] ?? _titleTop;
         _titleLeft = settings['titleLeft'] ?? _titleLeft;
         _titleRight = settings['titleRight'] ?? _titleRight;
@@ -268,7 +256,6 @@ class LoadingScreenProvider extends ChangeNotifier {
             settings['loaderBorderWidth'] ?? _loaderBorderWidth;
         _showLoaderBorder = settings['showLoaderBorder'] ?? _showLoaderBorder;
 
-        // Load loader margin
         _loaderTop = settings['loaderTop'] ?? _loaderTop;
         _loaderLeft = settings['loaderLeft'] ?? _loaderLeft;
         _loaderRight = settings['loaderRight'] ?? _loaderRight;
@@ -277,11 +264,13 @@ class LoadingScreenProvider extends ChangeNotifier {
         _backgroundImagePath = settings['backgroundImagePath'];
         _isBackgroundImageAsset =
             settings['isBackgroundImageAsset'] ?? _isBackgroundImageAsset;
+        
+        // // Loader file settings (COMMENTED OUT)
+        // _loaderFilePath = settings['loaderFilePath'];
+        // _isLoaderFileAsset =
+        //     settings['isLoaderFileAsset'] ?? _isLoaderFileAsset;
+        // _loaderFileType = settings['loaderFileType'] ?? _loaderFileType;
 
-        _loaderFilePath = settings['loaderFilePath'];
-        _isLoaderFileAsset =
-            settings['isLoaderFileAsset'] ?? _isLoaderFileAsset;
-        _loaderFileType = settings['loaderFileType'] ?? _loaderFileType;
       } on Exception catch (e) {
         debugPrint('Error loading settings: $e');
       }
@@ -298,12 +287,9 @@ class LoadingScreenProvider extends ChangeNotifier {
       'showTitle': _showTitle,
       'titleLineHeight': _titleLineHeight,
       'titleOpacity': _titleOpacity,
-
-      // Properly serialize title padding
       'titleTop': _titleTop,
       'titleLeft': _titleLeft,
       'titleRight': _titleRight,
-
       'loaderWidth': _loaderWidth,
       'loaderHeight': _loaderHeight,
       'loaderBorderRadius': _loaderBorderRadius,
@@ -316,10 +302,12 @@ class LoadingScreenProvider extends ChangeNotifier {
       'showBackground': _showBackground,
       'backgroundImagePath': _backgroundImagePath,
       'isBackgroundImageAsset': _isBackgroundImageAsset,
-      'loaderFilePath': _loaderFilePath,
-      'isLoaderFileAsset': _isLoaderFileAsset,
-      'loaderFileType': _loaderFileType,
+      // // Loader file settings (COMMENTED OUT)
+      // 'loaderFilePath': _loaderFilePath,
+      // 'isLoaderFileAsset': _isLoaderFileAsset,
+      // 'loaderFileType': _loaderFileType,
     };
 
     await _prefs.setString('loading_screen_settings', jsonEncode(settings));
-  }}
+  }
+}

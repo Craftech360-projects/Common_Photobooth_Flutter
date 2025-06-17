@@ -303,29 +303,6 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
     final settings = context.watch<FaceCaptureProvider>();
     final globalSettings = context.watch<GlobalSettingsProvider>();
 
-    // Show loading indicator if camera is not initialized
-    // if (!_cameraInitialized ||
-    //     _controller == null ||
-    //     !_controller!.value.isInitialized) {
-    //   return Scaffold(
-    //     body: Container(
-    //       width: double.infinity,
-    //       height: double.infinity,
-    //       decoration: BoxDecoration(
-    //         image: DecorationImage(
-    //           image: _getBackgroundImage(settings, globalSettings),
-    //           fit: BoxFit.cover,
-    //         ),
-    //       ),
-    //       child: Center(
-    //         child: CircularProgressIndicator(
-    //           color: settings.previewBorderColor,
-    //         ),
-    //       ),
-    //     ),
-    //   );
-    // }
-
     return Scaffold(
       body: Stack(
         children: [
@@ -369,22 +346,6 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
             top: settings.buttonTop,
             left: settings.buttonLeft,
             child: _buildCaptureButton(settings),
-          ),
-
-          Positioned(
-            right: 0,
-            top: 0,
-            child: GestureDetector(
-              onTap: () =>
-                  Navigator.pushNamed(context, AppRoutes.faceCaptureSettings),
-              child: Container(
-                width: 50,
-                height: 50,
-                decoration: const BoxDecoration(
-                  color: Colors.transparent,
-                ),
-              ),
-            ),
           ),
         ],
       ),
@@ -478,28 +439,19 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
     if (settings.useImageButton && settings.buttonImagePath != null) {
       return GestureDetector(
         onTap: _takePicture,
-        child: Container(
-          width: settings.buttonWidth,
-          height: settings.buttonHeight,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
-            border: settings.buttonHasBorder
-                ? Border.all(
-                    color: settings.buttonBorderColor,
-                    width: settings.buttonBorderWidth,
-                  )
-                : null,
-          ),
-          child: settings.isButtonImageAsset
-              ? Image.asset(
-                  settings.buttonImagePath!,
-                  fit: BoxFit.contain,
-                )
-              : Image.file(
-                  File(settings.buttonImagePath!),
-                  fit: BoxFit.contain,
-                ),
-        ),
+        child: settings.isButtonImageAsset
+            ? Image.asset(
+                settings.buttonImagePath!,
+                fit: BoxFit.contain,
+                width: 585,
+                height: 150,
+              )
+            : Image.file(
+                File(settings.buttonImagePath!),
+                fit: BoxFit.contain,
+                width: 585,
+                height: 150,
+              ),
       );
     } else {
       return ElevatedButton(
@@ -548,7 +500,7 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
         }
       } else {
         // Default background
-        return const AssetImage('assets/images/background.jpg');
+        return const AssetImage('assets/images/common_bg.png');
       }
     }
   }

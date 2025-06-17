@@ -1,7 +1,39 @@
-import 'package:flutter/material.dart';
+// lib/widgets/snackbar.dart
 
-void showSnackBar(BuildContext context, String message) {
+import 'package:flutter/material.dart';
+import 'package:photobooth_flutter/core/constants/constants.dart';
+import 'package:photobooth_flutter/core/themes/app_colors.dart';
+
+// MODIFIED: Added an 'isError' parameter
+void showSnackBar(
+  BuildContext context,
+  String content, {
+  bool isError = false,
+}) {
+  if (!context.mounted) return;
+
   ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text(message)),
+    snackBarAnimationStyle: const AnimationStyle(
+      curve: Curves.easeInOut,
+      duration: Duration(milliseconds: 600),
+    ),
+    SnackBar(
+      backgroundColor: isError ? AppColors.red : AppColors.green,
+      content: Text(
+        content,
+        style: const TextStyle(
+          fontFamily: "SwitzerVariable",
+          fontSize: 14.5,
+          fontWeight: FontWeight.w500,
+          color: AppColors.white,
+        ),
+      ),
+      shape: RoundedRectangleBorder(borderRadius: Constants.br4),
+      padding: const EdgeInsets.all(12),
+      behavior: SnackBarBehavior.floating,
+      margin: const EdgeInsets.only(bottom: 10, left: 16, right: 16, top: 0),
+      elevation: 1,
+      dismissDirection: DismissDirection.horizontal,
+    ),
   );
 }

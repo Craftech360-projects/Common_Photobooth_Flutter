@@ -14,7 +14,6 @@ import 'package:photobooth_flutter/services/comfy_api_service.dart';
 import 'package:photobooth_flutter/services/local_storage_service.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:video_player/video_player.dart';
 
 class LoadingScreen extends StatefulWidget {
   const LoadingScreen({super.key});
@@ -24,38 +23,33 @@ class LoadingScreen extends StatefulWidget {
 }
 
 class _LoadingScreenState extends State<LoadingScreen> {
-  VideoPlayerController? _controller; // Make it nullable
-  bool _isInitialized = false;
   bool _isProcessing = true;
   String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
-    _initializeLoader();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _processImage();
     });
   }
 
-  Future<void> _initializeLoader() async {
-    final settings = Provider.of<LoadingScreenProvider>(context, listen: false);
-
-    // Initialize video controller if needed
-    if ((settings.loaderFileType == 'mp4' ||
-            settings.loaderFileType == 'mov') &&
-        settings.loaderFilePath != null) {
-      try {
-        await _initializeVideoPlayer(settings);
-      } on Exception catch (e) {
-        debugPrint('Error initializing video player: $e');
-      }
-    }
-
-    setState(() {
-      _isInitialized = true;
-    });
-  }
+  // Future<void> _initializeLoader() async {
+  //   final settings = Provider.of<LoadingScreenProvider>(context, listen: false);
+  //   // Initialize video controller if needed
+  //   if ((settings.loaderFileType == 'mp4' ||
+  //           settings.loaderFileType == 'mov') &&
+  //       settings.loaderFilePath != null) {
+  //     try {
+  //       await _initializeVideoPlayer(settings);
+  //     } on Exception catch (e) {
+  //       debugPrint('Error initializing video player: $e');
+  //     }
+  //   }
+  //   setState(() {
+  //     _isInitialized = true;
+  //   });
+  // }
 
   Future<void> _processImage() async {
     try {
@@ -346,41 +340,41 @@ class _LoadingScreenState extends State<LoadingScreen> {
     }
   }
 
-  Future<void> _initializeVideoPlayer(LoadingScreenProvider settings) async {
-    if (settings.loaderFilePath == null) return;
+  // Future<void> _initializeVideoPlayer(LoadingScreenProvider settings) async {
+  //   if (settings.loaderFilePath == null) return;
 
-    try {
-      if (settings.isLoaderFileAsset) {
-        // For asset videos
-        _controller = VideoPlayerController.asset(settings.loaderFilePath!,
-            videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true));
-        _controller?.addListener(() {
-          setState(() {});
-        });
-        await _controller?.setLooping(true);
-        await _controller?.initialize().then((_) => setState(() {}));
-        await _controller?.play();
-      } else {
-        // For file videos
-        _controller = VideoPlayerController.file(
-          File(settings.loaderFilePath!),
-          videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
-        );
-      }
+  //   try {
+  //     if (settings.isLoaderFileAsset) {
+  //       // For asset videos
+  //       _controller = VideoPlayerController.asset(settings.loaderFilePath!,
+  //           videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true));
+  //       _controller?.addListener(() {
+  //         setState(() {});
+  //       });
+  //       await _controller?.setLooping(true);
+  //       await _controller?.initialize().then((_) => setState(() {}));
+  //       await _controller?.play();
+  //     } else {
+  //       // For file videos
+  //       _controller = VideoPlayerController.file(
+  //         File(settings.loaderFilePath!),
+  //         videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
+  //       );
+  //     }
 
-      await _controller?.setLooping(true);
-      await _controller?.initialize().then((_) => setState(() {}));
-      await _controller?.play();
-    } on Exception catch (e) {
-      debugPrint('Error initializing video player: $e');
-    }
-  }
+  //     await _controller?.setLooping(true);
+  //     await _controller?.initialize().then((_) => setState(() {}));
+  //     await _controller?.play();
+  //   } on Exception catch (e) {
+  //     debugPrint('Error initializing video player: $e');
+  //   }
+  // }
 
-  @override
-  void dispose() {
-    _controller?.dispose(); // Add null check
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   _controller?.dispose(); // Add null check
+  //   super.dispose();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -394,36 +388,10 @@ class _LoadingScreenState extends State<LoadingScreen> {
               image: _getBackgroundImage(loadingSettings, globalSettings),
             ),
             child: Stack(
+              alignment: Alignment.center,
               children: [
-                // Title
-                if (loadingSettings.showTitle)
-                  Positioned(
-                    top: loadingSettings.titleTop,
-                    left: loadingSettings.titleLeft,
-                    right: loadingSettings.titleRight,
-                    child: Text(
-                      loadingSettings.titleText,
-                      style: TextStyle(
-                        fontSize: loadingSettings.titleFontSize,
-                        fontWeight: loadingSettings.titleFontWeight,
-                        color: loadingSettings.titleColor,
-                        height: loadingSettings.titleLineHeight,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-
-                // Loader
-                Positioned(
-                  top: loadingSettings.loaderTop,
-                  left: loadingSettings.loaderLeft,
-                  right: loadingSettings.loaderRight,
-                  child: SizedBox(
-                    width: loadingSettings.loaderWidth,
-                    height: loadingSettings.loaderHeight,
-                    child: _buildLoader(loadingSettings),
-                  ),
-                ),
+                // The main content is now always the new animated text loader.
+                _buildLoader(loadingSettings),
               ],
             ),
           ),
@@ -460,46 +428,29 @@ class _LoadingScreenState extends State<LoadingScreen> {
         ),
       );
     }
-    if (settings.loaderFilePath == null) {
-      return const Center(
-          child: CircularProgressIndicator(
-        color: AppColors.white,
-      ));
-    }
 
-    switch (settings.loaderFileType) {
-      case 'gif':
-        if (settings.isLoaderFileAsset) {
-          return Image.asset(
-            settings.loaderFilePath!,
-            fit: BoxFit.contain,
-          );
-        } else {
-          return Image.file(
-            File(settings.loaderFilePath!),
-            fit: BoxFit.contain,
-          );
-        }
-      case 'mp4':
-      case 'mov':
-        if (_controller != null && _controller!.value.isInitialized) {
-          return AspectRatio(
-            aspectRatio: _controller!.value.aspectRatio,
-            child: VideoPlayer(_controller!),
-          );
-        }
-        return const Center(
-            child: Center(
-                child: CircularProgressIndicator(
-          color: AppColors.white,
-        )));
-      default:
-        return const Center(
-            child: Center(
-                child: CircularProgressIndicator(
-          color: AppColors.white,
-        )));
-    }
+    // The new text-based loader
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          RichText(
+            textAlign: TextAlign.center,
+            text: TextSpan(
+              style: TextStyle(
+                  fontSize: 70,
+                  color: settings.titleColor,
+                  fontWeight: FontWeight.w500,
+                  fontFamily: "PolySans"),
+              children: const <TextSpan>[
+                TextSpan(text: 'Processing the\n'),
+              ],
+            ),
+          ),
+          const _PulsatingText(),
+        ],
+      ),
+    );
   }
 
   DecorationImage? _getBackgroundImage(
@@ -528,9 +479,64 @@ class _LoadingScreenState extends State<LoadingScreen> {
     // Use default background as last resort
     else {
       return const DecorationImage(
-        image: AssetImage('assets/images/background.jpg'),
+        image: AssetImage('assets/images/common_bg.png'),
         fit: BoxFit.cover,
       );
     }
+  }
+}
+
+class _PulsatingText extends StatefulWidget {
+  const _PulsatingText();
+
+  @override
+  State<_PulsatingText> createState() => _PulsatingTextState();
+}
+
+class _PulsatingTextState extends State<_PulsatingText>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
+    )..repeat(reverse: true);
+
+    _animation = Tween(begin: 1.0, end: 1.15).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ScaleTransition(
+      scale: _animation,
+      child: const Text(
+        'Magic',
+        style: TextStyle(
+          fontSize: 90,
+          color: AppColors.yellow,
+          fontWeight: FontWeight.bold,
+          fontFamily: "PolySans",
+          // shadows: [
+          //   Shadow(
+          //     blurRadius: 20.0,
+          //     color: AppColors.yellow,
+          //     offset: Offset(0, 0),
+          //   ),
+          // ],
+        ),
+      ),
+    );
   }
 }

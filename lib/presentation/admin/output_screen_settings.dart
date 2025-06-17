@@ -234,154 +234,97 @@ class OutputScreenSettings extends StatelessWidget {
 
                           const Divider(),
 
-                          // QR Code Settings
-                          _buildSectionTitle('QR Code Settings'),
-                          _buildSlider(
-                            label: 'QR Code Size',
-                            value: settings.qrCodeSize,
-                            min: 100.0,
-                            max: 300.0,
-                            onChanged: (value) => settings.setQrCodeSize(value),
-                          ),
-                          _buildColorPickerWithLabel(
-                            context: context,
-                            label: 'QR Background Color',
-                            color: settings.qrCodeBackgroundColor,
-                            onColorChanged: (color) => settings.setQrCodeColors(
-                                backgroundColor: color),
-                          ),
-
-                          _buildColorPickerWithLabel(
-                            context: context,
-                            label: 'QR Foreground Color',
-                            color: settings.qrCodeForegroundColor,
-                            onColorChanged: (color) => settings.setQrCodeColors(
-                                foregroundColor: color),
-                          ),
-                          _buildTextField(
-                            label: 'QR Code Text',
-                            value: settings.qrCodeText,
-                            onChanged: (value) => settings.setQrCodeText(value),
-                          ),
-                          _buildSlider(
-                            label: 'Text Font Size',
-                            value: settings.qrCodeTextFontSize,
-                            min: 12.0,
-                            max: 24.0,
-                            onChanged: (value) =>
-                                settings.setQrCodeTextStyle(fontSize: value),
-                          ),
-                          _buildColorPickerWithLabel(
-                            context: context,
-                            label: 'Text Color',
-                            color: settings.qrCodeTextColor,
-                            onColorChanged: (color) =>
-                                settings.setQrCodeTextStyle(color: color),
-                          ),
-                          _buildDropdown<QrCodeLayout>(
-                            label: 'QR Code Layout',
-                            value: settings.qrCodeLayout,
-                            items: {
-                              QrCodeLayout.below: 'Text Below QR',
-                              QrCodeLayout.above: 'Text Above QR',
-                              QrCodeLayout.leftOfQr: 'Text Left of QR',
-                              QrCodeLayout.rightOfQr: 'Text Right of QR',
-                              QrCodeLayout.sideBySide: 'Side by Side',
-                            },
-                            onChanged: (value) =>
-                                settings.setQrCodeLayout(value!),
-                          ),
-
-                          // Fine-tuning controls for QR code position
-                          _buildSectionTitle('QR Code Position'),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _buildSlider(
-                                  label: 'From Left',
-                                  value: settings.qrCodeLeft,
-                                  min: 0.0,
-                                  max: 1080.0,
-                                  onChanged: (value) =>
-                                      settings.setQrCodePosition(
-                                    value,
-                                    settings.qrCodeBottom,
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                child: _buildSlider(
-                                  label: 'From Bottom',
-                                  value: settings.qrCodeBottom,
-                                  min: 0.0,
-                                  max: 1920.0,
-                                  onChanged: (value) =>
-                                      settings.setQrCodePosition(
-                                    settings.qrCodeLeft,
-                                    value,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          const Divider(),
-
                           // Button Settings
                           _buildSectionTitle('Button Settings'),
-                          _buildTextField(
-                            label: 'Button Text',
-                            value: settings.buttonText,
-                            onChanged: (value) => settings.setButtonText(value),
-                          ),
-                          _buildSlider(
-                            label: 'Font Size',
-                            value: settings.buttonFontSize,
-                            min: 16.0,
-                            max: 32.0,
+                          SwitchListTile(
+                            title: const Text('Use Image Button'),
+                            value: settings.useImageButton,
                             onChanged: (value) =>
-                                settings.setButtonStyle(fontSize: value),
-                          ),
-                          _buildColorPickerWithLabel(
-                            context: context,
-                            label: 'Button Color',
-                            color: settings.buttonColor,
-                            onColorChanged: (color) =>
-                                settings.setButtonStyle(color: color),
-                          ),
-                          _buildColorPickerWithLabel(
-                            context: context,
-                            label: 'Text Color',
-                            color: settings.buttonTextColor,
-                            onColorChanged: (color) =>
-                                settings.setButtonStyle(textColor: color),
-                          ),
-                          _buildSlider(
-                            label: 'Horizontal Padding',
-                            value: settings.buttonPaddingHorizontal,
-                            min: 10.0,
-                            max: 100.0,
-                            onChanged: (value) => settings.setButtonStyle(
-                                paddingHorizontal: value),
-                          ),
-                          _buildSlider(
-                            label: 'Vertical Padding',
-                            value: settings.buttonPaddingVertical,
-                            min: 5.0,
-                            max: 50.0,
-                            onChanged: (value) =>
-                                settings.setButtonStyle(paddingVertical: value),
-                          ),
-                          _buildSlider(
-                            label: 'Button Border Radius',
-                            value: settings.buttonBorderRadius,
-                            min: 0.0,
-                            max: 30.0,
-                            onChanged: (value) =>
-                                settings.setButtonStyle(borderRadius: value),
+                                settings.setUseImageButton(value),
                           ),
 
-                          // Fine-tuning controls for button position
+                          if (settings.useImageButton) ...[
+                            ListTile(
+                              title: const Text('Button Image'),
+                              subtitle: Text(settings.buttonImagePath ??
+                                  'No image selected'),
+                              trailing: ElevatedButton(
+                                onPressed: () async {
+                                  final result = await FilePicker.platform
+                                      .pickFiles(type: FileType.image);
+                                  if (result != null &&
+                                      result.files.single.path != null) {
+                                    settings.setButtonImage(
+                                        result.files.single.path,
+                                        isAsset: false);
+                                  }
+                                },
+                                child: const Text('Choose...'),
+                              ),
+                            ),
+                            _buildSlider(
+                                label: 'Width',
+                                value: settings.buttonWidth,
+                                min: 100,
+                                max: 900,
+                                onChanged: (v) =>
+                                    settings.setButtonStyle(width: v)),
+                            _buildSlider(
+                                label: 'Height',
+                                value: settings.buttonHeight,
+                                min: 50,
+                                max: 900,
+                                onChanged: (v) =>
+                                    settings.setButtonStyle(height: v)),
+                          ] else ...[
+                            _buildTextField(
+                                label: 'Button Text',
+                                value: settings.buttonText,
+                                onChanged: (value) =>
+                                    settings.setButtonText(value)),
+                            _buildSlider(
+                                label: 'Font Size',
+                                value: settings.buttonFontSize,
+                                min: 16.0,
+                                max: 90.0,
+                                onChanged: (value) =>
+                                    settings.setButtonStyle(fontSize: value)),
+                            _buildColorPickerWithLabel(
+                                context: context,
+                                label: 'Button Color',
+                                color: settings.buttonColor,
+                                onColorChanged: (color) =>
+                                    settings.setButtonStyle(color: color)),
+                            _buildColorPickerWithLabel(
+                                context: context,
+                                label: 'Text Color',
+                                color: settings.buttonTextColor,
+                                onColorChanged: (color) =>
+                                    settings.setButtonStyle(textColor: color)),
+                            _buildSlider(
+                                label: 'Horizontal Padding',
+                                value: settings.buttonPaddingHorizontal,
+                                min: 10.0,
+                                max: 100.0,
+                                onChanged: (value) => settings.setButtonStyle(
+                                    paddingHorizontal: value)),
+                            _buildSlider(
+                                label: 'Vertical Padding',
+                                value: settings.buttonPaddingVertical,
+                                min: 5.0,
+                                max: 50.0,
+                                onChanged: (value) => settings.setButtonStyle(
+                                    paddingVertical: value)),
+                          ],
+
+                          _buildSlider(
+                              label: 'Button Border Radius',
+                              value: settings.buttonBorderRadius,
+                              min: 0.0,
+                              max: 30.0,
+                              onChanged: (value) =>
+                                  settings.setButtonStyle(borderRadius: value)),
+
                           _buildSectionTitle('Button Position'),
                           Row(
                             children: [

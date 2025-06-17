@@ -2,12 +2,14 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class GenderSelectionProvider extends ChangeNotifier {
   // Title settings
-  String _titleText = 'Select Gender';
+  String _titleText = '';
   double _titleFontSize = 22.0;
   Color _titleColor = AppColors.white;
   FontWeight _titleFontWeight = FontWeight.w500;
@@ -25,14 +27,14 @@ class GenderSelectionProvider extends ChangeNotifier {
   String? _femaleImagePath = 'assets/images/female_avatar.png';
   bool _isMaleImageAsset = true;
   bool _isFemaleImageAsset = true;
-  double _imageWidth = 150.0;
-  double _imageHeight = 150.0;
-  double _imageSpacing = 20.0;
-  double _imageBorderRadius = 5.0;
+  double _imageWidth = 410.0;
+  double _imageHeight = 495.0;
+  double _imageSpacing = 40.0;
+  double _imageBorderRadius = 0.0;
   bool _showImageBorder = false;
-  double _imageBorderWidth = 2.0;
+  double _imageBorderWidth = 0.0;
   Color _imageBorderColor = AppColors.yellow;
-  double _genderSelectionLeft = 373.0;
+  double _genderSelectionLeft = 100.0;
   double _genderSelectionTop = 830.0;
 
   // Selection effect settings
@@ -45,30 +47,30 @@ class GenderSelectionProvider extends ChangeNotifier {
 
   // Button settings
   String _buttonText = 'Continue';
-  double _buttonWidth = 200.0;
-  double _buttonHeight = 45.0;
+  double _buttonWidth = 585.0;
+  double _buttonHeight = 150.0;
   double _buttonFontSize = 18.0;
   FontWeight _buttonFontWeight = FontWeight.w500;
   Color _buttonColor = AppColors.yellow;
   Color _buttonTextColor = AppColors.black;
-  double _buttonBorderRadius = 5.0;
+  double _buttonBorderRadius = 0.0;
   bool _buttonHasBorder = false;
-  double _buttonBorderWidth = 1.0;
+  double _buttonBorderWidth = 0.0;
   Color _buttonBorderColor = AppColors.black;
-  bool _useImageButton = false;
-  String? _buttonImagePath;
+  bool _useImageButton = true;
+  String _buttonImagePath = 'assets/images/next_btn.png';
   bool _isButtonImageAsset = true;
   EdgeInsets _buttonPadding =
       const EdgeInsets.symmetric(vertical: 0, horizontal: 0);
 
   // Position properties for button
-  double _buttonLeft = 440.0;
-  double _buttonBottom = 868.0;
+  double _buttonLeft = 245.0;
+  double _buttonBottom = 380.0;
 
   // Layout settings
   double _screenPadding = 0.0;
   bool _showBackground = true;
-  String? _backgroundImagePath;
+  String _backgroundImagePath = 'assets/images/gender_bg.png';
   bool _isBackgroundImageAsset = true;
 
   // Getters
@@ -101,7 +103,7 @@ class GenderSelectionProvider extends ChangeNotifier {
   double get genderSelectionTop => _genderSelectionTop;
 
   String get buttonText => _buttonText;
-  double get buttonWidth => _buttonWidth;
+double get buttonWidth => _buttonWidth;
   double get buttonHeight => _buttonHeight;
   double get buttonFontSize => _buttonFontSize;
   FontWeight get buttonFontWeight => _buttonFontWeight;
@@ -184,18 +186,57 @@ class GenderSelectionProvider extends ChangeNotifier {
     _saveSettings();
   }
 
-  void setMaleImage(String? imagePath, {required bool isAsset}) {
-    _maleImagePath = imagePath;
-    _isMaleImageAsset = isAsset;
+  Future<void> _setImage(String? sourcePath, bool isAsset,
+      Function(String?, bool) updateState) async {
+    if (sourcePath == null) {
+      updateState(null, true);
+    } else if (isAsset) {
+      updateState(sourcePath, true);
+    } else {
+      try {
+        final appDir = await getApplicationDocumentsDirectory();
+        final fileName =
+            'gender_${DateTime.now().millisecondsSinceEpoch}${path.extension(sourcePath)}';
+        final destinationPath = path.join(appDir.path, fileName);
+        await File(sourcePath).copy(destinationPath);
+        updateState(destinationPath, false);
+      } catch (e) {
+        debugPrint('Error copying image: $e');
+        return;
+      }
+    }
     notifyListeners();
     _saveSettings();
   }
 
-  void setFemaleImage(String? imagePath, {required bool isAsset}) {
-    _femaleImagePath = imagePath;
-    _isFemaleImageAsset = isAsset;
-    notifyListeners();
-    _saveSettings();
+  Future<void> setMaleImage(String? imagePath, {required bool isAsset}) async {
+    await _setImage(imagePath, isAsset, (path, asset) {
+      _maleImagePath = path;
+      _isMaleImageAsset = asset;
+    });
+  }
+
+  Future<void> setFemaleImage(String? imagePath,
+      {required bool isAsset}) async {
+    await _setImage(imagePath, isAsset, (path, asset) {
+      _femaleImagePath = path;
+      _isFemaleImageAsset = asset;
+    });
+  }
+
+  Future<void> setButtonImage(String sourcePath, {bool isAsset = true}) async {
+    await _setImage(sourcePath, isAsset, (path, asset) {
+      _buttonImagePath = path!;
+      _isButtonImageAsset = asset;
+    });
+  }
+
+  Future<void> setBackgroundImage(String? sourcePath,
+      {required bool isAsset}) async {
+    await _setImage(sourcePath, isAsset, (path, asset) {
+      _backgroundImagePath = path!;
+      _isBackgroundImageAsset = asset;
+    });
   }
 
   void setImageDimensions(double width, double height) {
@@ -290,13 +331,6 @@ class GenderSelectionProvider extends ChangeNotifier {
     _saveSettings();
   }
 
-  void setButtonImage(String? path, {bool isAsset = true}) {
-    _buttonImagePath = path;
-    _isButtonImageAsset = isAsset;
-    notifyListeners();
-    _saveSettings();
-  }
-
   void setScreenPadding(double padding) {
     _screenPadding = padding;
     notifyListeners();
@@ -305,13 +339,6 @@ class GenderSelectionProvider extends ChangeNotifier {
 
   void setShowBackground(bool show) {
     _showBackground = show;
-    notifyListeners();
-    _saveSettings();
-  }
-
-  void setBackgroundImage(String? path, {required bool isAsset}) {
-    _backgroundImagePath = path;
-    _isBackgroundImageAsset = isAsset;
     notifyListeners();
     _saveSettings();
   }
@@ -358,8 +385,10 @@ class GenderSelectionProvider extends ChangeNotifier {
       _titleTop = settings['titleTop'] ?? _titleTop;
       _titleWidth = settings['titleWidth'] ?? _titleWidth;
       // Gender selection position
-      _genderSelectionLeft = settings['genderSelectionLeft'] ?? _genderSelectionLeft;
-      _genderSelectionTop = settings['genderSelectionTop'] ?? _genderSelectionTop;
+      _genderSelectionLeft =
+          settings['genderSelectionLeft'] ?? _genderSelectionLeft;
+      _genderSelectionTop =
+          settings['genderSelectionTop'] ?? _genderSelectionTop;
       // Button position
       _buttonLeft = settings['buttonLeft'] ?? _buttonLeft;
       _buttonBottom = settings['buttonBottom'] ?? _buttonBottom;
@@ -433,7 +462,7 @@ class GenderSelectionProvider extends ChangeNotifier {
       _buttonBorderWidth = settings['buttonBorderWidth'] ?? _buttonBorderWidth;
       _buttonBorderColor =
           Color(settings['buttonBorderColor'] ?? _buttonBorderColor.value);
-      
+
       _useImageButton = settings['useImageButton'] ?? _useImageButton;
       _buttonImagePath = settings['buttonImagePath'];
       _isButtonImageAsset =
@@ -503,10 +532,8 @@ class GenderSelectionProvider extends ChangeNotifier {
         'imageBorderWidth': _imageBorderWidth,
         'imageBorderColor': _imageBorderColor.value,
 
-      
-
         // Button margin and padding
-       
+
         'buttonPaddingTop': _buttonPadding.top,
         'buttonPaddingBottom': _buttonPadding.bottom,
         'buttonPaddingLeft': _buttonPadding.left,

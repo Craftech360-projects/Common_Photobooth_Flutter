@@ -1,16 +1,22 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class FaceCaptureProvider extends ChangeNotifier {
+  late SharedPreferences _prefs;
+  bool _isInitialized = false;
+
   // Title settings
-  String _titleText = 'Smile Please... 😃';
-  double _titleFontSize = 22.0;
-  FontWeight _titleFontWeight = FontWeight.w500;
-  Color _titleColor = AppColors.white;
-  double _titleTop = 460.0;
+  String _titleText = 'Strike a Pose';
+  double _titleFontSize = 70.0;
+  FontWeight _titleFontWeight = FontWeight.w600;
+  Color _titleColor = AppColors.yellow;
+  double _titleTop = 488.0;
   double _titleLeft = 0.0;
   double _titleRight = 0.0;
   bool _showTitle = true;
@@ -19,18 +25,18 @@ class FaceCaptureProvider extends ChangeNotifier {
   TextAlign _titleAlignment = TextAlign.center;
 
   // Camera preview settings
-  double _previewWidth = 850.0;
-  double _previewHeight = 850.0;
+  double _previewWidth = 685.0;
+  double _previewHeight = 816.0;
   double _previewBorderRadius = 5.0;
-  Color _previewBorderColor = AppColors.orange;
+  Color _previewBorderColor = AppColors.white;
   double _previewBorderWidth = 2.0;
   bool _showPreviewBorder = true;
-  double _previewTop = 533.0;
-  double _previewLeft = 116.0; // Centered by default (1080 - 375) / 2
+  double _previewTop = 590.0;
+  double _previewLeft = 196.0;
 
   // Windows camera settings
-  String _pictureFormat = 'jpeg'; // Windows camera typically uses jpeg
-  final String _pictureQuality = 'high'; // high, medium, low
+  String _pictureFormat = 'jpeg';
+  final String _pictureQuality = 'high';
 
   // Button settings
   String _buttonText = 'Capture';
@@ -38,19 +44,19 @@ class FaceCaptureProvider extends ChangeNotifier {
   FontWeight _buttonFontWeight = FontWeight.w500;
   Color _buttonColor = AppColors.white;
   Color _buttonTextColor = AppColors.black;
-  double _buttonWidth = 200.0;
-  double _buttonHeight = 45.0;
-  double _buttonBorderRadius = 5.0;
-  double _buttonTop = 1430.0;
-  double _buttonLeft = 440.0; // Centered by default (1080 - 200) / 2
+  double _buttonWidth = 585.0;
+  double _buttonHeight = 150.0;
+  double _buttonBorderRadius = 0.0;
+  double _buttonTop = 1455.0;
+  double _buttonLeft = 245.0;
   EdgeInsets _buttonPadding = const EdgeInsets.all(8.0);
   bool _buttonHasBorder = false;
   Color _buttonBorderColor = AppColors.orange;
   double _buttonBorderWidth = 2.0;
 
   // Image button settings
-  bool _useImageButton = false;
-  String? _buttonImagePath;
+  bool _useImageButton = true;
+  String? _buttonImagePath = 'assets/images/capture_btn.png';
   bool _isButtonImageAsset = true;
 
   // Background settings
@@ -74,7 +80,6 @@ class FaceCaptureProvider extends ChangeNotifier {
   double get titleLeft => _titleLeft;
   double get titleRight => _titleRight;
   EdgeInsets get buttonPadding => _buttonPadding;
-
   double get previewWidth => _previewWidth;
   double get previewHeight => _previewHeight;
   double get previewBorderRadius => _previewBorderRadius;
@@ -83,7 +88,6 @@ class FaceCaptureProvider extends ChangeNotifier {
   bool get showPreviewBorder => _showPreviewBorder;
   double get previewTop => _previewTop;
   double get previewLeft => _previewLeft;
-
   String get buttonText => _buttonText;
   double get buttonFontSize => _buttonFontSize;
   FontWeight get buttonFontWeight => _buttonFontWeight;
@@ -97,16 +101,12 @@ class FaceCaptureProvider extends ChangeNotifier {
   double get buttonBorderWidth => _buttonBorderWidth;
   double get buttonTop => _buttonTop;
   double get buttonLeft => _buttonLeft;
-
   bool get useImageButton => _useImageButton;
   String? get buttonImagePath => _buttonImagePath;
   bool get isButtonImageAsset => _isButtonImageAsset;
-
   bool get showBackground => _showBackground;
   String? get backgroundImagePath => _backgroundImagePath;
   bool get isBackgroundImageAsset => _isBackgroundImageAsset;
-
-  // Update getters
   String get pictureFormat => _pictureFormat;
   String get pictureQuality => _pictureQuality;
   int get selectedCameraIndex => _selectedCameraIndex;
@@ -114,265 +114,264 @@ class FaceCaptureProvider extends ChangeNotifier {
   // Setters
   void setTitleText(String text) {
     _titleText = text;
-    notifyListeners();
-    _saveSettings();
+    _saveAndNotify();
   }
 
   void setTitleFontSize(double size) {
     _titleFontSize = size;
-    notifyListeners();
-    _saveSettings();
+    _saveAndNotify();
   }
 
   void setTitleFontWeight(FontWeight weight) {
     _titleFontWeight = weight;
-    notifyListeners();
-    _saveSettings();
+    _saveAndNotify();
   }
 
   void setPictureFormat(String format) {
     _pictureFormat = format;
-    notifyListeners();
-    _saveSettings();
+    _saveAndNotify();
   }
 
   void setTitleColor(Color color) {
     _titleColor = color;
-    notifyListeners();
-    _saveSettings();
+    _saveAndNotify();
   }
 
   void setTitleLineHeight(double height) {
     _titleLineHeight = height;
-    notifyListeners();
-    _saveSettings();
+    _saveAndNotify();
   }
 
   void setTitleOpacity(double opacity) {
     _titleOpacity = opacity;
-    notifyListeners();
-    _saveSettings();
+    _saveAndNotify();
   }
 
   void setTitleAlignment(TextAlign alignment) {
     _titleAlignment = alignment;
-    notifyListeners();
-    _saveSettings();
+    _saveAndNotify();
   }
 
   void setTitleTop(double top) {
     _titleTop = top;
-    notifyListeners();
-    _saveSettings();
+    _saveAndNotify();
   }
 
   void setTitleLeft(double left) {
     _titleLeft = left;
-    notifyListeners();
-    _saveSettings();
+    _saveAndNotify();
   }
 
   void setTitleRight(double right) {
     _titleRight = right;
-    notifyListeners();
-    _saveSettings();
+    _saveAndNotify();
   }
 
   void setPreviewTop(double top) {
     _previewTop = top;
-    notifyListeners();
-    _saveSettings();
+    _saveAndNotify();
   }
 
   void setPreviewLeft(double left) {
     _previewLeft = left;
-    notifyListeners();
-    _saveSettings();
+    _saveAndNotify();
   }
 
   void setButtonTop(double top) {
     _buttonTop = top;
-    notifyListeners();
-    _saveSettings();
+    _saveAndNotify();
   }
 
   void setButtonLeft(double left) {
     _buttonLeft = left;
-    notifyListeners();
-    _saveSettings();
+    _saveAndNotify();
   }
 
   void setButtonPadding(EdgeInsets padding) {
     _buttonPadding = padding;
-    notifyListeners();
-    _saveSettings();
+    _saveAndNotify();
   }
 
   void setShowTitle(bool show) {
     _showTitle = show;
-    notifyListeners();
-    _saveSettings();
+    _saveAndNotify();
   }
 
   void setPreviewWidth(double width) {
     _previewWidth = width;
-    notifyListeners();
-    _saveSettings();
+    _saveAndNotify();
   }
 
   void setPreviewHeight(double height) {
     _previewHeight = height;
-    notifyListeners();
-    _saveSettings();
+    _saveAndNotify();
   }
 
   void setPreviewBorderRadius(double radius) {
     _previewBorderRadius = radius;
-    notifyListeners();
-    _saveSettings();
+    _saveAndNotify();
   }
 
   void setPreviewBorderColor(Color color) {
     _previewBorderColor = color;
-    notifyListeners();
-    _saveSettings();
+    _saveAndNotify();
   }
 
   void setPreviewBorderWidth(double width) {
     _previewBorderWidth = width;
-    notifyListeners();
-    _saveSettings();
+    _saveAndNotify();
   }
 
   void setShowPreviewBorder(bool show) {
     _showPreviewBorder = show;
-    notifyListeners();
-    _saveSettings();
+    _saveAndNotify();
   }
 
   void setButtonText(String text) {
     _buttonText = text;
-    notifyListeners();
-    _saveSettings();
+    _saveAndNotify();
   }
 
   void setButtonFontSize(double size) {
     _buttonFontSize = size;
-    notifyListeners();
-    _saveSettings();
+    _saveAndNotify();
   }
 
   void setButtonFontWeight(FontWeight weight) {
     _buttonFontWeight = weight;
-    notifyListeners();
-    _saveSettings();
+    _saveAndNotify();
   }
 
   void setButtonColor(Color color) {
     _buttonColor = color;
-    notifyListeners();
-    _saveSettings();
+    _saveAndNotify();
   }
 
   void setButtonTextColor(Color color) {
     _buttonTextColor = color;
-    notifyListeners();
-    _saveSettings();
+    _saveAndNotify();
   }
 
   void setButtonWidth(double width) {
     _buttonWidth = width;
-    notifyListeners();
-    _saveSettings();
+    _saveAndNotify();
   }
 
   void setButtonHeight(double height) {
     _buttonHeight = height;
-    notifyListeners();
-    _saveSettings();
+    _saveAndNotify();
   }
 
   void setButtonBorderRadius(double radius) {
     _buttonBorderRadius = radius;
-    notifyListeners();
-    _saveSettings();
+    _saveAndNotify();
   }
 
   void setButtonHasBorder(bool hasBorder) {
     _buttonHasBorder = hasBorder;
-    notifyListeners();
-    _saveSettings();
+    _saveAndNotify();
   }
 
   void setButtonBorderColor(Color color) {
     _buttonBorderColor = color;
-    notifyListeners();
-    _saveSettings();
+    _saveAndNotify();
   }
 
   void setButtonBorderWidth(double width) {
     _buttonBorderWidth = width;
-    notifyListeners();
-    _saveSettings();
+    _saveAndNotify();
   }
 
   void setUseImageButton(bool use) {
     _useImageButton = use;
-    notifyListeners();
-    _saveSettings();
-  }
-
-  void setButtonImagePath(String? path, {bool isAsset = true}) {
-    _buttonImagePath = path;
-    _isButtonImageAsset = isAsset;
-    notifyListeners();
-    _saveSettings();
+    _saveAndNotify();
   }
 
   void setShowBackground(bool show) {
     _showBackground = show;
-    notifyListeners();
-    _saveSettings();
-  }
-
-  void setBackgroundImagePath(String? path, {bool isAsset = true}) {
-    _backgroundImagePath = path;
-    _isBackgroundImageAsset = isAsset;
-    notifyListeners();
-    _saveSettings();
+    _saveAndNotify();
   }
 
   void setSelectedCameraIndex(int index) {
     _selectedCameraIndex = index;
-    notifyListeners();
-    _saveSettings();
+    _saveAndNotify();
   }
 
-  // Initialize from SharedPreferences
+  Future<void> _setImage(String? sourcePath, bool isAsset,
+      Function(String?, bool) updateState) async {
+    if (sourcePath == null) {
+      updateState(null, true);
+    } else if (isAsset) {
+      updateState(sourcePath, true);
+    } else {
+      try {
+        final appDir = await getApplicationDocumentsDirectory();
+        final fileName =
+            'capture_${DateTime.now().millisecondsSinceEpoch}${path.extension(sourcePath)}';
+        final destinationPath = path.join(appDir.path, fileName);
+        await File(sourcePath).copy(destinationPath);
+        updateState(destinationPath, false);
+      } catch (e) {
+        debugPrint('Error copying image: $e');
+        return;
+      }
+    }
+    _saveAndNotify();
+  }
+
+  Future<void> setButtonImagePath(String? path, {bool isAsset = true}) async {
+    await _setImage(path, isAsset, (p, a) {
+      _buttonImagePath = p;
+      _isButtonImageAsset = a;
+    });
+  }
+
+  Future<void> setBackgroundImagePath(String? path,
+      {bool isAsset = true}) async {
+    await _setImage(path, isAsset, (p, a) {
+      _backgroundImagePath = p;
+      _isBackgroundImageAsset = a;
+    });
+  }
+
   Future<void> init() async {
-    final prefs = await SharedPreferences.getInstance();
-    final settingsJson = prefs.getString('face_capture_settings');
+    if (_isInitialized) return;
+    _prefs = await SharedPreferences.getInstance();
+    await _loadSettings();
+    _isInitialized = true;
+  }
+
+  void _saveAndNotify() {
+    if (!_isInitialized) return;
+    _saveSettings();
+    notifyListeners();
+  }
+
+  Future<void> _loadSettings() async {
+    final settingsJson = _prefs.getString('face_capture_settings');
 
     if (settingsJson != null) {
       final settings = jsonDecode(settingsJson) as Map<String, dynamic>;
 
-      // Title settings
+      _useImageButton = settings['useImageButton'] ?? _useImageButton;
+      _buttonImagePath = settings['buttonImagePath'] ??
+          _buttonImagePath; // FIX: Preserve default if null
+      _isButtonImageAsset =
+          settings['isButtonImageAsset'] ?? _isButtonImageAsset;
+
+      // ... Omitted for brevity: all other settings are loaded correctly
       _titleText = settings['titleText'] ?? _titleText;
       _titleFontSize = settings['titleFontSize'] ?? _titleFontSize;
       _titleFontWeight = FontWeight
           .values[settings['titleFontWeight'] ?? _titleFontWeight.index];
       _titleColor = Color(settings['titleColor'] ?? _titleColor.value);
-
       _titleTop = settings['titleTop'] ?? _titleTop;
       _titleLeft = settings['titleLeft'] ?? _titleLeft;
       _titleRight = settings['titleRight'] ?? _titleRight;
-
       _showTitle = settings['showTitle'] ?? _showTitle;
       _titleLineHeight = settings['titleLineHeight'] ?? _titleLineHeight;
       _titleOpacity = settings['titleOpacity'] ?? _titleOpacity;
       _titleAlignment = TextAlign.values[settings['titleAlignment'] ?? 2];
-
-      // Camera preview settings
       _previewWidth = settings['previewWidth'] ?? _previewWidth;
       _previewHeight = settings['previewHeight'] ?? _previewHeight;
       _previewBorderRadius =
@@ -384,8 +383,6 @@ class FaceCaptureProvider extends ChangeNotifier {
       _showPreviewBorder = settings['showPreviewBorder'] ?? _showPreviewBorder;
       _previewTop = settings['previewTop'] ?? _previewTop;
       _previewLeft = settings['previewLeft'] ?? _previewLeft;
-
-      // Button settings
       _buttonText = settings['buttonText'] ?? _buttonText;
       _buttonFontSize = settings['buttonFontSize'] ?? _buttonFontSize;
       _buttonFontWeight = FontWeight
@@ -399,8 +396,6 @@ class FaceCaptureProvider extends ChangeNotifier {
           settings['buttonBorderRadius'] ?? _buttonBorderRadius;
       _buttonTop = settings['buttonTop'] ?? _buttonTop;
       _buttonLeft = settings['buttonLeft'] ?? _buttonLeft;
-
-      // Fix the button padding initialization
       if (settings['buttonPadding'] is Map) {
         final paddingMap = settings['buttonPadding'] as Map<String, dynamic>;
         _buttonPadding = EdgeInsets.fromLTRB(
@@ -414,20 +409,10 @@ class FaceCaptureProvider extends ChangeNotifier {
       _buttonBorderColor =
           Color(settings['buttonBorderColor'] ?? _buttonBorderColor.value);
       _buttonBorderWidth = settings['buttonBorderWidth'] ?? _buttonBorderWidth;
-
-      // Image button settings
-      _useImageButton = settings['useImageButton'] ?? _useImageButton;
-      _buttonImagePath = settings['buttonImagePath'];
-      _isButtonImageAsset =
-          settings['isButtonImageAsset'] ?? _isButtonImageAsset;
-
-      // Background settings
       _showBackground = settings['showBackground'] ?? _showBackground;
       _backgroundImagePath = settings['backgroundImagePath'];
       _isBackgroundImageAsset =
           settings['isBackgroundImageAsset'] ?? _isBackgroundImageAsset;
-
-      // Camera settings
       _selectedCameraIndex =
           settings['selectedCameraIndex'] ?? _selectedCameraIndex;
     }

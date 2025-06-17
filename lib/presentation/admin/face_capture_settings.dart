@@ -106,7 +106,7 @@ class _FaceCaptureSettingsState extends State<FaceCaptureSettings> {
                             label: 'Title Font Size',
                             value: settings.titleFontSize,
                             min: 16.0,
-                            max: 48.0,
+                            max: 80.0,
                             onChanged: (value) =>
                                 settings.setTitleFontSize(value),
                           ),

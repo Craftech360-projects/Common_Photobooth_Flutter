@@ -2,11 +2,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/providers/admin_watermark_provider.dart';
-import 'package:photobooth_flutter/providers/app_flow_provider.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/providers/photobooth_provider.dart';
 import 'package:photobooth_flutter/providers/registration_screen_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
+import 'package:photobooth_flutter/widgets/snackbar.dart';
 import 'package:photobooth_flutter/widgets/watermark_overlay.dart';
 import 'package:provider/provider.dart';
 
@@ -19,13 +19,13 @@ class ParticipantDetailsScreen extends StatefulWidget {
 }
 
 class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
-  final _formKey = GlobalKey<FormState>();
+  // The Form key is no longer needed as validation is handled manually.
+  // final _formKey = GlobalKey<FormState>();
   final Map<String, TextEditingController> _controllers = {};
 
   @override
   void initState() {
     super.initState();
-    // --- FIX: Initialize controllers here, before the first build ---
     final registrationSettings =
         Provider.of<RegistrationScreenProvider>(context, listen: false);
 
@@ -34,7 +34,6 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // If registration screen is disabled, navigate directly to gender selection
       if (!registrationSettings.showRegistrationScreen) {
         Navigator.pushReplacementNamed(context, AppRoutes.genderSelection);
       }
@@ -43,7 +42,6 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
 
   @override
   void dispose() {
-    // Dispose all controllers
     for (var controller in _controllers.values) {
       controller.dispose();
     }
@@ -59,9 +57,9 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
     return Scaffold(
       body: WatermarkOverlay(
         show: watermarkProvider.showWatermark,
+        // The Form widget is removed as we are now handling validation manually.
         child: Stack(
           children: [
-            // Background container
             Container(
               width: double.infinity,
               height: double.infinity,
@@ -73,8 +71,6 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
                 ),
               ),
             ),
-
-            // Title widget with positioning
             if (registrationSettings.showTitle)
               Positioned(
                 left: registrationSettings.titleLeft,
@@ -86,13 +82,10 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
                     fontSize: registrationSettings.titleFontSize,
                     fontWeight: registrationSettings.titleFontWeight,
                     color: registrationSettings.titleTextColor,
-                    height: registrationSettings.titleLineHeight,
                   ),
                   textAlign: registrationSettings.titleTextAlign,
                 ),
               ),
-
-            // Text fields with positioning
             ...registrationSettings.textFields
                 .where((field) => field.isEnabled)
                 .map((field) => Positioned(
@@ -111,88 +104,42 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
                               : FontStyle.normal,
                         ),
                         decoration: InputDecoration(
+                          floatingLabelBehavior: FloatingLabelBehavior.never,
                           labelText: field.label,
-                          labelStyle: TextStyle(
-                            color: field.labelColor,
-                          ),
                           hintText: field.hintText,
+                          labelStyle: TextStyle(
+                              fontSize: field.fontSize,
+                              color: field.labelColor),
                           filled: true,
                           fillColor: field.fillColor,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(
-                              field.borderRadius,
-                            ),
-                            borderSide: field.hasBorder
-                                ? BorderSide(
-                                    color: field.borderColor,
-                                    width: field.borderWidth,
-                                  )
-                                : BorderSide.none,
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(
-                              field.borderRadius,
-                            ),
-                            borderSide: field.hasBorder
-                                ? BorderSide(
-                                    color: field.borderColor,
-                                    width: field.borderWidth,
-                                  )
-                                : BorderSide.none,
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(
-                              field.borderRadius,
-                            ),
-                            borderSide: field.hasBorder
-                                ? BorderSide(
-                                    color: field.borderColor,
-                                    width: field.borderWidth,
-                                  )
-                                : BorderSide.none,
-                          ),
+                          border: field.hasBorder
+                              ? OutlineInputBorder(
+                                  borderRadius:
+                                      BorderRadius.circular(field.borderRadius),
+                                  borderSide: BorderSide(
+                                      color: field.borderColor,
+                                      width: field.borderWidth))
+                              : InputBorder.none,
+                          enabledBorder: field.hasBorder
+                              ? OutlineInputBorder(
+                                  borderRadius:
+                                      BorderRadius.circular(field.borderRadius),
+                                  borderSide: BorderSide(
+                                      color: field.borderColor,
+                                      width: field.borderWidth))
+                              : InputBorder.none,
+                          focusedBorder: field.hasBorder
+                              ? OutlineInputBorder(
+                                  borderRadius:
+                                      BorderRadius.circular(field.borderRadius),
+                                  borderSide: BorderSide(
+                                      color: field.borderColor,
+                                      width: field.borderWidth))
+                              : InputBorder.none,
                         ),
-                        validator: (value) {
-                          if (field.isRequired && (value?.isEmpty ?? true)) {
-                            return 'Please enter ${field.label.toLowerCase()}';
-                          }
-
-                          // Add type-specific validations
-                          if (value != null && value.isNotEmpty) {
-                            switch (field.fieldType) {
-                              case TextFieldType.email:
-                                // Email validation using regex
-                                final emailRegex =
-                                    RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-                                if (!emailRegex.hasMatch(value)) {
-                                  return 'Please enter a valid email address';
-                                }
-                                break;
-                              case TextFieldType.phone:
-                                // Phone validation - allow digits, spaces, and some special chars
-                                final phoneRegex = RegExp(
-                                    r'^[+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,4}[-\s\.]?[0-9]{1,9}$');
-                                if (!phoneRegex.hasMatch(value)) {
-                                  return 'Please enter a valid phone number';
-                                }
-                                break;
-                              case TextFieldType.name:
-                                // Name validation - minimum 2 characters
-                                if (value.length < 2) {
-                                  return 'Name must be at least 2 characters';
-                                }
-                                break;
-                              default:
-                                // No additional validation for custom fields
-                                break;
-                            }
-                          }
-                          return null;
-                        },
+                        // The validator property is removed to prevent in-field errors.
                       ),
                     )),
-
-            // Button with positioning
             Positioned(
               left: registrationSettings.buttonLeft,
               bottom: registrationSettings.buttonBottom,
@@ -200,30 +147,17 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
                   ? _buildImageButton(registrationSettings)
                   : _buildTextButton(registrationSettings),
             ),
-
-            // Admin settings access
             Positioned(
               right: 0,
               top: 0,
               child: GestureDetector(
-                onTap: () =>
-                    Navigator.pushNamed(context, AppRoutes.adminScreen),
+                onTap: () => Navigator.pushNamed(
+                    context, AppRoutes.registrationScreenSettings),
                 child: Container(
                   width: 50,
                   height: 50,
-                  decoration: const BoxDecoration(
-                    color: Colors.transparent,
-                  ),
+                  decoration: const BoxDecoration(color: Colors.transparent),
                 ),
-              ),
-            ),
-
-            // Hidden form for validation
-            Opacity(
-              opacity: 0,
-              child: Form(
-                key: _formKey,
-                child: Container(),
               ),
             ),
           ],
@@ -260,7 +194,7 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
             fontStyle:
                 settings.buttonIsItalic ? FontStyle.italic : FontStyle.normal,
             color: settings.submitButtonTextColor
-                .withValues(alpha: settings.buttonTextOpacity),
+                .withOpacity(settings.buttonTextOpacity),
           ),
         ),
       ),
@@ -269,7 +203,6 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
 
   Widget _buildImageButton(RegistrationScreenProvider settings) {
     if (settings.buttonImagePath == null) {
-      // Fallback to text button if no image is selected
       return _buildTextButton(settings);
     }
 
@@ -305,66 +238,77 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
   }
 
   void _handleSubmit() {
-    if (_formKey.currentState!.validate()) {
+    FocusScope.of(context).unfocus(); // Hide keyboard
+    final registrationSettings = context.read<RegistrationScreenProvider>();
+    String? firstErrorMessage;
+
+    // Manually validate each enabled field
+    for (var field in registrationSettings.textFields) {
+      if (field.isEnabled) {
+        final value = _controllers[field.id]?.text;
+        String? error;
+
+        if (field.isRequired && (value == null || value.isEmpty)) {
+          error = 'Please enter ${field.label.toLowerCase()}';
+        } else if (value != null && value.isNotEmpty) {
+          switch (field.fieldType) {
+            case TextFieldType.email:
+              final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+              if (!emailRegex.hasMatch(value)) {
+                error = 'Please enter a valid email address';
+              }
+              break;
+            case TextFieldType.phone:
+              final phoneRegex = RegExp(
+                  r'^[+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,4}[-\s\.]?[0-9]{1,9}$');
+              if (!phoneRegex.hasMatch(value)) {
+                error = 'Please enter a valid phone number';
+              }
+              break;
+            case TextFieldType.name:
+              if (value.length < 2) {
+                error = 'Name must be at least 2 characters';
+              }
+              break;
+            default:
+              break;
+          }
+        }
+
+        if (error != null) {
+          firstErrorMessage = error;
+          break; // Stop at the first error
+        }
+      }
+    }
+
+    if (firstErrorMessage != null) {
+      // If there's an error, show it in a SnackBar and do not proceed.
+      showSnackBar(context, firstErrorMessage, isError: true);
+    } else {
+      // If all fields are valid, proceed.
       final provider = Provider.of<PhotoboothProvider>(context, listen: false);
-      final registrationSettings = context.read<RegistrationScreenProvider>();
-      final appFlowProvider = context.read<AppFlowProvider>();
-
-      // Log controllers (optional debugging)
-      _controllers.forEach((key, controller) {});
-
-      // --- MODIFICATION START ---
-      // Find field IDs based on their type
-      String? nameFieldId = registrationSettings.textFields
-          .firstWhere((f) => f.isEnabled && f.fieldType == TextFieldType.name,
-              orElse: () => CustomTextField(
-                  id: '', label: '', hintText: '')) // Provide a dummy default
-          .id;
-      String? emailFieldId = registrationSettings.textFields
-          .firstWhere((f) => f.isEnabled && f.fieldType == TextFieldType.email,
-              orElse: () => CustomTextField(id: '', label: '', hintText: ''))
-          .id;
-
-      // // Example for phone:
-      String? phoneFieldId = registrationSettings.textFields
-          .firstWhere((f) => f.isEnabled && f.fieldType == TextFieldType.phone,
-              orElse: () => CustomTextField(id: '', label: '', hintText: ''))
-          .id;
-
-      // Retrieve text using the found IDs
       String name = '';
-      if (nameFieldId.isNotEmpty && _controllers.containsKey(nameFieldId)) {
-        name = _controllers[nameFieldId]!.text;
-      } else {
-        debugPrint('Could not find enabled Name field or its controller.');
-      }
-
       String email = '';
-      if (emailFieldId.isNotEmpty && _controllers.containsKey(emailFieldId)) {
-        email = _controllers[emailFieldId]!.text;
-      } else {
-        debugPrint('Could not find enabled Email field or its controller.');
+
+      for (var field in registrationSettings.textFields) {
+        if (field.isEnabled) {
+          if (field.fieldType == TextFieldType.name) {
+            name = _controllers[field.id]?.text ?? '';
+          } else if (field.fieldType == TextFieldType.email) {
+            email = _controllers[field.id]?.text ?? '';
+          }
+        }
       }
 
-      String phone = '';
-      if (_controllers.containsKey(phoneFieldId)) {
-        phone = _controllers[phoneFieldId]!.text;
-      } else {
-        debugPrint('Could not find enabled Phone field or its controller.');
-      }
-      // --- MODIFICATION END ---
-
-      // Set user details in provider
       provider.setUserDetails(name, email);
-
-      Navigator.pushNamed(context, AppRoutes.categoriesScreen);
+      Navigator.pushNamed(context, AppRoutes.genderSelection);
     }
   }
 
   ImageProvider _getBackgroundImage(
       RegistrationScreenProvider registrationSettings,
       GlobalSettingsProvider globalSettings) {
-    // First try to use registration screen specific background
     if (registrationSettings.registrationScreenBackground != null) {
       if (registrationSettings.isRegistrationScreenBackgroundAsset) {
         return AssetImage(registrationSettings.registrationScreenBackground!);
@@ -373,8 +317,6 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
             File(registrationSettings.registrationScreenBackground!));
       }
     }
-
-    // Fall back to global background if available
     if (globalSettings.backgroundImage != null) {
       if (globalSettings.isAssetImage) {
         return AssetImage(globalSettings.backgroundImage!);
@@ -382,8 +324,6 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
         return FileImage(File(globalSettings.backgroundImage!));
       }
     }
-
-    // Default background
-    return const AssetImage('assets/images/background.jpg');
+    return const AssetImage('assets/images/common_bg.png');
   }
 }

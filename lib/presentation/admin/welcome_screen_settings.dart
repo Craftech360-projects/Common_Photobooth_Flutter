@@ -340,8 +340,7 @@ class WelcomeScreenSettings extends StatelessWidget {
                         label: 'Button Width',
                         value: welcomeSettings.buttonWidth,
                         min: 100,
-                        max: 400,
-                        divisions: 60,
+                        max: 800,
                         onChanged: (value) =>
                             welcomeSettings.setButtonWidth(value),
                       ),
@@ -349,8 +348,7 @@ class WelcomeScreenSettings extends StatelessWidget {
                         label: 'Button Height',
                         value: welcomeSettings.buttonHeight,
                         min: 20,
-                        max: 120,
-                        divisions: 40,
+                        max: 300,
                         onChanged: (value) =>
                             welcomeSettings.setButtonHeight(value),
                       ),

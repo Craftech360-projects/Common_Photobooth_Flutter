@@ -7,35 +7,29 @@ import 'package:path_provider/path_provider.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// --- NEW ENUM ---
-enum TextFieldType {
-  name,
-  email,
-  phone, // Added phone as an example
-  custom, // For generic fields
-}
+enum TextFieldType { name, email, phone, custom }
 
 class CustomTextField {
-  String id;
-  String label;
-  String hintText;
+  final String id;
+  final String label;
+  final String hintText;
   bool isEnabled;
-  bool isRequired;
-  Color fillColor;
-  Color textColor;
-  Color labelColor;
-  double fontSize;
-  FontWeight fontWeight;
-  bool isItalic;
-  bool hasBorder;
-  double borderWidth;
-  Color borderColor;
-  double borderRadius;
-  double width;
-  double height;
-  TextFieldType fieldType;
-  double left;
-  double top;
+  final bool isRequired;
+  final Color fillColor;
+  final Color textColor;
+  final Color labelColor;
+  final double fontSize;
+  final FontWeight fontWeight;
+  final bool isItalic;
+  final bool hasBorder;
+  final double borderWidth;
+  final Color borderColor;
+  final double borderRadius;
+  final double width;
+  final double height;
+  final TextFieldType fieldType;
+  final double left;
+  final double top;
 
   CustomTextField({
     required this.id,
@@ -46,21 +40,66 @@ class CustomTextField {
     this.fillColor = AppColors.white,
     this.textColor = AppColors.black,
     this.labelColor = AppColors.black,
-    this.fontSize = 16.0,
+    this.fontSize = 46.0,
     this.fontWeight = FontWeight.w500,
     this.isItalic = false,
     this.hasBorder = true,
     this.borderWidth = 1.0,
     this.borderColor = AppColors.black,
-    this.borderRadius = 4.0,
-    this.width = 0.4, // Percentage of screen width
-    this.height = 60.0,
-    this.left = 350.0,
-    this.top = 940.0,
+    this.borderRadius = 0.0,
+    this.width = 0.65,
+    this.height = 70.0,
+    this.left = 180.0,
+    this.top = 880.0,
     this.fieldType = TextFieldType.custom,
   });
 
-  // Helper method for serialization (optional but good practice)
+  CustomTextField copyWith({
+    String? id,
+    String? label,
+    String? hintText,
+    bool? isEnabled,
+    bool? isRequired,
+    Color? fillColor,
+    Color? textColor,
+    Color? labelColor,
+    double? fontSize,
+    FontWeight? fontWeight,
+    bool? isItalic,
+    bool? hasBorder,
+    double? borderWidth,
+    Color? borderColor,
+    double? borderRadius,
+    double? width,
+    double? height,
+    TextFieldType? fieldType,
+    double? left,
+    double? top,
+  }) {
+    return CustomTextField(
+      id: id ?? this.id,
+      label: label ?? this.label,
+      hintText: hintText ?? this.hintText,
+      isEnabled: isEnabled ?? this.isEnabled,
+      isRequired: isRequired ?? this.isRequired,
+      fillColor: fillColor ?? this.fillColor,
+      textColor: textColor ?? this.textColor,
+      labelColor: labelColor ?? this.labelColor,
+      fontSize: fontSize ?? this.fontSize,
+      fontWeight: fontWeight ?? this.fontWeight,
+      isItalic: isItalic ?? this.isItalic,
+      hasBorder: hasBorder ?? this.hasBorder,
+      borderWidth: borderWidth ?? this.borderWidth,
+      borderColor: borderColor ?? this.borderColor,
+      borderRadius: borderRadius ?? this.borderRadius,
+      width: width ?? this.width,
+      height: height ?? this.height,
+      fieldType: fieldType ?? this.fieldType,
+      left: left ?? this.left,
+      top: top ?? this.top,
+    );
+  }
+
   Map<String, dynamic> toJson() => {
         'id': id,
         'label': label,
@@ -81,18 +120,14 @@ class CustomTextField {
         'height': height,
         'left': left,
         'top': top,
-        'fieldType': fieldType.name, // --- SERIALIZE ENUM NAME ---
+        'fieldType': fieldType.name,
       };
 
-  // Helper method for deserialization (optional but good practice)
   factory CustomTextField.fromJson(Map<String, dynamic> json) {
-    // Helper to safely get enum from name
     TextFieldType getTextFieldTypeFromName(String? name) {
       if (name == null) return TextFieldType.custom;
-      return TextFieldType.values.firstWhere(
-        (e) => e.name == name,
-        orElse: () => TextFieldType.custom, // Default if name doesn't match
-      );
+      return TextFieldType.values.firstWhere((e) => e.name == name,
+          orElse: () => TextFieldType.custom);
     }
 
     return CustomTextField(
@@ -116,8 +151,7 @@ class CustomTextField {
       height: json['height']?.toDouble() ?? 60.0,
       left: json['left']?.toDouble() ?? 350.0,
       top: json['top']?.toDouble() ?? 0.0,
-      fieldType: getTextFieldTypeFromName(
-          json['fieldType']), // --- DESERIALIZE ENUM NAME ---
+      fieldType: getTextFieldTypeFromName(json['fieldType']),
     );
   }
 }
@@ -133,8 +167,8 @@ class RegistrationScreenProvider extends ChangeNotifier {
   List<CustomTextField> _textFields = [];
 
   // Title settings
-  bool _showTitle = true;
-  String _titleText = "Enter Details";
+  bool _showTitle = false;
+  String _titleText = "";
   double _titleFontSize = 22.0;
   FontWeight _titleFontWeight = FontWeight.w500;
   double _titleLineHeight = 1.0;
@@ -145,33 +179,33 @@ class RegistrationScreenProvider extends ChangeNotifier {
   double _titleWidth = 300.0;
 
   // Button settings
-  bool _useImageButton = false;
+  bool _useImageButton = true;
   String _submitButtonText = 'SUBMIT';
   Color _submitButtonColor = AppColors.goldenYellow;
   Color _submitButtonTextColor = AppColors.black;
-  double _buttonWidth = 200.0;
-  double _buttonHeight = 45.0;
-  double _buttonBorderRadius = 4.0;
+  double _buttonWidth = 585.0;
+  double _buttonHeight = 150.0;
+  double _buttonBorderRadius = 0.0;
   double _buttonFontSize = 18.0;
   FontWeight _buttonFontWeight = FontWeight.w500;
   bool _buttonIsItalic = false;
   bool _buttonHasBorder = false;
-  double _buttonBorderWidth = 1.0;
+  double _buttonBorderWidth = 0.0;
   Color _buttonBorderColor = AppColors.white;
   EdgeInsets _buttonPadding =
       const EdgeInsets.symmetric(horizontal: 30, vertical: 15);
   double _buttonOpacity = 1.0;
   double _buttonTextOpacity = 1.0;
-  double _buttonLeft = 450.0;
-  double _buttonBottom = 999.0;
+  double _buttonLeft = 246.0;
+  double _buttonBottom = 530.0;
 
   // Image button settings
-  String? _buttonImagePath;
+  String? _buttonImagePath = 'assets/images/submit_btn.png';
   bool _isButtonImageAsset = true;
   double _buttonImageOpacity = 1.0;
 
   // Background settings
-  String? _registrationScreenBackground;
+  String? _registrationScreenBackground = 'assets/images/registration_bg.png';
   bool _isRegistrationScreenBackgroundAsset = true;
 
   // Getters
@@ -258,7 +292,8 @@ class RegistrationScreenProvider extends ChangeNotifier {
 
 // Load button position
     _buttonLeft = _prefs.getDouble('registration_button_left') ?? _buttonLeft;
-    _buttonBottom = _prefs.getDouble('registration_button_bottom') ?? _buttonBottom;
+    _buttonBottom =
+        _prefs.getDouble('registration_button_bottom') ?? _buttonBottom;
 
     // Load button padding
     final double verticalPadding =
@@ -290,6 +325,12 @@ class RegistrationScreenProvider extends ChangeNotifier {
     // Load button settings
     _useImageButton =
         _prefs.getBool('registration_use_image_button') ?? _useImageButton;
+    _buttonImagePath =
+        _prefs.getString('registration_button_image_path') ?? _buttonImagePath;
+    _isButtonImageAsset =
+        _prefs.getBool('registration_is_button_image_asset') ??
+            _isButtonImageAsset;
+
     _submitButtonText =
         _prefs.getString('registration_button_text') ?? _submitButtonText;
     _submitButtonColor = Color(
@@ -338,12 +379,6 @@ class RegistrationScreenProvider extends ChangeNotifier {
       );
     }
 
-    // Load image button settings
-    _buttonImagePath = _prefs.getString('registration_button_image_path');
-    _isButtonImageAsset =
-        _prefs.getBool('registration_is_button_image_asset') ??
-            _isButtonImageAsset;
-
     // Verify button image file exists if it's not an asset
     if (_buttonImagePath != null && !_isButtonImageAsset) {
       final file = File(_buttonImagePath!);
@@ -355,7 +390,8 @@ class RegistrationScreenProvider extends ChangeNotifier {
 
     // Load background settings
     _registrationScreenBackground =
-        _prefs.getString('registration_screen_background');
+        _prefs.getString('registration_screen_background') ??
+            _registrationScreenBackground;
     _isRegistrationScreenBackgroundAsset =
         _prefs.getBool('registration_is_screen_background_asset') ??
             _isRegistrationScreenBackgroundAsset;
@@ -437,11 +473,27 @@ class RegistrationScreenProvider extends ChangeNotifier {
   void _setDefaultTextFields() {
     _textFields = [
       CustomTextField(
-        id: 'name', // Keep original IDs for backward compatibility if needed
-        label: 'Full Name',
-        hintText: 'Enter full name',
-        fieldType: TextFieldType.name, // --- SET TYPE ---
-      )
+          id: 'name',
+          label: 'Full Name',
+          hintText: '',
+          fieldType: TextFieldType.name,
+          hasBorder: false,
+          fillColor: Colors.transparent,
+          labelColor: Colors.white,
+          textColor: Colors.white,
+          left: 180,
+          top: 880.0),
+      CustomTextField(
+          id: 'email',
+          label: 'Email Address',
+          hintText: '',
+          fieldType: TextFieldType.email,
+          hasBorder: false,
+          fillColor: Colors.transparent,
+          labelColor: Colors.white,
+          textColor: Colors.white,
+          left: 180,
+          top: 1060.0),
     ];
   }
 
@@ -510,19 +562,17 @@ class RegistrationScreenProvider extends ChangeNotifier {
   }
 
   // Text field methods
-  void addTextField() async {
-    if (_textFields.length >= 3) {
-      return; // Maximum 3 fields allowed
-    }
+  void addTextField() {
+    if (_textFields.length >= 3) return;
     final newField = CustomTextField(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
-      label: 'Contact Number', // Example label
-      hintText: 'Enter contact number',
-      fieldType: TextFieldType
-          .phone, // --- SET TYPE FOR NEW FIELD --- (Example: phone)
+      label: 'New Field',
+      hintText: 'Enter value',
+      fieldType: TextFieldType.custom,
+      top: 1060.0,
     );
     _textFields.add(newField);
-    await _saveTextFields();
+    _saveTextFields();
     notifyListeners();
   }
 
@@ -558,13 +608,11 @@ class RegistrationScreenProvider extends ChangeNotifier {
     }
   }
 
-  void updateTextField(String id, CustomTextField updatedField) async {
+  void updateTextField(String id, CustomTextField updatedField) {
     final index = _textFields.indexWhere((field) => field.id == id);
     if (index != -1) {
-      // Ensure the type isn't accidentally overwritten if not explicitly set
-      // Or, ensure the UI passes the correct type in updatedField
       _textFields[index] = updatedField;
-      await _saveTextFields();
+      _saveTextFields();
       notifyListeners();
     }
   }

@@ -4,7 +4,15 @@ import 'package:photobooth_flutter/core/constants/constants.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/providers/admin_watermark_provider.dart';
 import 'package:photobooth_flutter/providers/auth_provider.dart';
+import 'package:photobooth_flutter/providers/category_settings_provider.dart';
+import 'package:photobooth_flutter/providers/face_capture_provider.dart';
+import 'package:photobooth_flutter/providers/gender_selection_provider.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
+import 'package:photobooth_flutter/providers/loading_screen_provider.dart';
+import 'package:photobooth_flutter/providers/output_screen_provider.dart';
+import 'package:photobooth_flutter/providers/registration_screen_provider.dart';
+import 'package:photobooth_flutter/providers/theme_selection_provider.dart';
+import 'package:photobooth_flutter/providers/welcome_screen_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
 import 'package:photobooth_flutter/widgets/snackbar.dart';
 import 'package:photobooth_flutter/widgets/watermark_overlay.dart';
@@ -30,12 +38,18 @@ class _AdminScreenState extends State<AdminScreen> {
       _supabaseUrlController.text = globalSettings.supabaseUrl ?? '';
       _supabaseAnonKeyController.text = globalSettings.supabaseAnonKey ?? '';
 
-      // Set watermark visibility based on authentication status
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final watermarkProvider =
           Provider.of<AdminWatermarkProvider>(context, listen: false);
       watermarkProvider.setShowWatermark(!authProvider.isAuthenticated);
     });
+  }
+
+  @override
+  void dispose() {
+    _supabaseUrlController.dispose();
+    _supabaseAnonKeyController.dispose();
+    super.dispose();
   }
 
   @override
@@ -89,16 +103,11 @@ class _AdminScreenState extends State<AdminScreen> {
             backgroundColor: AppColors.black,
             foregroundColor: AppColors.white,
           ),
-          // --- MODIFICATION START ---
           onPressed: () async {
-            // Get the provider
             final authProvider =
                 Provider.of<AuthProvider>(context, listen: false);
-
-            // Call the logout method
             await authProvider.logout();
 
-            // Navigate to the auth screen and remove all previous routes
             if (mounted) {
               Navigator.of(context).pushNamedAndRemoveUntil(
                 AppRoutes.authScreen,
@@ -138,19 +147,53 @@ class _AdminScreenState extends State<AdminScreen> {
               foregroundColor: AppColors.red,
             ),
             onPressed: () async {
-              Navigator.pop(context);
+              // Pop the dialog first
+              Navigator.of(context).pop();
 
-              // Reset all providers
+              // Get all providers
               final globalSettings =
                   Provider.of<GlobalSettingsProvider>(context, listen: false);
+              final authProvider =
+                  Provider.of<AuthProvider>(context, listen: false);
 
+              // Clear all SharedPreferences data
               await globalSettings.clearAllPreferences();
 
-              // Update text controllers
+              // Log the user out, which clears secure storage and updates auth state
+              await authProvider.logout();
+
+              // Re-initialize all settings providers to load their default state
+              await Provider.of<WelcomeScreenProvider>(context, listen: false)
+                  .init();
+              await Provider.of<RegistrationScreenProvider>(context,
+                      listen: false)
+                  .init();
+              await Provider.of<GenderSelectionProvider>(context, listen: false)
+                  .init();
+              await Provider.of<CategorySettingsProvider>(context,
+                      listen: false)
+                  .init();
+              await Provider.of<ThemeSelectionProvider>(context, listen: false)
+                  .init();
+              await Provider.of<FaceCaptureProvider>(context, listen: false)
+                  .init();
+              await Provider.of<LoadingScreenProvider>(context, listen: false)
+                  .init();
+              await Provider.of<OutputScreenProvider>(context, listen: false)
+                  .init();
+
+              // Update the local text controllers in the AdminScreen
               _supabaseUrlController.text = '';
               _supabaseAnonKeyController.text = '';
 
-              showSnackBar(context, 'All preferences have been reset');
+              // Give user feedback and navigate
+              if (mounted) {
+                showSnackBar(context, 'All settings have been reset.');
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                  AppRoutes.authScreen,
+                  (Route<dynamic> route) => false,
+                );
+              }
             },
             child: const Text('Reset'),
           ),
@@ -169,7 +212,6 @@ class _GlobalSettingsSection extends StatelessWidget {
     required this.supabaseAnonKeyController,
   });
 
-  // In the _GlobalSettingsSection class
   @override
   Widget build(BuildContext context) {
     final globalSettings = context.watch<GlobalSettingsProvider>();
@@ -177,37 +219,26 @@ class _GlobalSettingsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Global Background Image',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
+        const Text('Global Background Image',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         Constants.h8,
         ElevatedButton(
           style: ElevatedButton.styleFrom(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(4),
-            ),
-          ),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(4))),
           onPressed: () async {
             try {
               final result = await FilePicker.platform.pickFiles(
-                type: FileType.image,
-                allowMultiple: false,
-                dialogTitle: 'Please select an image file',
-              );
-
-              if (result != null && result.files.isNotEmpty) {
-                final file = result.files.first;
-                if (file.path != null) {
-                  await globalSettings.setBackgroundImage(
-                    file.path!,
-                    isAsset: false,
-                  );
-                  showSnackBar(
-                      context, 'Background image updated successfully');
-                }
+                  type: FileType.image,
+                  allowMultiple: false,
+                  dialogTitle: 'Please select an image file');
+              if (result?.files.first.path != null) {
+                await globalSettings.setBackgroundImage(
+                    result!.files.first.path!,
+                    isAsset: false);
+                showSnackBar(context, 'Background image updated successfully');
               }
-            } on Exception catch (e) {
+            } catch (e) {
               debugPrint('Error picking file: $e');
               showSnackBar(context, 'Error selecting file: $e');
             }
@@ -216,73 +247,52 @@ class _GlobalSettingsSection extends StatelessWidget {
         ),
         if (globalSettings.backgroundImage != null)
           Padding(
-            padding: const EdgeInsets.only(top: 8.0),
-            child: Text('Selected: ${globalSettings.backgroundImage}'),
-          ),
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Text('Selected: ${globalSettings.backgroundImage}')),
         Constants.h24,
-
-        // Add Offline Mode Toggle
-        const Text(
-          'Storage Mode',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
+        const Text('Storage Mode',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         Constants.h8,
         SwitchListTile(
           title: const Text('Offline Mode'),
-          subtitle: Text(
-            globalSettings.isOfflineMode
-                ? 'Using local storage for images'
-                : 'Using Supabase for image storage',
-          ),
+          subtitle: Text(globalSettings.isOfflineMode
+              ? 'Using local storage for images'
+              : 'Using Supabase for image storage'),
           value: globalSettings.isOfflineMode,
           onChanged: (value) {
             globalSettings.setOfflineMode(value);
           },
         ),
-
-        // Show directory settings if in offline mode
         if (globalSettings.isOfflineMode) ...[
           ListTile(
             title: const Text('Input Directory'),
             subtitle: Text(globalSettings.inputDirectory ?? 'Not set'),
-            // Remove the trailing ElevatedButton for directory selection
           ),
           ListTile(
             title: const Text('Output Directory'),
             subtitle: Text(globalSettings.outputDirectory ?? 'Not set'),
-            // Remove the trailing ElevatedButton for directory selection
           ),
         ],
-
-        // Show Supabase settings if not in offline mode
         if (!globalSettings.isOfflineMode) ...[
-          const Text(
-            'Supabase Configuration',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
+          const Text('Supabase Configuration',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           Constants.h8,
           TextFormField(
             controller: supabaseUrlController,
             decoration: const InputDecoration(
-              labelText: 'Supabase URL',
-              border: OutlineInputBorder(),
-              hintText: 'https://your-project.supabase.co',
-            ),
-            onChanged: (value) {
-              globalSettings.setSupabaseUrl(value);
-            },
+                labelText: 'Supabase URL',
+                border: OutlineInputBorder(),
+                hintText: 'https://your-project.supabase.co'),
+            onChanged: (value) => globalSettings.setSupabaseUrl(value),
           ),
           const SizedBox(height: 12),
           TextFormField(
             controller: supabaseAnonKeyController,
             decoration: const InputDecoration(
-              labelText: 'Supabase Anon Key',
-              border: OutlineInputBorder(),
-              hintText: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9........',
-            ),
-            onChanged: (value) {
-              globalSettings.setSupabaseAnonKey(value);
-            },
+                labelText: 'Supabase Anon Key',
+                border: OutlineInputBorder(),
+                hintText: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9........'),
+            onChanged: (value) => globalSettings.setSupabaseAnonKey(value),
           ),
         ],
       ],
@@ -296,83 +306,75 @@ class _ScreenSettingsSection extends StatelessWidget {
     return Column(
       children: [
         _buildSettingCard(
-          context,
-          'Welcome Screen',
-          'Configure welcome screen appearance and content',
-          Icons.home,
-          () => Navigator.pushNamed(context, AppRoutes.welcomeScreenSettings),
-        ),
+            context,
+            'Welcome Screen',
+            'Configure welcome screen appearance and content',
+            Icons.home,
+            () =>
+                Navigator.pushNamed(context, AppRoutes.welcomeScreenSettings)),
+        _buildSettingCard(
+            context,
+            'Registration Screen',
+            'Configure registration form fields and appearance',
+            Icons.app_registration,
+            () => Navigator.pushNamed(
+                context, AppRoutes.registrationScreenSettings)),
+        _buildSettingCard(
+            context,
+            'Gender Selection Screen',
+            'Configure gender selection options and appearance',
+            Icons.people,
+            () => Navigator.pushNamed(context, AppRoutes.genderScreenSettings)),
+        _buildSettingCard(
+            context,
+            'Categories Screen',
+            'Configure main and sub-category cards',
+            Icons.category,
+            () =>
+                Navigator.pushNamed(context, AppRoutes.categoryScreenSettings)),
         _buildSettingCard(
           context,
-          'Registration Screen',
-          'Configure registration form fields and appearance',
-          Icons.app_registration,
-          () => Navigator.pushNamed(
-              context, AppRoutes.registrationScreenSettings),
+          'Theme Selection Screen',
+          'Configure theme carousel and appearance',
+          Icons.burst_mode,
+          // FIX: Corrected navigation route
+          () => Navigator.pushNamed(context, AppRoutes.themeSelectionSettings),
         ),
         _buildSettingCard(
-          context,
-          'Gender Selection Screen',
-          'Configure gender selection options and appearance',
-          Icons.people,
-          () => Navigator.pushNamed(context, AppRoutes.genderScreenSettings),
-        ),
+            context,
+            'Capturing Screen',
+            'Configure capturing options and appearance',
+            Icons.camera,
+            () => Navigator.pushNamed(context, AppRoutes.faceCaptureSettings)),
         _buildSettingCard(
-          context,
-          'Character Selection Screen',
-          'Configure character selection options and appearance',
-          Icons.tips_and_updates_rounded,
-          () => Navigator.pushNamed(context, AppRoutes.characterScreenSettings),
-        ),
+            context,
+            'Loading Screen',
+            'Configure loading screen appearance and animation',
+            Icons.hourglass_empty,
+            () =>
+                Navigator.pushNamed(context, AppRoutes.loadingScreenSettings)),
         _buildSettingCard(
-          context,
-          'Capturing Screen',
-          'Configure capturing options and appearance',
-          Icons.camera,
-          () => Navigator.pushNamed(context, AppRoutes.faceCaptureSettings),
-        ),
-        _buildSettingCard(
-          context,
-          'Loading Screen',
-          'Configure loading screen appearance and animation',
-          Icons.hourglass_empty,
-          () => Navigator.pushNamed(context, AppRoutes.loadingScreenSettings),
-        ),
-        _buildSettingCard(
-          context,
-          'Output Screen',
-          'Configure output screen appearance and content',
-          Icons.print_rounded,
-          () => Navigator.pushNamed(context, AppRoutes.outputScreenSettings),
-        ),
+            context,
+            'Output Screen',
+            'Configure output screen appearance and content',
+            Icons.print_rounded,
+            () => Navigator.pushNamed(context, AppRoutes.outputScreenSettings)),
       ],
     );
   }
 
-  Widget _buildSettingCard(
-    BuildContext context,
-    String title,
-    String description,
-    IconData icon,
-    VoidCallback onTap,
-  ) {
+  Widget _buildSettingCard(BuildContext context, String title,
+      String description, IconData icon, VoidCallback onTap) {
     return Card(
       margin: const EdgeInsets.only(bottom: 16.0),
       child: ListTile(
         leading: Icon(icon, size: 40),
-        title: Text(
-          title,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        title: Text(title,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         subtitle: Text(description),
         trailing: const Icon(Icons.arrow_forward_ios),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16.0,
-          vertical: 8.0,
-        ),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         onTap: onTap,
       ),
     );

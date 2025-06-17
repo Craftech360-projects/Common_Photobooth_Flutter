@@ -11,7 +11,7 @@ class WelcomeScreenProvider extends ChangeNotifier {
 
   // Welcome screen settings
   bool _showWelcomeScreen = true;
-  String _welcomeMessage = 'Welcome to\nNext Level AI Photobooth';
+  String _welcomeMessage = '';
 
   // Welcome message styling
   double _welcomeMessageFontSize = 22.0;
@@ -28,17 +28,17 @@ class WelcomeScreenProvider extends ChangeNotifier {
   double _welcomeMessageWidth = 300.0;
 
   // Position properties for button
-  double _buttonLeft = 455.0;
-  double _buttonBottom = 910.0;
+  double _buttonLeft = 245.0;
+  double _buttonBottom = 475.0;
 
   // Button settings
-  bool _useImageButton = false;
+  bool _useImageButton = true; // Default to image button
   String _welcomeButtonText = 'Get Started';
   Color _welcomeButtonColor = AppColors.goldenYellow;
   Color _welcomeButtonTextColor = AppColors.black;
-  double _buttonWidth = 200.0;
-  double _buttonHeight = 50.0;
-  double _buttonBorderRadius = 4.0;
+  double _buttonWidth = 585.0;
+  double _buttonHeight = 150.0;
+  double _buttonBorderRadius = 0.0;
 
   // Text button additional styling
   double _buttonTextFontSize = 18.0;
@@ -51,12 +51,14 @@ class WelcomeScreenProvider extends ChangeNotifier {
   double _buttonPaddingHorizontal = 0.0;
 
   // Image button settings
-  String? _buttonImagePath;
+  String? _buttonImagePath =
+      'assets/images/start_btn.png'; // Default button image
   bool _isButtonImageAsset = true;
   double _buttonImageOpacity = 1.0;
 
   // Background settings
-  String? _welcomeScreenBackground;
+  String? _welcomeScreenBackground =
+      'assets/images/welcome_bg.png'; // Default background
   bool _isWelcomeScreenBackgroundAsset = true;
 
   // Getters for welcome message styling
@@ -110,21 +112,20 @@ class WelcomeScreenProvider extends ChangeNotifier {
   Future<void> loadSettings() async {
     // Load welcome screen settings
     _showWelcomeScreen = _prefs.getBool('welcome_show_screen') ?? true;
-    _welcomeMessage =
-        _prefs.getString('welcome_message') ?? 'Welcome to the AI Photobooth!';
+    _welcomeMessage = _prefs.getString('welcome_message') ?? _welcomeMessage;
 
     // Load welcome message styling
     _welcomeMessageFontSize = _prefs.getDouble('welcome_message_font_size') ??
         _welcomeMessageFontSize;
     _welcomeMessageFontWeight = FontWeight.values[
         _prefs.getInt('welcome_message_font_weight') ??
-            _welcomeMessageFontWeight.index]; // Bold is index 3
+            _welcomeMessageFontWeight.index];
     _welcomeMessageLineHeight =
         _prefs.getDouble('welcome_message_line_height') ??
             _welcomeMessageLineHeight;
     _welcomeMessageTextAlign = TextAlign.values[
         _prefs.getInt('welcome_message_text_align') ??
-            _welcomeMessageTextAlign.index]; // Center is index 2
+            _welcomeMessageTextAlign.index];
     _welcomeMessageColor = Color(
         _prefs.getInt('welcome_message_color') ?? _welcomeMessageColor.value);
     _welcomeMessageOpacity =
@@ -142,7 +143,7 @@ class WelcomeScreenProvider extends ChangeNotifier {
     _buttonLeft = _prefs.getDouble('welcome_button_left') ?? _buttonLeft;
     _buttonBottom = _prefs.getDouble('welcome_button_bottom') ?? _buttonBottom;
 
-    /// Load button settings
+    // Load button settings
     _useImageButton =
         _prefs.getBool('welcome_use_image_button') ?? _useImageButton;
     _welcomeButtonText =
@@ -180,7 +181,8 @@ class WelcomeScreenProvider extends ChangeNotifier {
             _buttonPaddingHorizontal;
 
     // Load image button settings
-    _buttonImagePath = _prefs.getString('welcome_button_image_path');
+    _buttonImagePath =
+        _prefs.getString('welcome_button_image_path') ?? _buttonImagePath;
     _isButtonImageAsset =
         _prefs.getBool('welcome_is_button_image_asset') ?? _isButtonImageAsset;
     _buttonImageOpacity =
@@ -189,14 +191,15 @@ class WelcomeScreenProvider extends ChangeNotifier {
     // Verify button image file exists if it's not an asset
     if (_buttonImagePath != null && !_isButtonImageAsset) {
       final file = File(_buttonImagePath!);
-      if (!file.existsSync()) {
+      if (!await file.exists()) {
         _buttonImagePath = null;
         await _prefs.remove('welcome_button_image_path');
       }
     }
 
     // Load background settings
-    _welcomeScreenBackground = _prefs.getString('welcome_screen_background');
+    _welcomeScreenBackground = _prefs.getString('welcome_screen_background') ??
+        _welcomeScreenBackground;
     _isWelcomeScreenBackgroundAsset =
         _prefs.getBool('welcome_is_screen_background_asset') ??
             _isWelcomeScreenBackgroundAsset;
@@ -204,7 +207,7 @@ class WelcomeScreenProvider extends ChangeNotifier {
     // Verify background image file exists if it's not an asset
     if (_welcomeScreenBackground != null && !_isWelcomeScreenBackgroundAsset) {
       final file = File(_welcomeScreenBackground!);
-      if (!file.existsSync()) {
+      if (!await file.exists()) {
         _welcomeScreenBackground = null;
         await _prefs.remove('welcome_screen_background');
       }
