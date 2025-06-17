@@ -124,7 +124,7 @@ class _MyAppState extends State<MyApp> {
       onGenerateRoute: AppRoutes.onGenerateRoute,
       initialRoute: authProvider.isAuthenticated
           ? AppRoutes.welcomeScreen
-          : AppRoutes.welcomeScreen,
+          : AppRoutes.authScreen,
       debugShowCheckedModeBanner: false,
     );
   }
