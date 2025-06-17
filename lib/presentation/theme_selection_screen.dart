@@ -28,16 +28,6 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: settings.showTitle
-            ? Text(
-                settings.titleText,
-                style: TextStyle(
-                  color: settings.titleColor,
-                  fontSize: settings.titleFontSize,
-                  fontWeight: settings.titleFontWeight,
-                ),
-              )
-            : null,
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(

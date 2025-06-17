@@ -36,7 +36,7 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
     }
   }
 
-  Future<void> _processImage() async {
+   Future<void> _processImage() async {
     try {
       final provider = Provider.of<PhotoboothProvider>(context, listen: false);
 
@@ -60,7 +60,7 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
     }
   }
 
-  @override
+   @override
   Widget build(BuildContext context) {
     final outputSettings = Provider.of<OutputScreenProvider>(context);
     final globalSettings = Provider.of<GlobalSettingsProvider>(context);
@@ -256,9 +256,9 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
     if (imageUrl != null) {
       // Check if we're in offline mode and if the image is a local file path
       if (globalSettings.isOfflineMode && !imageUrl.startsWith('http')) {
-        // Display local file image
+        // MODIFIED: Use File.fromUri(Uri.file(path)) to correctly handle local file paths on Windows.
         return Image.file(
-          File(imageUrl),
+          File.fromUri(Uri.file(imageUrl)),
           fit: BoxFit.contain,
           errorBuilder: (context, error, stackTrace) {
             debugPrint('Error loading local image: $error');

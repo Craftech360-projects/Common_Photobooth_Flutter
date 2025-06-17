@@ -51,7 +51,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
   //   });
   // }
 
-  Future<void> _processImage() async {
+ Future<void> _processImage() async {
     try {
       final provider = Provider.of<PhotoboothProvider>(context, listen: false);
       final globalSettings =
@@ -137,8 +137,10 @@ class _LoadingScreenState extends State<LoadingScreen> {
       final characterNumber = Random().nextInt(4) + 1;
       final characterImageName =
           '${gender == 'male' ? 'm' : 'f'}$characterNumber.png';
+      
+      // MODIFIED: Construct a relative path for the theme character image.
       final characterImagePath =
-          'C:\\storage\\themes\\$gender\\$themeName\\$characterImageName';
+          'themes/$gender/$themeName/$characterImageName';
 
       final outputPathPrefix =
           LocalStorageService.instance.getOutputPathPrefix();
@@ -146,6 +148,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
       if (ComfyApiService.isInitialized) {
         try {
           final workflow = await Workflow.getWorkflow('swaplab.json');
+          
+          // These methods now receive relative paths
           workflow.updateInputImagePath(faceImagePath, nodeId: '35');
           workflow.updateSwaplabCharacterImage(characterImagePath);
           workflow.updateOutputImagePath(outputPathPrefix, nodeId: '37');
@@ -339,7 +343,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
       });
     }
   }
-
   // Future<void> _initializeVideoPlayer(LoadingScreenProvider settings) async {
   //   if (settings.loaderFilePath == null) return;
 

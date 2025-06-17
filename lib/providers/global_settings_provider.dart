@@ -96,8 +96,8 @@ class GlobalSettingsProvider with ChangeNotifier {
   // Initialize default directories for offline mode
   Future<void> _initializeOfflineDirectories() async {
     // Set fixed paths for input and output directories
-    _inputDirectory = "C:\\eventbooth_app\\storage\\input";
-    _outputDirectory = "C:\\eventbooth_app\\storage\\output";
+    _inputDirectory = "C:\\storage\\input";
+    _outputDirectory = "C:\\storage\\output";
 
     // Create directories if they don't exist
     final inputDir = Directory(_inputDirectory!);

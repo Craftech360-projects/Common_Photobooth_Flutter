@@ -77,7 +77,8 @@ class LocalStorageService {
       // Copy the file to the input directory
       await imageFile.copy(destinationPath);
 
-      return destinationPath;
+      // MODIFIED: Return the relative path for the API
+      return 'input/$fileName';
     } catch (e) {
       debugPrint('Error saving face image: $e');
       rethrow;
@@ -91,7 +92,8 @@ class LocalStorageService {
     }
 
     final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
-    return path.join(_outputDirectory, 'output_$timestamp.png');
+    // MODIFIED: Return the relative path for the API
+    return 'output/output_$timestamp.png';
   }
 
   // Check for new output image

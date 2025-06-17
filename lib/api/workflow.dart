@@ -27,13 +27,13 @@ class Workflow {
   void updateInputImagePath(String path, {String nodeId = '289'}) {
     if (_workflow.containsKey(nodeId) &&
         _workflow[nodeId].containsKey('inputs')) {
-      _workflow[nodeId]['inputs']['image_path'] = path;
+      _workflow[nodeId]['inputs']['image_path'] = path.replaceAll(r'\', '/');
     }
   }
 
   void updateSwaplabCharacterImage(String path) {
     if (_workflow.containsKey('36') && _workflow['36'].containsKey('inputs')) {
-      _workflow['36']['inputs']['image_path'] = path;
+      _workflow['36']['inputs']['image_path'] = path.replaceAll(r'\', '/');
     }
   }
 
@@ -42,7 +42,7 @@ class Workflow {
   void updateOutputImagePath(String path, {String nodeId = '288'}) {
     if (_workflow.containsKey(nodeId) &&
         _workflow[nodeId].containsKey('inputs')) {
-      _workflow[nodeId]['inputs']['path'] = path;
+      _workflow[nodeId]['inputs']['path'] = path.replaceAll(r'\', '/');
     }
   }
 

@@ -384,10 +384,11 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
     }
 
     if (!_cameraInitialized || _controller == null) {
-      return Center(
-        child: CircularProgressIndicator(
-          color: settings.previewBorderColor,
-        ),
+      return const Center(
+        child: SizedBox(),
+        // child: CircularProgressIndicator(
+        //   color: settings.previewBorderColor,
+        // ),
       );
     }
 

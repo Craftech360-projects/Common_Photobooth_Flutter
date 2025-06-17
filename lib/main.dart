@@ -1,3 +1,4 @@
+import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:camera_platform_interface/camera_platform_interface.dart';
 import 'package:camera_windows/camera_windows.dart';
 import 'package:flutter/material.dart';
@@ -97,6 +98,14 @@ void main() async {
       child: const MyApp(),
     ),
   );
+
+  doWhenWindowReady(() {
+    const initialSize = Size(1080, 1920);
+    appWindow.minSize = initialSize;
+    appWindow.size = initialSize;
+    appWindow.alignment = Alignment.center;
+    appWindow.show();
+  });
 }
 
 class MyApp extends StatefulWidget {

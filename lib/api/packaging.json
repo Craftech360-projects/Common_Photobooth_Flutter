@@ -423,10 +423,10 @@
   },
   "270": {
     "inputs": {
-      "text": "TRAINBOX, Create an artistic image of a fashion action figure styled like a doll in plastic packaging. The packaging should be sleek and modern, labeled with a luxury brand name at the top (e.g., \"COUNT VALENTINE – LONDON\"). The central figure is a stylish woman standing upright, wearing a neutral-toned, bodycon long-sleeve mini dress, paired with strappy high heels. Her pose is confident, and she wears black cat-eye sunglasses.\n\nTo the right of the figure, neatly arranged in separate compartments within the packaging, include the following accessories:\n\nA pair of gold hoop earrings.\n\nA structured handbag that matches the dress.\n\nA second pair of gold dangle earrings as an alternative option.\n\nThe entire layout should resemble a high-fashion collectible, merging editorial aesthetics with toy packaging design. Use a clean white background with subtle shadows to give depth and a high-end feel.\n",
-      "old": "[caption]",
+      "text": "TRAINBOX, Create an artistic image of a fashion action figure styled like a doll in plastic packaging. The packaging should be sleek and modern.To the right of the figure, neatly arranged in separate compartments within the packaging, include the following accessories:  \nshoes sunglasses helmet motorbikes\n\n",
+      "old": "[caption]", 
       "new": [
-        "268",
+        "268",  
         2
       ]
     },
