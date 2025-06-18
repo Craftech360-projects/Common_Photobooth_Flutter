@@ -110,7 +110,7 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
                           labelStyle: TextStyle(
                               fontSize: field.fontSize,
                               color: field.labelColor),
-                          filled: true,
+                          filled: false,
                           fillColor: field.fillColor,
                           border: field.hasBorder
                               ? OutlineInputBorder(
@@ -249,7 +249,7 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
         String? error;
 
         if (field.isRequired && (value == null || value.isEmpty)) {
-          error = 'Please enter ${field.label.toLowerCase()}';
+          error = 'Please fill in the ${field.label} field';
         } else if (value != null && value.isNotEmpty) {
           switch (field.fieldType) {
             case TextFieldType.email:

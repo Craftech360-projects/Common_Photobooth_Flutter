@@ -36,7 +36,7 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
     }
   }
 
-   Future<void> _processImage() async {
+  Future<void> _processImage() async {
     try {
       final provider = Provider.of<PhotoboothProvider>(context, listen: false);
 
@@ -60,7 +60,7 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
     }
   }
 
-   @override
+  @override
   Widget build(BuildContext context) {
     final outputSettings = Provider.of<OutputScreenProvider>(context);
     final globalSettings = Provider.of<GlobalSettingsProvider>(context);
@@ -185,7 +185,20 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
               ),
             ),
             clipBehavior: Clip.antiAlias,
-            child: _buildOutputImage(),
+            child: Stack(
+              children: [
+                _buildOutputImage(),
+                Positioned(
+                  top: 10,
+                  right: 10,
+                  child: Image.asset(
+                    fit: BoxFit.contain,
+                    'assets/images/cft_logo.png',
+                    width: 60,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         Positioned(

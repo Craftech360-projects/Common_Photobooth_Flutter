@@ -15,6 +15,7 @@ class PhotoboothProvider extends ChangeNotifier {
       capturedImageUrl; // Add this property to store the captured image URL
   DateTime? workflowSentTime; // Add this to track when workflow was sent
   theme_provider.Theme? selectedTheme;
+  String? accessories; // NEW: To store user-inputted accessories
 
   String get selectedGender => gender ?? 'male'; // Default to male if not set
 
@@ -34,6 +35,13 @@ class PhotoboothProvider extends ChangeNotifier {
     selectedTheme = theme;
     notifyListeners();
   }
+  
+  // NEW: Setter for accessories
+  void setAccessories(String text) {
+    accessories = text;
+    notifyListeners();
+  }
+
 
   void setCharacter(String id, String imagePath, bool isAsset) {
     selectedCharacterId = id;
@@ -76,6 +84,7 @@ class PhotoboothProvider extends ChangeNotifier {
     capturedImageUrl = null; // Clear this as well
     workflowSentTime = null; // Clear this as well
     selectedTheme = null;
+    accessories = null; // NEW: Reset accessories
     notifyListeners();
   }
 }

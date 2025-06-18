@@ -28,13 +28,21 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white, size: 30),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-      ),
+          toolbarHeight: 70,
+          leadingWidth: 170,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            // Add padding here for horizontal and vertical spacing
+            padding: const EdgeInsets.only(left: 0.0, top: 20.0, bottom: 0.0),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            icon: Image.asset(
+              'assets/images/back_btn.png',
+            ),
+            iconSize: 180,
+          )),
       body: Container(
         width: double.infinity,
         height: double.infinity,
@@ -132,12 +140,12 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> {
         case 1:
           scale = 0.9;
           yOffset = 30;
-          xOffset = -120;
+          xOffset = -100;
           break;
         case 2:
           scale = 0.9;
           yOffset = 30;
-          xOffset = 120;
+          xOffset = 150;
           break;
         default:
           scale = 0.8;
@@ -171,13 +179,13 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> {
           onPressed: () => setState(() => _currentIndex =
               (_currentIndex - 1 + themes.length) % themes.length),
         ),
-        SizedBox(width: settings.arrowSpacing),
+        const SizedBox(width: 150),
         SizedBox(
             width: 500,
             height: settings.carouselHeight,
             child: Stack(
                 alignment: Alignment.center, children: orderedStackChildren)),
-        SizedBox(width: settings.arrowSpacing),
+        const SizedBox(width: 150),
         IconButton(
           icon: Image.asset('assets/images/forward_arrow.png',
               width: 50, height: 50),
@@ -206,9 +214,10 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> {
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                      color: AppColors.goldenYellow.withOpacity(0.6),
-                      blurRadius: 15,
-                      spreadRadius: 2)
+                    color: AppColors.goldenYellow.withOpacity(0.6),
+                    blurRadius: 80,
+                    spreadRadius: 12,
+                  )
                 ]
               : [],
         ),

@@ -605,7 +605,7 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
                         value: settings.selectionGlowIntensity,
                         min: 0.1,
                         max: 1.0,
-                        divisions: 9,
+                        divisions: 18,
                         label:
                             settings.selectionGlowIntensity.toStringAsFixed(1),
                         onChanged: (value) {
@@ -666,7 +666,9 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
                         if (settings.buttonImagePath != null)
                           ElevatedButton(
                             onPressed: () {
-                              settings.setButtonImage('assets/images/next_btn.png', isAsset: true);
+                              settings.setButtonImage(
+                                  'assets/images/next_btn.png',
+                                  isAsset: true);
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.red,

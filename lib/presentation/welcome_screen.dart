@@ -7,6 +7,7 @@ import 'package:photobooth_flutter/providers/welcome_screen_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
 import 'package:photobooth_flutter/widgets/watermark_overlay.dart';
 import 'package:provider/provider.dart';
+import 'package:video_player/video_player.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -16,6 +17,25 @@ class WelcomeScreen extends StatefulWidget {
 }
 
 class _WelcomeScreenState extends State<WelcomeScreen> {
+  late VideoPlayerController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = VideoPlayerController.asset('assets/videos/welcome_bg.mp4')
+      ..initialize().then((_) {
+        _controller.setLooping(true);
+        _controller.play();
+        setState(() {});
+      });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final welcomeSettings = context.watch<WelcomeScreenProvider>();
@@ -35,39 +55,19 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         show: watermarkProvider.showWatermark,
         child: Stack(
           children: [
-            // Background
-            Container(
-              width: double.infinity,
-              height: double.infinity,
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: _getBackgroundImage(welcomeSettings, globalSettings),
-                  fit: BoxFit.cover,
+            // Background Video
+            SizedBox.expand(
+              child: FittedBox(
+                fit: BoxFit.cover,
+                child: SizedBox(
+                  width: _controller.value.size.width,
+                  height: _controller.value.size.height,
+                  child: VideoPlayer(_controller),
                 ),
               ),
             ),
 
-            // Content
-            Positioned(
-              left: welcomeSettings.welcomeMessageLeft,
-              top: welcomeSettings.welcomeMessageTop,
-              width: welcomeSettings.welcomeMessageWidth,
-              child: Text(
-                welcomeSettings.welcomeMessage,
-                style: TextStyle(
-                  fontSize: welcomeSettings.welcomeMessageFontSize,
-                  fontWeight: welcomeSettings.welcomeMessageFontWeight,
-                  color: welcomeSettings.welcomeMessageColor
-                      .withValues(alpha: welcomeSettings.welcomeMessageOpacity),
-                  fontStyle: welcomeSettings.welcomeMessageItalic
-                      ? FontStyle.italic
-                      : FontStyle.normal,
-                  height: welcomeSettings.welcomeMessageLineHeight,
-                ),
-                textAlign: welcomeSettings.welcomeMessageTextAlign,
-              ),
-            ),
-
+            // Your existing content on top of the video
             Positioned(
               left: welcomeSettings.buttonLeft,
               bottom: welcomeSettings.buttonBottom,
@@ -162,29 +162,5 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         ),
       ),
     );
-  }
-
-  ImageProvider _getBackgroundImage(WelcomeScreenProvider welcomeSettings,
-      GlobalSettingsProvider globalSettings) {
-    // First try to use welcome screen specific background
-    if (welcomeSettings.welcomeScreenBackground != null) {
-      if (welcomeSettings.isWelcomeScreenBackgroundAsset) {
-        return AssetImage(welcomeSettings.welcomeScreenBackground!);
-      } else {
-        return FileImage(File(welcomeSettings.welcomeScreenBackground!));
-      }
-    }
-
-    // Fall back to global background
-    if (globalSettings.backgroundImage != null) {
-      if (globalSettings.isAssetImage) {
-        return AssetImage(globalSettings.backgroundImage!);
-      } else {
-        return FileImage(File(globalSettings.backgroundImage!));
-      }
-    }
-
-    // Default background
-    return const AssetImage('assets/images/common_bg.png');
   }
 }

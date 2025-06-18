@@ -493,7 +493,7 @@ class RegistrationScreenProvider extends ChangeNotifier {
           labelColor: Colors.white,
           textColor: Colors.white,
           left: 180,
-          top: 1060.0),
+          top: 1066.0),
     ];
   }
 

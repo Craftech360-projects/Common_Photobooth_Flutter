@@ -39,11 +39,11 @@ class GenderSelectionProvider extends ChangeNotifier {
 
   // Selection effect settings
   bool _useSelectionEffect = true;
-  double _selectedImageScale = 1.05;
+  double _selectedImageScale = 1.0;
   bool _useSelectionGlow = true;
   Color _selectionGlowColor = AppColors.white;
-  double _selectionGlowIntensity = 0.6;
-  double _selectionGlowSpread = 8.0;
+  double _selectionGlowIntensity = 0.35;
+  double _selectionGlowSpread = 20.0;
 
   // Button settings
   String _buttonText = 'Continue';

@@ -15,15 +15,6 @@ class Workflow {
     return Workflow(workflow);
   }
 
-  /// Update the Supabase watcher node with the unique ID of the database row.
-  /// Node 283 is the SupabaseTableWatcherNode.
-  // void updateSupabaseWatcherNode(String uniqueId) {
-  //   if (_workflow.containsKey('283') &&
-  //       _workflow['283'].containsKey('inputs')) {
-  //     _workflow['283']['inputs']['unique_id'] = uniqueId;
-  //   }
-  // }
-
   void updateInputImagePath(String path, {String nodeId = '289'}) {
     if (_workflow.containsKey(nodeId) &&
         _workflow[nodeId].containsKey('inputs')) {
@@ -54,13 +45,18 @@ class Workflow {
     }
   }
 
-  // /// Update the noise seed in the workflow
-  // /// Node 25 is the RandomNoise node.
-  // void updateNoiseSeed(int seed) {
-  //   if (_workflow.containsKey('25') && _workflow['25'].containsKey('inputs')) {
-  //     _workflow['25']['inputs']['noise_seed'] = seed;
-  //   }
-  // }
+  /// NEW: Updates the prompt for the packaging workflow with gender and accessories.
+  void updatePackagingPrompt(String gender, String accessories) {
+    if (_workflow.containsKey('270') &&
+        _workflow['270'].containsKey('inputs')) {
+      // Construct the new prompt
+      final String newPrompt =
+          "TRAINBOX, Create an artistic image of a fashion action figure styled like a doll in plastic packaging. The packaging should be sleek and modern. The central figure is a stylish $gender. To the right of the figure, neatly arranged in separate compartments within the packaging, include the following accessories:\n$accessories\n\n";
+
+      // Update the prompt text in the workflow
+      _workflow['270']['inputs']['text'] = newPrompt;
+    }
+  }
 
   Map<String, dynamic> toMap() {
     return _workflow;
