@@ -1,13 +1,13 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:media_kit/media_kit.dart';
+import 'package:media_kit_video/media_kit_video.dart';
 import 'package:photobooth_flutter/providers/admin_watermark_provider.dart';
-import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/providers/welcome_screen_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
 import 'package:photobooth_flutter/widgets/watermark_overlay.dart';
 import 'package:provider/provider.dart';
-import 'package:video_player/video_player.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -17,37 +17,35 @@ class WelcomeScreen extends StatefulWidget {
 }
 
 class _WelcomeScreenState extends State<WelcomeScreen> {
-  late VideoPlayerController _controller;
+  late final Player _player;
+  late final VideoController _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.asset('assets/videos/welcome_bg.mp4')
-      ..initialize().then((_) {
-        _controller.setLooping(true);
-        _controller.play();
-        setState(() {});
-      });
+    _player = Player();
+    _controller = VideoController(_player);
+    _player.open(Media('asset://assets/videos/welcome_bg.mp4'), play: true);
+    // Correct: Use setPlaylistMode for looping
+    _player.setPlaylistMode(PlaylistMode.single);
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _player.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final welcomeSettings = context.watch<WelcomeScreenProvider>();
-    final globalSettings = context.watch<GlobalSettingsProvider>();
     final watermarkProvider = context.watch<AdminWatermarkProvider>();
 
-    // If welcome screen is disabled, navigate directly to participant details
     if (!welcomeSettings.showWelcomeScreen) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.pushReplacementNamed(context, AppRoutes.participantDetails);
       });
-      return const SizedBox.shrink(); // Return empty widget while redirecting
+      return const SizedBox.shrink();
     }
 
     return Scaffold(
@@ -55,19 +53,14 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         show: watermarkProvider.showWatermark,
         child: Stack(
           children: [
-            // Background Video
+            // CORRECTED WIDGET STRUCTURE
             SizedBox.expand(
-              child: FittedBox(
-                fit: BoxFit.cover,
-                child: SizedBox(
-                  width: _controller.value.size.width,
-                  height: _controller.value.size.height,
-                  child: VideoPlayer(_controller),
-                ),
+              child: Video(
+                controller: _controller,
+                controls: NoVideoControls,
+                fit: BoxFit.cover, // Apply the fit property directly here
               ),
             ),
-
-            // Your existing content on top of the video
             Positioned(
               left: welcomeSettings.buttonLeft,
               bottom: welcomeSettings.buttonBottom,
@@ -75,8 +68,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   ? _buildImageButton(welcomeSettings)
                   : _buildTextButton(welcomeSettings),
             ),
-
-            // Admin access button (hidden at bottom)
             Positioned(
               right: 0,
               top: 0,

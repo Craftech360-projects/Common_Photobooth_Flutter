@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:photobooth_flutter/core/constants/constants.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/providers/admin_watermark_provider.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
@@ -40,13 +39,11 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
     try {
       final provider = Provider.of<PhotoboothProvider>(context, listen: false);
 
-      // If we already have a captured image URL, use it
       if (provider.capturedImageUrl != null) {
         setState(() => _isLoading = false);
         return;
       }
 
-      // Otherwise, this is a fallback for testing
       setState(() {
         _isLoading = false;
         _errorMessage = 'No image URL available';
@@ -86,6 +83,7 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
   }
 
   Widget _buildPreviewContent(OutputScreenProvider settings) {
+    // This preview doesn't need to be flow-aware, it's just a placeholder
     return Stack(
       children: [
         if (settings.showTitle)
@@ -103,9 +101,7 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
               textAlign: TextAlign.center,
             ),
           ),
-        Positioned(
-          left: settings.imageLeft,
-          top: settings.imageTop,
+        Center(
           child: Container(
             width: settings.imageWidth,
             height: settings.imageHeight,
@@ -122,12 +118,6 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
             ),
           ),
         ),
-        // QR code placeholder
-        // Positioned(
-        //     left: settings.qrCodeLeft,
-        //     bottom: settings.qrCodeBottom,
-        //     child: _buildQrCodeWithText(settings)),
-        // Button placeholder
         Positioned(
           left: settings.buttonLeft,
           bottom: settings.buttonBottom,
@@ -144,16 +134,27 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
         ? const Center(
             child: CircularProgressIndicator(color: AppColors.goldenYellow))
         : _errorMessage != null
-            ? const Center(/* existing error content */)
+            ? Center(
+                child: Text(_errorMessage!,
+                    style: const TextStyle(color: Colors.red, fontSize: 18)))
             : _buildSuccessContent(
                 context, Provider.of<OutputScreenProvider>(context));
   }
 
   Widget _buildSuccessContent(
       BuildContext context, OutputScreenProvider settings) {
+    final photoboothProvider = context.read<PhotoboothProvider>();
+    // Determine which flow is active to apply the correct layout
+    final isSwaplabFlow = photoboothProvider.selectedTheme != null;
+
+    final double imageWidth =
+        isSwaplabFlow ? settings.swaplabImageWidth : settings.imageWidth;
+    final double imageHeight =
+        isSwaplabFlow ? settings.swaplabImageHeight : settings.imageHeight;
+
     return Stack(
+      alignment: Alignment.center,
       children: [
-        // Title
         if (settings.showTitle)
           Positioned(
             left: settings.titleLeft,
@@ -170,13 +171,11 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
             ),
           ),
 
-        // Output Image
-        Positioned(
-          left: settings.imageLeft,
-          top: settings.imageTop,
+        // This Container is now centered and uses the correct dimensions
+        Center(
           child: Container(
-            width: settings.imageWidth,
-            height: settings.imageHeight,
+            width: imageWidth,
+            height: imageHeight,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(settings.imageBorderRadius),
               border: Border.all(
@@ -192,15 +191,16 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
                   top: 10,
                   right: 10,
                   child: Image.asset(
-                    fit: BoxFit.contain,
                     'assets/images/cft_logo.png',
-                    width: 60,
+                    width: 120,
+                    fit: BoxFit.contain,
                   ),
                 ),
               ],
             ),
           ),
         ),
+
         Positioned(
           left: settings.buttonLeft,
           bottom: settings.buttonBottom,
@@ -214,7 +214,10 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
 
   Widget _buildTextButton(OutputScreenProvider settings) {
     return ElevatedButton(
-      onPressed: () => Navigator.of(context).pushReplacementNamed('/'),
+      onPressed: () {
+        Provider.of<PhotoboothProvider>(context, listen: false).clearUserData();
+        Navigator.of(context).pushReplacementNamed('/');
+      },
       style: ElevatedButton.styleFrom(
         backgroundColor: settings.buttonColor,
         foregroundColor: settings.buttonTextColor,
@@ -237,10 +240,13 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
 
   Widget _buildImageButton(OutputScreenProvider settings) {
     if (settings.buttonImagePath == null) {
-      return _buildTextButton(settings); // Fallback to text button
+      return _buildTextButton(settings);
     }
     return GestureDetector(
-      onTap: () => Navigator.of(context).pushReplacementNamed('/'),
+      onTap: () {
+        Provider.of<PhotoboothProvider>(context, listen: false).clearUserData();
+        Navigator.of(context).pushReplacementNamed('/');
+      },
       child: Container(
         width: settings.buttonWidth,
         height: settings.buttonHeight,
@@ -262,59 +268,34 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
     final globalSettings =
         Provider.of<GlobalSettingsProvider>(context, listen: false);
 
-    // First try to use swappedImageUrl, then fall back to capturedImageUrl if needed
-    final imageUrl = provider.swappedImageUrl;
+    final imageUrl = provider.swappedImageUrl ?? provider.capturedImageUrl;
     debugPrint('Attempting to load image from URL: $imageUrl');
 
     if (imageUrl != null) {
-      // Check if we're in offline mode and if the image is a local file path
       if (globalSettings.isOfflineMode && !imageUrl.startsWith('http')) {
-        // MODIFIED: Use File.fromUri(Uri.file(path)) to correctly handle local file paths on Windows.
         return Image.file(
           File.fromUri(Uri.file(imageUrl)),
-          fit: BoxFit.contain,
+          fit: BoxFit.cover, // Use BoxFit.cover to fill the container
           errorBuilder: (context, error, stackTrace) {
             debugPrint('Error loading local image: $error');
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.error, color: AppColors.red, size: 50),
-                Constants.h8,
-                Text('Error: $error',
-                    style: const TextStyle(color: AppColors.white)),
-              ],
-            );
+            return const Center(
+                child: Text('Error loading image',
+                    style: TextStyle(color: Colors.red)));
           },
         );
       } else {
-        // Display online image from URL
         return Image.network(
           imageUrl,
-          fit: BoxFit.contain,
+          fit: BoxFit.cover, // Use BoxFit.cover to fill the container
           loadingBuilder: (context, child, loadingProgress) {
             if (loadingProgress == null) return child;
-            debugPrint(
-                'Loading progress: ${loadingProgress.cumulativeBytesLoaded}/${loadingProgress.expectedTotalBytes}');
-            return Center(
-              child: CircularProgressIndicator(
-                value: loadingProgress.expectedTotalBytes != null
-                    ? loadingProgress.cumulativeBytesLoaded /
-                        loadingProgress.expectedTotalBytes!
-                    : null,
-              ),
-            );
+            return const Center(child: CircularProgressIndicator());
           },
           errorBuilder: (context, error, stackTrace) {
             debugPrint('Error loading image: $error');
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.error, color: AppColors.red, size: 50),
-                Constants.h8,
-                Text('Error: $error',
-                    style: const TextStyle(color: AppColors.white)),
-              ],
-            );
+            return const Center(
+                child: Text('Error loading image',
+                    style: TextStyle(color: Colors.red)));
           },
         );
       }
@@ -328,7 +309,6 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
 
   ImageProvider _getBackgroundImage(
       OutputScreenProvider settings, GlobalSettingsProvider globalSettings) {
-    // First try to use gender screen specific background
     if (settings.showBackground && settings.backgroundImagePath != null) {
       if (settings.isBackgroundImageAsset) {
         return AssetImage(settings.backgroundImagePath!);
@@ -337,7 +317,6 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
       }
     }
 
-    // Fall back to global background if available
     if (globalSettings.backgroundImage != null) {
       if (globalSettings.isAssetImage) {
         return AssetImage(globalSettings.backgroundImage!);
@@ -345,8 +324,6 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
         return FileImage(File(globalSettings.backgroundImage!));
       }
     }
-
-    // Default background
     return const AssetImage('assets/images/common_bg.png');
   }
 }

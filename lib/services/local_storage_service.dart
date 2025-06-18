@@ -104,7 +104,6 @@ class LocalStorageService {
     }
 
     try {
-      
       final outputDir = Directory(_outputDirectory);
       if (!await outputDir.exists()) {
         return null;
@@ -123,19 +122,54 @@ class LocalStorageService {
         return matches;
       }).toList();
   
+      if (matchingFiles.isEmpty) {
+        return null;
+      }
   
       // Sort by creation time (newest first)
       matchingFiles.sort((a, b) {
         return b.statSync().modified.compareTo(a.statSync().modified);
       });
   
-      // Return the path of the newest file if any
-      if (matchingFiles.isNotEmpty) {
-        return matchingFiles.first.path;
+      // Get the newest file
+      final newestFile = matchingFiles.first;
+
+      // === FIX STARTS HERE ===
+      // Check for file stability to prevent reading an incomplete file.
+      try {
+        final initialLength = await newestFile.length();
+
+        // If the file is empty, it's definitely not ready.
+        if (initialLength == 0) {
+          debugPrint('File ${newestFile.path} found but is empty. Waiting...');
+          return null;
+        }
+
+        // Wait a brief moment to see if the file size changes.
+        await Future.delayed(const Duration(milliseconds: 250));
+        
+        final finalLength = await newestFile.length();
+
+        if (initialLength != finalLength) {
+          // The file size has changed, meaning it's still being written.
+          // Return null to let the polling loop in LoadingScreen try again.
+          debugPrint('File ${newestFile.path} is still being written (size changed from $initialLength to $finalLength). Waiting...');
+          return null;
+        }
+
+        // File size is stable and not zero, assume it's ready.
+        debugPrint('File ${newestFile.path} appears stable (size: $finalLength). Proceeding.');
+        return newestFile.path;
+
+      } catch (e) {
+        // This can happen if the file is deleted between listing and checking.
+        debugPrint('Error checking file stability for ${newestFile.path}: $e');
+        return null;
       }
+      // === FIX ENDS HERE ===
   
-      return null;
-    } on Exception {
+    } on Exception catch(e) {
+      debugPrint("Error in getLatestOutputImage: $e");
       return null;
     }
   }

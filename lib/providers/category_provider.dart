@@ -23,7 +23,8 @@ class CategoryProvider extends ChangeNotifier {
     _selectedWorkflow = workflowFileName;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('selected_workflow', workflowFileName);
-    debugPrint("Selected workflow saved: $workflowFileName");
+    // Print statement to confirm which workflow is being saved
+    debugPrint("[CategoryProvider] Selected workflow saved: $workflowFileName");
     notifyListeners();
   }
 

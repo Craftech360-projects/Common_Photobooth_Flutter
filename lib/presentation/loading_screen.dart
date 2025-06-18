@@ -3,12 +3,12 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:media_kit/media_kit.dart';
+import 'package:media_kit_video/media_kit_video.dart';
 import 'package:path/path.dart' as path;
 import 'package:photobooth_flutter/api/workflow.dart';
-import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/models/user_model.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
-import 'package:photobooth_flutter/providers/loading_screen_provider.dart';
 import 'package:photobooth_flutter/providers/photobooth_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
 import 'package:photobooth_flutter/services/comfy_api_service.dart';
@@ -16,7 +16,6 @@ import 'package:photobooth_flutter/services/local_storage_service.dart';
 import 'package:photobooth_flutter/services/sqflite_service.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:video_player/video_player.dart';
 
 class LoadingScreen extends StatefulWidget {
   const LoadingScreen({super.key});
@@ -26,42 +25,36 @@ class LoadingScreen extends StatefulWidget {
 }
 
 class _LoadingScreenState extends State<LoadingScreen> {
-  late VideoPlayerController _videoController;
+  late final Player _player;
+  late final VideoController _videoController;
   String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
-
-    _videoController =
-        VideoPlayerController.asset('assets/videos/loading_bg.mp4')
-          ..initialize().then((_) {
-            _videoController.setLooping(true);
-            _videoController.play();
-            if (mounted) {
-              setState(() {});
-            }
-          });
+    _player = Player();
+    _videoController = VideoController(_player);
+    _player.open(Media('asset://assets/videos/loading_bg.mp4'), play: true);
+    // Correct: Use setPlaylistMode for looping
+    _player.setPlaylistMode(PlaylistMode.single);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _processImage();
     });
   }
 
+  // MODIFIED: This function now stops the video when an error is set.
   @override
   void dispose() {
-    _videoController.dispose();
+    _player.dispose();
     super.dispose();
   }
 
-  // MODIFIED: This function now stops the video when an error is set.
   void _setErrorMessage(String message) {
     if (mounted) {
       setState(() {
         _errorMessage = message;
-        if (_videoController.value.isPlaying) {
-          _videoController.pause();
-        }
+        _player.pause();
       });
     }
   }
@@ -145,6 +138,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
       if (ComfyApiService.isInitialized) {
         try {
           final workflow = await Workflow.getWorkflow('swaplab.json');
+          debugPrint("[LoadingScreen] Sending workflow: swaplab.json");
 
           workflow.updateInputImagePath(faceImagePath, nodeId: '35');
           workflow.updateSwaplabCharacterImage(characterImagePath);
@@ -161,7 +155,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
           }
 
           int attempts = 0;
-          const maxAttempts = 90;
+          const maxAttempts = 150;
           const pollDelay = Duration(seconds: 2);
 
           final outputPrefix = path.basename(outputPathPrefix);
@@ -235,16 +229,18 @@ class _LoadingScreenState extends State<LoadingScreen> {
           final workflowFileName = prefs.getString('selected_workflow');
           if (workflowFileName == null) {
             _setErrorMessage(
-                'Error: No workflow selected. Please re-authenticate.');
+                'Error: No workflow selected. Please return to the category screen and make a selection.');
             return;
           }
 
           final workflow = await Workflow.getWorkflow(workflowFileName);
+          debugPrint(
+              "[LoadingScreen] Sending workflow from category selection: $workflowFileName");
 
           if (workflowFileName == 'packaging.json') {
             final gender = provider.gender ?? 'person';
-            final accessories = provider.accessories ??
-                'shoes, sunglasses, helmet, motorbikes';
+            final accessories =
+                provider.accessories ?? 'shoes, sunglasses, helmet, motorbikes';
             workflow.updatePackagingPrompt(gender, accessories);
           }
 
@@ -263,7 +259,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
           }
 
           int attempts = 0;
-          const maxAttempts = 90;
+          const maxAttempts = 150;
           const pollDelay = Duration(seconds: 2);
 
           final outputPrefix = path.basename(outputPathPrefix);
@@ -311,26 +307,20 @@ class _LoadingScreenState extends State<LoadingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // MODIFIED: The body's background color is black to avoid flashes
       backgroundColor: Colors.black,
       body: Center(
         child: _errorMessage != null
-            // If there's an error, show the error message UI
             ? _buildErrorDisplay()
-            // Otherwise, show the video player
-            : _videoController.value.isInitialized
-                ? AspectRatio(
-                    aspectRatio: _videoController.value.aspectRatio,
-                    child: VideoPlayer(_videoController),
-                  )
-                // Before video is initialized, show a blank container
-                : Container(),
+            : Video(
+                controls: NoVideoControls,
+                controller: _videoController,
+              ),
       ),
     );
   }
 
   // NEW: A dedicated widget to display the error message.
-  Widget _buildErrorDisplay() {
+ Widget _buildErrorDisplay() {
     return Padding(
       padding: const EdgeInsets.all(32.0),
       child: Column(
@@ -341,9 +331,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
           const Text(
             'An Error Occurred',
             style: TextStyle(
-                color: Colors.white,
-                fontSize: 28,
-                fontWeight: FontWeight.bold),
+                color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
           Text(

@@ -21,10 +21,17 @@ class OutputScreenProvider extends ChangeNotifier {
   FontWeight _titleFontWeight = FontWeight.w500;
   Color _titleColor = AppColors.white;
   bool _showTitle = false;
+
+  // AI Artistry Image settings
   double _imageWidth = 900.0, _imageHeight = 506.0;
   double _imageBorderRadius = 12.0;
   Color _imageBorderColor = Colors.transparent;
   double _imageBorderWidth = 0.0;
+
+  // NEW: Swaplab Image settings
+  double _swaplabImageWidth = 450.0;
+  double _swaplabImageHeight = 675.0;
+
   String _buttonText = 'Start Over';
   double _buttonFontSize = 18.0;
   Color _buttonColor = AppColors.yellow, _buttonTextColor = AppColors.black;
@@ -32,12 +39,10 @@ class OutputScreenProvider extends ChangeNotifier {
   double _buttonBorderRadius = 4.0;
   double _buttonWidth = 580.0, _buttonHeight = 150.0;
 
-  // NEW: Image Button Defaults
   bool _useImageButton = true;
   String? _buttonImagePath = 'assets/images/home_btn.png';
   bool _isButtonImageAsset = true;
 
-  // Background settings
   String? _backgroundImagePath;
   bool _isBackgroundImageAsset = true;
   bool _showBackground = false;
@@ -47,14 +52,12 @@ class OutputScreenProvider extends ChangeNotifier {
   String? get buttonImagePath => _buttonImagePath;
   bool get isButtonImageAsset => _isButtonImageAsset;
 
-  // Getters for other properties
   String get titleText => _titleText;
   double get titleFontSize => _titleFontSize;
   FontWeight get titleFontWeight => _titleFontWeight;
   Color get titleColor => _titleColor;
   bool get showTitle => _showTitle;
 
-  // Getters for position properties
   double get titleLeft => _titleLeft;
   double get titleTop => _titleTop;
   double get titleWidth => _titleWidth;
@@ -73,6 +76,10 @@ class OutputScreenProvider extends ChangeNotifier {
   double get imageBorderRadius => _imageBorderRadius;
   Color get imageBorderColor => _imageBorderColor;
   double get imageBorderWidth => _imageBorderWidth;
+  
+  // NEW: Getters for Swaplab dimensions
+  double get swaplabImageWidth => _swaplabImageWidth;
+  double get swaplabImageHeight => _swaplabImageHeight;
 
   String get buttonText => _buttonText;
   double get buttonFontSize => _buttonFontSize;
@@ -96,6 +103,14 @@ class OutputScreenProvider extends ChangeNotifier {
   // Setters
   void setUseImageButton(bool use) {
     _useImageButton = use;
+    notifyListeners();
+    _saveSettings();
+  }
+
+  // NEW: Setter for Swaplab image dimensions
+  void setSwaplabImageDimensions(double width, double height) {
+    _swaplabImageWidth = width;
+    _swaplabImageHeight = height;
     notifyListeners();
     _saveSettings();
   }
@@ -131,44 +146,38 @@ class OutputScreenProvider extends ChangeNotifier {
     if (settingsJson != null) {
       final Map<String, dynamic> settings = jsonDecode(settingsJson);
 
-      // Load position properties
-      _titleLeft = _prefs.getDouble('output_title_left') ?? _titleLeft;
-      _titleTop = _prefs.getDouble('output_title_top') ?? _titleTop;
-      _titleWidth = _prefs.getDouble('output_title_width') ?? _titleWidth;
-
-      _imageLeft = _prefs.getDouble('output_image_left') ?? _imageLeft;
-      _imageTop = _prefs.getDouble('output_image_top') ?? _imageTop;
-
-      _qrCodeLeft = _prefs.getDouble('output_qrcode_left') ?? _qrCodeLeft;
-      _qrCodeBottom = _prefs.getDouble('output_qrcode_bottom') ?? _qrCodeBottom;
-
-      _buttonLeft = _prefs.getDouble('output_button_left') ?? _buttonLeft;
-      _buttonBottom = _prefs.getDouble('output_button_bottom') ?? _buttonBottom;
-
-      // Title settings
+      _titleLeft = settings['titleLeft'] ?? _titleLeft;
+      _titleTop = settings['titleTop'] ?? _titleTop;
+      _titleWidth = settings['titleWidth'] ?? _titleWidth;
+      _imageLeft = settings['imageLeft'] ?? _imageLeft;
+      _imageTop = settings['imageTop'] ?? _imageTop;
+      _qrCodeLeft = settings['qrCodeLeft'] ?? _qrCodeLeft;
+      _qrCodeBottom = settings['qrCodeBottom'] ?? _qrCodeBottom;
+      _buttonLeft = settings['buttonLeft'] ?? _buttonLeft;
+      _buttonBottom = settings['buttonBottom'] ?? _buttonBottom;
       _titleText = settings['titleText'] ?? _titleText;
       _titleFontSize = settings['titleFontSize'] ?? _titleFontSize;
       _titleFontWeight = FontWeight
           .values[settings['titleFontWeight'] ?? _titleFontWeight.index];
       _titleColor = Color(settings['titleColor'] ?? _titleColor.value);
       _showTitle = settings['showTitle'] ?? _showTitle;
-
-      // Image settings
       _imageWidth = settings['imageWidth'] ?? _imageWidth;
       _imageHeight = settings['imageHeight'] ?? _imageHeight;
+      
+      // NEW: Load Swaplab dimensions
+      _swaplabImageWidth = settings['swaplabImageWidth'] ?? _swaplabImageWidth;
+      _swaplabImageHeight = settings['swaplabImageHeight'] ?? _swaplabImageHeight;
+      
       _imageBorderRadius = settings['imageBorderRadius'] ?? _imageBorderRadius;
       _imageBorderColor =
           Color(settings['imageBorderColor'] ?? _imageBorderColor.value);
       _imageBorderWidth = settings['imageBorderWidth'] ?? _imageBorderWidth;
-
-      // Button settings
       _useImageButton = settings['useImageButton'] ?? _useImageButton;
       _buttonImagePath = settings['buttonImagePath'] ?? _buttonImagePath;
       _isButtonImageAsset =
           settings['isButtonImageAsset'] ?? _isButtonImageAsset;
       _buttonWidth = settings['buttonWidth'] ?? _buttonWidth;
       _buttonHeight = settings['buttonHeight'] ?? _buttonHeight;
-
       _buttonText = settings['buttonText'] ?? _buttonText;
       _buttonFontSize = settings['buttonFontSize'] ?? _buttonFontSize;
       _buttonColor = Color(settings['buttonColor'] ?? _buttonColor.value);
@@ -180,8 +189,6 @@ class OutputScreenProvider extends ChangeNotifier {
           settings['buttonPaddingVertical'] ?? _buttonPaddingVertical;
       _buttonBorderRadius =
           settings['buttonBorderRadius'] ?? _buttonBorderRadius;
-
-      // Background settings
       _backgroundImagePath = settings['backgroundImagePath'];
       _isBackgroundImageAsset =
           settings['isBackgroundImageAsset'] ?? _isBackgroundImageAsset;
@@ -193,17 +200,27 @@ class OutputScreenProvider extends ChangeNotifier {
 
   Future<void> _saveSettings() async {
     final settings = {
-      // Title settings
       'titleText': _titleText,
       'titleFontSize': _titleFontSize,
       'titleFontWeight': _titleFontWeight.index,
       'titleColor': _titleColor.value,
-
       'showTitle': _showTitle,
-
-      // Image settings
+      'titleLeft': _titleLeft,
+      'titleTop': _titleTop,
+      'titleWidth': _titleWidth,
+      'imageLeft': _imageLeft,
+      'imageTop': _imageTop,
+      'qrCodeLeft': _qrCodeLeft,
+      'qrCodeBottom': _qrCodeBottom,
+      'buttonLeft': _buttonLeft,
+      'buttonBottom': _buttonBottom,
       'imageWidth': _imageWidth,
       'imageHeight': _imageHeight,
+
+      // NEW: Save Swaplab dimensions
+      'swaplabImageWidth': _swaplabImageWidth,
+      'swaplabImageHeight': _swaplabImageHeight,
+
       'imageBorderRadius': _imageBorderRadius,
       'imageBorderColor': _imageBorderColor.value,
       'imageBorderWidth': _imageBorderWidth,
@@ -219,64 +236,43 @@ class OutputScreenProvider extends ChangeNotifier {
       'buttonPaddingHorizontal': _buttonPaddingHorizontal,
       'buttonPaddingVertical': _buttonPaddingVertical,
       'buttonBorderRadius': _buttonBorderRadius,
-
-      // Background settings
       'backgroundImagePath': _backgroundImagePath,
       'isBackgroundImageAsset': _isBackgroundImageAsset,
       'showBackground': _showBackground,
     };
 
     await _prefs.setString('output_screen_settings', jsonEncode(settings));
-    // Save position properties
-    await _prefs.setDouble('output_title_left', _titleLeft);
-    await _prefs.setDouble('output_title_top', _titleTop);
-    await _prefs.setDouble('output_title_width', _titleWidth);
-
-    await _prefs.setDouble('output_image_left', _imageLeft);
-    await _prefs.setDouble('output_image_top', _imageTop);
-
-    await _prefs.setDouble('output_qrcode_left', _qrCodeLeft);
-    await _prefs.setDouble('output_qrcode_bottom', _qrCodeBottom);
-
-    await _prefs.setDouble('output_button_left', _buttonLeft);
-    await _prefs.setDouble('output_button_bottom', _buttonBottom);
   }
 
-  void setTitlePosition(double left, double top, double width) async {
+  void setTitlePosition(double left, double top, double width) {
     _titleLeft = left;
     _titleTop = top;
     _titleWidth = width;
-    await _prefs.setDouble('output_title_left', left);
-    await _prefs.setDouble('output_title_top', top);
-    await _prefs.setDouble('output_title_width', width);
     notifyListeners();
+    _saveSettings();
   }
 
-  void setImagePosition(double left, double top) async {
+  void setImagePosition(double left, double top) {
     _imageLeft = left;
     _imageTop = top;
-    await _prefs.setDouble('output_image_left', left);
-    await _prefs.setDouble('output_image_top', top);
     notifyListeners();
+    _saveSettings();
   }
 
-  void setQrCodePosition(double left, double bottom) async {
+  void setQrCodePosition(double left, double bottom) {
     _qrCodeLeft = left;
     _qrCodeBottom = bottom;
-    await _prefs.setDouble('output_qrcode_left', left);
-    await _prefs.setDouble('output_qrcode_bottom', bottom);
     notifyListeners();
+    _saveSettings();
   }
 
-  void setButtonPosition(double left, double bottom) async {
+  void setButtonPosition(double left, double bottom) {
     _buttonLeft = left;
     _buttonBottom = bottom;
-    await _prefs.setDouble('output_button_left', left);
-    await _prefs.setDouble('output_button_bottom', bottom);
     notifyListeners();
+    _saveSettings();
   }
 
-  // Title setters
   void setShowTitle(bool show) {
     _showTitle = show;
     notifyListeners();
@@ -303,7 +299,6 @@ class OutputScreenProvider extends ChangeNotifier {
     _saveSettings();
   }
 
-  // Image setters
   void setImageDimensions(double width, double height) {
     _imageWidth = width;
     _imageHeight = height;
@@ -323,7 +318,6 @@ class OutputScreenProvider extends ChangeNotifier {
     _saveSettings();
   }
 
-  // Button setters
   void setButtonText(String text) {
     _buttonText = text;
     notifyListeners();
@@ -352,7 +346,6 @@ class OutputScreenProvider extends ChangeNotifier {
     _saveSettings();
   }
 
-  // Background setters
   void setBackgroundImage(String? path, {required bool isAsset}) {
     _backgroundImagePath = path;
     _isBackgroundImageAsset = isAsset;
