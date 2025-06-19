@@ -9,6 +9,7 @@ import 'package:photobooth_flutter/routes/routes.dart';
 import 'package:photobooth_flutter/widgets/snackbar.dart';
 import 'package:photobooth_flutter/widgets/watermark_overlay.dart';
 import 'package:provider/provider.dart';
+import 'package:virtual_keyboard_multi_language/virtual_keyboard_multi_language.dart';
 
 class ParticipantDetailsScreen extends StatefulWidget {
   const ParticipantDetailsScreen({super.key});
@@ -19,9 +20,12 @@ class ParticipantDetailsScreen extends StatefulWidget {
 }
 
 class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
-  // The Form key is no longer needed as validation is handled manually.
-  // final _formKey = GlobalKey<FormState>();
   final Map<String, TextEditingController> _controllers = {};
+  final Map<String, FocusNode> _focusNodes = {};
+  bool _isKeyboardVisible = false;
+  TextEditingController? _currentController;
+  // Use a mutable keyboard type
+  VirtualKeyboardType _keyboardType = VirtualKeyboardType.Alphanumeric;
 
   @override
   void initState() {
@@ -30,7 +34,22 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
         Provider.of<RegistrationScreenProvider>(context, listen: false);
 
     for (var field in registrationSettings.textFields) {
-      _controllers[field.id] = TextEditingController();
+      final controller = TextEditingController();
+      _controllers[field.id] = controller;
+
+      _focusNodes[field.id] = FocusNode()
+        ..addListener(() {
+          if (_focusNodes[field.id]!.hasFocus) {
+            setState(() {
+              _currentController = _controllers[field.id];
+              // Set keyboard type based on the focused field
+              _keyboardType = (field.fieldType == TextFieldType.email)
+                  ? VirtualKeyboardType.Alphanumeric
+                  : VirtualKeyboardType.Alphanumeric;
+              _isKeyboardVisible = true;
+            });
+          }
+        });
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -40,10 +59,60 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
     });
   }
 
+  /// Correctly handles key presses from the virtual keyboard.
+  void _onKeyPress(VirtualKeyboardKey key) {
+    if (_currentController == null) return;
+
+    final text = _currentController!.text;
+    final selection = _currentController!.selection;
+
+    // --- FIX STARTS HERE ---
+    // Check for the backspace action.
+    if (key.action == VirtualKeyboardKeyAction.Backspace) {
+      if (selection.baseOffset > 0) {
+        final newText = text.replaceRange(
+          selection.start - 1,
+          selection.end,
+          '',
+        );
+        _currentController!.text = newText;
+        // Move the cursor back
+        _currentController!.selection = TextSelection.fromPosition(
+            TextPosition(offset: selection.start - 1));
+      }
+    } else if (key.action == VirtualKeyboardKeyAction.Return) {
+      // Optional: Handle the enter key, e.g., by submitting the form.
+      _handleSubmit();
+    } else {
+      // Handle all other keys (letters, numbers, symbols).
+      final newText = text.replaceRange(
+        selection.start,
+        selection.end,
+        key.text ?? '',
+      );
+      _currentController!.text = newText;
+      // Move the cursor forward
+      _currentController!.selection = TextSelection.fromPosition(
+          TextPosition(offset: selection.start + (key.text?.length ?? 0)));
+    }
+    // --- FIX ENDS HERE ---
+  }
+
+  /// Hides the virtual keyboard and unfocuses the text fields.
+  void _hideKeyboard() {
+    setState(() {
+      _isKeyboardVisible = false;
+    });
+    FocusScope.of(context).unfocus();
+  }
+
   @override
   void dispose() {
     for (var controller in _controllers.values) {
       controller.dispose();
+    }
+    for (var focusNode in _focusNodes.values) {
+      focusNode.dispose();
     }
     super.dispose();
   }
@@ -57,17 +126,19 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
     return Scaffold(
       body: WatermarkOverlay(
         show: watermarkProvider.showWatermark,
-        // The Form widget is removed as we are now handling validation manually.
         child: Stack(
           children: [
-            Container(
-              width: double.infinity,
-              height: double.infinity,
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image:
-                      _getBackgroundImage(registrationSettings, globalSettings),
-                  fit: BoxFit.cover,
+            GestureDetector(
+              onTap: _hideKeyboard,
+              child: Container(
+                width: double.infinity,
+                height: double.infinity,
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: _getBackgroundImage(
+                        registrationSettings, globalSettings),
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
             ),
@@ -95,6 +166,9 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
                       height: field.height,
                       child: TextFormField(
                         controller: _controllers[field.id],
+                        focusNode: _focusNodes[field.id],
+                        readOnly: true,
+                        showCursor: true,
                         style: TextStyle(
                           color: field.textColor,
                           fontSize: field.fontSize,
@@ -137,7 +211,6 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
                                       width: field.borderWidth))
                               : InputBorder.none,
                         ),
-                        // The validator property is removed to prevent in-field errors.
                       ),
                     )),
             Positioned(
@@ -160,6 +233,24 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
                 ),
               ),
             ),
+            if (_isKeyboardVisible)
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  color: Colors.black.withOpacity(0.5),
+                  child: VirtualKeyboard(
+                    height: MediaQuery.of(context).size.height * 0.25,
+                    postKeyPress: _onKeyPress,
+                    type: _keyboardType,
+                    textColor: Colors.white,
+                    fontSize: 30,
+                    // You can optionally set a height
+                    // height: 350,
+                  ),
+                ),
+              )
           ],
         ),
       ),
@@ -238,11 +329,10 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
   }
 
   void _handleSubmit() {
-    FocusScope.of(context).unfocus(); // Hide keyboard
+    _hideKeyboard();
     final registrationSettings = context.read<RegistrationScreenProvider>();
     String? firstErrorMessage;
 
-    // Manually validate each enabled field
     for (var field in registrationSettings.textFields) {
       if (field.isEnabled) {
         final value = _controllers[field.id]?.text;
@@ -277,16 +367,14 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
 
         if (error != null) {
           firstErrorMessage = error;
-          break; // Stop at the first error
+          break;
         }
       }
     }
 
     if (firstErrorMessage != null) {
-      // If there's an error, show it in a SnackBar and do not proceed.
       showSnackBar(context, firstErrorMessage, isError: true);
     } else {
-      // If all fields are valid, proceed.
       final provider = Provider.of<PhotoboothProvider>(context, listen: false);
       String name = '';
       String email = '';

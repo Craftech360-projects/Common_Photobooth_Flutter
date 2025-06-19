@@ -34,6 +34,7 @@ dependencies:
   media_kit: ^1.1.10 # Add this
   media_kit_video: ^1.2.4 # Add this
   media_kit_libs_video: ^1.0.4
+  virtual_keyboard_multi_language: ^1.1.2
 
 dev_dependencies:
   flutter_lints: ^5.0.0
