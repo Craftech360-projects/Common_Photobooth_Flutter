@@ -73,10 +73,15 @@ class _AdminScreenState extends State<AdminScreen> {
 
       final csvData = _usersToCsv(users);
 
+      // MODIFIED: Create a filename-safe timestamp.
+      final now = DateTime.now();
+      final timestamp =
+          '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}_${now.hour.toString().padLeft(2, '0')}-${now.minute.toString().padLeft(2, '0')}';
+
       // Use file_picker to let the user choose a save location
       String? outputFile = await FilePicker.platform.saveFile(
         dialogTitle: 'Save User Data as CSV',
-        fileName: 'photobooth_users_${DateTime.now().toIso8601String()}.csv',
+        fileName: 'photobooth_users_$timestamp.csv',
       );
 
       if (outputFile != null) {

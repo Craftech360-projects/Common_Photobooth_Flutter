@@ -15,7 +15,7 @@ class OutputScreenProvider extends ChangeNotifier {
   double _titleLeft = 279.0, _titleTop = 434.0, _titleWidth = 500.0;
   double _imageLeft = 90.0, _imageTop = 710.0;
   double _qrCodeLeft = 373.0, _qrCodeBottom = 310.0;
-  double _buttonLeft = 250.0, _buttonBottom = 420.0;
+  double _buttonLeft = 360.0, _buttonBottom = 420.0;
   String _titleText = '';
   double _titleFontSize = 22.0;
   FontWeight _titleFontWeight = FontWeight.w500;
@@ -23,7 +23,7 @@ class OutputScreenProvider extends ChangeNotifier {
   bool _showTitle = false;
 
   // AI Artistry Image settings
-  double _imageWidth = 900.0, _imageHeight = 506.0;
+  double _imageWidth = 906.0, _imageHeight = 506.0;
   double _imageBorderRadius = 12.0;
   Color _imageBorderColor = Colors.transparent;
   double _imageBorderWidth = 0.0;
@@ -36,16 +36,16 @@ class OutputScreenProvider extends ChangeNotifier {
   double _buttonFontSize = 18.0;
   Color _buttonColor = AppColors.yellow, _buttonTextColor = AppColors.black;
   double _buttonPaddingHorizontal = 32.0, _buttonPaddingVertical = 18.0;
-  double _buttonBorderRadius = 4.0;
-  double _buttonWidth = 580.0, _buttonHeight = 150.0;
+  double _buttonBorderRadius = 0.0;
+  double _buttonWidth = 370.0, _buttonHeight = 200.0;
 
   bool _useImageButton = true;
   String? _buttonImagePath = 'assets/images/home_btn.png';
   bool _isButtonImageAsset = true;
 
-  String? _backgroundImagePath;
+  String _backgroundImagePath = 'assets/images/output_bg.png';
   bool _isBackgroundImageAsset = true;
-  bool _showBackground = false;
+  bool _showBackground = true;
 
   // Getters
   bool get useImageButton => _useImageButton;
@@ -76,7 +76,7 @@ class OutputScreenProvider extends ChangeNotifier {
   double get imageBorderRadius => _imageBorderRadius;
   Color get imageBorderColor => _imageBorderColor;
   double get imageBorderWidth => _imageBorderWidth;
-  
+
   // NEW: Getters for Swaplab dimensions
   double get swaplabImageWidth => _swaplabImageWidth;
   double get swaplabImageHeight => _swaplabImageHeight;
@@ -163,11 +163,12 @@ class OutputScreenProvider extends ChangeNotifier {
       _showTitle = settings['showTitle'] ?? _showTitle;
       _imageWidth = settings['imageWidth'] ?? _imageWidth;
       _imageHeight = settings['imageHeight'] ?? _imageHeight;
-      
+
       // NEW: Load Swaplab dimensions
       _swaplabImageWidth = settings['swaplabImageWidth'] ?? _swaplabImageWidth;
-      _swaplabImageHeight = settings['swaplabImageHeight'] ?? _swaplabImageHeight;
-      
+      _swaplabImageHeight =
+          settings['swaplabImageHeight'] ?? _swaplabImageHeight;
+
       _imageBorderRadius = settings['imageBorderRadius'] ?? _imageBorderRadius;
       _imageBorderColor =
           Color(settings['imageBorderColor'] ?? _imageBorderColor.value);
@@ -347,7 +348,7 @@ class OutputScreenProvider extends ChangeNotifier {
   }
 
   void setBackgroundImage(String? path, {required bool isAsset}) {
-    _backgroundImagePath = path;
+    _backgroundImagePath = path!;
     _isBackgroundImageAsset = isAsset;
     notifyListeners();
     _saveSettings();

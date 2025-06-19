@@ -103,8 +103,8 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
           ),
         Center(
           child: Container(
-            width: settings.imageWidth,
-            height: settings.imageHeight,
+            width: settings.swaplabImageWidth,
+            height: settings.swaplabImageHeight,
             decoration: BoxDecoration(
               color: Colors.grey[300],
               borderRadius: BorderRadius.circular(settings.imageBorderRadius),
@@ -113,8 +113,9 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
                 width: settings.imageBorderWidth,
               ),
             ),
-            child: const Center(
-              child: Icon(Icons.image, size: 48, color: AppColors.grey),
+            child: Image.asset(
+              "assets/images/swap.png",
+              fit: BoxFit.cover,
             ),
           ),
         ),
@@ -170,40 +171,36 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
               textAlign: TextAlign.center,
             ),
           ),
-
-        // This Container is now centered and uses the correct dimensions
-        Center(
-          child: Container(
-            width: imageWidth,
-            height: imageHeight,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(settings.imageBorderRadius),
-              border: Border.all(
-                color: settings.imageBorderColor,
-                width: settings.imageBorderWidth,
-              ),
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: Stack(
-              children: [
-                _buildOutputImage(),
-                Positioned(
-                  top: 10,
-                  right: 10,
-                  child: Image.asset(
-                    'assets/images/cft_logo.png',
-                    width: 120,
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              ],
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 100),
+          width: isSwaplabFlow ? 700 : 900,
+          // height: 1000,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(settings.imageBorderRadius),
+            border: Border.all(
+              color: settings.imageBorderColor,
+              width: settings.imageBorderWidth,
             ),
           ),
+          clipBehavior: Clip.antiAlias,
+          child: Stack(
+            children: [
+              _buildOutputImage(),
+              Positioned(
+                top: 10,
+                right: 10,
+                child: Image.asset(
+                  'assets/images/cft_logo.png',
+                  width: 120,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ],
+          ),
         ),
-
         Positioned(
           left: settings.buttonLeft,
-          bottom: settings.buttonBottom,
+          bottom: isSwaplabFlow ? 200 : 400,
           child: settings.useImageButton
               ? _buildImageButton(settings)
               : _buildTextButton(settings),
@@ -248,8 +245,8 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
         Navigator.of(context).pushReplacementNamed('/');
       },
       child: Container(
-        width: settings.buttonWidth,
-        height: settings.buttonHeight,
+        width: 370,
+        height: 200,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
           image: DecorationImage(
@@ -275,7 +272,7 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
       if (globalSettings.isOfflineMode && !imageUrl.startsWith('http')) {
         return Image.file(
           File.fromUri(Uri.file(imageUrl)),
-          fit: BoxFit.cover, // Use BoxFit.cover to fill the container
+          fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) {
             debugPrint('Error loading local image: $error');
             return const Center(
@@ -286,7 +283,7 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
       } else {
         return Image.network(
           imageUrl,
-          fit: BoxFit.cover, // Use BoxFit.cover to fill the container
+          fit: BoxFit.cover,
           loadingBuilder: (context, child, loadingProgress) {
             if (loadingProgress == null) return child;
             return const Center(child: CircularProgressIndicator());

@@ -8,7 +8,9 @@ import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/providers/photobooth_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
 import 'package:photobooth_flutter/routes/slide_right.dart';
+import 'package:photobooth_flutter/widgets/snackbar.dart';
 import 'package:provider/provider.dart';
+import 'package:virtual_keyboard_multi_language/virtual_keyboard_multi_language.dart';
 
 class CategoriesScreen extends StatefulWidget {
   const CategoriesScreen({super.key});
@@ -20,13 +22,64 @@ class CategoriesScreen extends StatefulWidget {
 class _CategoriesScreenState extends State<CategoriesScreen> {
   bool _showSubCategories = false;
   int _currentSubCategoryIndex = 0;
-  // NEW: Controller for the accessories text field
   final TextEditingController _accessoriesController = TextEditingController();
+
+  final FocusNode _accessoriesFocusNode = FocusNode();
+  bool _isKeyboardVisible = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _accessoriesFocusNode.addListener(() {
+      if (_accessoriesFocusNode.hasFocus) {
+        setState(() {
+          _isKeyboardVisible = true;
+        });
+      }
+    });
+  }
 
   @override
   void dispose() {
     _accessoriesController.dispose();
+    _accessoriesFocusNode.dispose();
     super.dispose();
+  }
+
+  void _onKeyPress(VirtualKeyboardKey key) {
+    final text = _accessoriesController.text;
+    final selection = _accessoriesController.selection;
+
+    if (key.action == VirtualKeyboardKeyAction.Backspace) {
+      if (selection.baseOffset > 0) {
+        final newText = text.replaceRange(
+          selection.start - 1,
+          selection.end,
+          '',
+        );
+        _accessoriesController.text = newText;
+        _accessoriesController.selection = TextSelection.fromPosition(
+            TextPosition(offset: selection.start - 1));
+      }
+    } else if (key.action == VirtualKeyboardKeyAction.Return) {
+      _hideKeyboard();
+    } else {
+      final newText = text.replaceRange(
+        selection.start,
+        selection.end,
+        key.text ?? '',
+      );
+      _accessoriesController.text = newText;
+      _accessoriesController.selection = TextSelection.fromPosition(
+          TextPosition(offset: selection.start + (key.text?.length ?? 0)));
+    }
+  }
+
+  void _hideKeyboard() {
+    setState(() {
+      _isKeyboardVisible = false;
+    });
+    _accessoriesFocusNode.unfocus();
   }
 
   @override
@@ -61,35 +114,59 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
               )
             : null,
       ),
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          image: _getBackgroundImage(settingsProvider, globalSettings),
-        ),
-        child: Center(
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 500),
-            transitionBuilder: (child, animation) {
-              final slideAnimation = Tween<Offset>(
-                begin: const Offset(0.0, 0.4),
-                end: Offset.zero,
-              ).animate(
-                  CurvedAnimation(parent: animation, curve: Curves.easeOut));
-              return SlideTransition(
-                position: slideAnimation,
-                child: FadeTransition(
-                  opacity: animation,
-                  child: child,
+      body: Stack(
+        children: [
+          GestureDetector(
+            onTap: _hideKeyboard,
+            child: Container(
+              width: double.infinity,
+              height: double.infinity,
+              decoration: BoxDecoration(
+                image: _getBackgroundImage(settingsProvider, globalSettings),
+              ),
+              child: Center(
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 500),
+                  transitionBuilder: (child, animation) {
+                    final slideAnimation = Tween<Offset>(
+                      begin: const Offset(0.0, 0.4),
+                      end: Offset.zero,
+                    ).animate(CurvedAnimation(
+                        parent: animation, curve: Curves.easeOut));
+                    return SlideTransition(
+                      position: slideAnimation,
+                      child: FadeTransition(
+                        opacity: animation,
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: _showSubCategories
+                      ? _buildSubCategoryView(context,
+                          key: const ValueKey('SubView'))
+                      : _buildMainCategoryView(context,
+                          key: const ValueKey('MainView')),
                 ),
-              );
-            },
-            child: _showSubCategories
-                ? _buildSubCategoryView(context, key: const ValueKey('SubView'))
-                : _buildMainCategoryView(context,
-                    key: const ValueKey('MainView')),
+              ),
+            ),
           ),
-        ),
+          if (_isKeyboardVisible)
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                color: Colors.black.withOpacity(0.5),
+                child: VirtualKeyboard(
+                  height: MediaQuery.of(context).size.height * 0.25,
+                  postKeyPress: _onKeyPress,
+                  type: VirtualKeyboardType.Alphanumeric,
+                  textColor: Colors.white,
+                  fontSize: 30,
+                ),
+              ),
+            )
+        ],
       ),
     );
   }
@@ -153,29 +230,24 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   }
 
   Widget _buildSubCategoryView(BuildContext context, {Key? key}) {
-    final settingsProvider = context.watch<CategorySettingsProvider>();
-    final flowProvider = context.read<CategoryProvider>();
-    final photoProvider = context.read<PhotoboothProvider>();
-
     final subCategories = [
       {
         'key': 'ghibli',
-        'settings': settingsProvider.ghibliCard,
+        'settings': context.read<CategorySettingsProvider>().ghibliCard,
         'workflow': 'ghibli.json'
       },
       {
         'key': 'pixar',
-        'settings': settingsProvider.pixarCard,
+        'settings': context.read<CategorySettingsProvider>().pixarCard,
         'workflow': 'pixar.json'
       },
       {
         'key': 'packaging',
-        'settings': settingsProvider.packagingCard,
+        'settings': context.read<CategorySettingsProvider>().packagingCard,
         'workflow': 'packaging.json'
       },
     ];
 
-    // Check if the currently selected sub-category is 'packaging'
     final isPackagingSelected =
         subCategories[_currentSubCategoryIndex]['key'] == 'packaging';
 
@@ -189,9 +261,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       final settings = card['settings'] as CategoryCardSettings;
       final int displayIndex = z;
 
-      double scale = 1.0;
-      double yOffset = 0;
-      double xOffset = 0;
+      double scale = 1.0, yOffset = 0, xOffset = 0;
 
       switch (displayIndex) {
         case 0:
@@ -226,17 +296,8 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
             settings: settings,
             isSelected: displayIndex == 0,
             onTap: () {
-              if (displayIndex == 0) {
-                // If accessories are empty for packaging, don't proceed
-                if (card['key'] == 'packaging' &&
-                    _accessoriesController.text.trim().isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text('Please enter some accessories.'),
-                      backgroundColor: Colors.red));
-                  return;
-                }
-                flowProvider.selectWorkflow(card['workflow'] as String);
-                Navigator.pushNamed(context, AppRoutes.faceCapture);
+              if (displayIndex != 0) {
+                setState(() => _currentSubCategoryIndex = cardIndex);
               }
             },
           ),
@@ -244,76 +305,108 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       );
     }
 
-    return Column(
-      // NEW: Wrap in a Column to add the text field below
-      mainAxisAlignment: MainAxisAlignment.center,
+    return Stack(
+      key: key,
+      alignment: Alignment.center,
       children: [
-        Row(
-          key: key,
+        Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            IconButton(
-              icon: Image.asset('assets/images/backward_arrow.png',
-                  width: 50, height: 50),
-              onPressed: () {
-                setState(() {
-                  _currentSubCategoryIndex =
-                      (_currentSubCategoryIndex + 1) % subCategories.length;
-                });
-              },
-            ),
-            const SizedBox(width: 120),
-            SizedBox(
-              width: 500,
-              height: 600,
-              child: Stack(
-                alignment: Alignment.center,
-                children: orderedStackChildren,
-              ),
-            ),
-            const SizedBox(width: 120),
-            IconButton(
-              icon: Image.asset('assets/images/forward_arrow.png',
-                  width: 50, height: 50),
-              onPressed: () {
-                setState(() {
-                  _currentSubCategoryIndex =
+            const SizedBox(height: 100),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                IconButton(
+                  icon: Image.asset('assets/images/backward_arrow.png',
+                      width: 50, height: 50),
+                  onPressed: () => setState(() => _currentSubCategoryIndex =
+                      (_currentSubCategoryIndex + 1) % subCategories.length),
+                ),
+                const SizedBox(width: 120),
+                SizedBox(
+                  width: 500,
+                  height: 600,
+                  child: Stack(
+                      alignment: Alignment.center,
+                      children: orderedStackChildren),
+                ),
+                const SizedBox(width: 120),
+                IconButton(
+                  icon: Image.asset('assets/images/forward_arrow.png',
+                      width: 50, height: 50),
+                  onPressed: () => setState(() => _currentSubCategoryIndex =
                       (_currentSubCategoryIndex - 1 + subCategories.length) %
-                          subCategories.length;
-                });
-              },
+                          subCategories.length),
+                ),
+              ],
             ),
-          ],
-        ),
-        // NEW: Conditionally show the accessories text field
-        if (isPackagingSelected)
-          Padding(
-            padding: const EdgeInsets.only(top: 24.0),
-            child: SizedBox(
-              width: 400,
-              child: TextField(
-                controller: _accessoriesController,
-                onChanged: (value) {
-                  photoProvider.setAccessories(value);
-                },
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  labelText: 'Enter Accessories (e.g., shoes, helmet)',
-                  labelStyle: const TextStyle(color: Colors.white70),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Colors.white54),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Colors.white),
-                    borderRadius: BorderRadius.circular(8),
+            if (isPackagingSelected)
+              SizedBox(
+                width: 600,
+                child: TextField(
+                  controller: _accessoriesController,
+                  focusNode: _accessoriesFocusNode,
+                  readOnly: true,
+                  showCursor: true,
+                  style: const TextStyle(color: Colors.white, fontSize: 24),
+                  decoration: InputDecoration(
+                    labelText: 'Enter Accessories (e.g., shoes, helmet)',
+                    labelStyle:
+                        const TextStyle(color: Colors.white70, fontSize: 24),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.white54),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.white),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                 ),
               ),
-            ),
-          ),
+          ],
+        ),
+        if (!_isKeyboardVisible)
+          Positioned(
+            bottom: 400,
+            child: _buildNextButton(context),
+          )
       ],
+    );
+  }
+
+  Widget _buildNextButton(BuildContext context) {
+    final flowProvider = context.read<CategoryProvider>();
+    final photoProvider = context.read<PhotoboothProvider>();
+
+    final subCategories = [
+      {'key': 'ghibli', 'workflow': 'ghibli.json'},
+      {'key': 'pixar', 'workflow': 'pixar.json'},
+      {'key': 'packaging', 'workflow': 'packaging.json'},
+    ];
+
+    onPressed() {
+      final selectedSubCategory = subCategories[_currentSubCategoryIndex];
+
+      if (selectedSubCategory['key'] == 'packaging') {
+        if (_accessoriesController.text.trim().isEmpty) {
+          showSnackBar(context, "Please enter some accessories", isError: true);
+          return;
+        }
+        // FIXED: Explicitly set accessories in the provider before navigating
+        photoProvider.setAccessories(_accessoriesController.text.trim());
+      }
+
+      _hideKeyboard();
+      flowProvider.selectWorkflow(selectedSubCategory['workflow'] as String);
+      Navigator.pushNamed(context, AppRoutes.faceCapture);
+    }
+
+    return GestureDetector(
+      onTap: onPressed,
+      child: Image.asset('assets/images/next_btn.png',
+          width: 585.0, height: 150.0, fit: BoxFit.contain),
     );
   }
 }

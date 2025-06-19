@@ -35,6 +35,9 @@ void main() async {
     databaseFactory = databaseFactoryFfi;
   }
 
+  // CONFIGURE INPUT OUTPUT DIRECTORIES FOR OFFLINE MODE
+
+
   MediaKit.ensureInitialized();
   await DatabaseService.instance.database;
 
