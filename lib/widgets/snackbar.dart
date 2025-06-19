@@ -13,10 +13,6 @@ void showSnackBar(
   if (!context.mounted) return;
 
   ScaffoldMessenger.of(context).showSnackBar(
-    snackBarAnimationStyle: const AnimationStyle(
-      curve: Curves.easeInOutBack,
-      duration: Duration(milliseconds: 800),
-    ),
     SnackBar(
       backgroundColor:
           isError ? AppColors.red.withValues(alpha: 0.6) : AppColors.green,
