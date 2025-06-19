@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:photobooth_flutter/core/constants/constants.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/providers/admin_watermark_provider.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
@@ -201,9 +202,18 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
         Positioned(
           left: settings.buttonLeft,
           bottom: isSwaplabFlow ? 200 : 400,
-          child: settings.useImageButton
-              ? _buildImageButton(settings)
-              : _buildTextButton(settings),
+          child: Column(
+            children: [
+              const Text(
+                "Thanks for participating. Your image\nwill be sent to you via email",
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.w600),
+              ),
+              Constants.h32,
+              settings.useImageButton
+                  ? _buildImageButton(settings)
+                  : _buildTextButton(settings),
+            ],
+          ),
         ),
       ],
     );
