@@ -156,7 +156,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
               left: 0,
               right: 0,
               child: Container(
-                color: Colors.black.withOpacity(0.5),
+                color: Colors.black.withValues(alpha: 0.5),
                 child: VirtualKeyboard(
                   height: MediaQuery.of(context).size.height * 0.25,
                   postKeyPress: _onKeyPress,
@@ -478,7 +478,7 @@ class _TappableCategoryCardState extends State<TappableCategoryCard> {
               ? [
                   BoxShadow(
                     color: widget.settings.glowColor
-                        .withOpacity(widget.settings.glowIntensity),
+                        .withValues(alpha: widget.settings.glowIntensity),
                     blurRadius: 80,
                     spreadRadius: 12,
                   )

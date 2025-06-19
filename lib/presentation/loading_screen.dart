@@ -79,9 +79,9 @@ class _LoadingScreenState extends State<LoadingScreen> {
         return;
       }
 
-      final name = provider.name ?? '';
-      final email = provider.email ?? '';
-      final gender = provider.selectedGender;
+      // final name = provider.name ?? '';
+      // final email = provider.email ?? '';
+      // final gender = provider.selectedGender;
 
       if (!ComfyApiService.isInitialized) {
         await ComfyApiService.initialize(
@@ -189,13 +189,13 @@ class _LoadingScreenState extends State<LoadingScreen> {
           }
 
           _setErrorMessage('Timed out waiting for image processing');
-        } catch (e) {
+        } on Exception catch (e) {
           _setErrorMessage('Error sending workflow: $e');
         }
       } else {
         _setErrorMessage('ComfyAPI service not initialized');
       }
-    } catch (e) {
+    } on Exception catch (e) {
       _setErrorMessage('Error processing image in Swaplab mode: $e');
     }
   }
@@ -293,7 +293,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
           }
 
           _setErrorMessage('Timed out waiting for image processing');
-        } catch (e) {
+        } on Exception catch (e) {
           _setErrorMessage('Error sending workflow: $e');
         }
       } else {

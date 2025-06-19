@@ -37,7 +37,6 @@ void main() async {
 
   // CONFIGURE INPUT OUTPUT DIRECTORIES FOR OFFLINE MODE
 
-
   MediaKit.ensureInitialized();
   await DatabaseService.instance.database;
 
@@ -53,11 +52,11 @@ void main() async {
           url: globalSettings.supabaseUrl!,
           anonKey: globalSettings.supabaseAnonKey!,
         );
-      } catch (e) {
+      } on Exception catch (e) {
         debugPrint('Failed to initialize Supabase: $e');
       }
     }
-  } catch (e) {
+  } on Exception catch (e) {
     debugPrint('Error initializing global settings: $e');
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();

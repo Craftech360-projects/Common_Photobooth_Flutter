@@ -161,7 +161,7 @@ class LocalStorageService {
         debugPrint('File ${newestFile.path} appears stable (size: $finalLength). Proceeding.');
         return newestFile.path;
 
-      } catch (e) {
+      } on Exception catch (e) {
         // This can happen if the file is deleted between listing and checking.
         debugPrint('Error checking file stability for ${newestFile.path}: $e');
         return null;

@@ -200,7 +200,7 @@ double get buttonWidth => _buttonWidth;
         final destinationPath = path.join(appDir.path, fileName);
         await File(sourcePath).copy(destinationPath);
         updateState(destinationPath, false);
-      } catch (e) {
+      } on Exception catch (e) {
         debugPrint('Error copying image: $e');
         return;
       }

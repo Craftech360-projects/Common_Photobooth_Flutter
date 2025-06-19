@@ -89,7 +89,7 @@ class _AdminScreenState extends State<AdminScreen> {
         await file.writeAsString(csvData);
         showSnackBar(context, 'User data exported successfully to $outputFile');
       }
-    } catch (e) {
+    } on Exception catch (e) {
       showSnackBar(context, 'Error exporting data: $e', isError: true);
     }
   }
@@ -297,7 +297,7 @@ class _GlobalSettingsSection extends StatelessWidget {
                     isAsset: false);
                 showSnackBar(context, 'Background image updated successfully');
               }
-            } catch (e) {
+            } on Exception catch (e) {
               debugPrint('Error picking file: $e');
               showSnackBar(context, 'Error selecting file: $e');
             }

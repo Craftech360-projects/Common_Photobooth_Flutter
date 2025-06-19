@@ -149,10 +149,10 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
     // Determine which flow is active to apply the correct layout
     final isSwaplabFlow = photoboothProvider.selectedTheme != null;
 
-    final double imageWidth =
-        isSwaplabFlow ? settings.swaplabImageWidth : settings.imageWidth;
-    final double imageHeight =
-        isSwaplabFlow ? settings.swaplabImageHeight : settings.imageHeight;
+    // final double imageWidth =
+    //     isSwaplabFlow ? settings.swaplabImageWidth : settings.imageWidth;
+    // final double imageHeight =
+    //     isSwaplabFlow ? settings.swaplabImageHeight : settings.imageHeight;
 
     return Stack(
       alignment: Alignment.center,
@@ -201,14 +201,19 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
         ),
         Positioned(
           left: settings.buttonLeft,
-          bottom: isSwaplabFlow ? 200 : 400,
+          bottom: isSwaplabFlow ? 100 : 350,
           child: Column(
             children: [
               const Text(
-                "Thanks for participating. Your image\nwill be sent to you via email",
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.w600),
+                textAlign: TextAlign.center,
+                "Thanks for participating.\nYour image will be sent via email.",
+                style: TextStyle(
+                    height: 1.4,
+                    fontSize: 28,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.white),
               ),
-              Constants.h32,
+              // Constants.h32,
               settings.useImageButton
                   ? _buildImageButton(settings)
                   : _buildTextButton(settings),

@@ -132,7 +132,7 @@ class OutputScreenProvider extends ChangeNotifier {
         await File(sourcePath).copy(destinationPath);
         _buttonImagePath = destinationPath;
         _isButtonImageAsset = false;
-      } catch (e) {
+      } on Exception catch (e) {
         debugPrint('Error copying button image: $e');
         return;
       }
@@ -190,7 +190,8 @@ class OutputScreenProvider extends ChangeNotifier {
           settings['buttonPaddingVertical'] ?? _buttonPaddingVertical;
       _buttonBorderRadius =
           settings['buttonBorderRadius'] ?? _buttonBorderRadius;
-      _backgroundImagePath = settings['backgroundImagePath'];
+      _backgroundImagePath =
+          settings['backgroundImagePath'] ?? 'assets/images/output_bg.png';
       _isBackgroundImageAsset =
           settings['isBackgroundImageAsset'] ?? _isBackgroundImageAsset;
       _showBackground = settings['showBackground'] ?? _showBackground;
@@ -348,8 +349,15 @@ class OutputScreenProvider extends ChangeNotifier {
   }
 
   void setBackgroundImage(String? path, {required bool isAsset}) {
-    _backgroundImagePath = path!;
-    _isBackgroundImageAsset = isAsset;
+    if (path == null) {
+      // If path is null, reset to the default background image.
+      _backgroundImagePath = 'assets/images/output_bg.png';
+      _isBackgroundImageAsset = true; // The default is an asset.
+    } else {
+      // Otherwise, set the new image path.
+      _backgroundImagePath = path;
+      _isBackgroundImageAsset = isAsset;
+    }
     notifyListeners();
     _saveSettings();
   }
