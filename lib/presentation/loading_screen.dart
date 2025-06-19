@@ -43,7 +43,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
     });
   }
 
-  // MODIFIED: This function now stops the video when an error is set.
   @override
   void dispose() {
     _player.dispose();
@@ -78,10 +77,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
         _setErrorMessage('Image file not found');
         return;
       }
-
-      // final name = provider.name ?? '';
-      // final email = provider.email ?? '';
-      // final gender = provider.selectedGender;
 
       if (!ComfyApiService.isInitialized) {
         await ComfyApiService.initialize(
@@ -129,8 +124,10 @@ class _LoadingScreenState extends State<LoadingScreen> {
       final characterImageName =
           '${gender == 'male' ? 'm' : 'f'}$characterNumber.png';
 
-      final characterImagePath =
-          'themes/$gender/$themeName/$characterImageName';
+      // MODIFIED: Construct the absolute path for the theme character image.
+      final storageDirectory = path.dirname(globalSettings.inputDirectory!);
+      final characterImagePath = path.join(
+          storageDirectory, 'themes', gender, themeName, characterImageName);
 
       final outputPathPrefix =
           LocalStorageService.instance.getOutputPathPrefix();
@@ -319,8 +316,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
     );
   }
 
-  // NEW: A dedicated widget to display the error message.
- Widget _buildErrorDisplay() {
+  Widget _buildErrorDisplay() {
     return Padding(
       padding: const EdgeInsets.all(32.0),
       child: Column(
