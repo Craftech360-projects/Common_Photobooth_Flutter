@@ -83,8 +83,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
     final String watcherNodeId;
 
     if (isSwaplabFlow) {
-      workflowFileName = 'swaplabonline.json';
-      watcherNodeId = '44'; // As per swaplabonline.json.json
+      workflowFileName = 'faceswaponline.json';
+      watcherNodeId = '44'; // As per faceswaponline.json
     } else {
       workflowFileName =
           prefs.getString('selected_workflow') ?? 'ghiblionline.json';
@@ -162,10 +162,13 @@ class _LoadingScreenState extends State<LoadingScreen> {
         final characterImagePath =
             'C:/storage/themes/$gender/$themeName/$characterImageName';
         workflow.updateSwaplabCharacterImage(characterImagePath);
+      } else if (workflowFileName == 'packagingonline.json') {
+        // Specific updates for Packaging workflow
+        final gender = provider.gender ?? 'person';
+        final accessories =
+            provider.accessories ?? 'shoes, sunglasses, helmet, motorbikes';
+        workflow.updatePackagingPrompt(gender, accessories);
       }
-
-      print("Workflow SENT=> : $workflow");
-      print("Workflow SENT=> : ${workflow.toMap()}");
 
       final response =
           await ComfyApiService.instance.sendOnlineWorkflow(workflow.toMap());

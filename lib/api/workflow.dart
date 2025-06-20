@@ -21,9 +21,22 @@ class Workflow {
   }
 
   void updateSwaplabCharacterImage(String path) {
-    // Node 46 is the Image Load node for the character image in swaplabonline.json.json
+    // Node 46 is the Image Load node for the character image in faceswaponline.json
     if (_workflow.containsKey('46') && _workflow['46'].containsKey('inputs')) {
       _workflow['46']['inputs']['image_path'] = path.replaceAll(r'\', '/');
+    }
+  }
+
+  /// NEW: Updates the prompt for the packaging workflow with gender and accessories.
+  void updatePackagingPrompt(String gender, String accessories) {
+    if (_workflow.containsKey('270') &&
+        _workflow['270'].containsKey('inputs')) {
+      // Construct the new prompt
+      final String newPrompt =
+          "TRAINBOX, Create an artistic image of a fashion action figure styled like a doll in plastic packaging. The packaging should be sleek and modern. The central figure is a stylish $gender. To the right of the figure, neatly arranged in separate compartments within the packaging, include the following accessories:\n$accessories\n\n";
+
+      // Update the prompt text in the workflow
+      _workflow['270']['inputs']['text'] = newPrompt;
     }
   }
 

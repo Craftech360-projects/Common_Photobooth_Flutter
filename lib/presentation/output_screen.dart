@@ -8,6 +8,7 @@ import 'package:photobooth_flutter/providers/output_screen_provider.dart';
 import 'package:photobooth_flutter/providers/photobooth_provider.dart';
 import 'package:photobooth_flutter/widgets/watermark_overlay.dart';
 import 'package:provider/provider.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 class SwappedFaceScreen extends StatefulWidget {
   final bool isPreviewMode;
@@ -83,7 +84,6 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
   }
 
   Widget _buildPreviewContent(OutputScreenProvider settings) {
-    // This preview doesn't need to be flow-aware, it's just a placeholder
     return Stack(
       children: [
         if (settings.showTitle)
@@ -145,42 +145,16 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
   Widget _buildSuccessContent(
       BuildContext context, OutputScreenProvider settings) {
     final photoboothProvider = context.read<PhotoboothProvider>();
-    // Determine which flow is active to apply the correct layout
     final isSwaplabFlow = photoboothProvider.selectedTheme != null;
-
-    // final double imageWidth =
-    //     isSwaplabFlow ? settings.swaplabImageWidth : settings.imageWidth;
-    // final double imageHeight =
-    //     isSwaplabFlow ? settings.swaplabImageHeight : settings.imageHeight;
 
     return Stack(
       alignment: Alignment.center,
       children: [
-        // if (settings.showTitle)
-        //   Positioned(
-        //     left: settings.titleLeft,
-        //     top: settings.titleTop,
-        //     width: settings.titleWidth,
-        //     child: Text(
-        //       settings.titleText,
-        //       style: TextStyle(
-        //         fontSize: settings.titleFontSize,
-        //         fontWeight: settings.titleFontWeight,
-        //         color: settings.titleColor,
-        //       ),
-        //       textAlign: TextAlign.center,
-        //     ),
-        //   ),
         Container(
           margin: const EdgeInsets.symmetric(horizontal: 100),
           width: isSwaplabFlow ? 700 : 900,
-          // height: 1000,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(settings.imageBorderRadius),
-            // border: Border.all(
-            //   color: settings.imageBorderColor,
-            //   width: settings.imageBorderWidth,
-            // ),
           ),
           clipBehavior: Clip.antiAlias,
           child: Stack(
@@ -201,21 +175,51 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
         Positioned(
           left: settings.buttonLeft,
           bottom: isSwaplabFlow ? 100 : 350,
-          child: Column(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const Text(
-                textAlign: TextAlign.center,
-                "Thanks for participating.\nYour image will be sent via email.",
-                style: TextStyle(
-                    height: 1.4,
-                    fontSize: 28,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.white),
+              // QR Code Section
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: QrImageView(
+                  data: photoboothProvider.swappedImageUrl ?? '',
+                  version: QrVersions.auto,
+                  size: 200.0,
+                  gapless: false,
+                  eyeStyle: const QrEyeStyle(
+                    eyeShape: QrEyeShape.square,
+                    color: Colors.black,
+                  ),
+                  dataModuleStyle: const QrDataModuleStyle(
+                    dataModuleShape: QrDataModuleShape.square,
+                    color: Colors.black,
+                  ),
+                ),
               ),
-              // Constants.h32,
-              settings.useImageButton
-                  ? _buildImageButton(settings)
-                  : _buildTextButton(settings),
+              const SizedBox(width: 32),
+              // Text and Button Section
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Thanks for participating.\nScan the QR code to download your photo.",
+                    style: TextStyle(
+                        height: 1.3,
+                        fontSize: 28,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.white),
+                  ),
+                  const SizedBox(height: 20),
+                  settings.useImageButton
+                      ? _buildImageButton(settings)
+                      : _buildTextButton(settings),
+                ],
+              ),
             ],
           ),
         ),
@@ -283,7 +287,7 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
     debugPrint('Attempting to load image from URL: $imageUrl');
 
     if (imageUrl != null) {
-      if (globalSettings.isOfflineMode && !imageUrl.startsWith('http')) {
+      if (!imageUrl.startsWith('http')) {
         return Image.file(
           File.fromUri(Uri.file(imageUrl)),
           fit: BoxFit.cover,

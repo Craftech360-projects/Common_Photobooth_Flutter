@@ -164,7 +164,6 @@ class OutputScreenProvider extends ChangeNotifier {
       _imageWidth = settings['imageWidth'] ?? _imageWidth;
       _imageHeight = settings['imageHeight'] ?? _imageHeight;
 
-      // NEW: Load Swaplab dimensions
       _swaplabImageWidth = settings['swaplabImageWidth'] ?? _swaplabImageWidth;
       _swaplabImageHeight =
           settings['swaplabImageHeight'] ?? _swaplabImageHeight;
@@ -218,11 +217,8 @@ class OutputScreenProvider extends ChangeNotifier {
       'buttonBottom': _buttonBottom,
       'imageWidth': _imageWidth,
       'imageHeight': _imageHeight,
-
-      // NEW: Save Swaplab dimensions
       'swaplabImageWidth': _swaplabImageWidth,
       'swaplabImageHeight': _swaplabImageHeight,
-
       'imageBorderRadius': _imageBorderRadius,
       'imageBorderColor': _imageBorderColor.value,
       'imageBorderWidth': _imageBorderWidth,
@@ -350,11 +346,9 @@ class OutputScreenProvider extends ChangeNotifier {
 
   void setBackgroundImage(String? path, {required bool isAsset}) {
     if (path == null) {
-      // If path is null, reset to the default background image.
       _backgroundImagePath = 'assets/images/common_bg.png';
-      _isBackgroundImageAsset = true; // The default is an asset.
+      _isBackgroundImageAsset = true;
     } else {
-      // Otherwise, set the new image path.
       _backgroundImagePath = path;
       _isBackgroundImageAsset = isAsset;
     }
