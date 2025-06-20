@@ -22,8 +22,7 @@ class ComfyApiService {
 
   static bool get isInitialized => _instance != null;
 
-  // Generic method to post a workflow to the ComfyUI API
-  Future<Map<String, dynamic>> _postWorkflow(
+  Future<Map<String, dynamic>> sendOnlineWorkflow(
       Map<String, dynamic> workflow) async {
     final sentTime = DateTime.now();
     final response = await http.post(
@@ -48,7 +47,6 @@ class ComfyApiService {
     }
   }
 
-  // Check backend health
   Future<bool> checkHealth() async {
     try {
       final response = await http.get(Uri.parse('$_apiUrl/health'));
@@ -56,23 +54,6 @@ class ComfyApiService {
     } on Exception catch (e) {
       debugPrint('Health check failed: $e');
       return false;
-    }
-  }
-
-  // Send workflow in offline mode
-  Future<Map<String, dynamic>> sendOfflineWorkflow(
-      {required Map<String, dynamic> workflow}) async {
-    try {
-      debugPrint('======= SENDING OFFLINE WORKFLOW ======');
-      final workflowJson = const JsonEncoder.withIndent('  ').convert(workflow);
-      debugPrint('Workflow JSON: $workflowJson');
-      debugPrint('========================================');
-
-      final response = await _postWorkflow(workflow);
-      return response;
-    } catch (e) {
-      debugPrint('Exception sending offline workflow: $e');
-      rethrow;
     }
   }
 }

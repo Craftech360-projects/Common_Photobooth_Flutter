@@ -50,12 +50,10 @@ flutter:
     - assets/videos/
     - assets/characters/
     - assets/videos/
-    - lib/api/chibi.json
-    - lib/api/ghibli.json
-    - lib/api/packaging.json
-    - lib/api/pixar.json
-    - lib/api/snoopy.json
-    - lib/api/swaplab.json
+    - lib/api/ghiblionline.json
+    - lib/api/packagingonline.json
+    - lib/api/pixaronline.json
+    - lib/api/swaplabonline.json
 
   fonts:
     - family: PolySans

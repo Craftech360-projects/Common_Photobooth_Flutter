@@ -80,52 +80,17 @@ class SupabaseService {
     }
   }
 
-  // Upload character image to Supabase
-  Future<String?> uploadCharacterImage(
-      File imageFile, String characterId) async {
-    return uploadImage(imageFile, characterId,
-        bucket: 'characters', prefix: 'character_');
-  }
-
-  // Store character details in Supabase
-  Future<String?> storeCharacterDetails({
-    required String characterId,
-    required String name,
-    String? description,
-    String? imageUrl,
-  }) async {
-    if (!_isInitialized) {
-      throw Exception('Supabase not initialized');
-    }
-
-    try {
-      // Insert data into the 'characters' table
-      await _client.from('characters').insert({
-        'character_id': characterId, // Use character_id field instead of id
-        'name': name,
-        'description': description,
-        'image_url': imageUrl,
-        'created_at': DateTime.now().toIso8601String(),
-      }).select();
-      return characterId;
-    } on Exception catch (e) {
-      debugPrint('Error storing character details: $e');
-      return null;
-    }
-  }
-
   // Upload user face image to Supabase
   Future<String?> uploadUserFaceImage(File imageFile) async {
-    return uploadImage(imageFile, null, bucket: 'input-images', prefix: 'face_');
+    return uploadImage(imageFile, null,
+        bucket: 'inputimages', prefix: 'face_');
   }
 
   // Store participant details in Supabase
   Future<String?> storeParticipantDetails({
     required String name,
     required String email,
-    String? contact,
     required String gender,
-    String? characterId,
     String? imageUrl,
   }) async {
     if (!_isInitialized) {
@@ -136,16 +101,14 @@ class SupabaseService {
       final result = await _client.from('inputimagetable').insert({
         'name': name,
         'email': email,
-        'contact': contact,
         'gender': gender,
-        'character_id': characterId,
         'image_url': imageUrl,
         'created_at': DateTime.now().toIso8601String(),
       }).select();
 
       // Return the UUID from the result
-      if (result.isNotEmpty && result[0]['id'] != null) {
-        return result[0]['id'].toString();
+      if (result.isNotEmpty && result[0]['unique_id'] != null) {
+        return result[0]['unique_id'].toString();
       }
       return null;
     } on Exception catch (e) {
@@ -162,53 +125,17 @@ class SupabaseService {
     }
 
     try {
-      // List files from the 'outputimages' bucket without server-side sorting
-      final fileList = await _client.storage.from('outputimages').list();
+      final response = await _client
+          .from('inputimagetable')
+          .select('output')
+          .eq('unique_id', participantId)
+          .single();
 
-      if (fileList.isEmpty) {
-        debugPrint('No images found in the outputimages bucket');
-        return null;
+      if (response.isNotEmpty && response['output'] != null) {
+        return response['output'] as String;
       }
 
-      // Sort the list manually in Dart based on createdAt (most recent first)
-      fileList.sort((a, b) {
-        final aDate =
-            a.createdAt != null ? DateTime.tryParse(a.createdAt!) : null;
-        final bDate =
-            b.createdAt != null ? DateTime.tryParse(b.createdAt!) : null;
-
-        if (bDate == null) return -1; // Treat nulls as older
-        if (aDate == null) return 1; // Treat nulls as older
-        return bDate.compareTo(aDate); // Compare actual dates (descending)
-      });
-
-      List<FileObject> filesToConsider = fileList;
-
-      // Filter by time if needed
-      if (afterTime != null) {
-        filesToConsider = fileList.where((file) {
-          final fileDate = file.createdAt != null
-              ? DateTime.tryParse(file.createdAt!)
-              : null;
-          // Keep the file if its date is not null and is after the specified time
-          return fileDate != null && fileDate.isAfter(afterTime);
-        }).toList();
-
-        if (filesToConsider.isEmpty) {
-          debugPrint('No images found after: ${afterTime.toIso8601String()}');
-          return null;
-        }
-      }
-
-      // Get the most recent file from the (potentially filtered) list
-      final latestFile = filesToConsider.first;
-      debugPrint(
-          'Found image: ${latestFile.name}, created at: ${latestFile.createdAt}');
-
-      // Get public URL for the file
-      final imageUrl =
-          _client.storage.from('outputimages').getPublicUrl(latestFile.name);
-      return imageUrl;
+      return null;
     } on Exception catch (e) {
       debugPrint('Error getting latest output image: $e');
       return null;

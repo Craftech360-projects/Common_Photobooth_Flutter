@@ -208,34 +208,6 @@ class GlobalSettingsProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // Set input directory
-  // Future<void> setInputDirectory(String directory) async {
-  //   _inputDirectory = directory;
-  //   await _prefs.setString('input_directory', directory);
-
-  //   // Create directory if it doesn't exist
-  //   final dir = Directory(directory);
-  //   if (!await dir.exists()) {
-  //     await dir.create(recursive: true);
-  //   }
-
-  //   notifyListeners();
-  // }
-
-  // // Set output directory
-  // Future<void> setOutputDirectory(String directory) async {
-  //   _outputDirectory = directory;
-  //   await _prefs.setString('output_directory', directory);
-
-  //   // Create directory if it doesn't exist
-  //   final dir = Directory(directory);
-  //   if (!await dir.exists()) {
-  //     await dir.create(recursive: true);
-  //   }
-
-  //   notifyListeners();
-  // }
-
   Future<void> clearAllPreferences() async {
     await _prefs.clear();
     _backgroundImage = null;

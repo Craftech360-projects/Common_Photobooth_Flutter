@@ -1,0 +1,89 @@
+{
+  "1": {
+    "inputs": {
+      "enabled": true,
+      "swap_model": "inswapper_128.onnx",
+      "facedetection": "YOLOv5n",
+      "face_restore_model": "GFPGANv1.4.pth",
+      "face_restore_visibility": 1,
+      "codeformer_weight": 1,
+      "detect_gender_input": "no",
+      "detect_gender_source": "no",
+      "input_faces_index": "0",
+      "source_faces_index": "0",
+      "console_log_level": 1,
+      "input_image": [
+        "46",
+        0
+      ],
+      "source_image": [
+        "44",
+        0
+      ]
+    },
+    "class_type": "ReActorFaceSwap",
+    "_meta": {
+      "title": "ReActor 🌌 Fast Face Swap"
+    }
+  },
+  "34": {
+    "inputs": {
+      "images": [
+        "1",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Preview Image"
+    }
+  },
+  "43": {
+    "inputs": {
+      "unique_id": [
+        "44",
+        2
+      ],
+      "supabase_url": "https://kdkkutcmxtsfrqzbxmox.supabase.co",
+      "supabase_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtka2t1dGNteHRzZnJxemJ4bW94Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0OTU1NzM3NCwiZXhwIjoyMDY1MTMzMzc0fQ.aAMtFygC6smIHh9c132dWBZGqru_MtzLocboPW1epXU",
+      "bucket": "outputimages",
+      "base_file_name": "image",
+      "table_name": "inputimagetable",
+      "unique_id_column": "unique_id",
+      "table_column": "output",
+      "image": [
+        "1",
+        0
+      ]
+    },
+    "class_type": "SupabaseImageUploader",
+    "_meta": {
+      "title": "Upload Image to Supabase"
+    }
+  },
+  "44": {
+    "inputs": {
+      "supabase_url": "https://kdkkutcmxtsfrqzbxmox.supabase.co",
+      "supabase_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtka2t1dGNteHRzZnJxemJ4bW94Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0OTU1NzM3NCwiZXhwIjoyMDY1MTMzMzc0fQ.aAMtFygC6smIHh9c132dWBZGqru_MtzLocboPW1epXU",
+      "table_name": "inputimagetable",
+      "image_column": "image_url",
+      "id_column": "unique_id",
+      "unique_id": "4c678108-c1ca-458e-90b1-1ca81e620282"
+    },
+    "class_type": "SupabaseTableWatcherNode",
+    "_meta": {
+      "title": "Supabase Table Watcher"
+    }
+  },
+  "46": {
+    "inputs": {
+      "image_path": "C:/storage/themes/",
+      "RGBA": "false",
+      "filename_text_extension": "true"
+    },
+    "class_type": "Image Load",
+    "_meta": {
+      "title": "Image Load"
+    }
+  }
+}

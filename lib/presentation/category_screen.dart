@@ -159,17 +159,17 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       {
         'key': 'ghibli',
         'settings': context.read<CategorySettingsProvider>().ghibliCard,
-        'workflow': 'ghibli.json'
+        'workflow': 'ghiblionline.json'
       },
       {
         'key': 'pixar',
         'settings': context.read<CategorySettingsProvider>().pixarCard,
-        'workflow': 'pixar.json'
+        'workflow': 'pixaronline.json'
       },
       {
         'key': 'packaging',
         'settings': context.read<CategorySettingsProvider>().packagingCard,
-        'workflow': 'packaging.json'
+        'workflow': 'packagingonline.json'
       },
     ];
 

@@ -102,7 +102,7 @@
   },
   "25": {
     "inputs": {
-      "noise_seed": 977982511892734
+      "noise_seed": 990558369007823
     },
     "class_type": "RandomNoise",
     "_meta": {
@@ -247,7 +247,7 @@
         0
       ],
       "image": [
-        "289",
+        "283",
         0
       ]
     },
@@ -275,13 +275,13 @@
       "num_beams": 3,
       "do_sample": true,
       "output_mask_select": "",
-      "seed": 502639508492908,
+      "seed": 1039640797395852,
       "image": [
         "256",
         0
       ],
       "florence2_model": [
-        "291",
+        "285",
         0
       ]
     },
@@ -306,7 +306,7 @@
   },
   "257": {
     "inputs": {
-      "lora_name": "ghibli-flux.safetensors",
+      "lora_name": "pixar-animation-flux.safetensors",
       "strength_model": 0.8000000000000002,
       "strength_clip": 1.0000000000000002,
       "model": [
@@ -406,13 +406,13 @@
       "num_beams": 3,
       "do_sample": true,
       "output_mask_select": "",
-      "seed": 182056351666546,
+      "seed": 969319199139470,
       "image": [
         "281",
         0
       ],
       "florence2_model": [
-        "291",
+        "285",
         0
       ]
     },
@@ -423,7 +423,7 @@
   },
   "270": {
     "inputs": {
-      "text": "GHIBLI, Recreate the exact scene and composition from the input image in the whimsical, hand-drawn style of Studio Ghibli. Retain all characters, clothing, background elements, and lighting, but translate them into soft watercolor textures, delicate linework, and vibrant yet natural colors typical of Ghibli films. Infuse the image with a warm, storybook-like atmosphere, adding subtle magical or fantastical touches while preserving the original mood and setting. [caption]",
+      "text": "Create a Pixar-style animated poster featuring the input image as a cute, expressive character. Use soft, colorful lighting, smooth textures, big bright eyes, and a slightly exaggerated, cartoony design. The background should be whimsical and vibrant, capturing a warm, adventurous, and heartwarming mood, like a scene from a Pixar movie. [caption]",
       "old": "[caption]",
       "new": [
         "268",
@@ -456,25 +456,13 @@
   "278": {
     "inputs": {
       "image": [
-        "289",
+        "283",
         0
       ]
     },
     "class_type": "easy imageSize",
     "_meta": {
       "title": "ImageSize"
-    }
-  },
-  "280": {
-    "inputs": {
-      "images": [
-        "256",
-        0
-      ]
-    },
-    "class_type": "PreviewImage",
-    "_meta": {
-      "title": "Preview Image"
     }
   },
   "281": {
@@ -487,7 +475,7 @@
         0
       ],
       "layer_image": [
-        "289",
+        "283",
         0
       ]
     },
@@ -496,44 +484,44 @@
       "title": "LayerUtility: ImageBlend V2"
     }
   },
-  "285": {
+  "283": {
     "inputs": {
-      "images": [
-        "289",
-        0
-      ]
+      "supabase_url": "https://kdkkutcmxtsfrqzbxmox.supabase.co",
+      "supabase_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtka2t1dGNteHRzZnJxemJ4bW94Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0OTU1NzM3NCwiZXhwIjoyMDY1MTMzMzc0fQ.aAMtFygC6smIHh9c132dWBZGqru_MtzLocboPW1epXU",
+      "table_name": "inputimagetable",
+      "image_column": "image_url",
+      "id_column": "unique_id",
+      "unique_id": "4c678108-c1ca-458e-90b1-1ca81e620282"
     },
-    "class_type": "PreviewImage",
+    "class_type": "SupabaseTableWatcherNode",
     "_meta": {
-      "title": "Preview Image"
+      "title": "Supabase Table Watcher"
     }
   },
-  "288": {
+  "284": {
     "inputs": {
-      "path": "output/image111.png",
-      "overwrite": "true",
+      "unique_id": [
+        "283",
+        2
+      ],
+      "supabase_url": "https://kdkkutcmxtsfrqzbxmox.supabase.co",
+      "supabase_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtka2t1dGNteHRzZnJxemJ4bW94Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0OTU1NzM3NCwiZXhwIjoyMDY1MTMzMzc0fQ.aAMtFygC6smIHh9c132dWBZGqru_MtzLocboPW1epXU",
+      "bucket": "outputimages",
+      "base_file_name": "image",
+      "table_name": "inputimagetable",
+      "unique_id_column": "unique_id",
+      "table_column": "output",
       "image": [
         "147",
         0
       ]
     },
-    "class_type": "JWImageSaveToPath",
+    "class_type": "SupabaseImageUploader",
     "_meta": {
-      "title": "Image Save To Path"
+      "title": "Upload Image to Supabase"
     }
   },
-  "289": {
-    "inputs": {
-      "image_path": "input/input_1749552671240.jpeg",
-      "RGBA": "false",
-      "filename_text_extension": "true"
-    },
-    "class_type": "Image Load",
-    "_meta": {
-      "title": "Image Load"
-    }
-  },
-  "291": {
+  "285": {
     "inputs": {
       "model": "Florence-2-base",
       "precision": "fp16",
@@ -543,6 +531,18 @@
     "class_type": "Florence2ModelLoader",
     "_meta": {
       "title": "Florence2ModelLoader"
+    }
+  },
+  "286": {
+    "inputs": {
+      "images": [
+        "283",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Preview Image"
     }
   }
 }

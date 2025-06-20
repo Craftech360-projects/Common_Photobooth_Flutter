@@ -11,13 +11,12 @@ class PhotoboothProvider extends ChangeNotifier {
   bool? isCharacterAsset;
   String? faceImagePath;
   String? swappedImageUrl;
-  String?
-      capturedImageUrl; // Add this property to store the captured image URL
-  DateTime? workflowSentTime; // Add this to track when workflow was sent
+  String? capturedImageUrl;
+  DateTime? workflowSentTime;
   theme_provider.Theme? selectedTheme;
-  String? accessories; // NEW: To store user-inputted accessories
+  String? accessories;
 
-  String get selectedGender => gender ?? 'male'; // Default to male if not set
+  String get selectedGender => gender ?? 'male';
 
   void setUserDetails(String name, String email) {
     this.name = name;
@@ -35,13 +34,12 @@ class PhotoboothProvider extends ChangeNotifier {
     selectedTheme = theme;
     notifyListeners();
   }
-  
+
   // NEW: Setter for accessories
   void setAccessories(String text) {
     accessories = text;
     notifyListeners();
   }
-
 
   void setCharacter(String id, String imagePath, bool isAsset) {
     selectedCharacterId = id;

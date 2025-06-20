@@ -1,4 +1,4 @@
-      {
+{
   "5": {
     "inputs": {
       "width": [
@@ -102,7 +102,7 @@
   },
   "25": {
     "inputs": {
-      "noise_seed": 126918550896445
+      "noise_seed": 793157357417183
     },
     "class_type": "RandomNoise",
     "_meta": {
@@ -174,7 +174,7 @@
   },
   "216": {
     "inputs": {
-      "aspect_ratio": "2:3"
+      "aspect_ratio": "16:9"
     },
     "class_type": "SDXLAspectRatioSelector",
     "_meta": {
@@ -275,13 +275,13 @@
       "num_beams": 3,
       "do_sample": true,
       "output_mask_select": "",
-      "seed": 33373286664912,
+      "seed": 589371105467038,
       "image": [
         "256",
         0
       ],
       "florence2_model": [
-        "282",
+        "285",
         0
       ]
     },
@@ -306,7 +306,7 @@
   },
   "257": {
     "inputs": {
-      "lora_name": "ghibli-flux.safetensors",
+      "lora_name": "TrainBox_v1.0.safetensors",
       "strength_model": 0.8000000000000002,
       "strength_clip": 1.0000000000000002,
       "model": [
@@ -406,13 +406,13 @@
       "num_beams": 3,
       "do_sample": true,
       "output_mask_select": "",
-      "seed": 1074246607987400,
+      "seed": 269892263108428,
       "image": [
         "281",
         0
       ],
       "florence2_model": [
-        "282",
+        "285",
         0
       ]
     },
@@ -423,7 +423,7 @@
   },
   "270": {
     "inputs": {
-      "text": "GHIBLI, Recreate the exact scene and composition from the input image in the whimsical, hand-drawn style of Studio Ghibli. Retain all characters, clothing, background elements, and lighting, but translate them into soft watercolor textures, delicate linework, and vibrant yet natural colors typical of Ghibli films. Infuse the image with a warm, storybook-like atmosphere, adding subtle magical or fantastical touches while preserving the original mood and setting. [caption]",
+      "text": "TRAINBOX, Create an artistic image of a fashion action figure styled like a doll in plastic packaging. The packaging should be sleek and modern.To the right of the figure, neatly arranged in separate compartments within the packaging, include the following accessories:  \\nshoes sunglasses helmet motorbikes\\n\\n",
       "old": "[caption]",
       "new": [
         "268",
@@ -465,18 +465,6 @@
       "title": "ImageSize"
     }
   },
-  "280": {
-    "inputs": {
-      "images": [
-        "256",
-        0
-      ]
-    },
-    "class_type": "PreviewImage",
-    "_meta": {
-      "title": "Preview Image"
-    }
-  },
   "281": {
     "inputs": {
       "invert_mask": true,
@@ -496,17 +484,6 @@
       "title": "LayerUtility: ImageBlend V2"
     }
   },
-  "282": {
-    "inputs": {
-      "model": "microsoft/Florence-2-base",
-      "precision": "fp16",
-      "attention": "sdpa"
-    },
-    "class_type": "DownloadAndLoadFlorence2Model",
-    "_meta": {
-      "title": "DownloadAndLoadFlorence2Model"
-    }
-  },
   "283": {
     "inputs": {
       "supabase_url": "https://kdkkutcmxtsfrqzbxmox.supabase.co",
@@ -514,7 +491,7 @@
       "table_name": "inputimagetable",
       "image_column": "image_url",
       "id_column": "unique_id",
-      "unique_id": "de4c0cad-93c5-45e4-85cb-e11e9b0a888d"
+      "unique_id": "4c678108-c1ca-458e-90b1-1ca81e620282"
     },
     "class_type": "SupabaseTableWatcherNode",
     "_meta": {
@@ -545,6 +522,18 @@
     }
   },
   "285": {
+    "inputs": {
+      "model": "Florence-2-base",
+      "precision": "fp16",
+      "attention": "sdpa",
+      "convert_to_safetensors": true
+    },
+    "class_type": "Florence2ModelLoader",
+    "_meta": {
+      "title": "Florence2ModelLoader"
+    }
+  },
+  "286": {
     "inputs": {
       "images": [
         "283",

@@ -1,6 +1,3 @@
-import 'dart:io';
-
-import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:camera_platform_interface/camera_platform_interface.dart';
 import 'package:camera_windows/camera_windows.dart';
 import 'package:flutter/material.dart';
@@ -21,26 +18,14 @@ import 'package:photobooth_flutter/providers/registration_screen_provider.dart';
 import 'package:photobooth_flutter/providers/theme_selection_provider.dart';
 import 'package:photobooth_flutter/providers/welcome_screen_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
-import 'package:photobooth_flutter/services/sqflite_service.dart';
 import 'package:photobooth_flutter/services/supabase_service.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // NEW: Initialize FFI for sqflite on desktop platforms
-  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-    sqfliteFfiInit();
-    databaseFactory = databaseFactoryFfi;
-  }
-
-  // CONFIGURE INPUT OUTPUT DIRECTORIES FOR OFFLINE MODE
-
   MediaKit.ensureInitialized();
-  await DatabaseService.instance.database;
 
-  // Initialize providers
   final globalSettings = GlobalSettingsProvider();
   try {
     await globalSettings.init();
@@ -113,14 +98,6 @@ void main() async {
       child: const MyApp(),
     ),
   );
-
-  doWhenWindowReady(() {
-    const initialSize = Size(1080, 1920);
-    appWindow.minSize = initialSize;
-    appWindow.size = initialSize;
-    appWindow.alignment = Alignment.center;
-    appWindow.show();
-  });
 }
 
 class MyApp extends StatefulWidget {
