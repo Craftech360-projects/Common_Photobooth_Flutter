@@ -35,63 +35,67 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   Widget build(BuildContext context) {
     final settingsProvider = context.watch<CategorySettingsProvider>();
     final globalSettings = context.watch<GlobalSettingsProvider>();
-    final flowProvider = context.read<CategoryProvider>();
+    final categoryProvider = context.read<CategoryProvider>();
 
     return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        toolbarHeight: 70,
-        automaticallyImplyLeading: false,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leadingWidth: 170,
-        leading: IconButton(
-          padding: const EdgeInsets.only(left: 0.0, top: 20.0, bottom: 0.0),
-          onPressed: () {
-            if (_showSubCategories) {
-              setState(() {
-                _showSubCategories = false;
-                flowProvider.resetSelection();
-              });
-            } else {
-              flowProvider.resetSelection();
-              Navigator.pop(context);
-            }
-          },
-          icon: Image.asset(
-            'assets/images/back_btn.png',
-          ),
-          iconSize: 180,
-        ),
-      ),
       body: Container(
         width: double.infinity,
         height: double.infinity,
         decoration: BoxDecoration(
           image: _getBackgroundImage(settingsProvider, globalSettings),
         ),
-        child: Center(
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 500),
-            transitionBuilder: (child, animation) {
-              final slideAnimation = Tween<Offset>(
-                begin: const Offset(0.0, 0.4),
-                end: Offset.zero,
-              ).animate(
-                  CurvedAnimation(parent: animation, curve: Curves.easeOut));
-              return SlideTransition(
-                position: slideAnimation,
-                child: FadeTransition(
-                  opacity: animation,
-                  child: child,
+        child: Stack(
+          children: [
+            Center(
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 500),
+                transitionBuilder: (child, animation) {
+                  final slideAnimation = Tween<Offset>(
+                    begin: const Offset(0.0, 0.4),
+                    end: Offset.zero,
+                  ).animate(CurvedAnimation(
+                      parent: animation, curve: Curves.easeOut));
+                  return SlideTransition(
+                    position: slideAnimation,
+                    child: FadeTransition(
+                      opacity: animation,
+                      child: child,
+                    ),
+                  );
+                },
+                child: _showSubCategories
+                    ? _buildSubCategoryView(context,
+                        key: const ValueKey('SubView'))
+                    : _buildMainCategoryView(context,
+                        key: const ValueKey('MainView')),
+              ),
+            ),
+            // Bottom Right Back Button
+            Positioned(
+              bottom: 30,
+              left: 30,
+              child: GestureDetector(
+                onTap: () {
+                  if (_showSubCategories) {
+                    setState(() {
+                      _showSubCategories = false;
+                      _currentSubCategoryIndex = 0;
+                      categoryProvider.resetSelection();
+                    });
+                  } else {
+                    categoryProvider.resetSelection();
+                    Navigator.pop(context);
+                  }
+                },
+                child: Image.asset(
+                  'assets/images/back_btn.png',
+                  width: 120,
+                  height: 120,
+                  fit: BoxFit.contain,
                 ),
-              );
-            },
-            child: _showSubCategories
-                ? _buildSubCategoryView(context, key: const ValueKey('SubView'))
-                : _buildMainCategoryView(context,
-                    key: const ValueKey('MainView')),
-          ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -273,7 +277,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                 child: TextField(
                   controller: _accessoriesController,
                   focusNode: _accessoriesFocusNode,
-                  readOnly: false, // Changed to false for physical keyboard
+                  readOnly: false,
                   showCursor: true,
                   style: const TextStyle(color: Colors.white, fontSize: 24),
                   decoration: InputDecoration(
@@ -402,7 +406,7 @@ class _TappableCategoryCardState extends State<TappableCategoryCard> {
               ? [
                   BoxShadow(
                     color: widget.settings.glowColor
-                        .withValues(alpha: widget.settings.glowIntensity),
+                        .withOpacity(widget.settings.glowIntensity),
                     blurRadius: 80,
                     spreadRadius: 12,
                   )

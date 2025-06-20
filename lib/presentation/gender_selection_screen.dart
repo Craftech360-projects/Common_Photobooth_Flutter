@@ -41,25 +41,6 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
     final watermarkProvider = context.watch<AdminWatermarkProvider>();
 
     return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-          toolbarHeight: 70,
-          automaticallyImplyLeading: false,
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          leadingWidth: 170,
-          leading: IconButton(
-            padding: const EdgeInsets.only(left: 0.0, top: 20.0, bottom: 0.0),
-            onPressed: () {
-              // Clear selected gender when going back
-              context.read<PhotoboothProvider>().clearGender();
-              Navigator.pop(context);
-            },
-            icon: Image.asset(
-              'assets/images/back_btn.png',
-            ),
-            iconSize: 180,
-          )),
       body: WatermarkOverlay(
         show: watermarkProvider.showWatermark,
         child: Stack(
@@ -75,8 +56,6 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
                 ),
               ),
             ),
-
-            // Title with updated styling
             Positioned(
               left: settings.titleLeft,
               top: settings.titleTop,
@@ -86,8 +65,7 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
                 style: TextStyle(
                   fontSize: settings.titleFontSize,
                   fontWeight: settings.titleFontWeight,
-                  color: settings.titleColor
-                      .withValues(alpha: settings.titleOpacity),
+                  color: settings.titleColor.withOpacity(settings.titleOpacity),
                   fontStyle: settings.titleItalic
                       ? FontStyle.italic
                       : FontStyle.normal,
@@ -96,8 +74,6 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
                 textAlign: settings.titleAlignment,
               ),
             ),
-
-            // Gender Selection with margins and padding
             Positioned(
               left: settings.genderSelectionLeft,
               top: settings.genderSelectionTop,
@@ -110,7 +86,6 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
                 ],
               ),
             ),
-
             if (_showError)
               Positioned(
                 bottom: settings.buttonBottom + 80,
@@ -122,8 +97,6 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
                   ),
                 ),
               ),
-
-            // Continue Button with margins
             Positioned(
               left: settings.buttonLeft,
               bottom: settings.buttonBottom,
@@ -131,7 +104,6 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
                   ? _buildImageButton(settings)
                   : _buildTextButton(settings),
             ),
-
             Positioned(
               right: 0,
               top: 0,
@@ -142,6 +114,23 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
                   width: 50,
                   height: 50,
                   decoration: const BoxDecoration(color: Colors.transparent),
+                ),
+              ),
+            ),
+            // Bottom Right Back Button
+            Positioned(
+              bottom: 30,
+              left: 30,
+              child: GestureDetector(
+                onTap: () {
+                  context.read<PhotoboothProvider>().clearGender();
+                  Navigator.pop(context);
+                },
+                child: Image.asset(
+                  'assets/images/back_btn.png',
+                  width: 120,
+                  height: 120,
+                  fit: BoxFit.contain,
                 ),
               ),
             ),
@@ -202,7 +191,7 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
               ? [
                   BoxShadow(
                     color: settings.selectionGlowColor
-                        .withValues(alpha: settings.selectionGlowIntensity),
+                        .withOpacity(settings.selectionGlowIntensity),
                     blurRadius: settings.selectionGlowSpread,
                     spreadRadius: settings.selectionGlowSpread / 2,
                   )

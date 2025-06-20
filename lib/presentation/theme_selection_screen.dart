@@ -26,25 +26,6 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> {
     final globalSettings = context.read<GlobalSettingsProvider>();
 
     return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-          toolbarHeight: 70,
-          leadingWidth: 170,
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          leading: IconButton(
-            // Add padding here for horizontal and vertical spacing
-            padding: const EdgeInsets.only(left: 0.0, top: 20.0, bottom: 0.0),
-            onPressed: () {
-              // Clear selected theme when going back
-              context.read<PhotoboothProvider>().clearTheme();
-              Navigator.pop(context);
-            },
-            icon: Image.asset(
-              'assets/images/back_btn.png',
-            ),
-            iconSize: 180,
-          )),
       body: Container(
         width: double.infinity,
         height: double.infinity,
@@ -87,6 +68,23 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> {
                   width: 50,
                   height: 50,
                   decoration: const BoxDecoration(color: Colors.transparent),
+                ),
+              ),
+            ),
+            // Bottom Right Back Button
+            Positioned(
+              bottom: 30,
+              left: 30,
+              child: GestureDetector(
+                onTap: () {
+                  context.read<PhotoboothProvider>().clearTheme();
+                  Navigator.pop(context);
+                },
+                child: Image.asset(
+                  'assets/images/back_btn.png',
+                  width: 120,
+                  height: 120,
+                  fit: BoxFit.contain,
                 ),
               ),
             ),
@@ -216,7 +214,7 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> {
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: AppColors.goldenYellow.withValues(alpha: 0.6),
+                    color: AppColors.goldenYellow.withOpacity(0.6),
                     blurRadius: 80,
                     spreadRadius: 12,
                   )

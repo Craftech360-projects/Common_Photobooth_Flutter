@@ -173,10 +173,10 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
           ),
         ),
         Positioned(
-          left: settings.buttonLeft,
+          left: 150,
           bottom: isSwaplabFlow ? 100 : 350,
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // QR Code Section
               Container(
@@ -207,14 +207,14 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
+                    textAlign: TextAlign.start,
                     "Thanks for participating.\nScan the QR code to download your photo.",
                     style: TextStyle(
                         height: 1.3,
-                        fontSize: 28,
+                        fontSize: 26,
                         fontWeight: FontWeight.w500,
                         color: AppColors.white),
                   ),
-                  const SizedBox(height: 20),
                   settings.useImageButton
                       ? _buildImageButton(settings)
                       : _buildTextButton(settings),
@@ -263,8 +263,8 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
         Navigator.of(context).pushReplacementNamed('/');
       },
       child: Container(
-        width: 370,
-        height: 200,
+        width: 350,
+        height: 180,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
           image: DecorationImage(

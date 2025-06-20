@@ -83,8 +83,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
     final String watcherNodeId;
 
     if (isSwaplabFlow) {
-      workflowFileName = 'faceswaponline.json';
-      watcherNodeId = '44'; // As per faceswaponline.json
+      workflowFileName = 'swaplabonline.json';
+      watcherNodeId = '44'; // As per swaplabonline.json
     } else {
       workflowFileName =
           prefs.getString('selected_workflow') ?? 'ghiblionline.json';
@@ -170,6 +170,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
         workflow.updatePackagingPrompt(gender, accessories);
       }
 
+      print("Workflow: ${workflow.toMap()}");
       final response =
           await ComfyApiService.instance.sendOnlineWorkflow(workflow.toMap());
 
@@ -179,7 +180,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
       // Polling for the result
       int attempts = 0;
-      const maxAttempts = 120; // 4 minutes timeout
+      const maxAttempts = 150; // 4 minutes timeout
       const pollDelay = Duration(seconds: 2);
 
       while (attempts < maxAttempts) {
