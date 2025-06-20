@@ -45,23 +45,24 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leadingWidth: 170,
-        leading: _showSubCategories
-            ? IconButton(
-                padding:
-                    const EdgeInsets.only(left: 0.0, top: 20.0, bottom: 0.0),
-                onPressed: () {
-                  setState(() {
-                    _showSubCategories = false;
-                    _currentSubCategoryIndex = 0;
-                    flowProvider.resetSelection();
-                  });
-                },
-                icon: Image.asset(
-                  'assets/images/back_btn.png',
-                ),
-                iconSize: 180,
-              )
-            : null,
+        leading: IconButton(
+          padding: const EdgeInsets.only(left: 0.0, top: 20.0, bottom: 0.0),
+          onPressed: () {
+            if (_showSubCategories) {
+              setState(() {
+                _showSubCategories = false;
+                flowProvider.resetSelection();
+              });
+            } else {
+              flowProvider.resetSelection();
+              Navigator.pop(context);
+            }
+          },
+          icon: Image.asset(
+            'assets/images/back_btn.png',
+          ),
+          iconSize: 180,
+        ),
       ),
       body: Container(
         width: double.infinity,

@@ -304,6 +304,28 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
     final globalSettings = context.watch<GlobalSettingsProvider>();
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+          toolbarHeight: 70,
+          automaticallyImplyLeading: false,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leadingWidth: 170,
+          leading: IconButton(
+            padding: const EdgeInsets.only(left: 0.0, top: 20.0, bottom: 0.0),
+            onPressed: () {
+              _disposeCurrentCamera().then((_) {
+                // ***MODIFICATION HERE***
+                // Clear the face image path from the provider
+                context.read<PhotoboothProvider>().clearFaceImage();
+                Navigator.pop(context);
+              });
+            },
+            icon: Image.asset(
+              'assets/images/back_btn.png',
+            ),
+            iconSize: 180,
+          )),
       body: Stack(
         children: [
           Container(

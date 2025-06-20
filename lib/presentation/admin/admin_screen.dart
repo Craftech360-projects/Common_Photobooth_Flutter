@@ -57,7 +57,6 @@ class _AdminScreenState extends State<AdminScreen> {
     final watermarkProvider = context.watch<AdminWatermarkProvider>();
 
     return Scaffold(
-      appBar: AppBar(),
       body: WatermarkOverlay(
         show: watermarkProvider.showWatermark,
         child: SingleChildScrollView(
@@ -92,6 +91,16 @@ class _AdminScreenState extends State<AdminScreen> {
           ),
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        elevation: 0,
+        onPressed: () => Navigator.of(context).pop(),
+        backgroundColor: Colors.transparent,
+        child: const SizedBox(
+          width: 50,
+          height: 50,
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
     );
   }
 

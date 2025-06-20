@@ -36,6 +36,8 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> {
             // Add padding here for horizontal and vertical spacing
             padding: const EdgeInsets.only(left: 0.0, top: 20.0, bottom: 0.0),
             onPressed: () {
+              // Clear selected theme when going back
+              context.read<PhotoboothProvider>().clearTheme();
               Navigator.pop(context);
             },
             icon: Image.asset(

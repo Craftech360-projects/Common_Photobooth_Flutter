@@ -21,7 +21,6 @@ class PhotoboothProvider extends ChangeNotifier {
   void setUserDetails(String name, String email) {
     this.name = name;
     this.email = email;
-
     notifyListeners();
   }
 
@@ -30,12 +29,11 @@ class PhotoboothProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setTheme(theme_provider.Theme theme) {
+  void setTheme(theme_provider.Theme? theme) {
     selectedTheme = theme;
     notifyListeners();
   }
 
-  // NEW: Setter for accessories
   void setAccessories(String text) {
     accessories = text;
     notifyListeners();
@@ -53,6 +51,31 @@ class PhotoboothProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Clears the path to the last captured face image.
+  void clearFaceImage() {
+    faceImagePath = null;
+    notifyListeners();
+  }
+  
+  /// Clears the user details.
+  void clearUserDetails() {
+    name = null;
+    email = null;
+    notifyListeners();
+  }
+  
+  /// Clears the selected gender.
+  void clearGender() {
+    gender = null;
+    notifyListeners();
+  }
+
+  /// Clears the selected theme.
+  void clearTheme() {
+    selectedTheme = null;
+    notifyListeners();
+  }
+
   void setSwappedImage(String url) {
     swappedImageUrl = url;
     notifyListeners();
@@ -63,13 +86,11 @@ class PhotoboothProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Add method to set workflow sent time
   void setWorkflowSentTime(DateTime time) {
     workflowSentTime = time;
     notifyListeners();
   }
 
-  // Add method to clear all user data
   void clearUserData() async {
     name = null;
     email = null;
@@ -79,10 +100,10 @@ class PhotoboothProvider extends ChangeNotifier {
     isCharacterAsset = null;
     faceImagePath = null;
     swappedImageUrl = null;
-    capturedImageUrl = null; // Clear this as well
-    workflowSentTime = null; // Clear this as well
+    capturedImageUrl = null;
+    workflowSentTime = null;
     selectedTheme = null;
-    accessories = null; // NEW: Reset accessories
+    accessories = null;
     notifyListeners();
   }
 }

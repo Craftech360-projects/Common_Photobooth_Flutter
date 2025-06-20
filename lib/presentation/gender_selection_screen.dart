@@ -41,6 +41,25 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
     final watermarkProvider = context.watch<AdminWatermarkProvider>();
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+          toolbarHeight: 70,
+          automaticallyImplyLeading: false,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leadingWidth: 170,
+          leading: IconButton(
+            padding: const EdgeInsets.only(left: 0.0, top: 20.0, bottom: 0.0),
+            onPressed: () {
+              // Clear selected gender when going back
+              context.read<PhotoboothProvider>().clearGender();
+              Navigator.pop(context);
+            },
+            icon: Image.asset(
+              'assets/images/back_btn.png',
+            ),
+            iconSize: 180,
+          )),
       body: WatermarkOverlay(
         show: watermarkProvider.showWatermark,
         child: Stack(
