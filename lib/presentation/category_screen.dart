@@ -305,9 +305,9 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     final photoProvider = context.read<PhotoboothProvider>();
 
     final subCategories = [
-      {'key': 'ghibli', 'workflow': 'ghibli.json'},
-      {'key': 'pixar', 'workflow': 'pixar.json'},
-      {'key': 'packaging', 'workflow': 'packaging.json'},
+      {'key': 'ghibli', 'workflow': 'ghiblionline.json'},
+      {'key': 'pixar', 'workflow': 'pixaronline.json'},
+      {'key': 'packaging', 'workflow': 'packagingonline.json'},
     ];
 
     onPressed() {

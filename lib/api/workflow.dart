@@ -21,7 +21,7 @@ class Workflow {
   }
 
   void updateSwaplabCharacterImage(String path) {
-    // Node 46 is the Image Load node for the character image in faceswaponline.json
+    // Node 46 is the Image Load node for the character image in swaplabonline.json.json
     if (_workflow.containsKey('46') && _workflow['46'].containsKey('inputs')) {
       _workflow['46']['inputs']['image_path'] = path.replaceAll(r'\', '/');
     }
