@@ -157,31 +157,31 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
     return Stack(
       alignment: Alignment.center,
       children: [
-        if (settings.showTitle)
-          Positioned(
-            left: settings.titleLeft,
-            top: settings.titleTop,
-            width: settings.titleWidth,
-            child: Text(
-              settings.titleText,
-              style: TextStyle(
-                fontSize: settings.titleFontSize,
-                fontWeight: settings.titleFontWeight,
-                color: settings.titleColor,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
+        // if (settings.showTitle)
+        //   Positioned(
+        //     left: settings.titleLeft,
+        //     top: settings.titleTop,
+        //     width: settings.titleWidth,
+        //     child: Text(
+        //       settings.titleText,
+        //       style: TextStyle(
+        //         fontSize: settings.titleFontSize,
+        //         fontWeight: settings.titleFontWeight,
+        //         color: settings.titleColor,
+        //       ),
+        //       textAlign: TextAlign.center,
+        //     ),
+        //   ),
         Container(
           margin: const EdgeInsets.symmetric(horizontal: 100),
           width: isSwaplabFlow ? 700 : 900,
           // height: 1000,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(settings.imageBorderRadius),
-            border: Border.all(
-              color: settings.imageBorderColor,
-              width: settings.imageBorderWidth,
-            ),
+            // border: Border.all(
+            //   color: settings.imageBorderColor,
+            //   width: settings.imageBorderWidth,
+            // ),
           ),
           clipBehavior: Clip.antiAlias,
           child: Stack(

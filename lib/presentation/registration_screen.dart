@@ -9,7 +9,6 @@ import 'package:photobooth_flutter/routes/routes.dart';
 import 'package:photobooth_flutter/widgets/snackbar.dart';
 import 'package:photobooth_flutter/widgets/watermark_overlay.dart';
 import 'package:provider/provider.dart';
-import 'package:virtual_keyboard_multi_language/virtual_keyboard_multi_language.dart';
 
 class ParticipantDetailsScreen extends StatefulWidget {
   const ParticipantDetailsScreen({super.key});
@@ -22,10 +21,6 @@ class ParticipantDetailsScreen extends StatefulWidget {
 class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
   final Map<String, TextEditingController> _controllers = {};
   final Map<String, FocusNode> _focusNodes = {};
-  bool _isKeyboardVisible = false;
-  TextEditingController? _currentController;
-  // Use a mutable keyboard type
-  VirtualKeyboardType _keyboardType = VirtualKeyboardType.Alphanumeric;
 
   @override
   void initState() {
@@ -36,20 +31,7 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
     for (var field in registrationSettings.textFields) {
       final controller = TextEditingController();
       _controllers[field.id] = controller;
-
-      _focusNodes[field.id] = FocusNode()
-        ..addListener(() {
-          if (_focusNodes[field.id]!.hasFocus) {
-            setState(() {
-              _currentController = _controllers[field.id];
-              // Set keyboard type based on the focused field
-              _keyboardType = (field.fieldType == TextFieldType.email)
-                  ? VirtualKeyboardType.Alphanumeric
-                  : VirtualKeyboardType.Alphanumeric;
-              _isKeyboardVisible = true;
-            });
-          }
-        });
+      _focusNodes[field.id] = FocusNode();
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -57,53 +39,6 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
         Navigator.pushReplacementNamed(context, AppRoutes.genderSelection);
       }
     });
-  }
-
-  /// Correctly handles key presses from the virtual keyboard.
-  void _onKeyPress(VirtualKeyboardKey key) {
-    if (_currentController == null) return;
-
-    final text = _currentController!.text;
-    final selection = _currentController!.selection;
-
-    // --- FIX STARTS HERE ---
-    // Check for the backspace action.
-    if (key.action == VirtualKeyboardKeyAction.Backspace) {
-      if (selection.baseOffset > 0) {
-        final newText = text.replaceRange(
-          selection.start - 1,
-          selection.end,
-          '',
-        );
-        _currentController!.text = newText;
-        // Move the cursor back
-        _currentController!.selection = TextSelection.fromPosition(
-            TextPosition(offset: selection.start - 1));
-      }
-    } else if (key.action == VirtualKeyboardKeyAction.Return) {
-      // Optional: Handle the enter key, e.g., by submitting the form.
-      _handleSubmit();
-    } else {
-      // Handle all other keys (letters, numbers, symbols).
-      final newText = text.replaceRange(
-        selection.start,
-        selection.end,
-        key.text ?? '',
-      );
-      _currentController!.text = newText;
-      // Move the cursor forward
-      _currentController!.selection = TextSelection.fromPosition(
-          TextPosition(offset: selection.start + (key.text?.length ?? 0)));
-    }
-    // --- FIX ENDS HERE ---
-  }
-
-  /// Hides the virtual keyboard and unfocuses the text fields.
-  void _hideKeyboard() {
-    setState(() {
-      _isKeyboardVisible = false;
-    });
-    FocusScope.of(context).unfocus();
   }
 
   @override
@@ -128,17 +63,14 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
         show: watermarkProvider.showWatermark,
         child: Stack(
           children: [
-            GestureDetector(
-              onTap: _hideKeyboard,
-              child: Container(
-                width: double.infinity,
-                height: double.infinity,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: _getBackgroundImage(
-                        registrationSettings, globalSettings),
-                    fit: BoxFit.cover,
-                  ),
+            Container(
+              width: double.infinity,
+              height: double.infinity,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image:
+                      _getBackgroundImage(registrationSettings, globalSettings),
+                  fit: BoxFit.cover,
                 ),
               ),
             ),
@@ -167,7 +99,7 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
                       child: TextFormField(
                         controller: _controllers[field.id],
                         focusNode: _focusNodes[field.id],
-                        readOnly: true,
+                        readOnly: false, // Changed to false
                         showCursor: true,
                         style: TextStyle(
                           color: field.textColor,
@@ -233,24 +165,6 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
                 ),
               ),
             ),
-            if (_isKeyboardVisible)
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: Container(
-                  color: Colors.black.withValues(alpha: 0.5),
-                  child: VirtualKeyboard(
-                    height: MediaQuery.of(context).size.height * 0.25,
-                    postKeyPress: _onKeyPress,
-                    type: _keyboardType,
-                    textColor: Colors.white,
-                    fontSize: 30,
-                    // You can optionally set a height
-                    // height: 350,
-                  ),
-                ),
-              )
           ],
         ),
       ),
@@ -329,7 +243,7 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
   }
 
   void _handleSubmit() {
-    _hideKeyboard();
+    FocusScope.of(context).unfocus();
     final registrationSettings = context.read<RegistrationScreenProvider>();
     String? firstErrorMessage;
 

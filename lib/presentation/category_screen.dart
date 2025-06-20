@@ -10,7 +10,6 @@ import 'package:photobooth_flutter/routes/routes.dart';
 import 'package:photobooth_flutter/routes/slide_right.dart';
 import 'package:photobooth_flutter/widgets/snackbar.dart';
 import 'package:provider/provider.dart';
-import 'package:virtual_keyboard_multi_language/virtual_keyboard_multi_language.dart';
 
 class CategoriesScreen extends StatefulWidget {
   const CategoriesScreen({super.key});
@@ -23,63 +22,13 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   bool _showSubCategories = false;
   int _currentSubCategoryIndex = 0;
   final TextEditingController _accessoriesController = TextEditingController();
-
   final FocusNode _accessoriesFocusNode = FocusNode();
-  bool _isKeyboardVisible = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _accessoriesFocusNode.addListener(() {
-      if (_accessoriesFocusNode.hasFocus) {
-        setState(() {
-          _isKeyboardVisible = true;
-        });
-      }
-    });
-  }
 
   @override
   void dispose() {
     _accessoriesController.dispose();
     _accessoriesFocusNode.dispose();
     super.dispose();
-  }
-
-  void _onKeyPress(VirtualKeyboardKey key) {
-    final text = _accessoriesController.text;
-    final selection = _accessoriesController.selection;
-
-    if (key.action == VirtualKeyboardKeyAction.Backspace) {
-      if (selection.baseOffset > 0) {
-        final newText = text.replaceRange(
-          selection.start - 1,
-          selection.end,
-          '',
-        );
-        _accessoriesController.text = newText;
-        _accessoriesController.selection = TextSelection.fromPosition(
-            TextPosition(offset: selection.start - 1));
-      }
-    } else if (key.action == VirtualKeyboardKeyAction.Return) {
-      _hideKeyboard();
-    } else {
-      final newText = text.replaceRange(
-        selection.start,
-        selection.end,
-        key.text ?? '',
-      );
-      _accessoriesController.text = newText;
-      _accessoriesController.selection = TextSelection.fromPosition(
-          TextPosition(offset: selection.start + (key.text?.length ?? 0)));
-    }
-  }
-
-  void _hideKeyboard() {
-    setState(() {
-      _isKeyboardVisible = false;
-    });
-    _accessoriesFocusNode.unfocus();
   }
 
   @override
@@ -114,59 +63,35 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
               )
             : null,
       ),
-      body: Stack(
-        children: [
-          GestureDetector(
-            onTap: _hideKeyboard,
-            child: Container(
-              width: double.infinity,
-              height: double.infinity,
-              decoration: BoxDecoration(
-                image: _getBackgroundImage(settingsProvider, globalSettings),
-              ),
-              child: Center(
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 500),
-                  transitionBuilder: (child, animation) {
-                    final slideAnimation = Tween<Offset>(
-                      begin: const Offset(0.0, 0.4),
-                      end: Offset.zero,
-                    ).animate(CurvedAnimation(
-                        parent: animation, curve: Curves.easeOut));
-                    return SlideTransition(
-                      position: slideAnimation,
-                      child: FadeTransition(
-                        opacity: animation,
-                        child: child,
-                      ),
-                    );
-                  },
-                  child: _showSubCategories
-                      ? _buildSubCategoryView(context,
-                          key: const ValueKey('SubView'))
-                      : _buildMainCategoryView(context,
-                          key: const ValueKey('MainView')),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          image: _getBackgroundImage(settingsProvider, globalSettings),
+        ),
+        child: Center(
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 500),
+            transitionBuilder: (child, animation) {
+              final slideAnimation = Tween<Offset>(
+                begin: const Offset(0.0, 0.4),
+                end: Offset.zero,
+              ).animate(
+                  CurvedAnimation(parent: animation, curve: Curves.easeOut));
+              return SlideTransition(
+                position: slideAnimation,
+                child: FadeTransition(
+                  opacity: animation,
+                  child: child,
                 ),
-              ),
-            ),
+              );
+            },
+            child: _showSubCategories
+                ? _buildSubCategoryView(context, key: const ValueKey('SubView'))
+                : _buildMainCategoryView(context,
+                    key: const ValueKey('MainView')),
           ),
-          if (_isKeyboardVisible)
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Container(
-                color: Colors.black.withValues(alpha: 0.5),
-                child: VirtualKeyboard(
-                  height: MediaQuery.of(context).size.height * 0.25,
-                  postKeyPress: _onKeyPress,
-                  type: VirtualKeyboardType.Alphanumeric,
-                  textColor: Colors.white,
-                  fontSize: 30,
-                ),
-              ),
-            )
-        ],
+        ),
       ),
     );
   }
@@ -347,7 +272,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                 child: TextField(
                   controller: _accessoriesController,
                   focusNode: _accessoriesFocusNode,
-                  readOnly: true,
+                  readOnly: false, // Changed to false for physical keyboard
                   showCursor: true,
                   style: const TextStyle(color: Colors.white, fontSize: 24),
                   decoration: InputDecoration(
@@ -367,11 +292,10 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
               ),
           ],
         ),
-        if (!_isKeyboardVisible)
-          Positioned(
-            bottom: 400,
-            child: _buildNextButton(context),
-          )
+        Positioned(
+          bottom: 400,
+          child: _buildNextButton(context),
+        )
       ],
     );
   }
@@ -394,11 +318,10 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
           showSnackBar(context, "Please enter some accessories", isError: true);
           return;
         }
-        // FIXED: Explicitly set accessories in the provider before navigating
         photoProvider.setAccessories(_accessoriesController.text.trim());
       }
 
-      _hideKeyboard();
+      _accessoriesFocusNode.unfocus();
       flowProvider.selectWorkflow(selectedSubCategory['workflow'] as String);
       Navigator.pushNamed(context, AppRoutes.faceCapture);
     }

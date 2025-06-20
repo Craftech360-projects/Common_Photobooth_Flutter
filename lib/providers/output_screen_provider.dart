@@ -43,7 +43,7 @@ class OutputScreenProvider extends ChangeNotifier {
   String? _buttonImagePath = 'assets/images/home_btn.png';
   bool _isButtonImageAsset = true;
 
-  String _backgroundImagePath = 'assets/images/output_bg.png';
+  String _backgroundImagePath = 'assets/images/common_bg.png';
   bool _isBackgroundImageAsset = true;
   bool _showBackground = true;
 
@@ -191,7 +191,7 @@ class OutputScreenProvider extends ChangeNotifier {
       _buttonBorderRadius =
           settings['buttonBorderRadius'] ?? _buttonBorderRadius;
       _backgroundImagePath =
-          settings['backgroundImagePath'] ?? 'assets/images/output_bg.png';
+          settings['backgroundImagePath'] ?? 'assets/images/common_bg.png';
       _isBackgroundImageAsset =
           settings['isBackgroundImageAsset'] ?? _isBackgroundImageAsset;
       _showBackground = settings['showBackground'] ?? _showBackground;
@@ -351,7 +351,7 @@ class OutputScreenProvider extends ChangeNotifier {
   void setBackgroundImage(String? path, {required bool isAsset}) {
     if (path == null) {
       // If path is null, reset to the default background image.
-      _backgroundImagePath = 'assets/images/output_bg.png';
+      _backgroundImagePath = 'assets/images/common_bg.png';
       _isBackgroundImageAsset = true; // The default is an asset.
     } else {
       // Otherwise, set the new image path.
