@@ -396,23 +396,23 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
   }
 
   ImageProvider _getBackgroundImage(
-      FaceCaptureProvider settings, GlobalSettingsProvider globalSettings) {
-    if (settings.showBackground && settings.backgroundImagePath != null) {
+      FaceCaptureProvider settings,
+      GlobalSettingsProvider globalSettings) {
+    if (settings.backgroundImagePath != null) {
       if (settings.isBackgroundImageAsset) {
         return AssetImage(settings.backgroundImagePath!);
       } else {
-        return FileImage(File(settings.backgroundImagePath!));
-      }
-    } else {
-      if (globalSettings.backgroundImagePath != null) {
-        if (globalSettings.isBackgroundImageAsset) {
-          return AssetImage(globalSettings.backgroundImagePath!);
-        } else {
-          return FileImage(File(globalSettings.backgroundImagePath!));
-        }
-      } else {
-        return const AssetImage('assets/images/common_bg.png');
+        return FileImage(
+            File(settings.backgroundImagePath!));
       }
     }
+    if (globalSettings.backgroundImage != null) {
+      if (globalSettings.isAssetImage) {
+        return AssetImage(globalSettings.backgroundImage!);
+      } else {
+        return FileImage(File(globalSettings.backgroundImage!));
+      }
+    }
+    return const AssetImage('assets/images/common_bg.png');
   }
 }

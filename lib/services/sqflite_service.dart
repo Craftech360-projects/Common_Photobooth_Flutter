@@ -17,7 +17,6 @@ class DatabaseService {
   Future<Database> _initDB(String filePath) async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
-
     return await openDatabase(path, version: 1, onCreate: _createDB);
   }
 
@@ -34,7 +33,7 @@ CREATE TABLE users (
   )
 ''');
   }
-
+  
   Future<UserData> insertUser(UserData user) async {
     final db = await instance.database;
     final id = await db.insert('users', user.toMap());

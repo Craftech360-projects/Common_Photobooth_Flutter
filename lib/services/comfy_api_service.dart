@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -22,28 +21,34 @@ class ComfyApiService {
 
   static bool get isInitialized => _instance != null;
 
-  Future<Map<String, dynamic>> sendOnlineWorkflow(
-      Map<String, dynamic> workflow) async {
+  Future<Map<String, dynamic>> sendWorkflow(
+      {required Map<String, dynamic> workflow}) async {
     final sentTime = DateTime.now();
-    final response = await http.post(
-      Uri.parse('$_apiUrl/prompt'),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'prompt': workflow,
-      }),
-    );
+    try {
+      debugPrint('======= SENDING WORKFLOW ======');
+      final workflowJson = const JsonEncoder.withIndent('  ').convert(workflow);
+      debugPrint('Workflow JSON: $workflowJson');
+      debugPrint('================================');
+      
+      final response = await http.post(
+        Uri.parse('$_apiUrl/prompt'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'prompt': workflow}),
+      );
 
-    if (response.statusCode == 200) {
-      return {
-        'status': 'success',
-        'message': 'Workflow sent successfully',
-        'sentTime': sentTime.toIso8601String(),
-      };
-    } else {
-      debugPrint('Error sending workflow: ${response.body}');
-      throw Exception('Failed to send workflow: ${response.statusCode}');
+      if (response.statusCode == 200) {
+        return {
+          'status': 'success',
+          'message': 'Workflow sent successfully',
+          'sentTime': sentTime.toIso8601String(),
+        };
+      } else {
+        debugPrint('Error sending workflow: ${response.body}');
+        throw Exception('Failed to send workflow: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('Exception sending workflow: $e');
+      rethrow;
     }
   }
 

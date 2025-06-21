@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/core/constants/constants.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
+import 'package:photobooth_flutter/models/user_model.dart';
 import 'package:photobooth_flutter/providers/admin_watermark_provider.dart';
 import 'package:photobooth_flutter/providers/auth_provider.dart';
 import 'package:photobooth_flutter/providers/category_settings_provider.dart';
@@ -14,6 +17,7 @@ import 'package:photobooth_flutter/providers/registration_screen_provider.dart';
 import 'package:photobooth_flutter/providers/theme_selection_provider.dart';
 import 'package:photobooth_flutter/providers/welcome_screen_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
+import 'package:photobooth_flutter/services/sqflite_service.dart';
 import 'package:photobooth_flutter/widgets/snackbar.dart';
 import 'package:photobooth_flutter/widgets/watermark_overlay.dart';
 import 'package:provider/provider.dart';
@@ -43,6 +47,50 @@ class _AdminScreenState extends State<AdminScreen> {
           Provider.of<AdminWatermarkProvider>(context, listen: false);
       watermarkProvider.setShowWatermark(!authProvider.isAuthenticated);
     });
+  }
+
+  String _usersToCsv(List<UserData> users) {
+    List<List<dynamic>> rows = [];
+    // Add header row
+    rows.add(['Name', 'Email', 'Output Filename']);
+    // Add data rows
+    for (var user in users) {
+      rows.add([user.name, user.email, user.outputImageFilename]);
+    }
+    // Convert to CSV string
+    return rows.map((row) => row.join(',')).join('\n');
+  }
+
+  // Handle the export and save logic
+  void _exportUserData() async {
+    try {
+      final users = await DatabaseService.instance.getAllUsers();
+      if (users.isEmpty) {
+        showSnackBar(context, 'No user data to export.');
+        return;
+      }
+
+      final csvData = _usersToCsv(users);
+
+      // MODIFIED: Create a filename-safe timestamp.
+      final now = DateTime.now();
+      final timestamp =
+          '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}_${now.hour.toString().padLeft(2, '0')}-${now.minute.toString().padLeft(2, '0')}';
+
+      // Use file_picker to let the user choose a save location
+      String? outputFile = await FilePicker.platform.saveFile(
+        dialogTitle: 'Save User Data as CSV',
+        fileName: 'photobooth_users_$timestamp.csv',
+      );
+
+      if (outputFile != null) {
+        final file = File(outputFile);
+        await file.writeAsString(csvData);
+        showSnackBar(context, 'User data exported successfully to $outputFile');
+      }
+    } on Exception catch (e) {
+      showSnackBar(context, 'Error exporting data: $e', isError: true);
+    }
   }
 
   @override
@@ -134,6 +182,16 @@ class _AdminScreenState extends State<AdminScreen> {
           ),
           onPressed: () => _showResetConfirmationDialog(),
           child: const Text('Reset All Preferences'),
+        ),
+        Constants.w8,
+        ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.blue,
+            foregroundColor: AppColors.white,
+          ),
+          onPressed: _exportUserData,
+          icon: const Icon(Icons.download),
+          label: const Text('Export User Data (CSV)'),
         ),
       ],
     );

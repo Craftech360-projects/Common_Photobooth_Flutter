@@ -14,6 +14,7 @@ dependencies:
   camera_platform_interface: ^2.7.0
   camera_windows: ^0.2.6+2
   carousel_slider: ^5.1.1
+  connectivity_plus: ^6.1.4
   crypto: ^3.0.6
   file_picker: ^9.2.1
   flutter:
@@ -62,6 +63,7 @@ flutter:
         - asset: assets/fonts/PolySans-Medium.ttf
         - asset: assets/fonts/PolySans-Bold.ttf
         - asset: assets/fonts/PolySans-Light.ttf
+
 # - family: Heineken
 #   fonts:
 #     - asset: assets/fonts/heineken-regular.ttf

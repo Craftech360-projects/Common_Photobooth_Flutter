@@ -1,14 +1,19 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
+import 'package:path/path.dart' as path;
 import 'package:photobooth_flutter/api/workflow.dart';
+import 'package:photobooth_flutter/models/user_model.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/providers/photobooth_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
 import 'package:photobooth_flutter/services/comfy_api_service.dart';
+import 'package:photobooth_flutter/services/local_storage_service.dart';
+import 'package:photobooth_flutter/services/sqflite_service.dart';
 import 'package:photobooth_flutter/services/supabase_service.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -75,55 +80,30 @@ class _LoadingScreenState extends State<LoadingScreen> {
       );
     }
 
-    final seed = DateTime.now().millisecondsSinceEpoch;
-    final isSwaplabFlow = provider.selectedTheme != null;
-    final prefs = await SharedPreferences.getInstance();
+    final connectivityResult = await (Connectivity().checkConnectivity());
+    final hasInternet =
+        connectivityResult.contains(ConnectivityResult.mobile) ||
+            connectivityResult.contains(ConnectivityResult.wifi);
 
-    final String workflowFileName;
-    final String watcherNodeId;
-
-    if (isSwaplabFlow) {
-      workflowFileName = 'swaplabonline.json';
-      watcherNodeId = '44'; // As per swaplabonline.json
+    if (hasInternet) {
+      await _handleOnlineFlow(imageFile, provider, globalSettings);
     } else {
-      workflowFileName =
-          prefs.getString('selected_workflow') ?? 'ghiblionline.json';
-      watcherNodeId = '283'; // As per AI Artistry JSON files
+      await _handleOfflineFlow(imageFile, provider, globalSettings);
     }
-
-    await _processOnlineFlow(
-      imageFile: imageFile,
-      provider: provider,
-      globalSettings: globalSettings,
-      seed: seed,
-      workflowFileName: workflowFileName,
-      watcherNodeId: watcherNodeId,
-      isSwaplab: isSwaplabFlow,
-    );
   }
 
-  Future<void> _processOnlineFlow({
-    required File imageFile,
-    required PhotoboothProvider provider,
-    required GlobalSettingsProvider globalSettings,
-    required int seed,
-    required String workflowFileName,
-    required String watcherNodeId,
-    required bool isSwaplab,
-  }) async {
+  Future<void> _handleOnlineFlow(File imageFile, PhotoboothProvider provider,
+      GlobalSettingsProvider globalSettings) async {
+    debugPrint("--- Starting Online Flow ---");
     final supabaseUrl = globalSettings.supabaseUrl;
     final supabaseAnonKey = globalSettings.supabaseAnonKey;
-
     if (supabaseUrl == null || supabaseAnonKey == null) {
       _setErrorMessage('Supabase credentials not configured.');
       return;
     }
-
     if (!SupabaseService.instance.isInitialized) {
-      await SupabaseService.instance.initialize(
-        url: supabaseUrl,
-        anonKey: supabaseAnonKey,
-      );
+      await SupabaseService.instance
+          .initialize(url: supabaseUrl, anonKey: supabaseAnonKey);
     }
 
     try {
@@ -145,13 +125,17 @@ class _LoadingScreenState extends State<LoadingScreen> {
         return;
       }
 
+      final isSwaplab = provider.selectedTheme != null;
+      final prefs = await SharedPreferences.getInstance();
+      final workflowFileName = isSwaplab
+          ? "faceswaponline.json"
+          : prefs.getString('selected_workflow') ?? "ghiblionline.json";
+      final watcherNodeId = isSwaplab ? "44" : "283";
+
       final workflow = await Workflow.getWorkflow(workflowFileName);
-
-      // Update nodes common to all online workflows
       workflow.updateSupabaseWatcherNode(uniqueId, nodeId: watcherNodeId);
-      workflow.updateNoiseSeed(seed);
+      workflow.updateNoiseSeed(DateTime.now().millisecondsSinceEpoch);
 
-      // Specific updates for Swaplab workflow
       if (isSwaplab) {
         final themeName =
             provider.selectedTheme!.name.toLowerCase().replaceAll(' ', '_');
@@ -162,52 +146,152 @@ class _LoadingScreenState extends State<LoadingScreen> {
         final characterImagePath =
             'C:/storage/themes/$gender/$themeName/$characterImageName';
         workflow.updateSwaplabCharacterImage(characterImagePath);
-      } else if (workflowFileName == 'packagingonline.json') {
-        // Specific updates for Packaging workflow
+      } else if (workflowFileName.contains("packaging")) {
         final gender = provider.gender ?? 'person';
         final accessories =
             provider.accessories ?? 'shoes, sunglasses, helmet, motorbikes';
         workflow.updatePackagingPrompt(gender, accessories);
       }
 
-      print("Workflow: ${workflow.toMap()}");
-      final response =
-          await ComfyApiService.instance.sendOnlineWorkflow(workflow.toMap());
+      final response = await ComfyApiService.instance
+          .sendWorkflow(workflow: workflow.toMap());
+      provider.setWorkflowSentTime(DateTime.parse(response['sentTime']));
 
-      if (response.containsKey('sentTime')) {
-        provider.setWorkflowSentTime(DateTime.parse(response['sentTime']));
-      }
-
-      // Polling for the result
-      int attempts = 0;
-      const maxAttempts = 150; // 4 minutes timeout
-      const pollDelay = Duration(seconds: 2);
-
-      while (attempts < maxAttempts) {
-        final supabaseImageUrl =
-            await SupabaseService.instance.getLatestOutputImage(
-          uniqueId,
-          afterTime: provider.workflowSentTime,
-        );
-
-        if (supabaseImageUrl != null) {
-          debugPrint('Found new image in Supabase: $supabaseImageUrl');
-          provider.setSwappedImage(supabaseImageUrl);
-          provider.setCapturedImageUrl(supabaseImageUrl);
-          if (mounted) {
-            await Navigator.of(context)
-                .pushReplacementNamed(AppRoutes.swappedFace);
-          }
-          return;
-        }
-        await Future.delayed(pollDelay);
-        attempts++;
-      }
-      _setErrorMessage('Timed out waiting for image processing.');
-    } on Exception catch (e) {
-      _setErrorMessage('Error processing image: $e');
+      // Start polling Supabase
+      await _pollForOutput(uniqueId, provider, isOnline: true);
+    } catch (e) {
+      _setErrorMessage("Online processing failed: $e");
     }
   }
+
+  Future<void> _handleOfflineFlow(File imageFile, PhotoboothProvider provider,
+      GlobalSettingsProvider globalSettings) async {
+    debugPrint("--- Starting Offline Flow ---");
+    if (!LocalStorageService.isServiceInitialized) {
+      await LocalStorageService.initialize(
+          inputDirectory: globalSettings.inputDirectory!,
+          outputDirectory: globalSettings.outputDirectory!);
+    }
+
+    try {
+      final faceImagePath =
+          await LocalStorageService.instance.saveFaceImage(imageFile);
+      final outputPath = LocalStorageService.instance.getOutputPathWithPrefix();
+
+      final isSwaplab = provider.selectedTheme != null;
+      final prefs = await SharedPreferences.getInstance();
+      final workflowFileName = isSwaplab
+          ? "swaplab.json"
+          : prefs
+                  .getString('selected_workflow')
+                  ?.replaceFirst("online", "offline") ??
+              "ghiblioffline.json";
+
+      final workflow = await Workflow.getWorkflow(workflowFileName);
+      workflow.updateNoiseSeed(DateTime.now().millisecondsSinceEpoch);
+
+      if (isSwaplab) {
+        final themeName =
+            provider.selectedTheme!.name.toLowerCase().replaceAll(' ', '_');
+        final gender = provider.gender ?? 'male';
+        final characterNumber = Random().nextInt(4) + 1;
+        final characterImageName =
+            '${gender == 'male' ? 'm' : 'f'}$characterNumber.png';
+        final characterImagePath =
+            'C:/storage/themes/$gender/$themeName/$characterImageName';
+
+        workflow.updateSwaplabInputFaceImage(faceImagePath);
+        workflow.updateSwaplabCharacterImage(characterImagePath);
+        workflow.updateSwaplabOutputImagePath(outputPath);
+      } else {
+        workflow.updateInputImagePath(faceImagePath);
+        workflow.updateOutputImagePath(outputPath);
+        if (workflowFileName.contains("packaging")) {
+          final gender = provider.gender ?? 'person';
+          final accessories =
+              provider.accessories ?? 'shoes, sunglasses, helmet, motorbikes';
+          workflow.updatePackagingPrompt(gender, accessories);
+        }
+      }
+
+      final response = await ComfyApiService.instance
+          .sendWorkflow(workflow: workflow.toMap());
+      provider.setWorkflowSentTime(DateTime.parse(response['sentTime']));
+
+      await _pollForOutput(outputPath, provider, isOnline: false);
+    } catch (e) {
+      _setErrorMessage("Offline processing failed: $e");
+    }
+  }
+
+  Future<void> _pollForOutput(String identifier, PhotoboothProvider provider,
+      {required bool isOnline}) async {
+    int attempts = 0;
+    const maxAttempts = 120;
+    const pollDelay = Duration(seconds: 2);
+
+    while (attempts < maxAttempts) {
+      String? outputUrl;
+      if (isOnline) {
+        outputUrl = await SupabaseService.instance.getLatestOutputImage(
+            identifier,
+            afterTime: provider.workflowSentTime);
+      } else {
+        outputUrl = await LocalStorageService.instance.getLatestOutputImage(
+            identifier,
+            afterTime: provider.workflowSentTime);
+      }
+
+      if (outputUrl != null) {
+        debugPrint('Found output image: $outputUrl');
+        provider.setCapturedImageUrl(outputUrl);
+
+        if (!isOnline) {
+          await DatabaseService.instance.insertUser(UserData(
+            name: provider.name ?? 'N/A',
+            email: provider.email ?? 'N/A',
+            outputImageFilename: path.basename(outputUrl),
+          ));
+        }
+
+        if (mounted) {
+          await Navigator.of(context)
+              .pushReplacementNamed(AppRoutes.swappedFace);
+        }
+        return;
+      }
+      await Future.delayed(pollDelay);
+      attempts++;
+    }
+    _setErrorMessage('Timed out waiting for image processing.');
+  }
+
+  //   final seed = DateTime.now().millisecondsSinceEpoch;
+  //   final isSwaplabFlow = provider.selectedTheme != null;
+  //   final prefs = await SharedPreferences.getInstance();
+
+  //   final String workflowFileName;
+  //   final String watcherNodeId;
+
+  //   if (isSwaplabFlow) {
+  //     workflowFileName = 'swaplabonline.json';
+  //     watcherNodeId = '44'; // As per swaplabonline.json
+  //   } else {
+  //     workflowFileName =
+  //         prefs.getString('selected_workflow') ?? 'ghiblionline.json';
+  //     watcherNodeId = '283'; // As per AI Artistry JSON files
+  //   }
+
+  //   await _processOnlineFlow(
+  //     imageFile: imageFile,
+  //     provider: provider,
+  //     globalSettings: globalSettings,
+  //     seed: seed,
+  //     workflowFileName: workflowFileName,
+  //     watcherNodeId: watcherNodeId,
+  //     isSwaplab: isSwaplabFlow,
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
