@@ -245,7 +245,8 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
                   color: settings.titleColor,
                   height: settings.titleLineHeight,
                 ).copyWith(
-                  color: settings.titleColor.withOpacity(settings.titleOpacity),
+                  color: settings.titleColor
+                      .withValues(alpha: settings.titleOpacity),
                 ),
               ),
             ),

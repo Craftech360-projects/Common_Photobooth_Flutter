@@ -1,3 +1,5 @@
+// lib/presentation/registration_screen.dart
+
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -94,7 +96,7 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
                 .map((field) => Positioned(
                       left: field.left,
                       top: field.top,
-                      width: MediaQuery.of(context).size.width * field.width,
+                      width: field.width, // CONFIRMED: Uses absolute width
                       height: field.height,
                       child: TextFormField(
                         controller: _controllers[field.id],
@@ -216,7 +218,7 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
             fontStyle:
                 settings.buttonIsItalic ? FontStyle.italic : FontStyle.normal,
             color: settings.submitButtonTextColor
-                .withOpacity(settings.buttonTextOpacity),
+                .withValues(alpha: settings.buttonTextOpacity),
           ),
         ),
       ),

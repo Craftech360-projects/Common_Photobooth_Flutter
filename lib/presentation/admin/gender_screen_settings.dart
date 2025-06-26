@@ -1,981 +1,76 @@
-import 'dart:io';
+// lib/presentation/gender_screen_settings.dart
+
+import 'dart:ui';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:photobooth_flutter/core/constants/constants.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/presentation/gender_selection_screen.dart';
 import 'package:photobooth_flutter/providers/gender_selection_provider.dart';
+import 'package:photobooth_flutter/widgets/custom_slider.dart';
+import 'package:photobooth_flutter/widgets/file_upload_area.dart';
 import 'package:photobooth_flutter/widgets/improved_color_picker.dart';
+import 'package:photobooth_flutter/widgets/settings_group.dart';
+import 'package:photobooth_flutter/widgets/settings_header.dart';
 import 'package:photobooth_flutter/widgets/settings_preview.dart';
 import 'package:provider/provider.dart';
 
-class GenderScreenSettings extends StatefulWidget {
+class GenderScreenSettings extends StatelessWidget {
   const GenderScreenSettings({super.key});
 
   @override
-  State<GenderScreenSettings> createState() => _GenderScreenSettingsState();
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              AppColors.primaryGradientStart,
+              AppColors.primaryGradientEnd
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: const Row(
+          children: [
+            _PreviewSection(),
+            Expanded(child: _SettingsSection()),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
-class _GenderScreenSettingsState extends State<GenderScreenSettings> {
+// --- UI SECTIONS ---
+class _PreviewSection extends StatelessWidget {
+  const _PreviewSection();
+
   @override
   Widget build(BuildContext context) {
-    final settings = context.watch<GenderSelectionProvider>();
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Gender Selection Screen Settings'),
-      ),
-      body: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return Padding(
+      padding: const EdgeInsets.all(12.0),
+      child: Stack(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
+          const Center(
             child: SettingsPreview(
               width: 1080,
               height: 1920,
-              // scale: 0.45,
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.transparent),
-                borderRadius: BorderRadius.circular(0),
-              ),
-              child: const GenderSelectionScreen(),
+              child: GenderSelectionScreen(),
             ),
           ),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Title Settings
-                  _buildSectionTitle('Title Settings'),
-
-                  // Title Text
-                  TextFormField(
-                    initialValue: settings.titleText,
-                    decoration: const InputDecoration(
-                      labelText: 'Title Text',
-                      border: OutlineInputBorder(),
-                    ),
-                    onChanged: (value) {
-                      settings.setTitleText(value);
-                    },
-                  ),
-
-                  Constants.h16,
-
-                  // Title Font Size
-                  _buildSliderWithLabel(
-                    label: 'Font Size',
-                    value: settings.titleFontSize,
-                    min: 16.0,
-                    max: 48.0,
-                    divisions: 32,
-                    onChanged: (value) {
-                      settings.setTitleStyle(fontSize: value);
-                    },
-                  ),
-
-                  // Title Line Height
-                  _buildSliderWithLabel(
-                    label: 'Line Height',
-                    value: settings.titleLineHeight,
-                    min: 0.8,
-                    max: 2.0,
-                    divisions: 24,
-                    onChanged: (value) {
-                      settings.setTitleStyle(lineHeight: value);
-                    },
-                  ),
-
-                  // Title Opacity
-                  _buildSliderWithLabel(
-                    label: 'Text Opacity',
-                    value: settings.titleOpacity,
-                    min: 0.1,
-                    max: 1.0,
-                    divisions: 9,
-                    onChanged: (value) {
-                      settings.setTitleStyle(opacity: value);
-                    },
-                  ),
-
-                  _buildSectionSubtitle('Title Position'),
-
-                  _buildSliderWithLabel(
-                    label: 'Title Left',
-                    value: settings.titleLeft,
-                    min: 0.0,
-                    max: 1000.0,
-                    // divisions: 60,
-                    onChanged: (value) {
-                      settings.setTitlePosition(
-                          value, settings.titleTop, settings.titleWidth);
-                    },
-                  ),
-                  _buildSliderWithLabel(
-                    label: 'Title Top',
-                    value: settings.titleTop,
-                    min: 0.0,
-                    max: 1000.0,
-                    // divisions: 60,
-                    onChanged: (value) {
-                      settings.setTitlePosition(
-                          settings.titleLeft, value, settings.titleWidth);
-                    },
-                  ),
-
-                  _buildSliderWithLabel(
-                    label: 'Title Width',
-                    value: settings.titleWidth,
-                    min: 0.0,
-                    max: 900.0,
-                    // divisions: 60,
-                    onChanged: (value) {
-                      settings.setTitlePosition(
-                          settings.titleLeft, settings.titleTop, value);
-                    },
-                  ),
-
-                  // Title Font Weight
-                  _buildSectionSubtitle('Font Style'),
-
-                  DropdownButtonFormField<FontWeight>(
-                    decoration: const InputDecoration(
-                      labelText: 'Font Weight',
-                      border: OutlineInputBorder(),
-                    ),
-                    value: settings.titleFontWeight,
-                    items: [
-                      const DropdownMenuItem(
-                          value: FontWeight.w300, child: Text('Light')),
-                      const DropdownMenuItem(
-                          value: FontWeight.w400, child: Text('Regular')),
-                      const DropdownMenuItem(
-                          value: FontWeight.w500, child: Text('Medium')),
-                      const DropdownMenuItem(
-                          value: FontWeight.w600, child: Text('SemiBold')),
-                      const DropdownMenuItem(
-                          value: FontWeight.w700, child: Text('Bold')),
-                      const DropdownMenuItem(
-                          value: FontWeight.w800, child: Text('ExtraBold')),
-                      const DropdownMenuItem(
-                          value: FontWeight.w900, child: Text('Black')),
-                    ],
-                    onChanged: (value) {
-                      if (value != null) {
-                        settings.setTitleStyle(fontWeight: value);
-                      }
-                    },
-                  ),
-
-                  Constants.h16,
-
-                  // Title Text Style (Italic)
-                  SwitchListTile(
-                    title: const Text('Italic Text'),
-                    value: settings.titleItalic,
-                    onChanged: (value) {
-                      settings.setTitleStyle(italic: value);
-                    },
-                  ),
-
-                  // Title Text Alignment
-                  _buildSectionSubtitle('Text Alignment'),
-
-                  SegmentedButton<TextAlign>(
-                    segments: const [
-                      ButtonSegment(
-                          value: TextAlign.left,
-                          icon: Icon(Icons.format_align_left)),
-                      ButtonSegment(
-                          value: TextAlign.center,
-                          icon: Icon(Icons.format_align_center)),
-                      ButtonSegment(
-                          value: TextAlign.right,
-                          icon: Icon(Icons.format_align_right)),
-                    ],
-                    selected: {settings.titleAlignment},
-                    onSelectionChanged: (Set<TextAlign> selection) {
-                      if (selection.isNotEmpty) {
-                        settings.setTitleStyle(alignment: selection.first);
-                      }
-                    },
-                  ),
-
-                  Constants.h16,
-
-                  // Title Color
-                  ListTile(
-                    title: const Text('Title Color'),
-                    leading: Container(
-                      width: 24,
-                      height: 24,
-                      decoration: BoxDecoration(
-                        color: settings.titleColor,
-                        border: Border.all(color: AppColors.black),
-                      ),
-                    ),
-                    onTap: () async {
-                      final color = await _showImprovedColorPicker(
-                        context: context,
-                        color: settings.titleColor,
-                        title: 'Select Title Color',
-                      );
-                      if (color != null) {
-                        settings.setTitleStyle(color: color);
-                      }
-                    },
-                  ),
-
-                  const Divider(height: 32),
-
-                  // Background Settings
-                  _buildSectionTitle('Background Settings'),
-                  SwitchListTile(
-                    title: const Text('Show Background'),
-                    value: settings.showBackground,
-                    onChanged: (value) {
-                      settings.setShowBackground(value);
-                    },
-                  ),
-                  if (settings.showBackground) ...[
-                    Constants.h8,
-                    Row(
-                      children: [
-                        ElevatedButton(
-                          onPressed: () async {
-                            final result = await FilePicker.platform.pickFiles(
-                              type: FileType.image,
-                              allowMultiple: false,
-                            );
-                            if (result != null && result.files.isNotEmpty) {
-                              settings.setBackgroundImage(
-                                result.files.first.path,
-                                isAsset: false,
-                              );
-                            }
-                          },
-                          child: const Text('Select Background Image'),
-                        ),
-                        Constants.w16,
-                        if (settings.backgroundImagePath != null)
-                          ElevatedButton(
-                            onPressed: () {
-                              settings.setBackgroundImage(null, isAsset: true);
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.red,
-                            ),
-                            child: const Text('Remove Background'),
-                          ),
-                      ],
-                    ),
-                    if (settings.backgroundImagePath != null)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: Container(
-                          width: 200,
-                          height: 120,
-                          decoration: BoxDecoration(
-                            border: Border.all(color: AppColors.black),
-                            image: DecorationImage(
-                              image: settings.isBackgroundImageAsset
-                                  ? AssetImage(settings.backgroundImagePath!)
-                                  : FileImage(
-                                          File(settings.backgroundImagePath!))
-                                      as ImageProvider,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-
-                  const Divider(height: 32),
-
-                  // Gender Images Settings
-                  _buildSectionTitle('Gender Images Settings'),
-
-                  // Images Row Margin and Padding
-                  _buildSectionSubtitle('Gender Section Position'),
-
-                  _buildSliderWithLabel(
-                    label: 'From Left',
-                    value: settings.genderSelectionLeft,
-                    min: 0.0,
-                    max: 1000.0,
-                    // divisions: 60,
-                    onChanged: (value) {
-                      settings.setGenderCardPosition(
-                          value, settings.genderSelectionTop);
-                    },
-                  ),
-
-                  _buildSliderWithLabel(
-                    label: 'From Top',
-                    value: settings.genderSelectionTop,
-                    min: 0.0,
-                    max: 1000.0,
-                    // divisions: 60,
-                    onChanged: (value) {
-                      settings.setGenderCardPosition(
-                          settings.genderSelectionLeft, value);
-                    },
-                  ),
-
-                  // Male Image
-                  const Text('Male Image',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                  Constants.h8,
-                  Row(
-                    children: [
-                      ElevatedButton(
-                        onPressed: () async {
-                          final result = await FilePicker.platform.pickFiles(
-                            type: FileType.image,
-                            allowMultiple: false,
-                          );
-                          if (result != null && result.files.isNotEmpty) {
-                            settings.setMaleImage(
-                              result.files.first.path,
-                              isAsset: false,
-                            );
-                          }
-                        },
-                        child: const Text('Select Male Image'),
-                      ),
-                      Constants.w16,
-                      if (settings.maleImagePath != null &&
-                          !settings.isMaleImageAsset)
-                        ElevatedButton(
-                          onPressed: () {
-                            settings.setMaleImage(
-                                'assets/images/male_avatar.png',
-                                isAsset: true);
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orange,
-                          ),
-                          child: const Text('Reset to Default'),
-                        ),
-                    ],
-                  ),
-                  if (settings.maleImagePath != null)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Container(
-                        width: 100,
-                        height: 150,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: AppColors.black),
-                          borderRadius:
-                              BorderRadius.circular(settings.imageBorderRadius),
-                          image: DecorationImage(
-                            image: settings.isMaleImageAsset
-                                ? AssetImage(settings.maleImagePath!)
-                                : FileImage(File(settings.maleImagePath!))
-                                    as ImageProvider,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                    ),
-
-                  Constants.h16,
-
-                  // Female Image
-                  const Text('Female Image',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                  Constants.h8,
-                  Row(
-                    children: [
-                      ElevatedButton(
-                        onPressed: () async {
-                          final result = await FilePicker.platform.pickFiles(
-                            type: FileType.image,
-                            allowMultiple: false,
-                          );
-                          if (result != null && result.files.isNotEmpty) {
-                            settings.setFemaleImage(
-                              result.files.first.path,
-                              isAsset: false,
-                            );
-                          }
-                        },
-                        child: const Text('Select Female Image'),
-                      ),
-                      Constants.w16,
-                      if (settings.femaleImagePath != null &&
-                          !settings.isFemaleImageAsset)
-                        ElevatedButton(
-                          onPressed: () {
-                            settings.setFemaleImage(
-                                'assets/images/female_avatar.png',
-                                isAsset: true);
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orange,
-                          ),
-                          child: const Text('Reset to Default'),
-                        ),
-                    ],
-                  ),
-                  if (settings.femaleImagePath != null)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Container(
-                        width: 100,
-                        height: 150,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: AppColors.black),
-                          borderRadius:
-                              BorderRadius.circular(settings.imageBorderRadius),
-                          image: DecorationImage(
-                            image: settings.isFemaleImageAsset
-                                ? AssetImage(settings.femaleImagePath!)
-                                : FileImage(File(settings.femaleImagePath!))
-                                    as ImageProvider,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                    ),
-
-                  Constants.h16,
-
-                  // Image Dimensions
-                  _buildSectionSubtitle('Image Dimensions'),
-
-                  _buildSliderWithLabel(
-                    label: 'Image Width',
-                    value: settings.imageWidth,
-                    min: 80.0,
-                    max: 900.0,
-                    onChanged: (value) {
-                      settings.setImageDimensions(value, settings.imageHeight);
-                    },
-                  ),
-
-                  _buildSliderWithLabel(
-                    label: 'Image Height',
-                    value: settings.imageHeight,
-                    min: 80.0,
-                    max: 900.0,
-                    onChanged: (value) {
-                      settings.setImageDimensions(settings.imageWidth, value);
-                    },
-                  ),
-
-                  _buildSliderWithLabel(
-                    label: 'Spacing Between Images',
-                    value: settings.imageSpacing,
-                    min: 0.0,
-                    max: 80.0,
-                    divisions: 50,
-                    onChanged: (value) {
-                      settings.setImageSpacing(value);
-                    },
-                  ),
-
-                  _buildSliderWithLabel(
-                    label: 'Image Border Radius',
-                    value: settings.imageBorderRadius,
-                    min: 0.0,
-                    max: 100.0,
-                    divisions: 50,
-                    onChanged: (value) {
-                      settings.setImageBorder(borderRadius: value);
-                    },
-                  ),
-
-                  Constants.h16,
-
-                  // Image Border Settings
-                  SwitchListTile(
-                    title: const Text('Show Image Border'),
-                    value: settings.showImageBorder,
-                    onChanged: (value) {
-                      settings.setImageBorder(showBorder: value);
-                    },
-                  ),
-
-                  if (settings.showImageBorder) ...[
-                    Constants.h16,
-                    _buildSliderWithLabel(
-                      label: 'Border Width',
-                      value: settings.imageBorderWidth < 1.0
-                          ? 1.0
-                          : settings.imageBorderWidth,
-                      min: 1.0,
-                      max: 10.0,
-                      divisions: 9,
-                      onChanged: (value) {
-                        settings.setImageBorder(borderWidth: value);
-                      },
-                    ),
-                    ListTile(
-                      title: const Text('Border Color'),
-                      leading: Container(
-                        width: 24,
-                        height: 24,
-                        decoration: BoxDecoration(
-                          color: settings.imageBorderColor,
-                          border: Border.all(color: AppColors.black),
-                        ),
-                      ),
-                      onTap: () async {
-                        final color = await _showImprovedColorPicker(
-                          context: context,
-                          color: settings.imageBorderColor,
-                          title: 'Select Border Color',
-                        );
-                        if (color != null) {
-                          settings.setImageBorder(borderColor: color);
-                        }
-                      },
-                    ),
-                  ],
-
-                  const Divider(height: 32),
-
-                  // Selection Effect Settings
-                  _buildSectionTitle('Selection Effect Settings'),
-
-                  SwitchListTile(
-                    title: const Text('Enable Highlighting'),
-                    subtitle: const Text('Scale up selected gender image'),
-                    value: settings.useSelectionEffect,
-                    onChanged: (value) {
-                      settings.setSelectionEffect(useEffect: value);
-                    },
-                  ),
-
-                  if (settings.useSelectionEffect) ...[
-                    Constants.h16,
-                    Slider(
-                      value: settings.selectedImageScale,
-                      min: 1.0,
-                      max: 1.5,
-                      divisions: 20,
-                      label: settings.selectedImageScale.toStringAsFixed(2),
-                      onChanged: (value) {
-                        settings.setSelectionEffect(scale: value);
-                      },
-                    ),
-                    const Text('Selected Image Scale Factor',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 14)),
-                    Constants.h16,
-                    SwitchListTile(
-                      title: const Text('Use Selection Glow'),
-                      subtitle: const Text('Add glow effect to selected image'),
-                      value: settings.useSelectionGlow,
-                      onChanged: (value) {
-                        settings.setSelectionEffect(useGlow: value);
-                      },
-                    ),
-                    if (settings.useSelectionGlow) ...[
-                      Constants.h16,
-                      ListTile(
-                        title: const Text('Glow Color'),
-                        leading: Container(
-                          width: 24,
-                          height: 24,
-                          decoration: BoxDecoration(
-                            color: settings.selectionGlowColor,
-                            border: Border.all(color: AppColors.black),
-                          ),
-                        ),
-                        onTap: () async {
-                          final color = await _showImprovedColorPicker(
-                              title: "Select Glow Color",
-                              context: context,
-                              color: settings.selectionGlowColor);
-                          if (color != null) {
-                            settings.setSelectionEffect(glowColor: color);
-                          }
-                        },
-                      ),
-                      Constants.h16,
-                      const Text('Glow Intensity',
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      Slider(
-                        value: settings.selectionGlowIntensity,
-                        min: 0.1,
-                        max: 1.0,
-                        divisions: 18,
-                        label:
-                            settings.selectionGlowIntensity.toStringAsFixed(1),
-                        onChanged: (value) {
-                          settings.setSelectionEffect(glowIntensity: value);
-                        },
-                      ),
-                      Constants.h16,
-                      const Text('Glow Spread',
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      Slider(
-                        value: settings.selectionGlowSpread,
-                        min: 1.0,
-                        max: 20.0,
-                        divisions: 19,
-                        label: settings.selectionGlowSpread.toStringAsFixed(1),
-                        onChanged: (value) {
-                          settings.setSelectionEffect(glowSpread: value);
-                        },
-                      ),
-                    ],
-                  ],
-
-                  const Divider(height: 32),
-
-                  // Button Settings
-                  _buildSectionTitle('Button Settings'),
-
-                  SwitchListTile(
-                    title: const Text('Use Image Button'),
-                    value: settings.useImageButton,
-                    onChanged: (value) {
-                      settings.setUseImageButton(value);
-                    },
-                  ),
-
-                  Constants.h16,
-
-                  if (settings.useImageButton) ...[
-                    // Image Button Settings
-                    Row(
-                      children: [
-                        ElevatedButton(
-                          onPressed: () async {
-                            final result = await FilePicker.platform.pickFiles(
-                              type: FileType.image,
-                              allowMultiple: false,
-                            );
-                            if (result != null && result.files.isNotEmpty) {
-                              settings.setButtonImage(
-                                result.files.first.path!,
-                                isAsset: false,
-                              );
-                            }
-                          },
-                          child: const Text('Select Button Image'),
-                        ),
-                        Constants.w16,
-                        if (settings.buttonImagePath != null)
-                          ElevatedButton(
-                            onPressed: () {
-                              settings.setButtonImage(
-                                  'assets/images/next_btn.png',
-                                  isAsset: true);
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.red,
-                            ),
-                            child: const Text('Remove Image'),
-                          ),
-                      ],
-                    ),
-                    if (settings.buttonImagePath != null)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: Container(
-                          width: 200,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            border: Border.all(color: AppColors.black),
-                            borderRadius: BorderRadius.circular(
-                                settings.buttonBorderRadius),
-                            image: DecorationImage(
-                              image: settings.isButtonImageAsset
-                                  ? AssetImage(settings.buttonImagePath!)
-                                  : FileImage(File(settings.buttonImagePath!))
-                                      as ImageProvider,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                      ),
-                  ] else ...[
-                    // Text Button Settings
-                    TextFormField(
-                      initialValue: settings.buttonText,
-                      decoration: const InputDecoration(
-                        labelText: 'Button Text',
-                        border: OutlineInputBorder(),
-                      ),
-                      onChanged: (value) {
-                        settings.setButtonText(value);
-                      },
-                    ),
-
-                    Constants.h16,
-
-                    DropdownButtonFormField<FontWeight>(
-                      decoration: const InputDecoration(
-                        labelText: 'Font Weight',
-                        border: OutlineInputBorder(),
-                      ),
-                      value: settings.buttonFontWeight,
-                      items: [
-                        const DropdownMenuItem(
-                            value: FontWeight.w300, child: Text('Light')),
-                        const DropdownMenuItem(
-                            value: FontWeight.w400, child: Text('Regular')),
-                        const DropdownMenuItem(
-                            value: FontWeight.w500, child: Text('Medium')),
-                        const DropdownMenuItem(
-                            value: FontWeight.w600, child: Text('SemiBold')),
-                        const DropdownMenuItem(
-                            value: FontWeight.w700, child: Text('Bold')),
-                        const DropdownMenuItem(
-                            value: FontWeight.w800, child: Text('ExtraBold')),
-                        const DropdownMenuItem(
-                            value: FontWeight.w900, child: Text('Black')),
-                      ],
-                      onChanged: (value) {
-                        if (value != null) {
-                          settings.setButtonStyle(fontWeight: value);
-                        }
-                      },
-                    ),
-
-                    Constants.h16,
-
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ListTile(
-                            title: const Text('Button Color'),
-                            leading: Container(
-                              width: 24,
-                              height: 24,
-                              decoration: BoxDecoration(
-                                color: settings.buttonColor,
-                                border: Border.all(color: AppColors.black),
-                              ),
-                            ),
-                            onTap: () async {
-                              final color = await _showImprovedColorPicker(
-                                  title: "Select Button Color",
-                                  context: context,
-                                  color: settings.buttonColor);
-                              if (color != null) {
-                                settings.setButtonStyle(buttonColor: color);
-                              }
-                            },
-                          ),
-                        ),
-                        Expanded(
-                          child: ListTile(
-                            title: const Text('Text Color'),
-                            leading: Container(
-                              width: 24,
-                              height: 24,
-                              decoration: BoxDecoration(
-                                color: settings.buttonTextColor,
-                                border: Border.all(color: AppColors.black),
-                              ),
-                            ),
-                            onTap: () async {
-                              final color = await _showImprovedColorPicker(
-                                  title: "Select Text Color",
-                                  context: context,
-                                  color: settings.buttonTextColor);
-                              if (color != null) {
-                                settings.setButtonStyle(textColor: color);
-                              }
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    Constants.h16,
-
-                    TextFormField(
-                      initialValue: settings.buttonFontSize.toString(),
-                      decoration: const InputDecoration(
-                        labelText: 'Button Font Size',
-                        border: OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.number,
-                      onChanged: (value) {
-                        final size = double.tryParse(value);
-                        if (size != null) {
-                          settings.setButtonStyle(fontSize: size);
-                        }
-                      },
-                    ),
-                  ],
-
-                  // Button Margin
-                  _buildSectionSubtitle('Button Positions'),
-
-                  _buildSliderWithLabel(
-                    label: 'From Left',
-                    value: settings.buttonLeft,
-                    min: 0.0,
-                    max: 1000.0,
-                    // divisions: 60,
-                    onChanged: (value) {
-                      settings.setButtonPosition(value, settings.buttonBottom);
-                    },
-                  ),
-
-                  _buildSliderWithLabel(
-                    label: 'From Bottom',
-                    value: settings.buttonBottom,
-                    min: 0.0,
-                    max: 1000.0,
-                    // divisions: 60,
-                    onChanged: (value) {
-                      settings.setButtonPosition(settings.buttonLeft, value);
-                    },
-                  ),
-
-                  // Common Button Settings
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextFormField(
-                          initialValue: settings.buttonWidth.toString(),
-                          decoration: const InputDecoration(
-                            labelText: 'Button Width',
-                            border: OutlineInputBorder(),
-                          ),
-                          keyboardType: TextInputType.number,
-                          onChanged: (value) {
-                            final width = double.tryParse(value);
-                            if (width != null) {
-                              settings.setButtonDimensions(
-                                  width, settings.buttonHeight);
-                            }
-                          },
-                        ),
-                      ),
-                      Constants.w16,
-                      Expanded(
-                        child: TextFormField(
-                          initialValue: settings.buttonHeight.toString(),
-                          decoration: const InputDecoration(
-                            labelText: 'Button Height',
-                            border: OutlineInputBorder(),
-                          ),
-                          keyboardType: TextInputType.number,
-                          onChanged: (value) {
-                            final height = double.tryParse(value);
-                            if (height != null) {
-                              settings.setButtonDimensions(
-                                  settings.buttonWidth, height);
-                            }
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  Constants.h16,
-
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextFormField(
-                          initialValue: settings.buttonBorderRadius.toString(),
-                          decoration: const InputDecoration(
-                            labelText: 'Button Border Radius',
-                            border: OutlineInputBorder(),
-                          ),
-                          keyboardType: TextInputType.number,
-                          onChanged: (value) {
-                            final radius = double.tryParse(value);
-                            if (radius != null) {
-                              settings.setButtonStyle(borderRadius: radius);
-                            }
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  Constants.h16,
-
-                  SwitchListTile(
-                    title: const Text('Button Border'),
-                    value: settings.buttonHasBorder,
-                    onChanged: (value) {
-                      settings.setButtonBorder(hasBorder: value);
-                    },
-                  ),
-
-                  if (settings.buttonHasBorder) ...[
-                    Constants.h16,
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextFormField(
-                            initialValue: settings.buttonBorderWidth.toString(),
-                            decoration: const InputDecoration(
-                              labelText: 'Border Width',
-                              border: OutlineInputBorder(),
-                            ),
-                            keyboardType: TextInputType.number,
-                            onChanged: (value) {
-                              final width = double.tryParse(value);
-                              if (width != null) {
-                                settings.setButtonBorder(borderWidth: width);
-                              }
-                            },
-                          ),
-                        ),
-                        Constants.w16,
-                        Expanded(
-                          child: ListTile(
-                            title: const Text('Border Color'),
-                            leading: Container(
-                              width: 24,
-                              height: 24,
-                              decoration: BoxDecoration(
-                                color: settings.buttonBorderColor,
-                                border: Border.all(color: AppColors.black),
-                              ),
-                            ),
-                            onTap: () async {
-                              final color = await _showImprovedColorPicker(
-                                  title: "Select Border Color",
-                                  context: context,
-                                  color: settings.buttonBorderColor);
-                              if (color != null) {
-                                settings.setButtonBorder(borderColor: color);
-                              }
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-
-                  const Divider(height: 32),
-
-                  // Layout Settings
-                  _buildSectionTitle('Layout Settings'),
-
-                  TextFormField(
-                    initialValue: settings.screenPadding.toString(),
-                    decoration: const InputDecoration(
-                      labelText: 'Screen Padding',
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.number,
-                    onChanged: (value) {
-                      final padding = double.tryParse(value);
-                      if (padding != null) {
-                        settings.setScreenPadding(padding);
-                      }
-                    },
-                  ),
-                ],
+          Positioned(
+            top: 0,
+            left: 0,
+            child: Material(
+              color: AppColors.white.withValues(alpha: 0.9),
+              shape: const CircleBorder(),
+              elevation: 2.0,
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back, color: AppColors.labelText),
+                onPressed: () => Navigator.of(context).pop(),
+                tooltip: 'Back',
               ),
             ),
           ),
@@ -983,106 +78,795 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
       ),
     );
   }
+}
 
-  // Helper methods
-  Widget _buildSectionTitle(String title) {
+class _SettingsSection extends StatelessWidget {
+  const _SettingsSection();
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0, top: 8.0),
-      child: Text(
-        title,
-        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      padding: const EdgeInsets.fromLTRB(0, 20, 20, 20),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20.0),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.85),
+              borderRadius: BorderRadius.circular(20.0),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+            ),
+            child: const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SettingsHeader(
+                  title: 'Gender Screen Settings',
+                  subtitle: 'Customize the gender selection options and style',
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.all(30),
+                    child: Column(
+                      children: [
+                        _TitleSettingsGroup(),
+                        SizedBox(height: 25),
+                        _BackgroundSettingsGroup(),
+                        SizedBox(height: 25),
+                        _GenderImagesGroup(),
+                        SizedBox(height: 25),
+                        _SelectionEffectGroup(),
+                        SizedBox(height: 25),
+                        _ButtonSettingsGroup(),
+                        SizedBox(height: 25),
+                        _LayoutSettingsGroup(),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
+}
 
-  Widget _buildSectionSubtitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0, top: 8.0),
-      child: Text(
-        title,
-        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+// --- SETTINGS GROUPS ---
+
+class _TitleSettingsGroup extends StatelessWidget {
+  const _TitleSettingsGroup();
+
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.watch<GenderSelectionProvider>();
+    final textTheme = Theme.of(context).textTheme;
+
+    return SettingsGroup(
+      icon: '✏️',
+      title: 'Title Settings',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextFormField(
+            initialValue: settings.titleText,
+            decoration: _inputDecoration(context, 'Enter title text'),
+            onChanged: (value) => settings.setTitleText(value),
+          ),
+          const SizedBox(height: 15),
+          _FormRow(
+            children: [
+              Expanded(
+                  child: CustomSliderWithLabel(
+                label: 'Font Size',
+                value: settings.titleFontSize,
+                min: 16,
+                max: 60,
+                onChanged: (v) => settings.setTitleStyle(fontSize: v),
+              )),
+              Expanded(
+                  child: CustomSliderWithLabel(
+                label: 'Opacity',
+                value: settings.titleOpacity,
+                min: 0.1,
+                max: 1.0,
+                step: 0.1,
+                onChanged: (v) => settings.setTitleStyle(opacity: v),
+              )),
+            ],
+          ),
+          const SizedBox(height: 15),
+          SettingsGroup(
+              isSubgroup: true,
+              icon: '🎨',
+              title: 'Styling',
+              child: Column(
+                children: [
+                  _CustomDropdown<FontWeight>(
+                    label: 'Font Weight',
+                    value: settings.titleFontWeight,
+                    items: const {
+                      FontWeight.w300: 'Light',
+                      FontWeight.w400: 'Regular',
+                      FontWeight.w500: 'Medium',
+                      FontWeight.w700: 'Bold',
+                      FontWeight.w900: 'Black'
+                    },
+                    onChanged: (v) => settings.setTitleStyle(fontWeight: v),
+                  ),
+                  const SizedBox(height: 15),
+                  _CustomColorPicker(
+                    label: 'Title Color',
+                    color: settings.titleColor,
+                    onColorChanged: (c) => settings.setTitleStyle(color: c),
+                  ),
+                  const SizedBox(height: 15),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text('Alignment', style: textTheme.bodyMedium),
+                      ),
+                      SegmentedButton<TextAlign>(
+                        segments: const [
+                          ButtonSegment(
+                              value: TextAlign.left,
+                              icon: Icon(Icons.format_align_left)),
+                          ButtonSegment(
+                              value: TextAlign.center,
+                              icon: Icon(Icons.format_align_center)),
+                          ButtonSegment(
+                              value: TextAlign.right,
+                              icon: Icon(Icons.format_align_right)),
+                        ],
+                        selected: {settings.titleAlignment},
+                        onSelectionChanged: (s) =>
+                            settings.setTitleStyle(alignment: s.first),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Italic Style', style: textTheme.bodyMedium),
+                      Switch(
+                        value: settings.titleItalic,
+                        onChanged: (v) => settings.setTitleStyle(italic: v),
+                      ),
+                    ],
+                  ),
+                ],
+              )),
+          const SizedBox(height: 15),
+          SettingsGroup(
+            isSubgroup: true,
+            icon: '📍',
+            title: 'Positioning',
+            child: Column(
+              children: [
+                CustomSliderWithLabel(
+                    label: 'From Left',
+                    value: settings.titleLeft,
+                    min: 0,
+                    max: 1000,
+                    onChanged: (v) => settings.setTitlePosition(
+                        v, settings.titleTop, settings.titleWidth)),
+                CustomSliderWithLabel(
+                    label: 'From Top',
+                    value: settings.titleTop,
+                    min: 0,
+                    max: 1000,
+                    onChanged: (v) => settings.setTitlePosition(
+                        settings.titleLeft, v, settings.titleWidth)),
+                CustomSliderWithLabel(
+                    label: 'Width',
+                    value: settings.titleWidth,
+                    min: 200,
+                    max: 900,
+                    onChanged: (v) => settings.setTitlePosition(
+                        settings.titleLeft, settings.titleTop, v)),
+              ],
+            ),
+          )
+        ],
       ),
     );
   }
+}
 
-  Widget _buildSliderWithLabel({
-    required String label,
-    required double value,
-    required double min,
-    required double max,
-    required ValueChanged<double> onChanged,
-    int? divisions,
-  }) {
+class _BackgroundSettingsGroup extends StatelessWidget {
+  const _BackgroundSettingsGroup();
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.watch<GenderSelectionProvider>();
+    return SettingsGroup(
+      icon: '🖼️',
+      title: 'Background',
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Show Background',
+                  style: Theme.of(context).textTheme.bodyLarge),
+              Switch(
+                value: settings.showBackground,
+                onChanged: (value) => settings.setShowBackground(value),
+              ),
+            ],
+          ),
+          if (settings.showBackground) ...[
+            const SizedBox(height: 15),
+            FileUploadArea(
+              onTap: () async {
+                final result =
+                    await FilePicker.platform.pickFiles(type: FileType.image);
+                if (result != null && result.files.single.path != null) {
+                  settings.setBackgroundImage(result.files.single.path,
+                      isAsset: false);
+                }
+              },
+              icon: '📁',
+              text: 'Choose background image',
+              selectedFile: settings.backgroundImagePath,
+            ),
+          ]
+        ],
+      ),
+    );
+  }
+}
+
+class _GenderImagesGroup extends StatelessWidget {
+  const _GenderImagesGroup();
+
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.watch<GenderSelectionProvider>();
+    return SettingsGroup(
+      icon: '🧑‍🤝‍🧑',
+      title: 'Gender Images',
+      child: Column(
+        children: [
+          _FormRow(
+            children: [
+              Expanded(
+                child: FileUploadArea(
+                  onTap: () async {
+                    final result = await FilePicker.platform
+                        .pickFiles(type: FileType.image);
+                    if (result != null && result.files.single.path != null) {
+                      settings.setMaleImage(result.files.single.path,
+                          isAsset: false);
+                    }
+                  },
+                  icon: '👨',
+                  text: 'Select Male Image',
+                  selectedFile: settings.maleImagePath,
+                ),
+              ),
+              Expanded(
+                child: FileUploadArea(
+                  onTap: () async {
+                    final result = await FilePicker.platform
+                        .pickFiles(type: FileType.image);
+                    if (result != null && result.files.single.path != null) {
+                      settings.setFemaleImage(result.files.single.path,
+                          isAsset: false);
+                    }
+                  },
+                  icon: '👩',
+                  text: 'Select Female Image',
+                  selectedFile: settings.femaleImagePath,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          SettingsGroup(
+            isSubgroup: true,
+            icon: '📐',
+            title: 'Sizing & Spacing',
+            child: Column(
+              children: [
+                _FormRow(
+                  children: [
+                    Expanded(
+                        child: CustomSliderWithLabel(
+                      label: 'Image Width',
+                      value: settings.imageWidth,
+                      min: 80,
+                      max: 900,
+                      onChanged: (v) =>
+                          settings.setImageDimensions(v, settings.imageHeight),
+                    )),
+                    Expanded(
+                        child: CustomSliderWithLabel(
+                      label: 'Image Height',
+                      value: settings.imageHeight,
+                      min: 80,
+                      max: 900,
+                      onChanged: (v) =>
+                          settings.setImageDimensions(settings.imageWidth, v),
+                    )),
+                  ],
+                ),
+                CustomSliderWithLabel(
+                  label: 'Spacing Between',
+                  value: settings.imageSpacing,
+                  min: 0,
+                  max: 100,
+                  onChanged: (v) => settings.setImageSpacing(v),
+                )
+              ],
+            ),
+          ),
+          const SizedBox(height: 15),
+          SettingsGroup(
+            isSubgroup: true,
+            icon: '📍',
+            title: "Positioning",
+            child: Column(
+              children: [
+                CustomSliderWithLabel(
+                  label: 'From Left',
+                  value: settings.genderSelectionLeft,
+                  min: 0,
+                  max: 1000,
+                  onChanged: (v) => settings.setGenderCardPosition(
+                      v, settings.genderSelectionTop),
+                ),
+                CustomSliderWithLabel(
+                  label: 'From Top',
+                  value: settings.genderSelectionTop,
+                  min: 0,
+                  max: 1000,
+                  onChanged: (v) => settings.setGenderCardPosition(
+                      settings.genderSelectionLeft, v),
+                )
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SelectionEffectGroup extends StatelessWidget {
+  const _SelectionEffectGroup();
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.watch<GenderSelectionProvider>();
+    return SettingsGroup(
+      icon: '✨',
+      title: 'Selection Effect',
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Enable Highlighting',
+                  style: Theme.of(context).textTheme.bodyLarge),
+              Switch(
+                value: settings.useSelectionEffect,
+                onChanged: (v) => settings.setSelectionEffect(useEffect: v),
+              ),
+            ],
+          ),
+          if (settings.useSelectionEffect) ...[
+            const SizedBox(height: 15),
+            CustomSliderWithLabel(
+              label: 'Selected Image Scale',
+              value: settings.selectedImageScale,
+              min: 1.0,
+              max: 1.5,
+              step: 0.05,
+              onChanged: (v) => settings.setSelectionEffect(scale: v),
+            ),
+            const SizedBox(height: 15),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Enable Selection Glow',
+                    style: Theme.of(context).textTheme.bodyLarge),
+                Switch(
+                  value: settings.useSelectionGlow,
+                  onChanged: (v) => settings.setSelectionEffect(useGlow: v),
+                ),
+              ],
+            ),
+            if (settings.useSelectionGlow) ...[
+              const SizedBox(height: 15),
+              _CustomColorPicker(
+                label: 'Glow Color',
+                color: settings.selectionGlowColor,
+                onColorChanged: (c) =>
+                    settings.setSelectionEffect(glowColor: c),
+              ),
+              _FormRow(children: [
+                Expanded(
+                  child: CustomSliderWithLabel(
+                    label: 'Glow Intensity',
+                    value: settings.selectionGlowIntensity,
+                    min: 0.1,
+                    max: 1.0,
+                    step: 0.1,
+                    onChanged: (v) =>
+                        settings.setSelectionEffect(glowIntensity: v),
+                  ),
+                ),
+                Expanded(
+                  child: CustomSliderWithLabel(
+                    label: 'Glow Spread',
+                    value: settings.selectionGlowSpread,
+                    min: 1.0,
+                    max: 20.0,
+                    onChanged: (v) =>
+                        settings.setSelectionEffect(glowSpread: v),
+                  ),
+                ),
+              ]),
+            ]
+          ]
+        ],
+      ),
+    );
+  }
+}
+
+class _ButtonSettingsGroup extends StatelessWidget {
+  const _ButtonSettingsGroup();
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.watch<GenderSelectionProvider>();
+    return SettingsGroup(
+      icon: '🔘',
+      title: 'Next Button',
+      child: Column(
+        children: [
+          _ToggleButtonGroup(
+            options: const ['Text Button', 'Image Button'],
+            selectedIndex: settings.useImageButton ? 1 : 0,
+            onSelected: (i) => settings.setUseImageButton(i == 1),
+          ),
+          const SizedBox(height: 20),
+          if (settings.useImageButton)
+            FileUploadArea(
+              onTap: () async {
+                final result =
+                    await FilePicker.platform.pickFiles(type: FileType.image);
+                if (result != null && result.files.single.path != null) {
+                  settings.setButtonImage(result.files.single.path!,
+                      isAsset: false);
+                }
+              },
+              icon: '🖼️',
+              text: 'Choose Button Image',
+              selectedFile: settings.buttonImagePath,
+            )
+          else
+            Column(
+              children: [
+                TextFormField(
+                  initialValue: settings.buttonText,
+                  decoration: _inputDecoration(context, 'Button Text'),
+                  onChanged: (v) => settings.setButtonText(v),
+                ),
+                const SizedBox(height: 15),
+                _FormRow(children: [
+                  Expanded(
+                    child: _CustomColorPicker(
+                      label: 'Button Color',
+                      color: settings.buttonColor,
+                      onColorChanged: (c) =>
+                          settings.setButtonStyle(buttonColor: c),
+                    ),
+                  ),
+                  Expanded(
+                    child: _CustomColorPicker(
+                      label: 'Text Color',
+                      color: settings.buttonTextColor,
+                      onColorChanged: (c) =>
+                          settings.setButtonStyle(textColor: c),
+                    ),
+                  )
+                ]),
+              ],
+            ),
+          const SizedBox(height: 20),
+          SettingsGroup(
+            isSubgroup: true,
+            icon: '📐',
+            title: 'Sizing & Positioning',
+            child: Column(
+              children: [
+                _FormRow(children: [
+                  Expanded(
+                    child: CustomSliderWithLabel(
+                      label: 'Width',
+                      value: settings.buttonWidth,
+                      min: 100,
+                      max: 800,
+                      onChanged: (v) => settings.setButtonDimensions(
+                          v, settings.buttonHeight),
+                    ),
+                  ),
+                  Expanded(
+                    child: CustomSliderWithLabel(
+                      label: 'Height',
+                      value: settings.buttonHeight,
+                      min: 40,
+                      max: 200,
+                      onChanged: (v) =>
+                          settings.setButtonDimensions(settings.buttonWidth, v),
+                    ),
+                  )
+                ]),
+                _FormRow(children: [
+                  Expanded(
+                    child: CustomSliderWithLabel(
+                      label: 'From Left',
+                      value: settings.buttonLeft,
+                      min: 0,
+                      max: 1000,
+                      onChanged: (v) =>
+                          settings.setButtonPosition(v, settings.buttonBottom),
+                    ),
+                  ),
+                  Expanded(
+                    child: CustomSliderWithLabel(
+                      label: 'From Bottom',
+                      value: settings.buttonBottom,
+                      min: 0,
+                      max: 1000,
+                      onChanged: (v) =>
+                          settings.setButtonPosition(settings.buttonLeft, v),
+                    ),
+                  )
+                ]),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LayoutSettingsGroup extends StatelessWidget {
+  const _LayoutSettingsGroup();
+
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.watch<GenderSelectionProvider>();
+    return SettingsGroup(
+      icon: '📏',
+      title: 'Layout',
+      child: CustomSliderWithLabel(
+        label: 'Screen Padding',
+        value: settings.screenPadding,
+        min: 0,
+        max: 64,
+        onChanged: (v) => settings.setScreenPadding(v),
+      ),
+    );
+  }
+}
+
+// --- TEMPORARY HELPERS (Can be moved to global files) ---
+// These are added here for completeness, but should be moved to the settings_ui_helpers directory.
+
+class _FormRow extends StatelessWidget {
+  final List<Widget> children;
+  const _FormRow({required this.children});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 15.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          children[0],
+          const SizedBox(width: 20),
+          if (children.length > 1) children[1],
+        ],
+      ),
+    );
+  }
+}
+
+InputDecoration _inputDecoration(BuildContext context, String hintText) {
+  final theme = Theme.of(context);
+  return InputDecoration(
+    hintText: hintText,
+    filled: true,
+    fillColor: Colors.white.withValues(alpha: 0.8),
+    hintStyle: theme.textTheme.bodyMedium
+        ?.copyWith(color: AppColors.labelText.withValues(alpha: 0.7)),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+      borderSide: const BorderSide(color: AppColors.inputBorder, width: 2),
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+      borderSide: const BorderSide(color: AppColors.inputBorder, width: 2),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+      borderSide:
+          const BorderSide(color: AppColors.primaryGradientStart, width: 2),
+    ),
+    contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+  );
+}
+
+class _CustomDropdown<T> extends StatelessWidget {
+  final String label;
+  final T value;
+  final Map<T, String> items;
+  final ValueChanged<T?> onChanged;
+
+  const _CustomDropdown(
+      {required this.label,
+      required this.value,
+      required this.items,
+      required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(label),
-            Text(value.toStringAsFixed(1)),
-          ],
-        ),
-        Slider(
+        Text(label, style: textTheme.bodyMedium),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<T>(
           value: value,
-          min: min,
-          max: max,
-          divisions: divisions,
+          items: items.entries
+              .map((e) =>
+                  DropdownMenuItem<T>(value: e.key, child: Text(e.value)))
+              .toList(),
           onChanged: onChanged,
+          decoration: _inputDecoration(context, ''),
+        ),
+      ],
+    );
+  }
+}
+
+class _CustomColorPicker extends StatelessWidget {
+  final String label;
+  final Color color;
+  final ValueChanged<Color> onColorChanged;
+
+  const _CustomColorPicker(
+      {required this.label, required this.color, required this.onColorChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: textTheme.bodyMedium),
+        const SizedBox(height: 8),
+        GestureDetector(
+          onTap: () => _showColorPickerDialog(context),
+          child: Container(
+            height: 48,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: AppColors.inputBorder, width: 2),
+              color: Colors.white.withValues(alpha: 0.8),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    color: color,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey.shade400),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  '#${color.value.toRadixString(16).substring(2).toUpperCase()}',
+                  style: textTheme.bodyMedium,
+                ),
+              ],
+            ),
+          ),
         ),
       ],
     );
   }
 
-  Future<Color?> _showImprovedColorPicker({
-    required BuildContext context,
-    required Color color,
-    required String title,
-  }) async {
-    Color? selectedColor;
-
-    await showDialog(
+  void _showColorPickerDialog(BuildContext context) {
+    showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(title),
+        title: Text('Select $label'),
         content: SingleChildScrollView(
-          child: ImprovedColorPicker(
+          child: CustomColorPicker(
             pickerColor: color,
-            onColorChanged: (color) {
-              selectedColor = color;
-            },
-            colorPalette: [
-              AppColors.white,
-              AppColors.black,
-              AppColors.yellow,
-              AppColors.goldenYellow,
-              AppColors.blue,
-              AppColors.darkBlue,
-              AppColors.red,
-              AppColors.green,
-              AppColors.orange,
-              AppColors.purple,
-              AppColors.deepPurple,
-              AppColors.purpleBright,
-              AppColors.grey,
-              AppColors.lightGrey,
-              AppColors.darkGrey,
-            ],
+            onColorChanged: onColorChanged,
           ),
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, selectedColor),
-            child: const Text('Select'),
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Done'),
           ),
         ],
       ),
     );
+  }
+}
 
-    return selectedColor;
+class _ToggleButtonGroup extends StatelessWidget {
+  final List<String> options;
+  final int selectedIndex;
+  final ValueChanged<int> onSelected;
+
+  const _ToggleButtonGroup(
+      {required this.options,
+      required this.selectedIndex,
+      required this.onSelected});
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return Row(
+      children: List.generate(options.length, (index) {
+        final bool isActive = selectedIndex == index;
+        return Expanded(
+          child: GestureDetector(
+            onTap: () => onSelected(index),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              margin:
+                  EdgeInsets.only(right: index < options.length - 1 ? 10 : 0),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                gradient: isActive
+                    ? const LinearGradient(colors: [
+                        AppColors.primaryGradientStart,
+                        AppColors.primaryGradientEnd
+                      ])
+                    : null,
+                color: isActive ? null : Colors.white.withValues(alpha: 0.8),
+                border: Border.all(
+                    color: isActive
+                        ? AppColors.primaryGradientStart
+                        : AppColors.inputBorder,
+                    width: 2),
+                boxShadow: isActive
+                    ? [
+                        BoxShadow(
+                            color: AppColors.primaryGradientStart
+                                .withValues(alpha: 0.3),
+                            blurRadius: 15,
+                            spreadRadius: -5)
+                      ]
+                    : [],
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                options[index],
+                style: textTheme.bodyMedium?.copyWith(
+                    color: isActive ? Colors.white : AppColors.labelText),
+              ),
+            ),
+          ),
+        );
+      }),
+    );
   }
 }

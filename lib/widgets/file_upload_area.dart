@@ -40,7 +40,7 @@ class FileUploadArea extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 10),
           decoration: BoxDecoration(
-            color: AppColors.primaryGradientStart.withOpacity(0.02),
+            color: AppColors.primaryGradientStart.withValues(alpha: 0.02),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Center(

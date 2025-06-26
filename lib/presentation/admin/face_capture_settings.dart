@@ -1,16 +1,22 @@
-// ignore_for_file: unused_field
+// lib/presentation/face_capture_settings.dart
 
-import 'dart:io';
+import 'dart:ui';
 
 import 'package:camera_platform_interface/camera_platform_interface.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:photobooth_flutter/core/constants/constants.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/presentation/face_capture_screen.dart';
 import 'package:photobooth_flutter/providers/face_capture_provider.dart';
+import 'package:photobooth_flutter/widgets/custom_dropdown.dart';
+import 'package:photobooth_flutter/widgets/custom_slider.dart';
+import 'package:photobooth_flutter/widgets/file_upload_area.dart';
+import 'package:photobooth_flutter/widgets/form_row.dart';
 import 'package:photobooth_flutter/widgets/improved_color_picker.dart';
+import 'package:photobooth_flutter/widgets/settings_group.dart';
+import 'package:photobooth_flutter/widgets/settings_header.dart';
 import 'package:photobooth_flutter/widgets/settings_preview.dart';
+import 'package:photobooth_flutter/widgets/toggle_btn_group.dart';
 import 'package:provider/provider.dart';
 
 class FaceCaptureSettings extends StatefulWidget {
@@ -36,645 +42,431 @@ class _FaceCaptureSettingsState extends State<FaceCaptureSettings> {
     } on Exception catch (e) {
       debugPrint('Error loading cameras: $e');
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
-
-  // Add method to switch camera in settings
-  void _switchCamera(int newIndex, FaceCaptureProvider settings) {
-    if (newIndex >= 0 && newIndex < _cameras.length) {
-      settings.setSelectedCameraIndex(newIndex);
-      // Show confirmation to user
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Camera switched to: ${_cameras[newIndex].name}'),
-          duration: const Duration(seconds: 2),
-        ),
-      );
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final settings = context.watch<FaceCaptureProvider>();
-
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Face Capture Settings'),
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => Navigator.pop(context),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              AppColors.primaryGradientStart,
+              AppColors.primaryGradientEnd
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
         ),
-        body: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
           children: [
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: SettingsPreview(
-                width: 1080,
-                height: 1920,
-                // scale: 0.45,
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.transparent),
-                  borderRadius: BorderRadius.circular(0),
-                ),
-                child: const FaceCaptureScreen(isPreviewMode: true),
-              ),
-            ),
+            const _PreviewSection(),
             Expanded(
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Title Settings
-                        _buildSectionTitle('Title Settings'),
-                        SwitchListTile(
-                          title: const Text('Show Title'),
-                          value: settings.showTitle,
-                          onChanged: (value) => settings.setShowTitle(value),
-                        ),
-                        if (settings.showTitle) ...[
-                          _buildTextField(
-                            label: 'Title Text',
-                            initialValue: settings.titleText,
-                            onChanged: (value) => settings.setTitleText(value),
-                          ),
-                          _buildSlider(
-                            label: 'Title Font Size',
-                            value: settings.titleFontSize,
-                            min: 16.0,
-                            max: 80.0,
-                            onChanged: (value) =>
-                                settings.setTitleFontSize(value),
-                          ),
-                          if (Platform.isWindows) ...[
-                            _buildDropdown<String>(
-                              label: 'Picture Format',
-                              value: settings.pictureFormat,
-                              items: {
-                                'jpeg': 'JPEG',
-                                'png': 'PNG',
-                              },
-                              onChanged: (value) =>
-                                  settings.setPictureFormat(value!),
-                            ),
-                          ],
-                          _buildDropdown<FontWeight>(
-                            label: 'Title Font Weight',
-                            value: settings.titleFontWeight,
-                            items: {
-                              FontWeight.w100: 'Thin',
-                              FontWeight.w400: 'Regular',
-                              FontWeight.w500: 'Medium',
-                              FontWeight.w700: 'Bold',
-                              FontWeight.w900: 'Extra Bold',
-                            },
-                            onChanged: (value) =>
-                                settings.setTitleFontWeight(value!),
-                          ),
-                          _buildSlider(
-                            label: 'Line Height',
-                            value: settings.titleLineHeight,
-                            min: 1.0,
-                            max: 2.0,
-                            onChanged: (value) =>
-                                settings.setTitleLineHeight(value),
-                          ),
-                          _buildSlider(
-                            label: 'Text Opacity',
-                            value: settings.titleOpacity,
-                            min: 0.0,
-                            max: 1.0,
-                            onChanged: (value) =>
-                                settings.setTitleOpacity(value),
-                          ),
-                          _buildDropdown<TextAlign>(
-                            label: 'Text Alignment',
-                            value: settings.titleAlignment,
-                            items: {
-                              TextAlign.left: 'Left',
-                              TextAlign.center: 'Center',
-                              TextAlign.right: 'Right',
-                            },
-                            onChanged: (value) =>
-                                settings.setTitleAlignment(value!),
-                          ),
-                          _buildSectionTitle('Title Position'),
-                          _buildSlider(
-                            label: 'Top Position',
-                            value: settings.titleTop,
-                            min: 0.0,
-                            max: 1200.0,
-                            onChanged: (value) => settings.setTitleTop(value),
-                          ),
-                          _buildSlider(
-                            label: 'Left Position',
-                            value: settings.titleLeft,
-                            min: 0.0,
-                            max: 900.0,
-                            onChanged: (value) => settings.setTitleLeft(value),
-                          ),
-                          _buildSlider(
-                            label: 'Right Position',
-                            value: settings.titleRight,
-                            min: 0.0,
-                            max: 900.0,
-                            onChanged: (value) => settings.setTitleRight(value),
-                          ),
-                          _buildColorPicker(
-                            label: 'Title Color',
-                            color: settings.titleColor,
-                            onColorChanged: (color) =>
-                                settings.setTitleColor(color),
-                          ),
-                        ],
-
-                        const Divider(),
-
-                        // Camera Preview Settings
-                        _buildSectionTitle('Camera Preview Settings'),
-                        // Update the camera dropdown to use the _switchCamera method
-                        if (_cameras.isNotEmpty)
-                          _buildDropdown<int>(
-                            label: 'Select Camera',
-                            value:
-                                settings.selectedCameraIndex < _cameras.length
-                                    ? settings.selectedCameraIndex
-                                    : 0,
-                            items: {
-                              for (int i = 0; i < _cameras.length; i++)
-                                i: 'Camera ${i + 1} (${_cameras[i].name})',
-                            },
-                            onChanged: (value) =>
-                                _switchCamera(value!, settings),
-                          ),
-                        _buildSlider(
-                          label: 'Preview Width',
-                          value: settings.previewWidth,
-                          min: 200.0,
-                          max: 900.0,
-                          onChanged: (value) => settings.setPreviewWidth(value),
-                        ),
-                        _buildSlider(
-                          label: 'Preview Height',
-                          value: settings.previewHeight,
-                          min: 200.0,
-                          max: 900.0,
-                          onChanged: (value) =>
-                              settings.setPreviewHeight(value),
-                        ),
-                        _buildSlider(
-                          label: 'Border Radius',
-                          value: settings.previewBorderRadius,
-                          min: 0.0,
-                          max: 50.0,
-                          onChanged: (value) =>
-                              settings.setPreviewBorderRadius(value),
-                        ),
-                        SwitchListTile(
-                          title: const Text('Show Preview Border'),
-                          value: settings.showPreviewBorder,
-                          onChanged: (value) =>
-                              settings.setShowPreviewBorder(value),
-                        ),
-                        if (settings.showPreviewBorder) ...[
-                          _buildColorPicker(
-                            label: 'Preview Border Color',
-                            color: settings.previewBorderColor,
-                            onColorChanged: (color) =>
-                                settings.setPreviewBorderColor(color),
-                          ),
-                          _buildSlider(
-                            label: 'Preview Border Width',
-                            value: settings.previewBorderWidth,
-                            min: 0.0,
-                            max: 10.0,
-                            onChanged: (value) =>
-                                settings.setPreviewBorderWidth(value),
-                          ),
-                        ],
-
-                        _buildSectionTitle('Preview Position'),
-                        _buildSlider(
-                          label: 'Top Position',
-                          value: settings.previewTop,
-                          min: 0.0,
-                          max: 1000.0,
-                          onChanged: (value) => settings.setPreviewTop(value),
-                        ),
-                        _buildSlider(
-                          label: 'Left Position',
-                          value: settings.previewLeft,
-                          min: 0.0,
-                          max: 800.0,
-                          onChanged: (value) => settings.setPreviewLeft(value),
-                        ),
-
-                        const Divider(),
-
-                        // Button Settings
-                        _buildSectionTitle('Button Settings'),
-                        SwitchListTile(
-                          title: const Text('Use Image Button'),
-                          value: settings.useImageButton,
-                          onChanged: (value) =>
-                              settings.setUseImageButton(value),
-                        ),
-                        if (settings.useImageButton) ...[
-                          ListTile(
-                            title: const Text('Button Image'),
-                            subtitle: Text(settings.buttonImagePath ??
-                                'No image selected'),
-                            trailing: ElevatedButton(
-                              onPressed: () async {
-                                final result =
-                                    await FilePicker.platform.pickFiles(
-                                  type: FileType.image,
-                                  allowMultiple: false,
-                                );
-                                if (result != null && result.files.isNotEmpty) {
-                                  settings.setButtonImagePath(
-                                    result.files.first.path,
-                                    isAsset: false,
-                                  );
-                                }
-                              },
-                              child: const Text('Choose Image'),
-                            ),
-                          ),
-                        ] else ...[
-                          _buildTextField(
-                            label: 'Button Text',
-                            initialValue: settings.buttonText,
-                            onChanged: (value) => settings.setButtonText(value),
-                          ),
-                          _buildSlider(
-                            label: 'Button Font Size',
-                            value: settings.buttonFontSize,
-                            min: 12.0,
-                            max: 36.0,
-                            onChanged: (value) =>
-                                settings.setButtonFontSize(value),
-                          ),
-                          _buildDropdown<FontWeight>(
-                            label: 'Button Font Weight',
-                            value: settings.buttonFontWeight,
-                            items: {
-                              FontWeight.w100: 'Thin',
-                              FontWeight.w400: 'Regular',
-                              FontWeight.w500: 'Medium',
-                              FontWeight.w700: 'Bold',
-                              FontWeight.w900: 'Extra Bold',
-                            },
-                            onChanged: (value) =>
-                                settings.setButtonFontWeight(value!),
-                          ),
-                          _buildColorPicker(
-                            label: 'Button Color',
-                            color: settings.buttonColor,
-                            onColorChanged: (color) =>
-                                settings.setButtonColor(color),
-                          ),
-                          _buildColorPicker(
-                            label: 'Button Text Color',
-                            color: settings.buttonTextColor,
-                            onColorChanged: (color) =>
-                                settings.setButtonTextColor(color),
-                          ),
-                        ],
-                        _buildSlider(
-                          label: 'Button Width',
-                          value: settings.buttonWidth,
-                          min: 100.0,
-                          max: 400.0,
-                          onChanged: (value) => settings.setButtonWidth(value),
-                        ),
-                        _buildSlider(
-                          label: 'Button Height',
-                          value: settings.buttonHeight,
-                          min: 40.0,
-                          max: 100.0,
-                          onChanged: (value) => settings.setButtonHeight(value),
-                        ),
-                        _buildSlider(
-                          label: 'Button Border Radius',
-                          value: settings.buttonBorderRadius,
-                          min: 0.0,
-                          max: 50.0,
-                          onChanged: (value) =>
-                              settings.setButtonBorderRadius(value),
-                        ),
-                        _buildSectionTitle('Button Position'),
-                        _buildSlider(
-                          label: 'Top Position',
-                          value: settings.buttonTop,
-                          min: 0.0,
-                          max: 1500.0,
-                          onChanged: (value) => settings.setButtonTop(value),
-                        ),
-                        _buildSlider(
-                          label: 'Left Position',
-                          value: settings.buttonLeft,
-                          min: 0.0,
-                          max: 800.0,
-                          onChanged: (value) => settings.setButtonLeft(value),
-                        ),
-
-                        _buildSectionTitle('Button Padding'),
-                        _buildSlider(
-                          label: 'Left Padding',
-                          value: settings.buttonPadding.left,
-                          min: 0.0,
-                          max: 50.0,
-                          onChanged: (value) => settings.setButtonPadding(
-                            settings.buttonPadding.copyWith(left: value),
-                          ),
-                        ),
-                        _buildSlider(
-                          label: 'Top Padding',
-                          value: settings.buttonPadding.top,
-                          min: 0.0,
-                          max: 50.0,
-                          onChanged: (value) => settings.setButtonPadding(
-                            settings.buttonPadding.copyWith(top: value),
-                          ),
-                        ),
-                        _buildSlider(
-                          label: 'Right Padding',
-                          value: settings.buttonPadding.right,
-                          min: 0.0,
-                          max: 50.0,
-                          onChanged: (value) => settings.setButtonPadding(
-                            settings.buttonPadding.copyWith(right: value),
-                          ),
-                        ),
-                        _buildSlider(
-                          label: 'Bottom Padding',
-                          value: settings.buttonPadding.bottom,
-                          min: 0.0,
-                          max: 50.0,
-                          onChanged: (value) => settings.setButtonPadding(
-                            settings.buttonPadding.copyWith(bottom: value),
-                          ),
-                        ),
-                        SwitchListTile(
-                          title: const Text('Button Has Border'),
-                          value: settings.buttonHasBorder,
-                          onChanged: (value) =>
-                              settings.setButtonHasBorder(value),
-                        ),
-                        if (settings.buttonHasBorder) ...[
-                          _buildColorPicker(
-                            label: 'Button Border Color',
-                            color: settings.buttonBorderColor,
-                            onColorChanged: (color) =>
-                                settings.setButtonBorderColor(color),
-                          ),
-                          _buildSlider(
-                            label: 'Button Border Width',
-                            value: settings.buttonBorderWidth,
-                            min: 1.0,
-                            max: 10.0,
-                            onChanged: (value) =>
-                                settings.setButtonBorderWidth(value),
-                          ),
-                        ],
-
-                        const Divider(),
-
-                        // Background Settings
-                        _buildSectionTitle('Background Settings'),
-                        SwitchListTile(
-                          title: const Text('Show Background Image'),
-                          value: settings.showBackground,
-                          onChanged: (value) =>
-                              settings.setShowBackground(value),
-                        ),
-                        if (settings.showBackground) ...[
-                          ListTile(
-                            title: const Text('Background Image'),
-                            subtitle: Text(settings.backgroundImagePath ??
-                                'No image selected'),
-                            trailing: ElevatedButton(
-                              onPressed: () async {
-                                final result =
-                                    await FilePicker.platform.pickFiles(
-                                  type: FileType.image,
-                                  allowMultiple: false,
-                                );
-                                if (result != null && result.files.isNotEmpty) {
-                                  settings.setBackgroundImagePath(
-                                    result.files.first.path,
-                                    isAsset: false,
-                                  );
-                                }
-                              },
-                              child: const Text('Choose Image'),
-                            ),
-                          ),
-                          if (settings.backgroundImagePath != null)
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 8.0),
-                              child: Container(
-                                height: 100,
-                                decoration: BoxDecoration(
-                                  border: Border.all(color: AppColors.black),
-                                  borderRadius: Constants.br8,
-                                  image: DecorationImage(
-                                    image: settings.isBackgroundImageAsset
-                                        ? AssetImage(
-                                            settings.backgroundImagePath!)
-                                        : FileImage(File(
-                                                settings.backgroundImagePath!))
-                                            as ImageProvider,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ),
-                            ),
-                        ],
-                      ]),
-                ),
+              child: _SettingsSection(
+                cameras: _cameras,
+                isLoading: _isLoading,
               ),
             ),
           ],
-        ));
-  }
-
-  Widget _buildSectionTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
         ),
       ),
     );
   }
+}
 
-  Widget _buildTextField({
-    required String label,
-    required String initialValue,
-    required Function(String) onChanged,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: TextFormField(
-        initialValue: initialValue,
-        decoration: InputDecoration(
-          labelText: label,
-          border: const OutlineInputBorder(),
-        ),
-        onChanged: onChanged,
-      ),
-    );
-  }
+// --- UI SECTIONS ---
+class _PreviewSection extends StatelessWidget {
+  const _PreviewSection();
 
-  Widget _buildSlider({
-    required String label,
-    required double value,
-    required double min,
-    required double max,
-    required Function(double) onChanged,
-  }) {
+  @override
+  Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.all(12.0),
+      child: Stack(
         children: [
-          Text('$label: ${value.toStringAsFixed(1)}'),
-          Row(
-            children: [
-              Expanded(
-                child: Slider(
-                  value: value,
-                  min: min,
-                  max: max,
-                  onChanged: onChanged,
-                ),
+          const Center(
+            child: SettingsPreview(
+              width: 1080,
+              height: 1920,
+              child: FaceCaptureScreen(
+                isPreviewMode: true,
               ),
-            ],
+            ),
+          ),
+          Positioned(
+            top: 0,
+            left: 0,
+            child: Material(
+              color: AppColors.white.withValues(alpha: 0.9),
+              shape: const CircleBorder(),
+              elevation: 2.0,
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back, color: AppColors.labelText),
+                onPressed: () => Navigator.of(context).pop(),
+                tooltip: 'Back',
+              ),
+            ),
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildDropdown<T>({
-    required String label,
-    required T value,
-    required Map<T, String> items,
-    required Function(T?) onChanged,
-  }) {
+class _SettingsSection extends StatelessWidget {
+  final List<CameraDescription> cameras;
+  final bool isLoading;
+
+  const _SettingsSection({required this.cameras, required this.isLoading});
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        children: [
-          Text('$label: '),
-          const SizedBox(width: 8),
-          Expanded(
-            child: DropdownButton<T>(
-              value: value,
-              isExpanded: true,
-              items: items.entries.map((entry) {
-                return DropdownMenuItem<T>(
-                  value: entry.key,
-                  child: Text(
-                    softWrap: true,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    entry.value,
-                    style: const TextStyle(
-                      fontSize: 13,
+      padding: const EdgeInsets.fromLTRB(0, 20, 20, 20),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20.0),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.85),
+              borderRadius: BorderRadius.circular(20.0),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SettingsHeader(
+                  title: 'Face Capture Screen',
+                  subtitle: 'Customize the camera and capture UI elements',
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(30),
+                    child: Column(
+                      children: [
+                        _TitleSettingsGroup(),
+                        const SizedBox(height: 25),
+                        _CameraPreviewSettingsGroup(
+                            cameras: cameras, isLoading: isLoading),
+                        const SizedBox(height: 25),
+                        _ButtonSettingsGroup(),
+                        const SizedBox(height: 25),
+                        _BackgroundSettingsGroup(),
+                      ],
                     ),
                   ),
-                );
-              }).toList(),
-              onChanged: onChanged,
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
+}
 
-  Widget _buildColorPicker({
-    required String label,
-    required Color color,
-    required Function(Color) onColorChanged,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
+// --- SETTINGS WIDGETS ---
+class _TitleSettingsGroup extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.watch<FaceCaptureProvider>();
+    final textTheme = Theme.of(context).textTheme;
+
+    return SettingsGroup(
+      icon: '✏️',
+      title: 'Title Settings',
+      child: Column(
         children: [
-          Text('$label: '),
-          const SizedBox(width: 8),
-          GestureDetector(
-            onTap: () async {
-              final selectedColor = await _showColorPicker(context, color);
-              if (selectedColor != null) {
-                onColorChanged(selectedColor);
-              }
-            },
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: color,
-                border: Border.all(color: AppColors.black),
-                borderRadius: BorderRadius.circular(4),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Show Title', style: textTheme.bodyLarge),
+              Switch(
+                  value: settings.showTitle,
+                  onChanged: (v) => settings.setShowTitle(v)),
+            ],
+          ),
+          if (settings.showTitle) ...[
+            const SizedBox(height: 15),
+            TextFormField(
+              initialValue: settings.titleText,
+              decoration: _inputDecoration(context, 'Title Text'),
+              onChanged: (v) => settings.setTitleText(v),
+            ),
+            const SizedBox(height: 15),
+            CustomSliderWithLabel(
+              label: 'Font Size',
+              value: settings.titleFontSize,
+              min: 16,
+              max: 80,
+              onChanged: (v) => settings.setTitleFontSize(v),
+            ),
+            const SizedBox(height: 15),
+            SettingsGroup(
+              isSubgroup: true,
+              icon: '📍',
+              title: 'Positioning',
+              child: Column(
+                children: [
+                  CustomSliderWithLabel(
+                      label: 'From Top',
+                      value: settings.titleTop,
+                      min: 0,
+                      max: 1200,
+                      onChanged: (v) => settings.setTitleTop(v)),
+                  CustomSliderWithLabel(
+                      label: 'From Left',
+                      value: settings.titleLeft,
+                      min: 0,
+                      max: 900,
+                      onChanged: (v) => settings.setTitleLeft(v)),
+                ],
               ),
             ),
+          ]
+        ],
+      ),
+    );
+  }
+}
+
+class _CameraPreviewSettingsGroup extends StatelessWidget {
+  final List<CameraDescription> cameras;
+  final bool isLoading;
+
+  const _CameraPreviewSettingsGroup(
+      {required this.cameras, required this.isLoading});
+
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.watch<FaceCaptureProvider>();
+    return SettingsGroup(
+      icon: '📷',
+      title: 'Camera Preview Settings',
+      child: Column(
+        children: [
+          if (isLoading)
+            const Center(child: CircularProgressIndicator())
+          else
+            CustomDropdown<int>(
+              label: 'Select Camera',
+              value: settings.selectedCameraIndex < cameras.length
+                  ? settings.selectedCameraIndex
+                  : 0,
+              items: {
+                for (int i = 0; i < cameras.length; i++)
+                  i: 'Camera ${i + 1} (${cameras[i].name})'
+              },
+              onChanged: (v) => settings.setSelectedCameraIndex(v ?? 0),
+            ),
+          const SizedBox(height: 15),
+          SettingsGroup(
+            isSubgroup: true,
+            icon: '📐',
+            title: 'Sizing & Positioning',
+            child: Column(
+              children: [
+                FormRow(children: [
+                  Expanded(
+                      child: CustomSliderWithLabel(
+                          label: 'Preview Width',
+                          value: settings.previewWidth,
+                          min: 200,
+                          max: 900,
+                          onChanged: (v) => settings.setPreviewWidth(v))),
+                  Expanded(
+                      child: CustomSliderWithLabel(
+                          label: 'Preview Height',
+                          value: settings.previewHeight,
+                          min: 200,
+                          max: 900,
+                          onChanged: (v) => settings.setPreviewHeight(v))),
+                ]),
+                CustomSliderWithLabel(
+                    label: 'From Top',
+                    value: settings.previewTop,
+                    min: 0,
+                    max: 1000,
+                    onChanged: (v) => settings.setPreviewTop(v)),
+                CustomSliderWithLabel(
+                    label: 'From Left',
+                    value: settings.previewLeft,
+                    min: 0,
+                    max: 800,
+                    onChanged: (v) => settings.setPreviewLeft(v)),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
+}
 
-  Future<Color?> _showColorPicker(
-      BuildContext context, Color initialColor) async {
-    Color selectedColor = initialColor;
-
-    await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Pick a color'),
-          content: SingleChildScrollView(
-            child: ImprovedColorPicker(
-              pickerColor: initialColor,
-              onColorChanged: (Color color) {
-                selectedColor = color;
+class _ButtonSettingsGroup extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.watch<FaceCaptureProvider>();
+    return SettingsGroup(
+      icon: '🔘',
+      title: 'Capture Button Settings',
+      child: Column(
+        children: [
+          ToggleButtonGroup(
+            options: const ['Text Button', 'Image Button'],
+            selectedIndex: settings.useImageButton ? 1 : 0,
+            onSelected: (i) => settings.setUseImageButton(i == 1),
+          ),
+          const SizedBox(height: 15),
+          if (settings.useImageButton)
+            FileUploadArea(
+              onTap: () async {
+                final result =
+                    await FilePicker.platform.pickFiles(type: FileType.image);
+                if (result?.files.single.path != null) {
+                  settings.setButtonImagePath(result!.files.single.path,
+                      isAsset: false);
+                }
               },
+              icon: '🖼️',
+              text: 'Choose Button Image',
+              selectedFile: settings.buttonImagePath,
+            )
+          else
+            Column(
+              children: [
+                TextFormField(
+                  initialValue: settings.buttonText,
+                  decoration: _inputDecoration(context, 'Button Text'),
+                  onChanged: (v) => settings.setButtonText(v),
+                ),
+                const SizedBox(height: 15),
+                CustomColorPicker(
+                    label: 'Button Color',
+                    pickerColor: settings.buttonColor,
+                    onColorChanged: (c) => settings.setButtonColor(c)),
+                const SizedBox(height: 10),
+                CustomColorPicker(
+                    label: 'Text Color',
+                    pickerColor: settings.buttonTextColor,
+                    onColorChanged: (c) => settings.setButtonTextColor(c)),
+              ],
+            ),
+          const SizedBox(height: 20),
+          SettingsGroup(
+            isSubgroup: true,
+            icon: '📐',
+            title: 'Sizing & Positioning',
+            child: Column(
+              children: [
+                FormRow(children: [
+                  Expanded(
+                      child: CustomSliderWithLabel(
+                          label: 'Button Width',
+                          value: settings.buttonWidth,
+                          min: 100,
+                          max: 500,
+                          onChanged: (v) => settings.setButtonWidth(v))),
+                  Expanded(
+                      child: CustomSliderWithLabel(
+                          label: 'Button Height',
+                          value: settings.buttonHeight,
+                          min: 40,
+                          max: 200,
+                          onChanged: (v) => settings.setButtonHeight(v))),
+                ]),
+                CustomSliderWithLabel(
+                    label: 'From Top',
+                    value: settings.buttonTop,
+                    min: 0,
+                    max: 1500,
+                    onChanged: (v) => settings.setButtonTop(v)),
+                CustomSliderWithLabel(
+                    label: 'From Left',
+                    value: settings.buttonLeft,
+                    min: 0,
+                    max: 800,
+                    onChanged: (v) => settings.setButtonLeft(v)),
+              ],
             ),
           ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-                selectedColor = initialColor;
-              },
-            ),
-            TextButton(
-              child: const Text('Select'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
+        ],
+      ),
     );
-
-    return selectedColor != initialColor ? selectedColor : null;
   }
+}
+
+class _BackgroundSettingsGroup extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.watch<FaceCaptureProvider>();
+    final textTheme = Theme.of(context).textTheme;
+
+    return SettingsGroup(
+      icon: '🖼️',
+      title: 'Background Settings',
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Show Background Image', style: textTheme.bodyLarge),
+              Switch(
+                  value: settings.showBackground,
+                  onChanged: (v) => settings.setShowBackground(v)),
+            ],
+          ),
+          const SizedBox(height: 15),
+          if (settings.showBackground)
+            FileUploadArea(
+              onTap: () async {
+                final result =
+                    await FilePicker.platform.pickFiles(type: FileType.image);
+                if (result?.files.single.path != null) {
+                  settings.setBackgroundImagePath(result!.files.single.path,
+                      isAsset: false);
+                }
+              },
+              icon: '📁',
+              text: 'Select Background Image',
+              selectedFile: settings.backgroundImagePath,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+// --- HELPER METHODS ---
+
+InputDecoration _inputDecoration(BuildContext context, String hintText) {
+  final theme = Theme.of(context);
+  return InputDecoration(
+    hintText: hintText,
+    filled: true,
+    fillColor: Colors.white.withValues(alpha: 0.8),
+    hintStyle: theme.textTheme.bodyMedium
+        ?.copyWith(color: AppColors.labelText.withValues(alpha: 0.7)),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+      borderSide: const BorderSide(color: AppColors.inputBorder, width: 2),
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+      borderSide: const BorderSide(color: AppColors.inputBorder, width: 2),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+      borderSide:
+          const BorderSide(color: AppColors.primaryGradientStart, width: 2),
+    ),
+    contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+  );
 }

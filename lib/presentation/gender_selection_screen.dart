@@ -65,7 +65,8 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
                 style: TextStyle(
                   fontSize: settings.titleFontSize,
                   fontWeight: settings.titleFontWeight,
-                  color: settings.titleColor.withOpacity(settings.titleOpacity),
+                  color: settings.titleColor
+                      .withValues(alpha: settings.titleOpacity),
                   fontStyle: settings.titleItalic
                       ? FontStyle.italic
                       : FontStyle.normal,
@@ -191,7 +192,7 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
               ? [
                   BoxShadow(
                     color: settings.selectionGlowColor
-                        .withOpacity(settings.selectionGlowIntensity),
+                        .withValues(alpha: settings.selectionGlowIntensity),
                     blurRadius: settings.selectionGlowSpread,
                     spreadRadius: settings.selectionGlowSpread / 2,
                   )

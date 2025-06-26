@@ -1,7 +1,18 @@
+// lib/presentation/theme_selection_settings.dart
+
+import 'dart:ui';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/presentation/theme_selection_screen.dart';
-import 'package:photobooth_flutter/providers/theme_selection_provider.dart';
+import 'package:photobooth_flutter/providers/theme_selection_provider.dart'
+    hide Theme;
+import 'package:photobooth_flutter/widgets/custom_slider.dart';
+import 'package:photobooth_flutter/widgets/file_upload_area.dart';
+import 'package:photobooth_flutter/widgets/form_row.dart';
+import 'package:photobooth_flutter/widgets/settings_group.dart';
+import 'package:photobooth_flutter/widgets/settings_header.dart';
 import 'package:photobooth_flutter/widgets/settings_preview.dart';
 import 'package:provider/provider.dart';
 
@@ -10,161 +21,389 @@ class ThemeSelectionSettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final settings = context.watch<ThemeSelectionProvider>();
     return Scaffold(
-      appBar: AppBar(title: const Text('Theme Selection Screen Settings')),
-      body: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              AppColors.primaryGradientStart,
+              AppColors.primaryGradientEnd
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: const Row(
+          children: [
+            _PreviewSection(),
+            Expanded(child: _SettingsSection()),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// --- UI SECTIONS ---
+class _PreviewSection extends StatelessWidget {
+  const _PreviewSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(12.0),
+      child: Stack(
         children: [
-          const Padding(
-            padding: EdgeInsets.all(16.0),
+          const Center(
             child: SettingsPreview(
               width: 1080,
               height: 1920,
               child: ThemeSelectionScreen(),
             ),
           ),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildTitleSettings(settings),
-                  const Divider(height: 32),
-                  _buildBackgroundSettings(settings),
-                  const Divider(height: 32),
-                  _buildCarouselSettings(settings),
-                  const Divider(height: 32),
-                  _buildButtonSettings(settings),
-                ],
+          Positioned(
+            top: 0,
+            left: 0,
+            child: Material(
+              color: AppColors.white.withValues(alpha: 0.9),
+              shape: const CircleBorder(),
+              elevation: 2.0,
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back, color: AppColors.labelText),
+                onPressed: () => Navigator.of(context).pop(),
+                tooltip: 'Back',
               ),
             ),
-          )
+          ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildSectionTitle(String title) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: Text(title,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-      );
+class _SettingsSection extends StatelessWidget {
+  const _SettingsSection();
 
-  Widget _buildSlider(String label, double value, double min, double max,
-      ValueChanged<double> onChanged) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('$label: ${value.toStringAsFixed(0)}'),
-        Slider(value: value, min: min, max: max, onChanged: onChanged),
-      ],
-    );
-  }
-
-  Widget _buildTitleSettings(ThemeSelectionProvider settings) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionTitle('Title Settings'),
-        SwitchListTile(
-          title: const Text('Show Title'),
-          value: settings.showTitle,
-          onChanged: (value) => settings.setShowTitle(value),
-        ),
-        if (settings.showTitle) ...[
-          TextFormField(
-            initialValue: settings.titleText,
-            decoration: const InputDecoration(
-                labelText: 'Title Text', border: OutlineInputBorder()),
-            onChanged: (value) => settings.setTitleText(value),
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0, 20, 20, 20),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20.0),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.85),
+              borderRadius: BorderRadius.circular(20.0),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+            ),
+            child: const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SettingsHeader(
+                  title: 'Theme Screen Settings',
+                  subtitle: 'Customize the theme selection carousel and layout',
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.all(30),
+                    child: Column(
+                      children: [
+                        _TitleSettingsGroup(),
+                        SizedBox(height: 25),
+                        _BackgroundSettingsGroup(),
+                        SizedBox(height: 25),
+                        _CarouselSettingsGroup(),
+                        SizedBox(height: 25),
+                        _ButtonSettingsGroup(),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-          _buildSlider('Font Size', settings.titleFontSize, 16, 90,
-              (v) => settings.setTitleFontSize(v)),
-          _buildSlider('Top Position', settings.titleTop, 50, 900,
-              (v) => settings.setTitleTop(v)),
-        ]
-      ],
-    );
-  }
-
-  Widget _buildBackgroundSettings(ThemeSelectionProvider settings) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionTitle('Background Settings'),
-        SwitchListTile(
-          title: const Text('Show Custom Background'),
-          value: settings.showBackground,
-          onChanged: (value) => settings.setShowBackground(value),
         ),
-        if (settings.showBackground)
-          ElevatedButton(
-            onPressed: () async {
-              final result =
-                  await FilePicker.platform.pickFiles(type: FileType.image);
-              if (result?.files.single.path != null) {
-                settings.setBackgroundImage(result!.files.single.path,
-                    isAsset: false);
-              }
-            },
-            child: const Text('Select Background'),
-          ),
-      ],
+      ),
     );
   }
+}
 
-  Widget _buildCarouselSettings(ThemeSelectionProvider settings) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionTitle('Carousel & Card Settings'),
-        _buildSlider('Carousel Top Position', settings.carouselTop, 100, 1000,
-            (v) => settings.setCarouselTop(v)),
-        _buildSlider('Carousel Height', settings.carouselHeight, 300, 1000,
-            (v) => settings.setCarouselHeight(v)),
-        _buildSlider('Arrow Spacing', settings.arrowSpacing, 0, 100,
-            (v) => settings.setArrowSpacing(v)),
-        _buildSlider('Card Width', settings.cardWidth, 200, 700,
-            (v) => settings.setCardWidth(v)),
-        _buildSlider('Card Height', settings.cardHeight, 300, 900,
-            (v) => settings.setCardHeight(v)),
-        _buildSlider('Card Border Radius', settings.cardBorderRadius, 0, 50,
-            (v) => settings.setCardBorderRadius(v)),
-      ],
-    );
-  }
+// --- SETTINGS WIDGETS ---
 
-  Widget _buildButtonSettings(ThemeSelectionProvider settings) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionTitle('Button Settings'),
-        SwitchListTile(
-          title: const Text('Use Image Button'),
-          value: settings.useImageButton,
-          onChanged: (value) => settings.setUseImageButton(value),
-        ),
-        if (settings.useImageButton)
-          ElevatedButton(
-            onPressed: () async {
-              final result =
-                  await FilePicker.platform.pickFiles(type: FileType.image);
-              if (result?.files.single.path != null) {
-                settings.setButtonImage(result!.files.single.path,
-                    isAsset: false);
-              }
-            },
-            child: const Text('Select Button Image'),
+class _TitleSettingsGroup extends StatelessWidget {
+  const _TitleSettingsGroup();
+
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.watch<ThemeSelectionProvider>();
+    final textTheme = Theme.of(context).textTheme;
+
+    return SettingsGroup(
+      icon: '✏️',
+      title: 'Title Settings',
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Show Title', style: textTheme.bodyLarge),
+              Switch(
+                value: settings.showTitle,
+                onChanged: (value) => settings.setShowTitle(value),
+              ),
+            ],
           ),
-        _buildSlider('Button Width', settings.buttonWidth, 100, 800,
-            (v) => settings.setButtonWidth(v)),
-        _buildSlider('Button Height', settings.buttonHeight, 50, 300,
-            (v) => settings.setButtonHeight(v)),
-        _buildSlider('Button Bottom Position', settings.buttonBottom, 100, 1000,
-            (v) => settings.setButtonBottom(v)),
-      ],
+          if (settings.showTitle) ...[
+            const SizedBox(height: 15),
+            TextFormField(
+              initialValue: settings.titleText,
+              decoration: _inputDecoration(context, 'Enter title text'),
+              onChanged: (value) => settings.setTitleText(value),
+            ),
+            const SizedBox(height: 15),
+            CustomSliderWithLabel(
+              label: 'Font Size',
+              value: settings.titleFontSize,
+              min: 16,
+              max: 90,
+              onChanged: (v) => settings.setTitleFontSize(v),
+            ),
+            CustomSliderWithLabel(
+              label: 'Top Position',
+              value: settings.titleTop,
+              min: 50,
+              max: 900,
+              onChanged: (v) => settings.setTitleTop(v),
+            ),
+          ],
+        ],
+      ),
     );
   }
+}
+
+class _BackgroundSettingsGroup extends StatelessWidget {
+  const _BackgroundSettingsGroup();
+
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.watch<ThemeSelectionProvider>();
+    final textTheme = Theme.of(context).textTheme;
+
+    return SettingsGroup(
+      icon: '🖼️',
+      title: 'Background Settings',
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Show Custom Background', style: textTheme.bodyLarge),
+              Switch(
+                value: settings.showBackground,
+                onChanged: (value) => settings.setShowBackground(value),
+              ),
+            ],
+          ),
+          if (settings.showBackground) ...[
+            const SizedBox(height: 15),
+            FileUploadArea(
+              onTap: () async {
+                final result =
+                    await FilePicker.platform.pickFiles(type: FileType.image);
+                if (result?.files.single.path != null) {
+                  settings.setBackgroundImage(result!.files.single.path,
+                      isAsset: false);
+                }
+              },
+              icon: '📁',
+              text: 'Select Background Image',
+              selectedFile: settings.backgroundImagePath,
+            ),
+          ]
+        ],
+      ),
+    );
+  }
+}
+
+class _CarouselSettingsGroup extends StatelessWidget {
+  const _CarouselSettingsGroup();
+
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.watch<ThemeSelectionProvider>();
+
+    return SettingsGroup(
+      icon: '🎠',
+      title: 'Carousel & Card Settings',
+      child: Column(
+        children: [
+          CustomSliderWithLabel(
+            label: 'Carousel Top Position',
+            value: settings.carouselTop,
+            min: 100,
+            max: 1200,
+            onChanged: (v) => settings.setCarouselTop(v),
+          ),
+          CustomSliderWithLabel(
+            label: 'Carousel Height',
+            value: settings.carouselHeight,
+            min: 300,
+            max: 1000,
+            onChanged: (v) => settings.setCarouselHeight(v),
+          ),
+          CustomSliderWithLabel(
+            label: 'Arrow Spacing',
+            value: settings.arrowSpacing,
+            min: 0,
+            max: 150,
+            onChanged: (v) => settings.setArrowSpacing(v),
+          ),
+          const SizedBox(height: 15),
+          SettingsGroup(
+            isSubgroup: true,
+            icon: '🃏',
+            title: 'Card Style',
+            child: Column(
+              children: [
+                FormRow(
+                  children: [
+                    Expanded(
+                      child: CustomSliderWithLabel(
+                        label: 'Card Width',
+                        value: settings.cardWidth,
+                        min: 200,
+                        max: 700,
+                        onChanged: (v) => settings.setCardWidth(v),
+                      ),
+                    ),
+                    Expanded(
+                      child: CustomSliderWithLabel(
+                        label: 'Card Height',
+                        value: settings.cardHeight,
+                        min: 300,
+                        max: 900,
+                        onChanged: (v) => settings.setCardHeight(v),
+                      ),
+                    ),
+                  ],
+                ),
+                CustomSliderWithLabel(
+                  label: 'Card Border Radius',
+                  value: settings.cardBorderRadius,
+                  min: 0,
+                  max: 50,
+                  onChanged: (v) => settings.setCardBorderRadius(v),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ButtonSettingsGroup extends StatelessWidget {
+  const _ButtonSettingsGroup();
+
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.watch<ThemeSelectionProvider>();
+    final textTheme = Theme.of(context).textTheme;
+
+    return SettingsGroup(
+      icon: '🔘',
+      title: 'Button Settings',
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Use Image Button', style: textTheme.bodyLarge),
+              Switch(
+                value: settings.useImageButton,
+                onChanged: (value) => settings.setUseImageButton(value),
+              ),
+            ],
+          ),
+          const SizedBox(height: 15),
+          if (settings.useImageButton)
+            FileUploadArea(
+              onTap: () async {
+                final result =
+                    await FilePicker.platform.pickFiles(type: FileType.image);
+                if (result?.files.single.path != null) {
+                  settings.setButtonImage(result!.files.single.path,
+                      isAsset: false);
+                }
+              },
+              icon: '🖼️',
+              text: 'Select Button Image',
+              selectedFile: settings.buttonImagePath,
+            ),
+          const SizedBox(height: 15),
+          FormRow(
+            children: [
+              Expanded(
+                child: CustomSliderWithLabel(
+                  label: 'Button Width',
+                  value: settings.buttonWidth,
+                  min: 100,
+                  max: 800,
+                  onChanged: (v) => settings.setButtonWidth(v),
+                ),
+              ),
+              Expanded(
+                child: CustomSliderWithLabel(
+                  label: 'Button Height',
+                  value: settings.buttonHeight,
+                  min: 50,
+                  max: 300,
+                  onChanged: (v) => settings.setButtonHeight(v),
+                ),
+              ),
+            ],
+          ),
+          CustomSliderWithLabel(
+            label: 'Button Bottom Position',
+            value: settings.buttonBottom,
+            min: 100,
+            max: 1000,
+            onChanged: (v) => settings.setButtonBottom(v),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// --- HELPER METHODS ---
+
+InputDecoration _inputDecoration(BuildContext context, String hintText) {
+  final theme = Theme.of(context);
+  return InputDecoration(
+    hintText: hintText,
+    filled: true,
+    fillColor: Colors.white.withValues(alpha: 0.8),
+    hintStyle: theme.textTheme.bodyMedium
+        ?.copyWith(color: AppColors.labelText.withValues(alpha: 0.7)),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+      borderSide: const BorderSide(color: AppColors.inputBorder, width: 2),
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+      borderSide: const BorderSide(color: AppColors.inputBorder, width: 2),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+      borderSide:
+          const BorderSide(color: AppColors.primaryGradientStart, width: 2),
+    ),
+    contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+  );
 }

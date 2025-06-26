@@ -1,3 +1,5 @@
+// lib/providers/registration_screen_provider.dart
+
 import 'dart:convert';
 import 'dart:io';
 
@@ -47,8 +49,8 @@ class CustomTextField {
     this.borderWidth = 1.0,
     this.borderColor = AppColors.black,
     this.borderRadius = 0.0,
-    this.width = 0.650,
-    this.height = 700.0,
+    this.width = 650.0, // Default absolute width
+    this.height = 70.0,
     this.left = 180.0,
     this.top = 880.0,
     this.fieldType = TextFieldType.custom,
@@ -147,10 +149,11 @@ class CustomTextField {
       borderWidth: json['borderWidth']?.toDouble() ?? 1.0,
       borderColor: Color(json['borderColor'] ?? AppColors.black.value),
       borderRadius: json['borderRadius']?.toDouble() ?? 4.0,
-      width: json['width']?.toDouble() ?? 0.55,
-      height: json['height']?.toDouble() ?? 60.0,
-      left: json['left']?.toDouble() ?? 350.0,
-      top: json['top']?.toDouble() ?? 0.0,
+      // *** FIX: Use a consistent absolute pixel default value ***
+      width: json['width']?.toDouble() ?? 650.0, // Was 0.55
+      height: json['height']?.toDouble() ?? 70.0, // Increased default height
+      left: json['left']?.toDouble() ?? 180.0, // Adjusted default position
+      top: json['top']?.toDouble() ?? 880.0, // Adjusted default position
       fieldType: getTextFieldTypeFromName(json['fieldType']),
     );
   }
@@ -580,28 +583,7 @@ class RegistrationScreenProvider extends ChangeNotifier {
     final index = _textFields.indexWhere((field) => field.id == id);
     if (index != -1) {
       final field = _textFields[index];
-      final updatedField = CustomTextField(
-        id: field.id,
-        label: field.label,
-        hintText: field.hintText,
-        isEnabled: field.isEnabled,
-        isRequired: field.isRequired,
-        fillColor: field.fillColor,
-        textColor: field.textColor,
-        labelColor: field.labelColor,
-        fontSize: field.fontSize,
-        fontWeight: field.fontWeight,
-        isItalic: field.isItalic,
-        hasBorder: field.hasBorder,
-        borderWidth: field.borderWidth,
-        borderColor: field.borderColor,
-        borderRadius: field.borderRadius,
-        width: field.width,
-        height: field.height,
-        fieldType: field.fieldType,
-        left: left,
-        top: top,
-      );
+      final updatedField = field.copyWith(left: left, top: top);
       _textFields[index] = updatedField;
       _saveTextFields();
       notifyListeners();
@@ -667,26 +649,10 @@ class RegistrationScreenProvider extends ChangeNotifier {
     if (index != -1) {
       // Create a copy with updated styles, preserving other properties like fieldType
       final currentField = _textFields[index];
-      _textFields[index] = CustomTextField(
-        id: currentField.id,
-        label: currentField.label,
-        hintText: currentField.hintText,
-        isEnabled: currentField.isEnabled,
-        isRequired: currentField.isRequired,
-        fillColor: currentField.fillColor,
-        textColor: currentField.textColor,
-        labelColor: currentField.labelColor,
-        fontSize: currentField.fontSize,
-        hasBorder: currentField.hasBorder,
-        borderWidth: currentField.borderWidth,
-        borderColor: currentField.borderColor,
-        width: currentField.width,
-        height: currentField.height,
-        fieldType: currentField.fieldType, // Preserve field type
-        // Apply updates
-        fontWeight: fontWeight ?? currentField.fontWeight,
-        isItalic: isItalic ?? currentField.isItalic,
-        borderRadius: borderRadius ?? currentField.borderRadius,
+      _textFields[index] = currentField.copyWith(
+        fontWeight: fontWeight,
+        isItalic: isItalic,
+        borderRadius: borderRadius,
       );
 
       await _saveTextFields();

@@ -1,3 +1,5 @@
+// lib/presentation/output_screen.dart
+
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -12,17 +14,14 @@ import 'package:qr_flutter/qr_flutter.dart';
 
 class SwappedFaceScreen extends StatefulWidget {
   final bool isPreviewMode;
-
-  const SwappedFaceScreen({
-    super.key,
-    this.isPreviewMode = false,
-  });
+  const SwappedFaceScreen({super.key, this.isPreviewMode = false});
 
   @override
   State<SwappedFaceScreen> createState() => _SwappedFaceScreenState();
 }
 
 class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
+  // ... (initState and _processImage methods remain the same)
   bool _isLoading = true;
   String? _errorMessage;
 
@@ -39,12 +38,10 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
   Future<void> _processImage() async {
     try {
       final provider = Provider.of<PhotoboothProvider>(context, listen: false);
-
       if (provider.capturedImageUrl != null) {
         setState(() => _isLoading = false);
         return;
       }
-
       setState(() {
         _isLoading = false;
         _errorMessage = 'No image URL available';
@@ -60,8 +57,8 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final outputSettings = Provider.of<OutputScreenProvider>(context);
-    final globalSettings = Provider.of<GlobalSettingsProvider>(context);
+    final outputSettings = context.watch<OutputScreenProvider>();
+    final globalSettings = context.watch<GlobalSettingsProvider>();
     final watermarkProvider = context.watch<AdminWatermarkProvider>();
     return Scaffold(
       body: WatermarkOverlay(
@@ -84,6 +81,7 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
   }
 
   Widget _buildPreviewContent(OutputScreenProvider settings) {
+    // This preview can be simplified as it's just for layout guidance
     return Stack(
       children: [
         if (settings.showTitle)
@@ -93,38 +91,67 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
             width: settings.titleWidth,
             child: Text(
               settings.titleText,
+              textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: settings.titleFontSize,
-                fontWeight: settings.titleFontWeight,
                 color: settings.titleColor,
+                fontWeight: settings.titleFontWeight,
               ),
-              textAlign: TextAlign.center,
             ),
           ),
-        Center(
+        Positioned(
+          left: settings.swaplabLeft,
+          top: settings.swaplabTop,
           child: Container(
             width: settings.swaplabImageWidth,
             height: settings.swaplabImageHeight,
             decoration: BoxDecoration(
               color: Colors.grey[300],
-              borderRadius: BorderRadius.circular(settings.imageBorderRadius),
-              border: Border.all(
-                color: settings.imageBorderColor,
-                width: settings.imageBorderWidth,
-              ),
+              border: Border.all(color: Colors.grey.shade600),
             ),
-            child: Image.asset(
-              "assets/images/swap.png",
-              fit: BoxFit.cover,
-            ),
+            child: const Center(child: Text('Swaplab Image')),
           ),
         ),
         Positioned(
-          left: settings.buttonLeft,
-          bottom: settings.buttonBottom,
-          child: settings.useImageButton
-              ? _buildImageButton(settings)
-              : _buildTextButton(settings),
+          left: settings.aiArtistryLeft,
+          top: settings.aiArtistryTop,
+          child: Container(
+            width: 400, // Example fixed size for preview
+            height: 400,
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              border: Border.all(color: Colors.grey.shade600),
+            ),
+            child: const Center(child: Text('AI Artistry Image')),
+          ),
+        ),
+        Positioned(
+          left: settings.qrCodeLeft,
+          bottom: settings.qrCodeBottom,
+          child: QrImageView(
+              data: 'PREVIEW',
+              size: settings.qrCodeSize,
+              backgroundColor: Colors.white),
+        ),
+        // Preview for Done Button
+        Positioned(
+          left: settings.doneButtonLeft,
+          bottom: settings.doneButtonBottom,
+          child: _buildButton(
+            isDone: true,
+            settings: settings,
+            onPressed: () {},
+          ),
+        ),
+        // Preview for Download Button
+        Positioned(
+          left: settings.downloadButtonLeft,
+          bottom: settings.downloadButtonBottom,
+          child: _buildButton(
+            isDone: false,
+            settings: settings,
+            onPressed: () {},
+          ),
         ),
       ],
     );
@@ -139,206 +166,170 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
                 child: Text(_errorMessage!,
                     style: const TextStyle(color: Colors.red, fontSize: 18)))
             : _buildSuccessContent(
-                context, Provider.of<OutputScreenProvider>(context));
+                context, context.watch<OutputScreenProvider>());
   }
 
   Widget _buildSuccessContent(
       BuildContext context, OutputScreenProvider settings) {
     final photoboothProvider = context.read<PhotoboothProvider>();
     final isSwaplabFlow = photoboothProvider.selectedTheme != null;
+    final imageUrl = photoboothProvider.swappedImageUrl ??
+        photoboothProvider.capturedImageUrl;
 
     return Stack(
-      alignment: Alignment.center,
       children: [
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 100),
-          width: isSwaplabFlow ? 700 : 900,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(settings.imageBorderRadius),
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: Stack(
-            children: [
-              _buildOutputImage(),
-              Positioned(
-                top: 10,
-                right: 10,
-                child: Image.asset(
-                  'assets/images/cft_logo.png',
-                  width: 120,
-                  fit: BoxFit.contain,
-                ),
+        if (settings.showTitle)
+          Positioned(
+            left: settings.titleLeft,
+            top: settings.titleTop,
+            width: settings.titleWidth,
+            child: Text(
+              settings.titleText,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: settings.titleFontSize,
+                fontWeight: settings.titleFontWeight,
+                color: settings.titleColor,
               ),
-            ],
+            ),
+          ),
+        Positioned(
+          left: isSwaplabFlow ? settings.swaplabLeft : settings.aiArtistryLeft,
+          top: isSwaplabFlow ? settings.swaplabTop : settings.aiArtistryTop,
+          width: isSwaplabFlow ? settings.swaplabImageWidth : null,
+          height: isSwaplabFlow ? settings.swaplabImageHeight : null,
+          child: _buildOutputImage(imageUrl),
+        ),
+        Positioned(
+          left: settings.qrCodeLeft,
+          bottom: settings.qrCodeBottom,
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: QrImageView(
+              data: imageUrl ?? 'No Image',
+              version: QrVersions.auto,
+              size: settings.qrCodeSize,
+            ),
           ),
         ),
         Positioned(
-          left: 150,
-          bottom: isSwaplabFlow ? 100 : 350,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // QR Code Section
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: QrImageView(
-                  data: photoboothProvider.swappedImageUrl ?? '',
-                  version: QrVersions.auto,
-                  size: 200.0,
-                  gapless: false,
-                  eyeStyle: const QrEyeStyle(
-                    eyeShape: QrEyeShape.square,
-                    color: Colors.black,
-                  ),
-                  dataModuleStyle: const QrDataModuleStyle(
-                    dataModuleShape: QrDataModuleShape.square,
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 32),
-              // Text and Button Section
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    textAlign: TextAlign.start,
-                    "Thanks for participating.\nScan the QR code to download your photo.",
-                    style: TextStyle(
-                        height: 1.3,
-                        fontSize: 26,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.white),
-                  ),
-                  settings.useImageButton
-                      ? _buildImageButton(settings)
-                      : _buildTextButton(settings),
-                ],
-              ),
-            ],
+          left: settings.doneButtonLeft,
+          bottom: settings.doneButtonBottom,
+          child: _buildButton(
+            isDone: true,
+            settings: settings,
+            onPressed: () {
+              Provider.of<PhotoboothProvider>(context, listen: false)
+                  .clearUserData();
+              Navigator.of(context)
+                  .pushNamedAndRemoveUntil('/', (route) => false);
+            },
+          ),
+        ),
+        Positioned(
+          left: settings.downloadButtonLeft,
+          bottom: settings.downloadButtonBottom,
+          child: _buildButton(
+            isDone: false,
+            settings: settings,
+            onPressed: () {
+              // TODO: Implement Download Logic
+            },
           ),
         ),
       ],
     );
   }
 
-  Widget _buildTextButton(OutputScreenProvider settings) {
-    return ElevatedButton(
-      onPressed: () {
-        Provider.of<PhotoboothProvider>(context, listen: false).clearUserData();
-        Navigator.of(context).pushReplacementNamed('/');
-      },
-      style: ElevatedButton.styleFrom(
-        backgroundColor: settings.buttonColor,
-        foregroundColor: settings.buttonTextColor,
-        minimumSize: Size(settings.buttonWidth, settings.buttonHeight),
-        padding: EdgeInsets.symmetric(
-          horizontal: settings.buttonPaddingHorizontal,
-          vertical: settings.buttonPaddingVertical,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
-        ),
-        textStyle: TextStyle(
-          fontSize: settings.buttonFontSize,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      child: Text(settings.buttonText),
-    );
-  }
+  Widget _buildButton({
+    required bool isDone,
+    required OutputScreenProvider settings,
+    required VoidCallback onPressed,
+  }) {
+    final useImage =
+        isDone ? settings.useDoneButtonImage : settings.useDownloadButtonImage;
+    final imagePath = isDone
+        ? settings.doneButtonImagePath
+        : settings.downloadButtonImagePath;
+    final isAsset = isDone
+        ? settings.isDoneButtonImageAsset
+        : settings.isDownloadButtonImageAsset;
+    final text = isDone ? settings.doneButtonText : settings.downloadButtonText;
+    final width =
+        isDone ? settings.doneButtonWidth : settings.downloadButtonWidth;
+    final height =
+        isDone ? settings.doneButtonHeight : settings.downloadButtonHeight;
 
-  Widget _buildImageButton(OutputScreenProvider settings) {
-    if (settings.buttonImagePath == null) {
-      return _buildTextButton(settings);
-    }
-    return GestureDetector(
-      onTap: () {
-        Provider.of<PhotoboothProvider>(context, listen: false).clearUserData();
-        Navigator.of(context).pushReplacementNamed('/');
-      },
-      child: Container(
-        width: 350,
-        height: 180,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
-          image: DecorationImage(
-            image: settings.isButtonImageAsset
-                ? AssetImage(settings.buttonImagePath!)
-                : FileImage(File(settings.buttonImagePath!)) as ImageProvider,
-            fit: BoxFit.contain,
+    if (useImage && imagePath != null) {
+      return GestureDetector(
+        onTap: onPressed,
+        child: Container(
+          width: width,
+          height: height,
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: isAsset
+                  ? AssetImage(imagePath)
+                  : FileImage(File(imagePath)) as ImageProvider,
+              fit: BoxFit.contain,
+            ),
           ),
         ),
+      );
+    }
+
+    // Fallback to text button
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        minimumSize: Size(width, height),
+        // Add more styling from provider if needed for text buttons
       ),
+      child: Text(text),
     );
   }
 
-  Widget _buildOutputImage() {
-    final provider = Provider.of<PhotoboothProvider>(context, listen: false);
-    final globalSettings =
-        Provider.of<GlobalSettingsProvider>(context, listen: false);
-
-    final imageUrl = provider.swappedImageUrl ?? provider.capturedImageUrl;
-    debugPrint('Attempting to load image from URL: $imageUrl');
-
-    if (imageUrl != null) {
-      if (!imageUrl.startsWith('http')) {
-        return Image.file(
-          File.fromUri(Uri.file(imageUrl)),
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            debugPrint('Error loading local image: $error');
-            return const Center(
-                child: Text('Error loading image',
-                    style: TextStyle(color: Colors.red)));
-          },
-        );
-      } else {
-        return Image.network(
-          imageUrl,
-          fit: BoxFit.cover,
-          loadingBuilder: (context, child, loadingProgress) {
-            if (loadingProgress == null) return child;
-            return const Center(child: CircularProgressIndicator());
-          },
-          errorBuilder: (context, error, stackTrace) {
-            debugPrint('Error loading image: $error');
-            return const Center(
-                child: Text('Error loading image',
-                    style: TextStyle(color: Colors.red)));
-          },
-        );
-      }
-    } else {
+  Widget _buildOutputImage(String? imageUrl) {
+    if (imageUrl == null) {
       return const Center(
-        child: Text('No image available',
-            style: TextStyle(color: AppColors.white)),
+          child: Text('No image available',
+              style: TextStyle(color: Colors.white)));
+    }
+    if (!imageUrl.startsWith('http')) {
+      return Image.file(File.fromUri(Uri.file(imageUrl)), fit: BoxFit.cover);
+    } else {
+      return Image.network(
+        imageUrl,
+        fit: BoxFit.cover,
+        loadingBuilder: (context, child, progress) => progress == null
+            ? child
+            : const Center(child: CircularProgressIndicator()),
+        errorBuilder: (context, error, stack) => const Center(
+            child: Text('Error loading image',
+                style: TextStyle(color: Colors.red))),
       );
     }
   }
 
   ImageProvider _getBackgroundImage(
       OutputScreenProvider settings, GlobalSettingsProvider globalSettings) {
-    if (settings.showBackground && settings.backgroundImagePath != null) {
-      if (settings.isBackgroundImageAsset) {
-        return AssetImage(settings.backgroundImagePath!);
-      } else {
-        return FileImage(File(settings.backgroundImagePath!));
-      }
+    String? path = settings.showBackground
+        ? settings.backgroundImagePath
+        : globalSettings.backgroundImage;
+    bool isAsset = settings.showBackground
+        ? settings.isBackgroundImageAsset
+        : globalSettings.isAssetImage;
+
+    if (path != null) {
+      return isAsset
+          ? AssetImage(path)
+          : FileImage(File(path)) as ImageProvider;
     }
 
-    if (globalSettings.backgroundImage != null) {
-      if (globalSettings.isAssetImage) {
-        return AssetImage(globalSettings.backgroundImage!);
-      } else {
-        return FileImage(File(globalSettings.backgroundImage!));
-      }
-    }
     return const AssetImage('assets/images/common_bg.png');
   }
 }

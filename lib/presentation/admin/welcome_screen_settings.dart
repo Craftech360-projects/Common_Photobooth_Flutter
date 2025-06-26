@@ -857,7 +857,7 @@ class _CustomColorPicker extends StatelessWidget {
       builder: (context) => AlertDialog(
         title: Text('Select $label'),
         content: SingleChildScrollView(
-          child: ImprovedColorPicker(
+          child: CustomColorPicker(
             pickerColor: color,
             onColorChanged: onColorChanged,
           ),

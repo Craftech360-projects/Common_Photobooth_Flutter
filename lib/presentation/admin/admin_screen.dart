@@ -1,6 +1,5 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:photobooth_flutter/core/constants/constants.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/providers/admin_watermark_provider.dart';
 import 'package:photobooth_flutter/providers/auth_provider.dart';
@@ -11,9 +10,13 @@ import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/providers/loading_screen_provider.dart';
 import 'package:photobooth_flutter/providers/output_screen_provider.dart';
 import 'package:photobooth_flutter/providers/registration_screen_provider.dart';
-import 'package:photobooth_flutter/providers/theme_selection_provider.dart';
+import 'package:photobooth_flutter/providers/theme_selection_provider.dart'
+    hide Theme;
 import 'package:photobooth_flutter/providers/welcome_screen_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
+import 'package:photobooth_flutter/widgets/file_upload_area.dart';
+import 'package:photobooth_flutter/widgets/input_decoration.dart';
+import 'package:photobooth_flutter/widgets/settings_group.dart';
 import 'package:photobooth_flutter/widgets/snackbar.dart';
 import 'package:photobooth_flutter/widgets/watermark_overlay.dart';
 import 'package:provider/provider.dart';
@@ -55,87 +58,52 @@ class _AdminScreenState extends State<AdminScreen> {
   @override
   Widget build(BuildContext context) {
     final watermarkProvider = context.watch<AdminWatermarkProvider>();
+    final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      body: WatermarkOverlay(
-        show: watermarkProvider.showWatermark,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Global Settings',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              Constants.h16,
-              _GlobalSettingsSection(
-                supabaseUrlController: _supabaseUrlController,
-                supabaseAnonKeyController: _supabaseAnonKeyController,
-              ),
-              const Divider(height: 32),
-              const Text(
-                'Screen Settings',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              Constants.h16,
-              _ScreenSettingsSection(),
-              const Divider(height: 32),
-              const Text(
-                'Advanced Settings',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              Constants.h16,
-              _buildAdvancedSettings(),
-            ],
-          ),
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        elevation: 0,
-        onPressed: () => Navigator.of(context).pop(),
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        title: Text('Admin Dashboard',
+            style: textTheme.headlineMedium?.copyWith(color: Colors.white)),
         backgroundColor: Colors.transparent,
-        child: const SizedBox(
-          width: 50,
-          height: 50,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
-    );
-  }
-
-  Widget _buildAdvancedSettings() {
-    return Row(
-      children: [
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.black,
-            foregroundColor: AppColors.white,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              AppColors.primaryGradientStart,
+              AppColors.primaryGradientEnd
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
-          onPressed: () async {
-            final authProvider =
-                Provider.of<AuthProvider>(context, listen: false);
-            await authProvider.logout();
-
-            if (mounted) {
-              Navigator.of(context).pushNamedAndRemoveUntil(
-                AppRoutes.authScreen,
-                (Route<dynamic> route) => false,
-              );
-            }
-          },
-          child: const Text('Add New Key'),
         ),
-        Constants.w8,
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.red,
-            foregroundColor: AppColors.white,
+        child: WatermarkOverlay(
+          show: watermarkProvider.showWatermark,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(30, kToolbarHeight + 60, 30, 30),
+            child: Column(
+              children: [
+                _GlobalSettingsSection(
+                  supabaseUrlController: _supabaseUrlController,
+                  supabaseAnonKeyController: _supabaseAnonKeyController,
+                ),
+                const SizedBox(height: 25),
+                const _ScreenSettingsSection(),
+                const SizedBox(height: 25),
+                _AdvancedSettingsSection(
+                  onReset: _showResetConfirmationDialog,
+                ),
+              ],
+            ),
           ),
-          onPressed: () => _showResetConfirmationDialog(),
-          child: const Text('Reset All Preferences'),
         ),
-      ],
+      ),
     );
   }
 
@@ -217,140 +185,234 @@ class _GlobalSettingsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final globalSettings = context.watch<GlobalSettingsProvider>();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('Global Background Image',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-        Constants.h8,
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(4))),
-          onPressed: () async {
-            try {
-              final result = await FilePicker.platform.pickFiles(
-                  type: FileType.image,
-                  allowMultiple: false,
-                  dialogTitle: 'Please select an image file');
-              if (result?.files.first.path != null) {
-                await globalSettings.setBackgroundImage(
-                    result!.files.first.path!,
-                    isAsset: false);
-                showSnackBar(context, 'Background image updated successfully');
-              }
-            } on Exception catch (e) {
-              debugPrint('Error picking file: $e');
-              showSnackBar(context, 'Error selecting file: $e');
-            }
-          },
-          child: const Text('Choose Background Image'),
-        ),
-        if (globalSettings.backgroundImage != null)
-          Padding(
-              padding: const EdgeInsets.only(top: 8.0),
-              child: Text('Selected: ${globalSettings.backgroundImage}')),
-        Constants.h24,
-        const Text('Supabase Configuration',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-        Constants.h8,
-        TextFormField(
-          controller: supabaseUrlController,
-          decoration: const InputDecoration(
-              labelText: 'Supabase URL',
-              border: OutlineInputBorder(),
-              hintText: 'https://your-project.supabase.co'),
-          onChanged: (value) => globalSettings.setSupabaseUrl(value),
-        ),
-        const SizedBox(height: 12),
-        TextFormField(
-          controller: supabaseAnonKeyController,
-          decoration: const InputDecoration(
-              labelText: 'Supabase Anon Key',
-              border: OutlineInputBorder(),
-              hintText: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9........'),
-          onChanged: (value) => globalSettings.setSupabaseAnonKey(value),
-        ),
-      ],
+    return SettingsGroup(
+      icon: '🌍',
+      title: 'Global Settings',
+      child: Column(
+        children: [
+          SettingsGroup(
+            isSubgroup: true,
+            icon: '🖼️',
+            title: 'Global Background Image',
+            child: FileUploadArea(
+              onTap: () async {
+                try {
+                  final result =
+                      await FilePicker.platform.pickFiles(type: FileType.image);
+                  if (result?.files.first.path != null) {
+                    await globalSettings.setBackgroundImage(
+                        result!.files.first.path!,
+                        isAsset: false);
+                    showSnackBar(context,
+                        'Global background image updated successfully');
+                  }
+                } on Exception catch (e) {
+                  showSnackBar(context, 'Error selecting file: $e',
+                      isError: true);
+                }
+              },
+              icon: '📁',
+              text: 'Choose Background Image',
+              selectedFile: globalSettings.backgroundImage,
+            ),
+          ),
+          const SizedBox(height: 15),
+          SettingsGroup(
+            isSubgroup: true,
+            icon: '🔑',
+            title: 'Supabase Configuration',
+            child: Column(
+              children: [
+                TextFormField(
+                  controller: supabaseUrlController,
+                  decoration: inputDecoration(
+                      context, 'https://your-project.supabase.co'),
+                  onChanged: (value) => globalSettings.setSupabaseUrl(value),
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: supabaseAnonKeyController,
+                  decoration: inputDecoration(context, 'Supabase Anon Key'),
+                  onChanged: (value) =>
+                      globalSettings.setSupabaseAnonKey(value),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
 
 class _ScreenSettingsSection extends StatelessWidget {
+  const _ScreenSettingsSection();
+
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _buildSettingCard(
-            context,
-            'Welcome Screen',
-            'Configure welcome screen appearance and content',
-            Icons.home,
-            () =>
-                Navigator.pushNamed(context, AppRoutes.welcomeScreenSettings)),
-        _buildSettingCard(
-            context,
-            'Registration Screen',
-            'Configure registration form fields and appearance',
-            Icons.app_registration,
-            () => Navigator.pushNamed(
-                context, AppRoutes.registrationScreenSettings)),
-        _buildSettingCard(
-            context,
-            'Gender Selection Screen',
-            'Configure gender selection options and appearance',
-            Icons.people,
-            () => Navigator.pushNamed(context, AppRoutes.genderScreenSettings)),
-        _buildSettingCard(
-            context,
-            'Categories Screen',
-            'Configure main and sub-category cards',
-            Icons.category,
-            () =>
-                Navigator.pushNamed(context, AppRoutes.categoryScreenSettings)),
-        _buildSettingCard(
-          context,
-          'Theme Selection Screen',
-          'Configure theme carousel and appearance',
-          Icons.burst_mode,
-          () => Navigator.pushNamed(context, AppRoutes.themeSelectionSettings),
-        ),
-        _buildSettingCard(
-            context,
-            'Capturing Screen',
-            'Configure capturing options and appearance',
-            Icons.camera,
-            () => Navigator.pushNamed(context, AppRoutes.faceCaptureSettings)),
-        _buildSettingCard(
-            context,
-            'Loading Screen',
-            'Configure loading screen appearance and animation',
-            Icons.hourglass_empty,
-            () =>
-                Navigator.pushNamed(context, AppRoutes.loadingScreenSettings)),
-        _buildSettingCard(
-            context,
-            'Output Screen',
-            'Configure output screen appearance and content',
-            Icons.print_rounded,
-            () => Navigator.pushNamed(context, AppRoutes.outputScreenSettings)),
-      ],
+    return SettingsGroup(
+      icon: '⚙️',
+      title: 'Screen Settings',
+      child: Column(
+        children: [
+          _ScreenSettingItem(
+            title: 'Welcome Screen',
+            subtitle: 'Configure welcome screen appearance and content',
+            icon: Icons.home,
+            onTap: () =>
+                Navigator.pushNamed(context, AppRoutes.welcomeScreenSettings),
+          ),
+          _ScreenSettingItem(
+            title: 'Registration Screen',
+            subtitle: 'Configure registration form fields and appearance',
+            icon: Icons.app_registration,
+            onTap: () => Navigator.pushNamed(
+                context, AppRoutes.registrationScreenSettings),
+          ),
+          _ScreenSettingItem(
+            title: 'Gender Selection Screen',
+            subtitle: 'Configure gender selection options and appearance',
+            icon: Icons.people,
+            onTap: () =>
+                Navigator.pushNamed(context, AppRoutes.genderScreenSettings),
+          ),
+          _ScreenSettingItem(
+            title: 'Categories Screen',
+            subtitle: 'Configure main and sub-category cards',
+            icon: Icons.category,
+            onTap: () =>
+                Navigator.pushNamed(context, AppRoutes.categoryScreenSettings),
+          ),
+          _ScreenSettingItem(
+            title: 'Theme Selection Screen',
+            subtitle: 'Configure theme carousel and appearance',
+            icon: Icons.burst_mode,
+            onTap: () =>
+                Navigator.pushNamed(context, AppRoutes.themeSelectionSettings),
+          ),
+          _ScreenSettingItem(
+            title: 'Capturing Screen',
+            subtitle: 'Configure capturing options and appearance',
+            icon: Icons.camera_alt,
+            onTap: () =>
+                Navigator.pushNamed(context, AppRoutes.faceCaptureSettings),
+          ),
+          _ScreenSettingItem(
+            title: 'Loading Screen',
+            subtitle: 'Configure loading screen appearance and animation',
+            icon: Icons.hourglass_empty,
+            onTap: () =>
+                Navigator.pushNamed(context, AppRoutes.loadingScreenSettings),
+          ),
+          _ScreenSettingItem(
+            title: 'Output Screen',
+            subtitle: 'Configure output screen appearance and content',
+            icon: Icons.print,
+            onTap: () =>
+                Navigator.pushNamed(context, AppRoutes.outputScreenSettings),
+          ),
+        ],
+      ),
     );
   }
+}
 
-  Widget _buildSettingCard(BuildContext context, String title,
-      String description, IconData icon, VoidCallback onTap) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16.0),
-      child: ListTile(
-        leading: Icon(icon, size: 40),
-        title: Text(title,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-        subtitle: Text(description),
-        trailing: const Icon(Icons.arrow_forward_ios),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-        onTap: onTap,
+class _ScreenSettingItem extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _ScreenSettingItem({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.white.withOpacity(0.2)),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 32, color: Colors.black.withOpacity(0.8)),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title,
+                      style:
+                          textTheme.titleMedium?.copyWith(color: Colors.black)),
+                  Text(subtitle,
+                      style: textTheme.bodySmall
+                          ?.copyWith(color: Colors.black.withOpacity(0.7))),
+                ],
+              ),
+            ),
+            Icon(Icons.arrow_forward_ios, color: Colors.black.withOpacity(0.8)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AdvancedSettingsSection extends StatelessWidget {
+  final VoidCallback onReset;
+  const _AdvancedSettingsSection({required this.onReset});
+
+  @override
+  Widget build(BuildContext context) {
+    return SettingsGroup(
+      icon: '🛠️',
+      title: 'Advanced',
+      child: Row(
+        children: [
+          Expanded(
+            child: ElevatedButton.icon(
+              icon: const Icon(Icons.logout),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.black.withOpacity(0.6),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+              onPressed: () async {
+                final authProvider =
+                    Provider.of<AuthProvider>(context, listen: false);
+                await authProvider.logout();
+                if (context.mounted) {
+                  Navigator.of(context).pushNamedAndRemoveUntil(
+                      AppRoutes.authScreen, (route) => false);
+                }
+              },
+              label: const Text('Logout'),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: ElevatedButton.icon(
+              icon: const Icon(Icons.refresh),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.red.withOpacity(0.8),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+              onPressed: onReset,
+              label: const Text('Reset All'),
+            ),
+          ),
+        ],
       ),
     );
   }

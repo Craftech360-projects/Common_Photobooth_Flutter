@@ -4,23 +4,25 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:photobooth_flutter/core/constants/constants.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 
-class ImprovedColorPicker extends StatefulWidget {
+class CustomColorPicker extends StatefulWidget {
+  final String? label;
   final Color pickerColor;
   final ValueChanged<Color> onColorChanged;
   final List<Color>? colorPalette;
 
-  const ImprovedColorPicker({
+  const CustomColorPicker({
     super.key,
     required this.pickerColor,
     required this.onColorChanged,
     this.colorPalette,
+    this.label,
   });
 
   @override
-  State<ImprovedColorPicker> createState() => _ImprovedColorPickerState();
+  State<CustomColorPicker> createState() => _CustomColorPickerState();
 }
 
-class _ImprovedColorPickerState extends State<ImprovedColorPicker> {
+class _CustomColorPickerState extends State<CustomColorPicker> {
   late TextEditingController _hexController;
   late Color _currentColor;
 
@@ -86,6 +88,14 @@ class _ImprovedColorPickerState extends State<ImprovedColorPicker> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
+        // Label
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+          child: Text(
+            widget.label ?? "Select Color",
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+        ),
         // Color picker
         ColorPicker(
           pickerColor: _currentColor,

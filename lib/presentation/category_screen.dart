@@ -406,7 +406,7 @@ class _TappableCategoryCardState extends State<TappableCategoryCard> {
               ? [
                   BoxShadow(
                     color: widget.settings.glowColor
-                        .withOpacity(widget.settings.glowIntensity),
+                        .withValues(alpha: widget.settings.glowIntensity),
                     blurRadius: 80,
                     spreadRadius: 12,
                   )

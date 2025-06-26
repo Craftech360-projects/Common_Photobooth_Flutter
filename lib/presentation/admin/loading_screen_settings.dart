@@ -1,10 +1,19 @@
+// lib/presentation/loading_screen_settings.dart
+
+import 'dart:ui';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:photobooth_flutter/core/constants/constants.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/presentation/loading_screen.dart';
 import 'package:photobooth_flutter/providers/loading_screen_provider.dart';
+import 'package:photobooth_flutter/widgets/custom_dropdown.dart';
+import 'package:photobooth_flutter/widgets/custom_slider.dart';
+import 'package:photobooth_flutter/widgets/file_upload_area.dart';
+import 'package:photobooth_flutter/widgets/form_row.dart';
 import 'package:photobooth_flutter/widgets/improved_color_picker.dart';
+import 'package:photobooth_flutter/widgets/settings_group.dart';
+import 'package:photobooth_flutter/widgets/settings_header.dart';
 import 'package:photobooth_flutter/widgets/settings_preview.dart';
 import 'package:provider/provider.dart';
 
@@ -14,325 +23,56 @@ class LoadingScreenSettings extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Loading Screen Settings'),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              AppColors.primaryGradientStart,
+              AppColors.primaryGradientEnd
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: const Row(
+          children: [
+            _PreviewSection(),
+            Expanded(child: _SettingsSection()),
+          ],
+        ),
       ),
-      body: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    );
+  }
+}
+
+// --- UI SECTIONS ---
+class _PreviewSection extends StatelessWidget {
+  const _PreviewSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(12.0),
+      child: Stack(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
+          const Center(
             child: SettingsPreview(
               width: 1080,
               height: 1920,
-              // scale: 0.45,
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.transparent),
-                borderRadius: BorderRadius.circular(0),
-              ),
-              child: const LoadingScreen(),
+              child: LoadingScreen(),
             ),
           ),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Consumer<LoadingScreenProvider>(
-                builder: (context, settings, child) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Title Settings
-                      const Text(
-                        'Title Settings',
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
-                      Constants.h16,
-                      _buildSwitch(
-                        label: 'Show Title',
-                        value: settings.showTitle,
-                        onChanged: (value) => settings.setShowTitle(value),
-                      ),
-                      if (settings.showTitle) ...[
-                        _buildTextField(
-                          label: 'Title Text',
-                          value: settings.titleText,
-                          onChanged: (value) => settings.setTitleText(value),
-                        ),
-                        _buildSlider(
-                          label: 'Font Size',
-                          value: settings.titleFontSize,
-                          min: 16,
-                          max: 48,
-                          onChanged: (value) =>
-                              settings.setTitleFontSize(value),
-                        ),
-                        _buildSlider(
-                          label: 'Line Height',
-                          value: settings.titleLineHeight,
-                          min: 0.8,
-                          max: 2.0,
-                          divisions: 24,
-                          onChanged: (value) =>
-                              settings.setTitleLineHeight(value),
-                        ),
-                        _buildSlider(
-                          label: 'Text Opacity',
-                          value: settings.titleOpacity,
-                          min: 0.1,
-                          max: 1.0,
-                          divisions: 9,
-                          onChanged: (value) => settings.setTitleOpacity(value),
-                        ),
-                        _buildDropdown<FontWeight>(
-                          label: 'Font Weight',
-                          value: settings.titleFontWeight,
-                          items: {
-                            FontWeight.w100: 'Thin',
-                            FontWeight.w300: 'Light',
-                            FontWeight.w400: 'Regular',
-                            FontWeight.w500: 'Medium',
-                            FontWeight.w700: 'Bold',
-                            FontWeight.w900: 'Extra Bold',
-                          },
-                          onChanged: (value) =>
-                              settings.setTitleFontWeight(value!),
-                        ),
-                        // Title Color with Dialog
-                        ListTile(
-                          title: const Text('Title Color'),
-                          leading: Container(
-                            width: 24,
-                            height: 24,
-                            decoration: BoxDecoration(
-                              color: settings.titleColor,
-                              border: Border.all(color: AppColors.black),
-                            ),
-                          ),
-                          onTap: () async {
-                            final color = await _showImprovedColorPicker(
-                              context: context,
-                              color: settings.titleColor,
-                              title: 'Select Title Color',
-                            );
-                            if (color != null) {
-                              settings.setTitleColor(color);
-                            }
-                          },
-                        ),
-
-                        // Title Margins
-                        Constants.h16,
-                        const Text(
-                          'Title Position',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                        Constants.h8,
-
-                        _buildSlider(
-                          label: 'Top Position',
-                          value: settings.titleTop,
-                          min: 0,
-                          max: 1000,
-                          onChanged: (value) => settings.setTitleTop(value),
-                        ),
-
-                        _buildSlider(
-                          label: 'Left Position',
-                          value: settings.titleLeft,
-                          min: 0,
-                          max: 500,
-                          onChanged: (value) => settings.setTitleLeft(value),
-                        ),
-
-                        _buildSlider(
-                          label: 'Right Position',
-                          value: settings.titleRight,
-                          min: 0,
-                          max: 500,
-                          onChanged: (value) => settings.setTitleRight(value),
-                        ),
-                      ],
-
-                      const Divider(height: 32),
-
-                      // Loader Settings
-                      const Text(
-                        'Loader Settings',
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
-                      Constants.h16,
-                      _buildSlider(
-                        label: 'Loader Width',
-                        value: settings.loaderWidth,
-                        min: 50,
-                        max: 500,
-                        onChanged: (value) => settings.setLoaderWidth(value),
-                      ),
-                      _buildSlider(
-                        label: 'Loader Height',
-                        value: settings.loaderHeight,
-                        min: 50,
-                        max: 500,
-                        onChanged: (value) => settings.setLoaderHeight(value),
-                      ),
-
-                      // Loader Margins
-                      Constants.h16,
-                      const Text(
-                        'Loader Position',
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      Constants.h8,
-
-                      _buildSlider(
-                        label: 'Top Position',
-                        value: settings.loaderTop,
-                        min: 0,
-                        max: 1000,
-                        onChanged: (value) => settings.setLoaderTop(value),
-                      ),
-
-                      _buildSlider(
-                        label: 'Left Position',
-                        value: settings.loaderLeft,
-                        min: 0,
-                        max: 500,
-                        onChanged: (value) => settings.setLoaderLeft(value),
-                      ),
-
-                      _buildSlider(
-                        label: 'Right Position',
-                        value: settings.loaderRight,
-                        min: 0,
-                        max: 500,
-                        onChanged: (value) => settings.setLoaderRight(value),
-                      ),
-
-                      const Divider(height: 32),
-
-                      // // Loader File Settings
-                      // const Text(
-                      //   'Loader File',
-                      //   style: TextStyle(
-                      //       fontSize: 20, fontWeight: FontWeight.bold),
-                      // ),
-                      // Constants.h16,
-                      // _buildDropdown<String>(
-                      //   label: 'Loader File Type',
-                      //   value: settings.loaderFileType,
-                      //   items: {
-                      //     'gif': 'GIF Animation',
-                      //     'json': 'Lottie Animation (JSON)',
-                      //     'mp4': 'MP4 Video',
-                      //     'mov': 'MOV Video',
-                      //   },
-                      //   onChanged: (value) => settings.setLoaderFile(
-                      //     settings.loaderFilePath,
-                      //     settings.isLoaderFileAsset,
-                      //     value!,
-                      //   ),
-                      // ),
-                      // Constants.h16,
-                      // ElevatedButton(
-                      //   onPressed: () async {
-                      //     FileType fileType;
-                      //     String fileExtension;
-
-                      //     switch (settings.loaderFileType) {
-                      //       case 'gif':
-                      //         fileType = FileType.image;
-                      //         fileExtension = 'gif';
-                      //         break;
-                      //       case 'json':
-                      //         fileType = FileType.custom;
-                      //         fileExtension = 'json';
-                      //         break;
-                      //       case 'mp4':
-                      //         fileType = FileType.video;
-                      //         fileExtension = 'mp4';
-                      //         break;
-                      //       case 'mov':
-                      //         fileType = FileType.custom;
-                      //         fileExtension = 'mov';
-                      //         break;
-                      //       default:
-                      //         fileType = FileType.any;
-                      //         fileExtension = '*';
-                      //     }
-
-                      //     final result = await FilePicker.platform.pickFiles(
-                      //       type: fileType,
-                      //       allowedExtensions: fileType == FileType.custom
-                      //           ? [fileExtension]
-                      //           : null,
-                      //     );
-
-                      //     if (result != null && result.files.isNotEmpty) {
-                      //       final file = result.files.first;
-                      //       if (file.path != null) {
-                      //         settings.setLoaderFile(
-                      //           file.path,
-                      //           false,
-                      //           settings.loaderFileType,
-                      //         );
-                      //       }
-                      //     }
-                      //   },
-                      //   child: const Text('Choose Loader File'),
-                      // ),
-                      // if (settings.loaderFilePath != null)
-                      //   Padding(
-                      //     padding: const EdgeInsets.only(top: 8.0),
-                      //     child: Text('Selected: ${settings.loaderFilePath}'),
-                      //   ),
-
-                      // const Divider(height: 32),
-
-                      // Background Settings
-                      const Text(
-                        'Background Settings',
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
-                      Constants.h16,
-                      _buildSwitch(
-                        label: 'Show Custom Background',
-                        value: settings.showBackground,
-                        onChanged: (value) => settings.setShowBackground(value),
-                      ),
-                      if (settings.showBackground) ...[
-                        Constants.h16,
-                        ElevatedButton(
-                          onPressed: () async {
-                            final result = await FilePicker.platform.pickFiles(
-                              type: FileType.image,
-                            );
-                            if (result != null && result.files.isNotEmpty) {
-                              final file = result.files.first;
-                              if (file.path != null) {
-                                settings.setBackgroundImage(
-                                  file.path,
-                                  false,
-                                );
-                              }
-                            }
-                          },
-                          child: const Text('Choose Background Image'),
-                        ),
-                        if (settings.backgroundImagePath != null)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8.0),
-                            child: Text(
-                                'Selected: ${settings.backgroundImagePath}'),
-                          ),
-                      ],
-                    ],
-                  );
-                },
+          Positioned(
+            top: 0,
+            left: 0,
+            child: Material(
+              color: AppColors.white.withValues(alpha: 0.9),
+              shape: const CircleBorder(),
+              elevation: 2.0,
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back, color: AppColors.labelText),
+                onPressed: () => Navigator.of(context).pop(),
+                tooltip: 'Back',
               ),
             ),
           ),
@@ -340,143 +80,304 @@ class LoadingScreenSettings extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildTextField({
-    required String label,
-    required String value,
-    required ValueChanged<String> onChanged,
-  }) {
-    // Create a controller with the current value
-    final controller = TextEditingController(text: value);
+class _SettingsSection extends StatelessWidget {
+  const _SettingsSection();
 
-    // Set the cursor position at the end of the text
-    controller.selection = TextSelection.fromPosition(
-      TextPosition(offset: controller.text.length),
-    );
-
+  @override
+  Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
-      child: TextField(
-        decoration: InputDecoration(
-          labelText: label,
-          border: const OutlineInputBorder(),
+      padding: const EdgeInsets.fromLTRB(0, 20, 20, 20),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20.0),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.85),
+              borderRadius: BorderRadius.circular(20.0),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+            ),
+            child: const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SettingsHeader(
+                  title: 'Loading Screen Settings',
+                  subtitle: 'Customize the elements shown during processing',
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.all(30),
+                    child: Column(
+                      children: [
+                        _TitleSettingsGroup(),
+                        SizedBox(height: 25),
+                        _LoaderSettingsGroup(),
+                        SizedBox(height: 25),
+                        _BackgroundSettingsGroup(),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
-        controller: controller,
-        onChanged: onChanged,
       ),
     );
   }
+}
 
-  Widget _buildSlider({
-    required String label,
-    required double value,
-    required double min,
-    required double max,
-    int? divisions,
-    required ValueChanged<double> onChanged,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
+// --- SETTINGS WIDGETS ---
+
+class _TitleSettingsGroup extends StatelessWidget {
+  const _TitleSettingsGroup();
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.watch<LoadingScreenProvider>();
+    final textTheme = Theme.of(context).textTheme;
+
+    return SettingsGroup(
+      icon: '✏️',
+      title: 'Title Settings',
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('$label: ${value.toStringAsFixed(1)}'),
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                child: Slider(
-                  value: value,
-                  min: min,
-                  max: max,
-                  divisions: divisions,
-                  onChanged: onChanged,
-                ),
+              Text('Show Title', style: textTheme.bodyLarge),
+              Switch(
+                value: settings.showTitle,
+                onChanged: (value) => settings.setShowTitle(value),
               ),
             ],
           ),
+          if (settings.showTitle) ...[
+            const SizedBox(height: 15),
+            TextFormField(
+              initialValue: settings.titleText,
+              decoration: _inputDecoration(context, 'Title Text'),
+              onChanged: (value) => settings.setTitleText(value),
+            ),
+            const SizedBox(height: 15),
+            FormRow(
+              children: [
+                Expanded(
+                  child: CustomSliderWithLabel(
+                    label: 'Font Size',
+                    value: settings.titleFontSize,
+                    min: 16,
+                    max: 48,
+                    onChanged: (value) => settings.setTitleFontSize(value),
+                  ),
+                ),
+                Expanded(
+                  child: CustomSliderWithLabel(
+                    label: 'Opacity',
+                    value: settings.titleOpacity,
+                    min: 0.1,
+                    max: 1.0,
+                    step: 0.1,
+                    onChanged: (value) => settings.setTitleOpacity(value),
+                  ),
+                )
+              ],
+            ),
+            const SizedBox(height: 15),
+            SettingsGroup(
+              isSubgroup: true,
+              icon: '🎨',
+              title: 'Styling',
+              child: Column(
+                children: [
+                  CustomDropdown<FontWeight>(
+                    label: 'Font Weight',
+                    value: settings.titleFontWeight,
+                    items: const {
+                      FontWeight.w100: 'Thin',
+                      FontWeight.w300: 'Light',
+                      FontWeight.w400: 'Regular',
+                      FontWeight.w500: 'Medium',
+                      FontWeight.w700: 'Bold',
+                      FontWeight.w900: 'Extra Bold',
+                    },
+                    onChanged: (value) => settings.setTitleFontWeight(value!),
+                  ),
+                  const SizedBox(height: 15),
+                  CustomColorPicker(
+                    label: 'Title Color',
+                    pickerColor: settings.titleColor,
+                    onColorChanged: (color) => settings.setTitleColor(color),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 15),
+            SettingsGroup(
+              isSubgroup: true,
+              icon: '📍',
+              title: 'Positioning',
+              child: Column(
+                children: [
+                  CustomSliderWithLabel(
+                    label: 'From Top',
+                    value: settings.titleTop,
+                    min: 0,
+                    max: 1000,
+                    onChanged: (value) => settings.setTitleTop(value),
+                  ),
+                  CustomSliderWithLabel(
+                    label: 'From Left',
+                    value: settings.titleLeft,
+                    min: 0,
+                    max: 500,
+                    onChanged: (value) => settings.setTitleLeft(value),
+                  ),
+                ],
+              ),
+            ),
+          ]
         ],
       ),
     );
   }
+}
 
-  Widget _buildDropdown<T>({
-    required String label,
-    required T value,
-    required Map<T, String> items,
-    required ValueChanged<T?> onChanged,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
-      child: DropdownButtonFormField<T>(
-        decoration: InputDecoration(
-          labelText: label,
-          border: const OutlineInputBorder(),
-        ),
-        value: value,
-        items: items.entries
-            .map((e) => DropdownMenuItem<T>(
-                  value: e.key,
-                  child: Text(e.value),
-                ))
-            .toList(),
-        onChanged: onChanged,
-      ),
-    );
-  }
-
-  Widget _buildSwitch({
-    required String label,
-    required bool value,
-    required ValueChanged<bool> onChanged,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
-      child: Row(
+class _LoaderSettingsGroup extends StatelessWidget {
+  const _LoaderSettingsGroup();
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.watch<LoadingScreenProvider>();
+    return SettingsGroup(
+      icon: '⏳',
+      title: 'Loader Settings',
+      child: Column(
         children: [
-          Text(label),
-          const Spacer(),
-          Switch(
-            value: value,
-            onChanged: onChanged,
+          SettingsGroup(
+            isSubgroup: true,
+            icon: '📐',
+            title: 'Sizing',
+            child: FormRow(
+              children: [
+                Expanded(
+                  child: CustomSliderWithLabel(
+                    label: 'Loader Width',
+                    value: settings.loaderWidth,
+                    min: 50,
+                    max: 500,
+                    onChanged: (value) => settings.setLoaderWidth(value),
+                  ),
+                ),
+                Expanded(
+                  child: CustomSliderWithLabel(
+                    label: 'Loader Height',
+                    value: settings.loaderHeight,
+                    min: 50,
+                    max: 500,
+                    onChanged: (value) => settings.setLoaderHeight(value),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 15),
+          SettingsGroup(
+            isSubgroup: true,
+            icon: '📍',
+            title: 'Positioning',
+            child: Column(
+              children: [
+                CustomSliderWithLabel(
+                  label: 'From Top',
+                  value: settings.loaderTop,
+                  min: 0,
+                  max: 1000,
+                  onChanged: (value) => settings.setLoaderTop(value),
+                ),
+                CustomSliderWithLabel(
+                  label: 'From Left',
+                  value: settings.loaderLeft,
+                  min: 0,
+                  max: 500,
+                  onChanged: (value) => settings.setLoaderLeft(value),
+                ),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
+}
 
-  // Remove the direct color picker and add this method for the dialog
-  Future<Color?> _showImprovedColorPicker({
-    required BuildContext context,
-    required Color color,
-    required String title,
-  }) async {
-    return showDialog<Color>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(title),
-          content: SingleChildScrollView(
-            child: ImprovedColorPicker(
-              pickerColor: color,
-              onColorChanged: (color) => color,
-            ),
+class _BackgroundSettingsGroup extends StatelessWidget {
+  const _BackgroundSettingsGroup();
+
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.watch<LoadingScreenProvider>();
+    final textTheme = Theme.of(context).textTheme;
+
+    return SettingsGroup(
+      icon: '🖼️',
+      title: 'Background Settings',
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Show Custom Background', style: textTheme.bodyLarge),
+              Switch(
+                value: settings.showBackground,
+                onChanged: (value) => settings.setShowBackground(value),
+              ),
+            ],
           ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
+          if (settings.showBackground) ...[
+            const SizedBox(height: 15),
+            FileUploadArea(
+              onTap: () async {
+                final result =
+                    await FilePicker.platform.pickFiles(type: FileType.image);
+                if (result != null && result.files.single.path != null) {
+                  settings.setBackgroundImage(result.files.single.path, false);
+                }
               },
+              icon: '📁',
+              text: 'Choose Background Image',
+              selectedFile: settings.backgroundImagePath,
             ),
-            TextButton(
-              child: const Text('Select'),
-              onPressed: () {
-                Navigator.of(context).pop(color);
-              },
-            ),
-          ],
-        );
-      },
+          ]
+        ],
+      ),
     );
   }
+}
+
+// --- HELPER METHODS ---
+
+InputDecoration _inputDecoration(BuildContext context, String hintText) {
+  final theme = Theme.of(context);
+  return InputDecoration(
+    hintText: hintText,
+    filled: true,
+    fillColor: Colors.white.withValues(alpha: 0.8),
+    hintStyle: theme.textTheme.bodyMedium
+        ?.copyWith(color: AppColors.labelText.withValues(alpha: 0.7)),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+      borderSide: const BorderSide(color: AppColors.inputBorder, width: 2),
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+      borderSide: const BorderSide(color: AppColors.inputBorder, width: 2),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+      borderSide:
+          const BorderSide(color: AppColors.primaryGradientStart, width: 2),
+    ),
+    contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+  );
 }

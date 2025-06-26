@@ -1,11 +1,7 @@
-import 'package:bitsdojo_window/bitsdojo_window.dart';
-import 'package:camera_platform_interface/camera_platform_interface.dart';
-import 'package:camera_windows/camera_windows.dart';
 import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:photobooth_flutter/core/themes/app_theme.dart';
 import 'package:photobooth_flutter/providers/admin_watermark_provider.dart';
-import 'package:photobooth_flutter/providers/app_flow_provider.dart';
 import 'package:photobooth_flutter/providers/auth_provider.dart';
 import 'package:photobooth_flutter/providers/category_provider.dart';
 import 'package:photobooth_flutter/providers/category_settings_provider.dart';
@@ -52,8 +48,8 @@ void main() async {
   final authProvider = AuthProvider();
   await authProvider.init();
 
-  final appFlowProvider = AppFlowProvider();
-  await appFlowProvider.init();
+  // final appFlowProvider = AppFlowProvider();         ====> Commented out as per request
+  // await appFlowProvider.init();
 
   final welcomeSettings = WelcomeScreenProvider();
   await welcomeSettings.init();
@@ -76,8 +72,6 @@ void main() async {
   final categorySettingsProvider = CategorySettingsProvider();
   await categorySettingsProvider.init();
 
-  CameraPlatform.instance = CameraWindows();
-
   runApp(
     MultiProvider(
       providers: [
@@ -85,7 +79,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => ThemeSelectionProvider()),
         ChangeNotifierProvider.value(value: globalSettings),
         ChangeNotifierProvider.value(value: authProvider),
-        ChangeNotifierProvider.value(value: appFlowProvider),
+        // ChangeNotifierProvider.value(value: appFlowProvider),
         ChangeNotifierProvider(create: (_) => CategoryProvider()),
         ChangeNotifierProvider.value(value: categorySettingsProvider),
         ChangeNotifierProvider.value(value: welcomeSettings),
@@ -100,13 +94,13 @@ void main() async {
     ),
   );
 
-  doWhenWindowReady(() {
-    const initialSize = Size(1080, 1920);
-    appWindow.minSize = initialSize;
-    appWindow.size = initialSize;
-    appWindow.alignment = Alignment.center;
-    appWindow.show();
-  });
+  // doWhenWindowReady(() {
+  //   const initialSize = Size(1920, 1080);
+  //   appWindow.minSize = initialSize;
+  //   appWindow.size = initialSize;
+  //   appWindow.alignment = Alignment.center;
+  //   appWindow.show();
+  // });
 }
 
 class MyApp extends StatefulWidget {

@@ -7,10 +7,15 @@ import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/presentation/registration_screen.dart';
 import 'package:photobooth_flutter/providers/registration_screen_provider.dart';
+import 'package:photobooth_flutter/widgets/custom_dropdown.dart';
+import 'package:photobooth_flutter/widgets/custom_slider.dart';
 import 'package:photobooth_flutter/widgets/file_upload_area.dart';
+import 'package:photobooth_flutter/widgets/form_row.dart';
 import 'package:photobooth_flutter/widgets/improved_color_picker.dart';
+import 'package:photobooth_flutter/widgets/input_decoration.dart';
 import 'package:photobooth_flutter/widgets/settings_preview.dart';
 import 'package:photobooth_flutter/widgets/snackbar.dart';
+import 'package:photobooth_flutter/widgets/toggle_btn_group.dart';
 import 'package:provider/provider.dart';
 
 class RegistrationScreenSettings extends StatelessWidget {
@@ -32,8 +37,8 @@ class RegistrationScreenSettings extends StatelessWidget {
         ),
         child: const Row(
           children: [
-            Expanded(flex: 2, child: _PreviewSection()),
-            Expanded(flex: 3, child: _SettingsSection()),
+            _PreviewSection(),
+            Expanded(child: _SettingsSection()),
           ],
         ),
       ),
@@ -42,55 +47,37 @@ class RegistrationScreenSettings extends StatelessWidget {
 }
 
 // --- UI SECTIONS ---
-
 class _PreviewSection extends StatelessWidget {
   const _PreviewSection();
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.white.withOpacity(0.1)),
-            ),
-            child: Stack(
-              children: [
-                const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(20.0),
-                    child: SettingsPreview(
-                      width: 1080,
-                      height: 1920,
-                      child: ParticipantDetailsScreen(),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  top: 25,
-                  left: 25,
-                  child: Material(
-                    color: Colors.white.withOpacity(0.9),
-                    shape: const CircleBorder(),
-                    elevation: 4.0,
-                    child: IconButton(
-                      icon: const Icon(Icons.arrow_back,
-                          color: AppColors.labelText),
-                      onPressed: () => Navigator.of(context).pop(),
-                      tooltip: 'Back',
-                    ),
-                  ),
-                ),
-              ],
+      padding: const EdgeInsets.all(12.0),
+      child: Stack(
+        children: [
+          const Center(
+            child: SettingsPreview(
+              width: 1080,
+              height: 1920,
+              child: ParticipantDetailsScreen(),
             ),
           ),
-        ),
+          Positioned(
+            top: 0,
+            left: 0,
+            child: Material(
+              color: AppColors.white.withValues(alpha: 0.9),
+              shape: const CircleBorder(),
+              elevation: 2.0,
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back, color: AppColors.labelText),
+                onPressed: () => Navigator.of(context).pop(),
+                tooltip: 'Back',
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -102,8 +89,6 @@ class _SettingsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final settings = context.watch<RegistrationScreenProvider>();
-    final textTheme = Theme.of(context).textTheme;
-
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 20, 20, 20),
       child: ClipRRect(
@@ -112,9 +97,9 @@ class _SettingsSection extends StatelessWidget {
           filter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.85),
+              color: Colors.white.withValues(alpha: 0.85),
               borderRadius: BorderRadius.circular(20.0),
-              border: Border.all(color: Colors.white.withOpacity(0.2)),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -171,7 +156,8 @@ class _GeneralSettingsGroup extends StatelessWidget {
           Switch(
             value: settings.showRegistrationScreen,
             onChanged: (value) => settings.setShowRegistrationScreen(value),
-            activeTrackColor: AppColors.primaryGradientStart.withOpacity(0.7),
+            activeTrackColor:
+                AppColors.primaryGradientStart.withValues(alpha: 0.7),
             activeColor: AppColors.primaryGradientEnd,
           ),
         ],
@@ -199,7 +185,7 @@ class _TitleSettingsGroup extends StatelessWidget {
                 value: settings.showTitle,
                 onChanged: (value) => settings.setShowTitle(value),
                 activeTrackColor:
-                    AppColors.primaryGradientStart.withOpacity(0.7),
+                    AppColors.primaryGradientStart.withValues(alpha: 0.7),
                 activeColor: AppColors.primaryGradientEnd,
               ),
             ],
@@ -208,13 +194,13 @@ class _TitleSettingsGroup extends StatelessWidget {
             const SizedBox(height: 20),
             TextFormField(
               initialValue: settings.titleText,
-              decoration: _inputDecoration(context, 'Enter Title Text'),
+              decoration: inputDecoration(context, 'Enter Title Text'),
               onChanged: (value) => settings.setTitleText(value),
             ),
             const SizedBox(height: 15),
-            _FormRow(children: [
+            FormRow(children: [
               Expanded(
-                child: _CustomSliderWithLabel(
+                child: CustomSliderWithLabel(
                   label: 'Font Size',
                   value: settings.titleFontSize,
                   min: 12,
@@ -223,7 +209,7 @@ class _TitleSettingsGroup extends StatelessWidget {
                 ),
               ),
               Expanded(
-                child: _CustomSliderWithLabel(
+                child: CustomSliderWithLabel(
                   label: 'Line Height',
                   value: settings.titleLineHeight,
                   min: 0.8,
@@ -233,9 +219,9 @@ class _TitleSettingsGroup extends StatelessWidget {
                 ),
               ),
             ]),
-            _FormRow(children: [
+            FormRow(children: [
               Expanded(
-                child: _CustomDropdown<FontWeight>(
+                child: CustomDropdown<FontWeight>(
                   label: 'Font Weight',
                   value: settings.titleFontWeight,
                   items: const {
@@ -250,7 +236,7 @@ class _TitleSettingsGroup extends StatelessWidget {
                 ),
               ),
               Expanded(
-                child: _CustomDropdown<TextAlign>(
+                child: CustomDropdown<TextAlign>(
                   label: 'Text Align',
                   value: settings.titleTextAlign,
                   items: const {
@@ -262,12 +248,11 @@ class _TitleSettingsGroup extends StatelessWidget {
                 ),
               ),
             ]),
-            _FormRow(
+            FormRow(
               children: [
                 Expanded(
-                  child: _CustomColorPicker(
-                    label: 'Title Color',
-                    color: settings.titleTextColor,
+                  child: CustomColorPicker(
+                    pickerColor: settings.titleTextColor,
                     onColorChanged: (c) => settings.setTitleTextColor(c),
                   ),
                 ),
@@ -279,7 +264,7 @@ class _TitleSettingsGroup extends StatelessWidget {
               title: 'Positioning',
               child: Column(
                 children: [
-                  _CustomSliderWithLabel(
+                  CustomSliderWithLabel(
                     label: 'From Left',
                     value: settings.titleLeft,
                     min: 0,
@@ -287,7 +272,7 @@ class _TitleSettingsGroup extends StatelessWidget {
                     onChanged: (v) => settings.setTitlePosition(
                         v, settings.titleTop, settings.titleWidth),
                   ),
-                  _CustomSliderWithLabel(
+                  CustomSliderWithLabel(
                     label: 'From Top',
                     value: settings.titleTop,
                     min: 0,
@@ -295,7 +280,7 @@ class _TitleSettingsGroup extends StatelessWidget {
                     onChanged: (v) => settings.setTitlePosition(
                         settings.titleLeft, v, settings.titleWidth),
                   ),
-                  _CustomSliderWithLabel(
+                  CustomSliderWithLabel(
                     label: 'Width',
                     value: settings.titleWidth,
                     min: 0,
@@ -397,7 +382,7 @@ class _TextFieldsSettingsGroup extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 15),
-          _CustomDropdown<TextFieldType>(
+          CustomDropdown<TextFieldType>(
             label: 'Field Type',
             value: field.fieldType,
             items: {
@@ -414,15 +399,15 @@ class _TextFieldsSettingsGroup extends StatelessWidget {
           const SizedBox(height: 15),
           TextFormField(
             initialValue: field.label,
-            decoration: _inputDecoration(context, 'Label'),
+            decoration: inputDecoration(context, 'Label'),
             onChanged: (value) => settings.updateTextField(
                 field.id, field.copyWith(label: value)),
           ),
           const SizedBox(height: 15),
-          _FormRow(
+          FormRow(
             children: [
               Expanded(
-                  child: _CustomSliderWithLabel(
+                  child: CustomSliderWithLabel(
                 label: 'Width',
                 value: field.width,
                 min: 200,
@@ -431,11 +416,11 @@ class _TextFieldsSettingsGroup extends StatelessWidget {
                     field.id, field.copyWith(width: v)),
               )),
               Expanded(
-                  child: _CustomSliderWithLabel(
+                  child: CustomSliderWithLabel(
                 label: 'Height',
                 value: field.height,
                 min: 40,
-                max: 150,
+                max: 200,
                 onChanged: (v) => settings.updateTextField(
                     field.id, field.copyWith(height: v)),
               ))
@@ -448,38 +433,38 @@ class _TextFieldsSettingsGroup extends StatelessWidget {
               title: 'Styling',
               child: Column(
                 children: [
-                  _FormRow(children: [
+                  FormRow(children: [
                     Expanded(
-                        child: _CustomColorPicker(
-                            label: "Fill Color",
-                            color: field.fillColor,
+                        child: CustomColorPicker(
+                            pickerColor: field.fillColor,
                             onColorChanged: (c) => settings.updateTextField(
                                 field.id, field.copyWith(fillColor: c)))),
                     Expanded(
-                        child: _CustomColorPicker(
-                            label: "Text Color",
-                            color: field.textColor,
+                        child: CustomColorPicker(
+                            pickerColor: field.textColor,
                             onColorChanged: (c) => settings.updateTextField(
                                 field.id, field.copyWith(textColor: c)))),
                   ]),
-                  _FormRow(
+                  FormRow(
                     children: [
                       Expanded(
-                          child: _CustomSliderWithLabel(
+                          child: CustomSliderWithLabel(
                               label: 'Font Size',
                               value: field.fontSize,
                               min: 10,
-                              max: 30,
-                              onChanged: (v) =>
-                                  settings.updateTextFieldStyle(id: field.id))),
+                              max: 40,
+                              onChanged: (v) {
+                                settings.updateTextField(
+                                    field.id, field.copyWith(fontSize: v));
+                              })),
                       Expanded(
-                          child: _CustomSliderWithLabel(
+                          child: CustomSliderWithLabel(
                               label: 'Border Radius',
                               value: field.borderRadius,
                               min: 0,
                               max: 30,
-                              onChanged: (v) => settings.updateTextFieldStyle(
-                                  id: field.id, borderRadius: v)))
+                              onChanged: (v) => settings.updateTextField(
+                                  field.id, field.copyWith(borderRadius: v))))
                     ],
                   ),
                 ],
@@ -491,14 +476,14 @@ class _TextFieldsSettingsGroup extends StatelessWidget {
               title: 'Positioning',
               child: Column(
                 children: [
-                  _CustomSliderWithLabel(
+                  CustomSliderWithLabel(
                       label: "From Left",
                       value: field.left,
                       min: 0,
                       max: 1000,
                       onChanged: (v) => settings.updateTextFieldPosition(
                           field.id, v, field.top)),
-                  _CustomSliderWithLabel(
+                  CustomSliderWithLabel(
                       label: "From Top",
                       value: field.top,
                       min: 0,
@@ -522,7 +507,7 @@ class _ButtonSettingsGroup extends StatelessWidget {
       title: 'Submit Button',
       child: Column(
         children: [
-          _ToggleButtonGroup(
+          ToggleButtonGroup(
             options: const ['Text Button', 'Image Button'],
             selectedIndex: settings.useImageButton ? 1 : 0,
             onSelected: (index) => settings.setUseImageButton(index == 1),
@@ -539,14 +524,14 @@ class _ButtonSettingsGroup extends StatelessWidget {
             title: 'Positioning',
             child: Column(
               children: [
-                _CustomSliderWithLabel(
+                CustomSliderWithLabel(
                     label: 'From Left',
                     value: settings.buttonLeft,
                     min: 0,
                     max: 1100,
                     onChanged: (v) =>
                         settings.setButtonPosition(v, settings.buttonBottom)),
-                _CustomSliderWithLabel(
+                CustomSliderWithLabel(
                     label: 'From Bottom',
                     value: settings.buttonBottom,
                     min: 0,
@@ -571,13 +556,13 @@ class _TextButtonSettings extends StatelessWidget {
       children: [
         TextFormField(
           initialValue: settings.submitButtonText,
-          decoration: _inputDecoration(context, 'Button Text'),
+          decoration: inputDecoration(context, 'Button Text'),
           onChanged: (v) => settings.setSubmitButtonText(v),
         ),
         const SizedBox(height: 15),
-        _FormRow(children: [
+        FormRow(children: [
           Expanded(
-            child: _CustomSliderWithLabel(
+            child: CustomSliderWithLabel(
                 label: 'Width',
                 value: settings.buttonWidth,
                 min: 100,
@@ -586,7 +571,7 @@ class _TextButtonSettings extends StatelessWidget {
                     settings.setButtonDimensions(v, settings.buttonHeight)),
           ),
           Expanded(
-            child: _CustomSliderWithLabel(
+            child: CustomSliderWithLabel(
                 label: 'Height',
                 value: settings.buttonHeight,
                 min: 40,
@@ -595,19 +580,17 @@ class _TextButtonSettings extends StatelessWidget {
                     settings.setButtonDimensions(settings.buttonWidth, v)),
           ),
         ]),
-        _FormRow(children: [
+        FormRow(children: [
           Expanded(
-              child: _CustomColorPicker(
-                  label: 'Button Color',
-                  color: settings.submitButtonColor,
+              child: CustomColorPicker(
+                  pickerColor: settings.submitButtonColor,
                   onColorChanged: (c) => settings.setSubmitButtonColor(c))),
           Expanded(
-              child: _CustomColorPicker(
-                  label: 'Text Color',
-                  color: settings.submitButtonTextColor,
+              child: CustomColorPicker(
+                  pickerColor: settings.submitButtonTextColor,
                   onColorChanged: (c) => settings.setSubmitButtonTextColor(c)))
         ]),
-        _CustomSliderWithLabel(
+        CustomSliderWithLabel(
             label: 'Border Radius',
             value: settings.buttonBorderRadius,
             min: 0,
@@ -644,9 +627,9 @@ class _ImageButtonSettings extends StatelessWidget {
           selectedFile: settings.buttonImagePath,
         ),
         const SizedBox(height: 15),
-        _FormRow(children: [
+        FormRow(children: [
           Expanded(
-            child: _CustomSliderWithLabel(
+            child: CustomSliderWithLabel(
                 label: 'Width',
                 value: settings.buttonWidth,
                 min: 100,
@@ -655,7 +638,7 @@ class _ImageButtonSettings extends StatelessWidget {
                     settings.setButtonDimensions(v, settings.buttonHeight)),
           ),
           Expanded(
-            child: _CustomSliderWithLabel(
+            child: CustomSliderWithLabel(
                 label: 'Height',
                 value: settings.buttonHeight,
                 min: 40,
@@ -664,7 +647,7 @@ class _ImageButtonSettings extends StatelessWidget {
                     settings.setButtonDimensions(settings.buttonWidth, v)),
           ),
         ]),
-        _CustomSliderWithLabel(
+        CustomSliderWithLabel(
             label: 'Border Radius',
             value: settings.buttonBorderRadius,
             min: 0,
@@ -689,9 +672,9 @@ class _SettingsHeader extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 25),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.8),
-        border:
-            Border(bottom: BorderSide(color: Colors.black.withOpacity(0.1))),
+        color: Colors.white.withValues(alpha: 0.8),
+        border: Border(
+            bottom: BorderSide(color: Colors.black.withValues(alpha: 0.1))),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -725,15 +708,15 @@ class _SettingsGroup extends StatelessWidget {
       padding: const EdgeInsets.all(25),
       decoration: BoxDecoration(
         color: isSubgroup
-            ? Colors.white.withOpacity(0.5)
-            : Colors.white.withOpacity(0.7),
+            ? Colors.white.withValues(alpha: 0.5)
+            : Colors.white.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: Colors.black.withOpacity(0.05)),
+        border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
         boxShadow: isSubgroup
             ? []
             : [
                 BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 15,
                     offset: const Offset(0, 4))
               ],
@@ -764,276 +747,6 @@ class _SettingsGroup extends StatelessWidget {
           child,
         ],
       ),
-    );
-  }
-}
-
-class _CustomSliderWithLabel extends StatelessWidget {
-  final String label;
-  final double value;
-  final double min;
-  final double max;
-  final double? step;
-  final ValueChanged<double> onChanged;
-
-  const _CustomSliderWithLabel(
-      {required this.label,
-      required this.value,
-      required this.min,
-      required this.max,
-      this.step,
-      required this.onChanged});
-
-  @override
-  Widget build(BuildContext context) {
-    int? divisions = step != null ? ((max - min) / step!).round() : null;
-    String valueLabel =
-        step == 0.1 ? value.toStringAsFixed(1) : value.round().toString();
-    final textTheme = Theme.of(context).textTheme;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(label, style: textTheme.bodyMedium),
-            Text(valueLabel,
-                style: textTheme.bodyMedium
-                    ?.copyWith(fontWeight: FontWeight.bold)),
-          ],
-        ),
-        SliderTheme(
-          data: SliderTheme.of(context).copyWith(
-            activeTrackColor: AppColors.primaryGradientEnd,
-            inactiveTrackColor: AppColors.inputBorder,
-            trackHeight: 6.0,
-            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10.0),
-            thumbColor: AppColors.primaryGradientStart,
-            overlayColor: AppColors.primaryGradientStart.withOpacity(0.2),
-          ),
-          child: Slider(
-            value: value,
-            min: min,
-            max: max,
-            divisions: divisions,
-            onChanged: onChanged,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _FormRow extends StatelessWidget {
-  final List<Widget> children;
-  const _FormRow({required this.children});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 15.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(child: children[0]),
-          const SizedBox(width: 20),
-          if (children.length > 1) Expanded(child: children[1]),
-        ],
-      ),
-    );
-  }
-}
-
-InputDecoration _inputDecoration(BuildContext context, String hintText) {
-  final theme = Theme.of(context);
-  return InputDecoration(
-    hintText: hintText,
-    filled: true,
-    fillColor: Colors.white.withOpacity(0.8),
-    hintStyle: theme.textTheme.bodyMedium
-        ?.copyWith(color: AppColors.labelText.withOpacity(0.7)),
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: AppColors.inputBorder, width: 2),
-    ),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: AppColors.inputBorder, width: 2),
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10),
-      borderSide:
-          const BorderSide(color: AppColors.primaryGradientStart, width: 2),
-    ),
-    contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-  );
-}
-
-class _CustomDropdown<T> extends StatelessWidget {
-  final String label;
-  final T value;
-  final Map<T, String> items;
-  final ValueChanged<T?> onChanged;
-
-  const _CustomDropdown(
-      {required this.label,
-      required this.value,
-      required this.items,
-      required this.onChanged});
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: textTheme.bodyMedium),
-        const SizedBox(height: 8),
-        DropdownButtonFormField<T>(
-          value: value,
-          items: items.entries
-              .map((e) =>
-                  DropdownMenuItem<T>(value: e.key, child: Text(e.value)))
-              .toList(),
-          onChanged: onChanged,
-          decoration: _inputDecoration(context, ''),
-        ),
-      ],
-    );
-  }
-}
-
-class _CustomColorPicker extends StatelessWidget {
-  final String label;
-  final Color color;
-  final ValueChanged<Color> onColorChanged;
-
-  const _CustomColorPicker(
-      {required this.label, required this.color, required this.onColorChanged});
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: textTheme.bodyMedium),
-        const SizedBox(height: 8),
-        GestureDetector(
-          onTap: () => _showColorPickerDialog(context),
-          child: Container(
-            height: 48,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppColors.inputBorder, width: 2),
-              color: Colors.white.withOpacity(0.8),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 30,
-                  height: 30,
-                  decoration: BoxDecoration(
-                    color: color,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey.shade400),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  '#${color.value.toRadixString(16).substring(2).toUpperCase()}',
-                  style: textTheme.bodyMedium,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  void _showColorPickerDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Select $label'),
-        content: SingleChildScrollView(
-          child: ImprovedColorPicker(
-            pickerColor: color,
-            onColorChanged: onColorChanged,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Done'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ToggleButtonGroup extends StatelessWidget {
-  final List<String> options;
-  final int selectedIndex;
-  final ValueChanged<int> onSelected;
-
-  const _ToggleButtonGroup(
-      {required this.options,
-      required this.selectedIndex,
-      required this.onSelected});
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    return Row(
-      children: List.generate(options.length, (index) {
-        final bool isActive = selectedIndex == index;
-        return Expanded(
-          child: GestureDetector(
-            onTap: () => onSelected(index),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              margin:
-                  EdgeInsets.only(right: index < options.length - 1 ? 10 : 0),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                gradient: isActive
-                    ? const LinearGradient(colors: [
-                        AppColors.primaryGradientStart,
-                        AppColors.primaryGradientEnd
-                      ])
-                    : null,
-                color: isActive ? null : Colors.white.withOpacity(0.8),
-                border: Border.all(
-                    color: isActive
-                        ? AppColors.primaryGradientStart
-                        : AppColors.inputBorder,
-                    width: 2),
-                boxShadow: isActive
-                    ? [
-                        BoxShadow(
-                            color:
-                                AppColors.primaryGradientStart.withOpacity(0.3),
-                            blurRadius: 15,
-                            spreadRadius: -5)
-                      ]
-                    : [],
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                options[index],
-                style: textTheme.bodyMedium?.copyWith(
-                    color: isActive ? Colors.white : AppColors.labelText),
-              ),
-            ),
-          ),
-        );
-      }),
     );
   }
 }

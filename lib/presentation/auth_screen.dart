@@ -86,8 +86,10 @@ class _AuthScreenState extends State<AuthScreen> {
     final authProvider = Provider.of<AuthProvider>(context);
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: AppColors.black,
+        automaticallyImplyLeading: false,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
           IconButton(
@@ -101,14 +103,14 @@ class _AuthScreenState extends State<AuthScreen> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
             colors: [
-              AppColors.black,
-              Colors.grey[900]!,
+              AppColors.primaryGradientStart,
+              AppColors.primaryGradientEnd
             ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
         ),
         child: Center(
@@ -155,7 +157,6 @@ class _AuthScreenState extends State<AuthScreen> {
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      
                     ),
                   ),
                   Constants.h8,
@@ -280,7 +281,6 @@ class _AuthScreenState extends State<AuthScreen> {
                             authProvider.error!,
                             style: const TextStyle(
                               color: AppColors.red,
-                       
                             ),
                           ),
                         ],
@@ -313,7 +313,6 @@ class _AuthScreenState extends State<AuthScreen> {
                                       color: AppColors.black,
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
-                             
                                     ),
                                   ),
                           ),
