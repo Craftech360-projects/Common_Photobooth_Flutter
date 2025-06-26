@@ -1,9 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:media_kit/media_kit.dart';
-import 'package:media_kit_video/media_kit_video.dart';
 import 'package:photobooth_flutter/providers/admin_watermark_provider.dart';
+import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/providers/welcome_screen_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
 import 'package:photobooth_flutter/widgets/watermark_overlay.dart';
@@ -17,50 +16,65 @@ class WelcomeScreen extends StatefulWidget {
 }
 
 class _WelcomeScreenState extends State<WelcomeScreen> {
-  late final Player _player;
-  late final VideoController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _player = Player();
-    _controller = VideoController(_player);
-    _player.open(Media('asset://assets/videos/welcome_bg.mp4'), play: true);
-    // Correct: Use setPlaylistMode for looping
-    _player.setPlaylistMode(PlaylistMode.single);
-  }
-
-  @override
-  void dispose() {
-    _player.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     final welcomeSettings = context.watch<WelcomeScreenProvider>();
+    final globalSettings = context.watch<GlobalSettingsProvider>();
     final watermarkProvider = context.watch<AdminWatermarkProvider>();
 
+    // If welcome screen is disabled, navigate directly to participant details
     if (!welcomeSettings.showWelcomeScreen) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.pushReplacementNamed(context, AppRoutes.participantDetails);
       });
-      return const SizedBox.shrink();
+      return const SizedBox.shrink(); // Return empty widget while redirecting
     }
 
     return Scaffold(
+      // appBar: AppBar(
+      //   leading: IconButton(
+      //     onPressed: () =>
+      //         Navigator.pushNamed(context, AppRoutes.welcomeScreenSettings),
+      //     icon: const Icon(Icons.star),
+      //   ),
+      // ),
       body: WatermarkOverlay(
         show: watermarkProvider.showWatermark,
         child: Stack(
           children: [
-            // CORRECTED WIDGET STRUCTURE
-            SizedBox.expand(
-              child: Video(
-                controller: _controller,
-                controls: NoVideoControls,
-                fit: BoxFit.cover, // Apply the fit property directly here
+            // Background
+            Container(
+              width: double.infinity,
+              height: double.infinity,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: _getBackgroundImage(welcomeSettings, globalSettings),
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
+
+            // Content
+            Positioned(
+              left: welcomeSettings.welcomeMessageLeft,
+              top: welcomeSettings.welcomeMessageTop,
+              width: welcomeSettings.welcomeMessageWidth,
+              child: Text(
+                welcomeSettings.welcomeMessage,
+                style: TextStyle(
+                  fontSize: welcomeSettings.welcomeMessageFontSize,
+                  fontWeight: welcomeSettings.welcomeMessageFontWeight,
+                  color: welcomeSettings.welcomeMessageColor
+                      .withValues(alpha: welcomeSettings.welcomeMessageOpacity),
+                  fontStyle: welcomeSettings.welcomeMessageItalic
+                      ? FontStyle.italic
+                      : FontStyle.normal,
+                  height: welcomeSettings.welcomeMessageLineHeight,
+                ),
+                textAlign: welcomeSettings.welcomeMessageTextAlign,
+              ),
+            ),
+
             Positioned(
               left: welcomeSettings.buttonLeft,
               bottom: welcomeSettings.buttonBottom,
@@ -68,9 +82,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   ? _buildImageButton(welcomeSettings)
                   : _buildTextButton(welcomeSettings),
             ),
+
+            // Admin access button (hidden at bottom)
             Positioned(
               right: 0,
-              bottom: 0,
+              top: 0,
               child: GestureDetector(
                 onTap: () =>
                     Navigator.pushNamed(context, AppRoutes.adminScreen),
@@ -153,5 +169,29 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         ),
       ),
     );
+  }
+
+  ImageProvider _getBackgroundImage(WelcomeScreenProvider welcomeSettings,
+      GlobalSettingsProvider globalSettings) {
+    // First try to use welcome screen specific background
+    if (welcomeSettings.welcomeScreenBackground != null) {
+      if (welcomeSettings.isWelcomeScreenBackgroundAsset) {
+        return AssetImage(welcomeSettings.welcomeScreenBackground!);
+      } else {
+        return FileImage(File(welcomeSettings.welcomeScreenBackground!));
+      }
+    }
+
+    // Fall back to global background
+    if (globalSettings.backgroundImage != null) {
+      if (globalSettings.isAssetImage) {
+        return AssetImage(globalSettings.backgroundImage!);
+      } else {
+        return FileImage(File(globalSettings.backgroundImage!));
+      }
+    }
+
+    // Default background
+    return const AssetImage('assets/images/background.jpg');
   }
 }

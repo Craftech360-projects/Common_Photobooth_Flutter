@@ -42,4 +42,12 @@ class AppColors {
 
   // Additional Colors
   static const Color lwhite = Color(0x19FFFFFF); // Translucent white
+  static const Color primaryGradientStart = Color(0xFF667EEA);
+  static const Color primaryGradientEnd = Color(0xFF764BA2);
+  static const Color settingsTitle = Color(0xFF2D3748);
+  static const Color settingsSubtitle = Color(0xFF718096);
+  static const Color labelText = Color(0xFF4A5568);
+  static const Color inputBorder = Color(0xFFE2E8F0);
+  static const Color fileUploadBorder = Color(0xFFCBD5E0);
+  static const Color fileUploadText = Color(0xFF718096);
 }

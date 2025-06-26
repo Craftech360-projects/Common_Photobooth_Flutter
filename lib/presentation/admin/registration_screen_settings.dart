@@ -1,1586 +1,1039 @@
-import 'dart:io';
+// lib/presentation/registration_screen_settings.dart
+
+import 'dart:ui';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:photobooth_flutter/core/constants/constants.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/presentation/registration_screen.dart';
 import 'package:photobooth_flutter/providers/registration_screen_provider.dart';
+import 'package:photobooth_flutter/widgets/file_upload_area.dart';
 import 'package:photobooth_flutter/widgets/improved_color_picker.dart';
 import 'package:photobooth_flutter/widgets/settings_preview.dart';
+import 'package:photobooth_flutter/widgets/snackbar.dart';
 import 'package:provider/provider.dart';
 
-class RegistrationScreenSettings extends StatefulWidget {
+class RegistrationScreenSettings extends StatelessWidget {
   const RegistrationScreenSettings({super.key});
 
   @override
-  State<RegistrationScreenSettings> createState() =>
-      _RegistrationScreenSettingsState();
-}
-
-class _RegistrationScreenSettingsState
-    extends State<RegistrationScreenSettings> {
-  final _formKey = GlobalKey<FormState>();
-
-  @override
   Widget build(BuildContext context) {
-    final settings = context.watch<RegistrationScreenProvider>();
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Registration Screen Settings'),
-      ),
-      body: Form(
-        key: _formKey,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              AppColors.primaryGradientStart,
+              AppColors.primaryGradientEnd
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: const Row(
           children: [
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: SettingsPreview(
-                width: 1080,
-                height: 1920,
-                // scale: 0.45,
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.transparent),
-                  borderRadius: BorderRadius.circular(0),
-                ),
-                child: const ParticipantDetailsScreen(),
-              ),
-            ),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Enable/Disable Registration Screen
-                    SwitchListTile(
-                      title: const Text('Enable Registration Screen'),
-                      subtitle: const Text(
-                          'Enable or disable the registration screen'),
-                      value: settings.showRegistrationScreen,
-                      onChanged: (value) {
-                        settings.setShowRegistrationScreen(value);
-                      },
-                    ),
-
-                    const Divider(),
-
-                    // Title Settings
-                    const Text(
-                      'Title Settings',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    Constants.h8,
-
-                    // Enable/Disable Title
-                    SwitchListTile(
-                      title: const Text('Show Title'),
-                      subtitle: const Text('Enable or disable the title'),
-                      value: settings.showTitle,
-                      onChanged: (value) {
-                        settings.setShowTitle(value);
-                      },
-                    ),
-
-                    if (settings.showTitle) ...[
-                      // Title Text
-                      TextFormField(
-                        initialValue: settings.titleText,
-                        decoration: const InputDecoration(
-                          labelText: 'Title Text',
-                          border: OutlineInputBorder(),
-                        ),
-                        onChanged: (value) {
-                          settings.setTitleText(value);
-                        },
-                      ),
-                      Constants.h16,
-
-                      // Font Size
-                      _buildSliderWithLabel(
-                        label: 'Font Size',
-                        value: settings.titleFontSize,
-                        min: 12,
-                        max: 80,
-                        divisions: 68,
-                        onChanged: (value) => settings.setTitleFontSize(value),
-                      ),
-
-                      _buildSliderWithLabel(
-                        label: 'Line Height',
-                        value: settings.titleLineHeight,
-                        min: 0.8,
-                        max: 2.0,
-                        divisions: 24,
-                        onChanged: (value) =>
-                            settings.setTitleLineHeight(value),
-                      ),
-                      Constants.w16,
-                      Constants.h16,
-
-                      // Font Weight
-                      DropdownButtonFormField<FontWeight>(
-                        value: settings.titleFontWeight,
-                        decoration: const InputDecoration(
-                          labelText: 'Font Weight',
-                          border: OutlineInputBorder(),
-                        ),
-                        items: [
-                          const DropdownMenuItem(
-                            value: FontWeight.normal,
-                            child: Text('Normal'),
-                          ),
-                          const DropdownMenuItem(
-                            value: FontWeight.bold,
-                            child: Text('Bold'),
-                          ),
-                          const DropdownMenuItem(
-                            value: FontWeight.w100,
-                            child: Text('Thin'),
-                          ),
-                          const DropdownMenuItem(
-                            value: FontWeight.w300,
-                            child: Text('Light'),
-                          ),
-                          const DropdownMenuItem(
-                            value: FontWeight.w500,
-                            child: Text('Medium'),
-                          ),
-                          const DropdownMenuItem(
-                            value: FontWeight.w900,
-                            child: Text('Black'),
-                          ),
-                        ],
-                        onChanged: (value) {
-                          if (value != null) {
-                            settings.setTitleFontWeight(value);
-                          }
-                        },
-                      ),
-                      Constants.h16,
-
-                      // Text Align
-                      DropdownButtonFormField<TextAlign>(
-                        value: settings.titleTextAlign,
-                        decoration: const InputDecoration(
-                          labelText: 'Text Align',
-                          border: OutlineInputBorder(),
-                        ),
-                        items: [
-                          const DropdownMenuItem(
-                            value: TextAlign.left,
-                            child: Text('Left'),
-                          ),
-                          const DropdownMenuItem(
-                            value: TextAlign.center,
-                            child: Text('Center'),
-                          ),
-                          const DropdownMenuItem(
-                            value: TextAlign.right,
-                            child: Text('Right'),
-                          ),
-                        ],
-                        onChanged: (value) {
-                          if (value != null) {
-                            settings.setTitleTextAlign(value);
-                          }
-                        },
-                      ),
-                      Constants.h16,
-
-                      // Text Color
-                      ListTile(
-                        title: const Text('Title Text Color'),
-                        leading: Container(
-                          width: 24,
-                          height: 24,
-                          decoration: BoxDecoration(
-                            color: settings.titleTextColor,
-                            border: Border.all(color: AppColors.black),
-                          ),
-                        ),
-                        onTap: () async {
-                          final color = await _buildColorPickerWithLabel(
-                            context,
-                            settings.titleTextColor,
-                            label: 'Title Text Color',
-                          );
-                          if (color != null) {
-                            settings.setTitleTextColor(color);
-                          }
-                        },
-                      ),
-
-                      _buildSectionHeader('Title Position'),
-
-                      _buildSliderWithLabel(
-                          label: 'From Left',
-                          value: settings.titleLeft,
-                          min: 0.0,
-                          max: 1000.0,
-                          onChanged: (value) {
-                            settings.setTitlePosition(
-                              value,
-                              settings.titleTop,
-                              settings.titleWidth,
-                            );
-                          }),
-                      _buildSliderWithLabel(
-                          label: 'From Top',
-                          value: settings.titleTop,
-                          min: 0.0,
-                          max: 1000.0,
-                          onChanged: (value) {
-                            settings.setTitlePosition(
-                              settings.titleLeft,
-                              value,
-                              settings.titleWidth,
-                            );
-                          }),
-                      _buildSliderWithLabel(
-                          label: 'Title Width',
-                          value: settings.titleWidth,
-                          min: 0.0,
-                          max: 1000.0,
-                          onChanged: (value) {
-                            settings.setTitlePosition(
-                              settings.titleLeft,
-                              settings.titleTop,
-                              value,
-                            );
-                          }),
-                    ],
-
-                    const Divider(),
-
-                    // Background Image Settings
-                    const Text(
-                      'Background Image',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    Constants.h8,
-
-                    Row(
-                      children: [
-                        ElevatedButton(
-                          onPressed: () async {
-                            final result = await FilePicker.platform.pickFiles(
-                              type: FileType.image,
-                              allowMultiple: false,
-                            );
-                            if (result != null && result.files.isNotEmpty) {
-                              await settings.setRegistrationScreenBackground(
-                                result.files.first.path,
-                                isAsset: false,
-                              );
-                            }
-                          },
-                          child: const Text('Select Background Image'),
-                        ),
-                        Constants.w16,
-                        if (settings.registrationScreenBackground != null)
-                          ElevatedButton(
-                            onPressed: () {
-                              settings.setRegistrationScreenBackground(null);
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.red,
-                            ),
-                            child: const Text('Remove Background'),
-                          ),
-                      ],
-                    ),
-
-                    if (settings.registrationScreenBackground != null)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: Container(
-                          width: 200,
-                          height: 120,
-                          decoration: BoxDecoration(
-                            border: Border.all(color: AppColors.grey),
-                            image: DecorationImage(
-                              image: settings
-                                      .isRegistrationScreenBackgroundAsset
-                                  ? AssetImage(
-                                      settings.registrationScreenBackground!)
-                                  : FileImage(File(settings
-                                          .registrationScreenBackground!))
-                                      as ImageProvider,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                      ),
-
-                    const Divider(),
-
-                    // Text Fields Settings
-                    const Text(
-                      'Text Fields',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    Constants.h8,
-
-                    // Add Text Field Button
-                    if (settings.textFields.length < 3)
-                      ElevatedButton(
-                        onPressed: () {
-                          settings.addTextField();
-                        },
-                        child: const Text('Add Text Field'),
-                      ),
-
-                    Constants.h16,
-
-                    // Text Fields List
-                    ...settings.textFields
-                        .map((field) => _buildTextFieldCard(field, settings)),
-
-                    const Divider(),
-
-                    // Button Settings
-                    const Text(
-                      'Button Settings',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    Constants.h8,
-
-                    _buildSectionHeader('Button Position'),
-                    _buildSliderWithLabel(
-                      label: 'From Left',
-                      value: settings.buttonLeft,
-                      min: 0,
-                      max: 1100,
-                      onChanged: (value) {
-                        settings.setButtonPosition(value, settings.buttonBottom);
-                      },
-                    ),
-                    _buildSliderWithLabel(
-                      label: 'From Bottom',
-                      value: settings.buttonBottom,
-                      min: 0,
-                      max: 1100,
-                      onChanged: (value) {
-                        settings.setButtonPosition(settings.buttonLeft, value);
-                      },
-                    ),
-
-                    // Button Type
-                    SwitchListTile(
-                      title: const Text('Use Image Button'),
-                      subtitle:
-                          const Text('Toggle between text and image button'),
-                      value: settings.useImageButton,
-                      onChanged: (value) {
-                        settings.setUseImageButton(value);
-                      },
-                    ),
-
-                    if (settings.useImageButton)
-                      _buildImageButtonSettings(settings)
-                    else
-                      _buildTextButtonSettings(settings),
-                  ],
-                ),
-              ),
-            ),
+            Expanded(flex: 2, child: _PreviewSection()),
+            Expanded(flex: 3, child: _SettingsSection()),
           ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildSectionHeader(String title) {
+// --- UI SECTIONS ---
+
+class _PreviewSection extends StatelessWidget {
+  const _PreviewSection();
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 16.0, bottom: 8.0),
-      child: Text(
-        title,
-        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      padding: const EdgeInsets.all(20.0),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.5),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: Colors.white.withOpacity(0.1)),
+            ),
+            child: Stack(
+              children: [
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(20.0),
+                    child: SettingsPreview(
+                      width: 1080,
+                      height: 1920,
+                      child: ParticipantDetailsScreen(),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 25,
+                  left: 25,
+                  child: Material(
+                    color: Colors.white.withOpacity(0.9),
+                    shape: const CircleBorder(),
+                    elevation: 4.0,
+                    child: IconButton(
+                      icon: const Icon(Icons.arrow_back,
+                          color: AppColors.labelText),
+                      onPressed: () => Navigator.of(context).pop(),
+                      tooltip: 'Back',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SettingsSection extends StatelessWidget {
+  const _SettingsSection();
+
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.watch<RegistrationScreenProvider>();
+    final textTheme = Theme.of(context).textTheme;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0, 20, 20, 20),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20.0),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.85),
+              borderRadius: BorderRadius.circular(20.0),
+              border: Border.all(color: Colors.white.withOpacity(0.2)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const _SettingsHeader(
+                  title: 'Registration Screen Settings',
+                  subtitle:
+                      'Customize the fields and appearance of the registration form',
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(30),
+                    child: Column(
+                      children: [
+                        _GeneralSettingsGroup(),
+                        if (settings.showRegistrationScreen) ...[
+                          const SizedBox(height: 25),
+                          _TitleSettingsGroup(),
+                          const SizedBox(height: 25),
+                          _BackgroundSettingsGroup(),
+                          const SizedBox(height: 25),
+                          _TextFieldsSettingsGroup(),
+                          const SizedBox(height: 25),
+                          _ButtonSettingsGroup(),
+                        ]
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// --- SETTINGS GROUPS ---
+
+class _GeneralSettingsGroup extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.watch<RegistrationScreenProvider>();
+    final textTheme = Theme.of(context).textTheme;
+
+    return _SettingsGroup(
+      icon: '⚙️',
+      title: 'General',
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text('Enable Registration Screen', style: textTheme.bodyLarge),
+          Switch(
+            value: settings.showRegistrationScreen,
+            onChanged: (value) => settings.setShowRegistrationScreen(value),
+            activeTrackColor: AppColors.primaryGradientStart.withOpacity(0.7),
+            activeColor: AppColors.primaryGradientEnd,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TitleSettingsGroup extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.watch<RegistrationScreenProvider>();
+    final textTheme = Theme.of(context).textTheme;
+
+    return _SettingsGroup(
+      icon: '✏️',
+      title: 'Screen Title',
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Show Title', style: textTheme.bodyLarge),
+              Switch(
+                value: settings.showTitle,
+                onChanged: (value) => settings.setShowTitle(value),
+                activeTrackColor:
+                    AppColors.primaryGradientStart.withOpacity(0.7),
+                activeColor: AppColors.primaryGradientEnd,
+              ),
+            ],
+          ),
+          if (settings.showTitle) ...[
+            const SizedBox(height: 20),
+            TextFormField(
+              initialValue: settings.titleText,
+              decoration: _inputDecoration(context, 'Enter Title Text'),
+              onChanged: (value) => settings.setTitleText(value),
+            ),
+            const SizedBox(height: 15),
+            _FormRow(children: [
+              Expanded(
+                child: _CustomSliderWithLabel(
+                  label: 'Font Size',
+                  value: settings.titleFontSize,
+                  min: 12,
+                  max: 80,
+                  onChanged: (v) => settings.setTitleFontSize(v),
+                ),
+              ),
+              Expanded(
+                child: _CustomSliderWithLabel(
+                  label: 'Line Height',
+                  value: settings.titleLineHeight,
+                  min: 0.8,
+                  max: 2.0,
+                  step: 0.1,
+                  onChanged: (v) => settings.setTitleLineHeight(v),
+                ),
+              ),
+            ]),
+            _FormRow(children: [
+              Expanded(
+                child: _CustomDropdown<FontWeight>(
+                  label: 'Font Weight',
+                  value: settings.titleFontWeight,
+                  items: const {
+                    FontWeight.w100: 'Thin',
+                    FontWeight.w300: 'Light',
+                    FontWeight.w400: 'Normal',
+                    FontWeight.w500: 'Medium',
+                    FontWeight.bold: 'Bold',
+                    FontWeight.w900: 'Black',
+                  },
+                  onChanged: (v) => settings.setTitleFontWeight(v!),
+                ),
+              ),
+              Expanded(
+                child: _CustomDropdown<TextAlign>(
+                  label: 'Text Align',
+                  value: settings.titleTextAlign,
+                  items: const {
+                    TextAlign.left: 'Left',
+                    TextAlign.center: 'Center',
+                    TextAlign.right: 'Right',
+                  },
+                  onChanged: (v) => settings.setTitleTextAlign(v!),
+                ),
+              ),
+            ]),
+            _FormRow(
+              children: [
+                Expanded(
+                  child: _CustomColorPicker(
+                    label: 'Title Color',
+                    color: settings.titleTextColor,
+                    onColorChanged: (c) => settings.setTitleTextColor(c),
+                  ),
+                ),
+              ],
+            ),
+            _SettingsGroup(
+              isSubgroup: true,
+              icon: '📍',
+              title: 'Positioning',
+              child: Column(
+                children: [
+                  _CustomSliderWithLabel(
+                    label: 'From Left',
+                    value: settings.titleLeft,
+                    min: 0,
+                    max: 1000,
+                    onChanged: (v) => settings.setTitlePosition(
+                        v, settings.titleTop, settings.titleWidth),
+                  ),
+                  _CustomSliderWithLabel(
+                    label: 'From Top',
+                    value: settings.titleTop,
+                    min: 0,
+                    max: 1000,
+                    onChanged: (v) => settings.setTitlePosition(
+                        settings.titleLeft, v, settings.titleWidth),
+                  ),
+                  _CustomSliderWithLabel(
+                    label: 'Width',
+                    value: settings.titleWidth,
+                    min: 0,
+                    max: 1000,
+                    onChanged: (v) => settings.setTitlePosition(
+                        settings.titleLeft, settings.titleTop, v),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _BackgroundSettingsGroup extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.watch<RegistrationScreenProvider>();
+    return _SettingsGroup(
+      icon: '🖼️',
+      title: 'Background Image',
+      child: FileUploadArea(
+        onTap: () => _pickBgImage(context, settings),
+        icon: '📁',
+        text: 'Click to upload a background',
+        selectedFile: settings.registrationScreenBackground,
       ),
     );
   }
 
-  Widget _buildSliderWithLabel({
-    required String label,
-    required double value,
-    required double min,
-    required double max,
-    int? divisions,
-    required Function(double) onChanged,
-  }) {
+  void _pickBgImage(
+      BuildContext context, RegistrationScreenProvider provider) async {
+    try {
+      final result = await FilePicker.platform.pickFiles(type: FileType.image);
+      if (result != null && result.files.single.path != null) {
+        await provider.setRegistrationScreenBackground(result.files.single.path,
+            isAsset: false);
+        showSnackBar(context, 'Background updated');
+      }
+    } catch (e) {
+      showSnackBar(context, 'Error selecting file: $e');
+    }
+  }
+}
+
+class _TextFieldsSettingsGroup extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.watch<RegistrationScreenProvider>();
+    final textTheme = Theme.of(context).textTheme;
+
+    return _SettingsGroup(
+      icon: '📝',
+      title: 'Input Fields',
+      child: Column(
+        children: [
+          if (settings.textFields.length < 3)
+            ElevatedButton.icon(
+              onPressed: () => settings.addTextField(),
+              icon: const Icon(Icons.add),
+              label: const Text('Add Input Field'),
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 48),
+              ),
+            ),
+          const SizedBox(height: 20),
+          ...settings.textFields.map((field) =>
+              _buildTextFieldCard(context, field, settings, textTheme)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTextFieldCard(BuildContext context, CustomTextField field,
+      RegistrationScreenProvider settings, TextTheme textTheme) {
+    return _SettingsGroup(
+      isSubgroup: true,
+      icon: '🔹',
+      title: field.label,
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Enabled', style: textTheme.bodyLarge),
+              Switch(
+                value: field.isEnabled,
+                onChanged: (value) =>
+                    settings.toggleTextFieldEnabled(field.id, value),
+              ),
+              if (settings.textFields.length > 1)
+                IconButton(
+                  icon: const Icon(Icons.delete, color: AppColors.red),
+                  onPressed: () => settings.removeTextField(field.id),
+                ),
+            ],
+          ),
+          const SizedBox(height: 15),
+          _CustomDropdown<TextFieldType>(
+            label: 'Field Type',
+            value: field.fieldType,
+            items: {
+              for (var type in TextFieldType.values)
+                type: type.toString().split('.').last
+            },
+            onChanged: (v) {
+              if (v != null) {
+                settings.updateTextField(
+                    field.id, field.copyWith(fieldType: v));
+              }
+            },
+          ),
+          const SizedBox(height: 15),
+          TextFormField(
+            initialValue: field.label,
+            decoration: _inputDecoration(context, 'Label'),
+            onChanged: (value) => settings.updateTextField(
+                field.id, field.copyWith(label: value)),
+          ),
+          const SizedBox(height: 15),
+          _FormRow(
+            children: [
+              Expanded(
+                  child: _CustomSliderWithLabel(
+                label: 'Width',
+                value: field.width,
+                min: 200,
+                max: 1000,
+                onChanged: (v) => settings.updateTextField(
+                    field.id, field.copyWith(width: v)),
+              )),
+              Expanded(
+                  child: _CustomSliderWithLabel(
+                label: 'Height',
+                value: field.height,
+                min: 40,
+                max: 150,
+                onChanged: (v) => settings.updateTextField(
+                    field.id, field.copyWith(height: v)),
+              ))
+            ],
+          ),
+          const SizedBox(height: 15),
+          _SettingsGroup(
+              isSubgroup: true,
+              icon: '🎨',
+              title: 'Styling',
+              child: Column(
+                children: [
+                  _FormRow(children: [
+                    Expanded(
+                        child: _CustomColorPicker(
+                            label: "Fill Color",
+                            color: field.fillColor,
+                            onColorChanged: (c) => settings.updateTextField(
+                                field.id, field.copyWith(fillColor: c)))),
+                    Expanded(
+                        child: _CustomColorPicker(
+                            label: "Text Color",
+                            color: field.textColor,
+                            onColorChanged: (c) => settings.updateTextField(
+                                field.id, field.copyWith(textColor: c)))),
+                  ]),
+                  _FormRow(
+                    children: [
+                      Expanded(
+                          child: _CustomSliderWithLabel(
+                              label: 'Font Size',
+                              value: field.fontSize,
+                              min: 10,
+                              max: 30,
+                              onChanged: (v) =>
+                                  settings.updateTextFieldStyle(id: field.id))),
+                      Expanded(
+                          child: _CustomSliderWithLabel(
+                              label: 'Border Radius',
+                              value: field.borderRadius,
+                              min: 0,
+                              max: 30,
+                              onChanged: (v) => settings.updateTextFieldStyle(
+                                  id: field.id, borderRadius: v)))
+                    ],
+                  ),
+                ],
+              )),
+          const SizedBox(height: 15),
+          _SettingsGroup(
+              isSubgroup: true,
+              icon: '📍',
+              title: 'Positioning',
+              child: Column(
+                children: [
+                  _CustomSliderWithLabel(
+                      label: "From Left",
+                      value: field.left,
+                      min: 0,
+                      max: 1000,
+                      onChanged: (v) => settings.updateTextFieldPosition(
+                          field.id, v, field.top)),
+                  _CustomSliderWithLabel(
+                      label: "From Top",
+                      value: field.top,
+                      min: 0,
+                      max: 1800,
+                      onChanged: (v) => settings.updateTextFieldPosition(
+                          field.id, field.left, v)),
+                ],
+              ))
+        ],
+      ),
+    );
+  }
+}
+
+class _ButtonSettingsGroup extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.watch<RegistrationScreenProvider>();
+    return _SettingsGroup(
+      icon: '🔘',
+      title: 'Submit Button',
+      child: Column(
+        children: [
+          _ToggleButtonGroup(
+            options: const ['Text Button', 'Image Button'],
+            selectedIndex: settings.useImageButton ? 1 : 0,
+            onSelected: (index) => settings.setUseImageButton(index == 1),
+          ),
+          const SizedBox(height: 20),
+          if (settings.useImageButton)
+            const _ImageButtonSettings()
+          else
+            const _TextButtonSettings(),
+          const SizedBox(height: 20),
+          _SettingsGroup(
+            isSubgroup: true,
+            icon: '📍',
+            title: 'Positioning',
+            child: Column(
+              children: [
+                _CustomSliderWithLabel(
+                    label: 'From Left',
+                    value: settings.buttonLeft,
+                    min: 0,
+                    max: 1100,
+                    onChanged: (v) =>
+                        settings.setButtonPosition(v, settings.buttonBottom)),
+                _CustomSliderWithLabel(
+                    label: 'From Bottom',
+                    value: settings.buttonBottom,
+                    min: 0,
+                    max: 1100,
+                    onChanged: (v) =>
+                        settings.setButtonPosition(settings.buttonLeft, v)),
+              ],
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class _TextButtonSettings extends StatelessWidget {
+  const _TextButtonSettings();
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.watch<RegistrationScreenProvider>();
+    return Column(
+      children: [
+        TextFormField(
+          initialValue: settings.submitButtonText,
+          decoration: _inputDecoration(context, 'Button Text'),
+          onChanged: (v) => settings.setSubmitButtonText(v),
+        ),
+        const SizedBox(height: 15),
+        _FormRow(children: [
+          Expanded(
+            child: _CustomSliderWithLabel(
+                label: 'Width',
+                value: settings.buttonWidth,
+                min: 100,
+                max: 800,
+                onChanged: (v) =>
+                    settings.setButtonDimensions(v, settings.buttonHeight)),
+          ),
+          Expanded(
+            child: _CustomSliderWithLabel(
+                label: 'Height',
+                value: settings.buttonHeight,
+                min: 40,
+                max: 200,
+                onChanged: (v) =>
+                    settings.setButtonDimensions(settings.buttonWidth, v)),
+          ),
+        ]),
+        _FormRow(children: [
+          Expanded(
+              child: _CustomColorPicker(
+                  label: 'Button Color',
+                  color: settings.submitButtonColor,
+                  onColorChanged: (c) => settings.setSubmitButtonColor(c))),
+          Expanded(
+              child: _CustomColorPicker(
+                  label: 'Text Color',
+                  color: settings.submitButtonTextColor,
+                  onColorChanged: (c) => settings.setSubmitButtonTextColor(c)))
+        ]),
+        _CustomSliderWithLabel(
+            label: 'Border Radius',
+            value: settings.buttonBorderRadius,
+            min: 0,
+            max: 50,
+            onChanged: (v) => settings.setButtonBorderRadius(v))
+      ],
+    );
+  }
+}
+
+class _ImageButtonSettings extends StatelessWidget {
+  const _ImageButtonSettings();
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.watch<RegistrationScreenProvider>();
+    return Column(
+      children: [
+        FileUploadArea(
+          onTap: () async {
+            try {
+              final result =
+                  await FilePicker.platform.pickFiles(type: FileType.image);
+              if (result != null && result.files.single.path != null) {
+                await settings.setButtonImage(result.files.single.path,
+                    isAsset: false);
+                showSnackBar(context, 'Button image updated');
+              }
+            } catch (e) {
+              showSnackBar(context, 'Error selecting file: $e');
+            }
+          },
+          icon: '🖼️',
+          text: 'Choose Button Image',
+          selectedFile: settings.buttonImagePath,
+        ),
+        const SizedBox(height: 15),
+        _FormRow(children: [
+          Expanded(
+            child: _CustomSliderWithLabel(
+                label: 'Width',
+                value: settings.buttonWidth,
+                min: 100,
+                max: 800,
+                onChanged: (v) =>
+                    settings.setButtonDimensions(v, settings.buttonHeight)),
+          ),
+          Expanded(
+            child: _CustomSliderWithLabel(
+                label: 'Height',
+                value: settings.buttonHeight,
+                min: 40,
+                max: 200,
+                onChanged: (v) =>
+                    settings.setButtonDimensions(settings.buttonWidth, v)),
+          ),
+        ]),
+        _CustomSliderWithLabel(
+            label: 'Border Radius',
+            value: settings.buttonBorderRadius,
+            min: 0,
+            max: 50,
+            onChanged: (v) => settings.setButtonBorderRadius(v))
+      ],
+    );
+  }
+}
+
+// --- GENERIC HELPER WIDGETS (can be extracted to separate files) ---
+
+class _SettingsHeader extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  const _SettingsHeader({required this.title, required this.subtitle});
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 25),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.8),
+        border:
+            Border(bottom: BorderSide(color: Colors.black.withOpacity(0.1))),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: textTheme.headlineMedium),
+          const SizedBox(height: 5),
+          Text(subtitle, style: textTheme.bodyMedium),
+        ],
+      ),
+    );
+  }
+}
+
+class _SettingsGroup extends StatelessWidget {
+  final String icon;
+  final String title;
+  final Widget child;
+  final bool isSubgroup;
+
+  const _SettingsGroup(
+      {required this.icon,
+      required this.title,
+      required this.child,
+      this.isSubgroup = false});
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return Container(
+      margin: isSubgroup ? const EdgeInsets.only(top: 10) : EdgeInsets.zero,
+      padding: const EdgeInsets.all(25),
+      decoration: BoxDecoration(
+        color: isSubgroup
+            ? Colors.white.withOpacity(0.5)
+            : Colors.white.withOpacity(0.7),
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: Colors.black.withOpacity(0.05)),
+        boxShadow: isSubgroup
+            ? []
+            : [
+                BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 15,
+                    offset: const Offset(0, 4))
+              ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 24,
+                height: 24,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(colors: [
+                    AppColors.primaryGradientStart,
+                    AppColors.primaryGradientEnd
+                  ]),
+                ),
+                alignment: Alignment.center,
+                child: Text(icon, style: const TextStyle(fontSize: 12)),
+              ),
+              const SizedBox(width: 10),
+              Expanded(child: Text(title, style: textTheme.titleLarge)),
+            ],
+          ),
+          const SizedBox(height: 20),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
+class _CustomSliderWithLabel extends StatelessWidget {
+  final String label;
+  final double value;
+  final double min;
+  final double max;
+  final double? step;
+  final ValueChanged<double> onChanged;
+
+  const _CustomSliderWithLabel(
+      {required this.label,
+      required this.value,
+      required this.min,
+      required this.max,
+      this.step,
+      required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    int? divisions = step != null ? ((max - min) / step!).round() : null;
+    String valueLabel =
+        step == 0.1 ? value.toStringAsFixed(1) : value.round().toString();
+    final textTheme = Theme.of(context).textTheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(label),
-            Text(value.toStringAsFixed(1)),
+            Text(label, style: textTheme.bodyMedium),
+            Text(valueLabel,
+                style: textTheme.bodyMedium
+                    ?.copyWith(fontWeight: FontWeight.bold)),
           ],
         ),
-        Slider(
+        SliderTheme(
+          data: SliderTheme.of(context).copyWith(
+            activeTrackColor: AppColors.primaryGradientEnd,
+            inactiveTrackColor: AppColors.inputBorder,
+            trackHeight: 6.0,
+            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10.0),
+            thumbColor: AppColors.primaryGradientStart,
+            overlayColor: AppColors.primaryGradientStart.withOpacity(0.2),
+          ),
+          child: Slider(
+            value: value,
+            min: min,
+            max: max,
+            divisions: divisions,
+            onChanged: onChanged,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _FormRow extends StatelessWidget {
+  final List<Widget> children;
+  const _FormRow({required this.children});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 15.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(child: children[0]),
+          const SizedBox(width: 20),
+          if (children.length > 1) Expanded(child: children[1]),
+        ],
+      ),
+    );
+  }
+}
+
+InputDecoration _inputDecoration(BuildContext context, String hintText) {
+  final theme = Theme.of(context);
+  return InputDecoration(
+    hintText: hintText,
+    filled: true,
+    fillColor: Colors.white.withOpacity(0.8),
+    hintStyle: theme.textTheme.bodyMedium
+        ?.copyWith(color: AppColors.labelText.withOpacity(0.7)),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+      borderSide: const BorderSide(color: AppColors.inputBorder, width: 2),
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+      borderSide: const BorderSide(color: AppColors.inputBorder, width: 2),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+      borderSide:
+          const BorderSide(color: AppColors.primaryGradientStart, width: 2),
+    ),
+    contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+  );
+}
+
+class _CustomDropdown<T> extends StatelessWidget {
+  final String label;
+  final T value;
+  final Map<T, String> items;
+  final ValueChanged<T?> onChanged;
+
+  const _CustomDropdown(
+      {required this.label,
+      required this.value,
+      required this.items,
+      required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: textTheme.bodyMedium),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<T>(
           value: value,
-          min: min,
-          max: max,
-          divisions: divisions,
+          items: items.entries
+              .map((e) =>
+                  DropdownMenuItem<T>(value: e.key, child: Text(e.value)))
+              .toList(),
           onChanged: onChanged,
+          decoration: _inputDecoration(context, ''),
+        ),
+      ],
+    );
+  }
+}
+
+class _CustomColorPicker extends StatelessWidget {
+  final String label;
+  final Color color;
+  final ValueChanged<Color> onColorChanged;
+
+  const _CustomColorPicker(
+      {required this.label, required this.color, required this.onColorChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: textTheme.bodyMedium),
+        const SizedBox(height: 8),
+        GestureDetector(
+          onTap: () => _showColorPickerDialog(context),
+          child: Container(
+            height: 48,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: AppColors.inputBorder, width: 2),
+              color: Colors.white.withOpacity(0.8),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    color: color,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey.shade400),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  '#${color.value.toRadixString(16).substring(2).toUpperCase()}',
+                  style: textTheme.bodyMedium,
+                ),
+              ],
+            ),
+          ),
         ),
       ],
     );
   }
 
-  Future<Color?> _buildColorPickerWithLabel(BuildContext context, Color color,
-      {String label = 'Color'}) async {
-    Color? selectedColor;
-
-    await showDialog(
+  void _showColorPickerDialog(BuildContext context) {
+    showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Text('Select $label'),
         content: SingleChildScrollView(
           child: ImprovedColorPicker(
             pickerColor: color,
-            onColorChanged: (color) {
-              selectedColor = color;
-            },
-            colorPalette: [
-              AppColors.white,
-              AppColors.black,
-              AppColors.yellow,
-              AppColors.goldenYellow,
-              AppColors.blue,
-              AppColors.darkBlue,
-              AppColors.red,
-              AppColors.green,
-              AppColors.orange,
-              AppColors.purple,
-              AppColors.deepPurple,
-              AppColors.purpleBright,
-              AppColors.grey,
-              AppColors.lightGrey,
-              AppColors.darkGrey,
-            ],
+            onColorChanged: onColorChanged,
           ),
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.of(context).pop(),
             child: const Text('Done'),
           ),
         ],
       ),
     );
-
-    return selectedColor;
   }
+}
 
-  Widget _buildSwitchWithLabel({
-    required String label,
-    required bool value,
-    required Function(bool) onChanged,
-  }) {
+class _ToggleButtonGroup extends StatelessWidget {
+  final List<String> options;
+  final int selectedIndex;
+  final ValueChanged<int> onSelected;
+
+  const _ToggleButtonGroup(
+      {required this.options,
+      required this.selectedIndex,
+      required this.onSelected});
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(label),
-        Switch(
-          value: value,
-          onChanged: onChanged,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDropdownWithLabel<T>({
-    required String label,
-    required T value,
-    required Map<T, String> items,
-    required Function(T?) onChanged,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label),
-          DropdownButton<T>(
-            value: value,
-            onChanged: onChanged,
-            items: items.entries.map((entry) {
-              return DropdownMenuItem<T>(
-                value: entry.key,
-                child: Text(entry.value),
-              );
-            }).toList(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTextFieldCard(
-      CustomTextField field, RegistrationScreenProvider settings) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  field.label,
-                  style: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                Row(
-                  children: [
-                    Switch(
-                      value: field.isEnabled,
-                      onChanged: (value) {
-                        settings.toggleTextFieldEnabled(field.id, value);
-                      },
-                    ),
-                    const SizedBox(width: 8),
-                    if (settings.textFields.length > 1)
-                      IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () {
-                          settings.removeTextField(field.id);
-                        },
-                      ),
-                  ],
-                ),
-              ],
-            ),
-            Constants.h16,
-            _buildDropdownWithLabel<TextFieldType>(
-              label: 'Field Type',
-              value: field.fieldType,
-              items: TextFieldType.values.asMap().map((key, value) => MapEntry(
-                  value,
-                  value
-                      .toString())), // Convert enum to Map<TextFieldType, String>
-              onChanged: (TextFieldType? newValue) {
-                if (newValue != null) {
-                  // Create a new field object with the updated type
-                  final updatedField = CustomTextField(
-                    id: field.id,
-                    label: field.label, // Keep existing values
-                    hintText: field.hintText,
-                    isEnabled: field.isEnabled,
-                    isRequired: field.isRequired,
-                    fillColor: field.fillColor,
-                    textColor: field.textColor,
-                    labelColor: field.labelColor,
-                    fontSize: field.fontSize,
-                    fontWeight: field.fontWeight,
-                    isItalic: field.isItalic,
-                    hasBorder: field.hasBorder,
-                    borderWidth: field.borderWidth,
-                    borderColor: field.borderColor,
-                    borderRadius: field.borderRadius,
-                    width: field.width,
-                    height: field.height,
-
-                    fieldType: newValue, // Set the new type
-                  );
-                  settings.updateTextField(field.id, updatedField);
-                }
-              },
-            ),
-            Constants.h16,
-            TextFormField(
-              initialValue: field.label,
-              decoration: const InputDecoration(
-                labelText: 'Label',
-                border: OutlineInputBorder(),
-              ),
-              onChanged: (value) {
-                final updatedField = CustomTextField(
-                  id: field.id,
-                  label: value, // Updated value
-                  hintText: field.hintText,
-                  isEnabled: field.isEnabled,
-                  isRequired: field.isRequired,
-                  fillColor: field.fillColor,
-                  textColor: field.textColor,
-                  labelColor: field.labelColor,
-                  fontSize: field.fontSize,
-                  fontWeight: field.fontWeight,
-                  isItalic: field.isItalic,
-                  hasBorder: field.hasBorder,
-                  borderWidth: field.borderWidth,
-                  borderColor: field.borderColor,
-                  borderRadius: field.borderRadius,
-                  width: field.width,
-                  height: field.height,
-
-                  fieldType: field.fieldType, // Preserve existing type
-                );
-                settings.updateTextField(field.id, updatedField);
-              },
-            ),
-            Constants.h16,
-            TextFormField(
-              initialValue: field.hintText,
-              decoration: const InputDecoration(
-                labelText: 'Hint Text',
-                border: OutlineInputBorder(),
-              ),
-              onChanged: (value) {
-                // IMPORTANT: Preserve fieldType
-                final updatedField = CustomTextField(
-                  id: field.id,
-                  label: field.label,
-                  hintText: value, // Updated value
-                  isEnabled: field.isEnabled,
-                  isRequired: field.isRequired,
-                  fillColor: field.fillColor,
-                  textColor: field.textColor,
-                  labelColor: field.labelColor,
-                  fontSize: field.fontSize,
-                  fontWeight: field.fontWeight,
-                  isItalic: field.isItalic,
-                  hasBorder: field.hasBorder,
-                  borderWidth: field.borderWidth,
-                  borderColor: field.borderColor,
-                  borderRadius: field.borderRadius,
-                  width: field.width,
-                  height: field.height,
-
-                  fieldType: field.fieldType, // Preserve existing type
-                );
-                settings.updateTextField(field.id, updatedField);
-              },
-            ),
-            Constants.h16,
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    initialValue: field.width.toString(),
-                    decoration: const InputDecoration(
-                      labelText: 'Width (% of screen)',
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.number,
-                    onChanged: (value) {
-                      final width = double.tryParse(value);
-                      if (width != null) {
-                        final updatedField = CustomTextField(
-                          id: field.id,
-                          label: field.label,
-                          hintText: field.hintText,
-                          fieldType: field.fieldType,
-                          isEnabled: field.isEnabled,
-                          isRequired: field.isRequired,
-                          fillColor: field.fillColor,
-                          textColor: field.textColor,
-                          labelColor: field.labelColor,
-                          fontSize: field.fontSize,
-                          hasBorder: field.hasBorder,
-                          borderWidth: field.borderWidth,
-                          borderColor: field.borderColor,
-                          width: width,
-                          height: field.height,
-                        );
-                        settings.updateTextField(field.id, updatedField);
-                      }
-                    },
-                  ),
-                ),
-                Constants.w16,
-                Expanded(
-                  child: TextFormField(
-                    initialValue: field.height.toString(),
-                    decoration: const InputDecoration(
-                      labelText: 'Height',
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.number,
-                    onChanged: (value) {
-                      final height = double.tryParse(value);
-                      if (height != null) {
-                        final updatedField = CustomTextField(
-                          id: field.id,
-                          label: field.label,
-                          hintText: field.hintText,
-                          fieldType: field.fieldType,
-                          isEnabled: field.isEnabled,
-                          isRequired: field.isRequired,
-                          fillColor: field.fillColor,
-                          textColor: field.textColor,
-                          labelColor: field.labelColor,
-                          fontSize: field.fontSize,
-                          hasBorder: field.hasBorder,
-                          borderWidth: field.borderWidth,
-                          borderColor: field.borderColor,
-                          width: field.width,
-                          height: height,
-                        );
-                        settings.updateTextField(field.id, updatedField);
-                      }
-                    },
-                  ),
-                ),
-              ],
-            ),
-            Constants.h16,
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    initialValue: field.fontSize.toString(),
-                    decoration: const InputDecoration(
-                      labelText: 'Font Size',
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.number,
-                    onChanged: (value) {
-                      final fontSize = double.tryParse(value);
-                      if (fontSize != null) {
-                        final updatedField = CustomTextField(
-                          id: field.id,
-                          label: field.label,
-                          hintText: field.hintText,
-                          fieldType: field.fieldType,
-                          isEnabled: field.isEnabled,
-                          isRequired: field.isRequired,
-                          fillColor: field.fillColor,
-                          textColor: field.textColor,
-                          labelColor: field.labelColor,
-                          fontSize: fontSize,
-                          hasBorder: field.hasBorder,
-                          borderWidth: field.borderWidth,
-                          borderColor: field.borderColor,
-                          width: field.width,
-                          height: field.height,
-                        );
-                        settings.updateTextField(field.id, updatedField);
-                      }
-                    },
-                  ),
-                ),
-                Constants.w16,
-                Expanded(
-                  child: SwitchListTile(
-                    title: const Text('Required'),
-                    value: field.isRequired,
-                    onChanged: (value) {
-                      final updatedField = CustomTextField(
-                        id: field.id,
-                        label: field.label,
-                        hintText: field.hintText,
-                        fieldType: field.fieldType,
-                        isEnabled: field.isEnabled,
-                        isRequired: value,
-                        fillColor: field.fillColor,
-                        textColor: field.textColor,
-                        labelColor: field.labelColor,
-                        fontSize: field.fontSize,
-                        hasBorder: field.hasBorder,
-                        borderWidth: field.borderWidth,
-                        borderColor: field.borderColor,
-                        width: field.width,
-                        height: field.height,
-                      );
-                      settings.updateTextField(field.id, updatedField);
-                    },
-                  ),
-                ),
-              ],
-            ),
-            // Font Weight
-            _buildDropdownWithLabel<FontWeight>(
-              label: 'Font Weight',
-              value: field.fontWeight,
-              items: {
-                FontWeight.w100: 'Thin',
-                FontWeight.w300: 'Light',
-                FontWeight.w400: 'Regular',
-                FontWeight.w500: 'Medium',
-                FontWeight.w700: 'Bold',
-                FontWeight.w900: 'Black',
-              },
-              onChanged: (value) {
-                if (value != null) {
-                  settings.updateTextFieldStyle(
-                    id: field.id,
-                    fontWeight: value,
-                  );
-                }
-              },
-            ),
-            // Font Style (Italic)
-            _buildSwitchWithLabel(
-              label: 'Italic',
-              value: field.isItalic,
-              onChanged: (value) {
-                settings.updateTextFieldStyle(
-                  id: field.id,
-                  isItalic: value,
-                );
-              },
-            ),
-            Constants.h16,
-            Row(
-              children: [
-                Expanded(
-                  child: ListTile(
-                    title: const Text('Fill Color'),
-                    leading: Container(
-                      width: 24,
-                      height: 24,
-                      decoration: BoxDecoration(
-                        color: field.fillColor,
-                        border: Border.all(color: AppColors.black),
-                      ),
-                    ),
-                    onTap: () async {
-                      final color = await _buildColorPickerWithLabel(
-                          context, field.fillColor);
-                      if (color != null) {
-                        final updatedField = CustomTextField(
-                          id: field.id,
-                          label: field.label,
-                          hintText: field.hintText,
-                          fieldType: field.fieldType,
-                          isEnabled: field.isEnabled,
-                          isRequired: field.isRequired,
-                          fillColor: color,
-                          textColor: field.textColor,
-                          labelColor: field.labelColor,
-                          fontSize: field.fontSize,
-                          hasBorder: field.hasBorder,
-                          borderWidth: field.borderWidth,
-                          borderColor: field.borderColor,
-                          width: field.width,
-                          height: field.height,
-                        );
-                        settings.updateTextField(field.id, updatedField);
-                      }
-                    },
-                  ),
-                ),
-                Expanded(
-                  child: ListTile(
-                    title: const Text('Text Color'),
-                    leading: Container(
-                      width: 24,
-                      height: 24,
-                      decoration: BoxDecoration(
-                        color: field.textColor,
-                        border: Border.all(color: AppColors.black),
-                      ),
-                    ),
-                    onTap: () async {
-                      final color = await _buildColorPickerWithLabel(
-                          context, field.textColor);
-                      if (color != null) {
-                        final updatedField = CustomTextField(
-                          id: field.id,
-                          label: field.label,
-                          hintText: field.hintText,
-                          fieldType: field.fieldType,
-                          isEnabled: field.isEnabled,
-                          isRequired: field.isRequired,
-                          fillColor: field.fillColor,
-                          textColor: color,
-                          labelColor: field.labelColor,
-                          fontSize: field.fontSize,
-                          hasBorder: field.hasBorder,
-                          borderWidth: field.borderWidth,
-                          borderColor: field.borderColor,
-                          width: field.width,
-                          height: field.height,
-                        );
-                        settings.updateTextField(field.id, updatedField);
-                      }
-                    },
-                  ),
-                ),
-              ],
-            ),
-            Constants.h8,
-            Row(
-              children: [
-                Expanded(
-                  child: ListTile(
-                    title: const Text('Label Color'),
-                    leading: Container(
-                      width: 24,
-                      height: 24,
-                      decoration: BoxDecoration(
-                        color: field.labelColor,
-                        border: Border.all(color: AppColors.black),
-                      ),
-                    ),
-                    onTap: () async {
-                      final color = await _buildColorPickerWithLabel(
-                          context, field.labelColor);
-                      if (color != null) {
-                        final updatedField = CustomTextField(
-                          id: field.id,
-                          label: field.label,
-                          hintText: field.hintText,
-                          fieldType: field.fieldType,
-                          isEnabled: field.isEnabled,
-                          isRequired: field.isRequired,
-                          fillColor: field.fillColor,
-                          textColor: field.textColor,
-                          labelColor: color,
-                          fontSize: field.fontSize,
-                          hasBorder: field.hasBorder,
-                          borderWidth: field.borderWidth,
-                          borderColor: field.borderColor,
-                          width: field.width,
-                          height: field.height,
-                        );
-                        settings.updateTextField(field.id, updatedField);
-                      }
-                    },
-                  ),
-                ),
-                Expanded(
-                  child: SwitchListTile(
-                    title: const Text('Border'),
-                    value: field.hasBorder,
-                    onChanged: (value) {
-                      final updatedField = CustomTextField(
-                        id: field.id,
-                        label: field.label,
-                        hintText: field.hintText,
-                        fieldType: field.fieldType,
-                        isEnabled: field.isEnabled,
-                        isRequired: field.isRequired,
-                        fillColor: field.fillColor,
-                        textColor: field.textColor,
-                        labelColor: field.labelColor,
-                        fontSize: field.fontSize,
-                        hasBorder: value,
-                        borderWidth: field.borderWidth,
-                        borderColor: field.borderColor,
-                        width: field.width,
-                        height: field.height,
-                      );
-                      settings.updateTextField(field.id, updatedField);
-                    },
-                  ),
-                ),
-              ],
-            ),
-            if (field.hasBorder)
-              Column(
-                children: [
-                  Constants.h16,
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextFormField(
-                          initialValue: field.borderWidth.toString(),
-                          decoration: const InputDecoration(
-                            labelText: 'Border Width',
-                            border: OutlineInputBorder(),
-                          ),
-                          keyboardType: TextInputType.number,
-                          onChanged: (value) {
-                            final width = double.tryParse(value);
-                            if (width != null) {
-                              final updatedField = CustomTextField(
-                                id: field.id,
-                                label: field.label,
-                                hintText: field.hintText,
-                                fieldType: field.fieldType,
-                                isEnabled: field.isEnabled,
-                                isRequired: field.isRequired,
-                                fillColor: field.fillColor,
-                                textColor: field.textColor,
-                                labelColor: field.labelColor,
-                                fontSize: field.fontSize,
-                                hasBorder: field.hasBorder,
-                                borderWidth: width,
-                                borderColor: field.borderColor,
-                                width: field.width,
-                                height: field.height,
-                              );
-                              settings.updateTextField(field.id, updatedField);
-                            }
-                          },
-                        ),
-                      ),
-                      Constants.w16,
-                      Expanded(
-                        child: ListTile(
-                          title: const Text('Border Color'),
-                          leading: Container(
-                            width: 24,
-                            height: 24,
-                            decoration: BoxDecoration(
-                              color: field.borderColor,
-                              border: Border.all(color: AppColors.black),
-                            ),
-                          ),
-                          onTap: () async {
-                            final color = await _buildColorPickerWithLabel(
-                                context, field.borderColor);
-                            if (color != null) {
-                              final updatedField = CustomTextField(
-                                id: field.id,
-                                label: field.label,
-                                hintText: field.hintText,
-                                fieldType: field.fieldType,
-                                isEnabled: field.isEnabled,
-                                isRequired: field.isRequired,
-                                fillColor: field.fillColor,
-                                textColor: field.textColor,
-                                labelColor: field.labelColor,
-                                fontSize: field.fontSize,
-                                hasBorder: field.hasBorder,
-                                borderWidth: field.borderWidth,
-                                borderColor: color,
-                                width: field.width,
-                                height: field.height,
-                              );
-                              settings.updateTextField(field.id, updatedField);
-                            }
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            Constants.h4,
-
-            // Border Radius
-            _buildSliderWithLabel(
-              label: 'Border Radius',
-              value: field.borderRadius,
-              min: 0,
-              max: 30,
-              divisions: 30,
-              onChanged: (value) {
-                settings.updateTextFieldStyle(
-                  id: field.id,
-                  borderRadius: value,
-                );
-              },
-            ),
-
-            // Inside the text field card builder, add position settings:
-            _buildSectionHeader('Field Position'),
-
-            _buildSliderWithLabel(
-                label: 'From Left',
-                value: field.left,
-                min: 0.0,
-                max: 2000.0,
-                onChanged: (value) {
-                  settings.updateTextFieldPosition(
-                    field.id,
-                    value,
-                    field.top,
-                  );
-                }),
-
-            _buildSliderWithLabel(
-                label: 'From Top',
-                value: field.top,
-                min: 0.0,
-                max: 2000.0,
-                onChanged: (value) {
-                  settings.updateTextFieldPosition(
-                    field.id,
-                    field.left,
-                    value,
-                  );
-                }),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextButtonSettings(RegistrationScreenProvider settings) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Constants.h16,
-        TextFormField(
-          initialValue: settings.submitButtonText,
-          decoration: const InputDecoration(
-            labelText: 'Button Text',
-            border: OutlineInputBorder(),
-          ),
-          onChanged: (value) {
-            settings.setSubmitButtonText(value);
-          },
-        ),
-        Constants.h16,
-        Row(
-          children: [
-            Expanded(
-              child: TextFormField(
-                initialValue: settings.buttonWidth.toString(),
-                decoration: const InputDecoration(
-                  labelText: 'Button Width',
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.number,
-                onChanged: (value) {
-                  final width = double.tryParse(value);
-                  if (width != null) {
-                    settings.setButtonDimensions(width, settings.buttonHeight);
-                  }
-                },
-              ),
-            ),
-            Constants.w16,
-            Expanded(
-              child: TextFormField(
-                initialValue: settings.buttonHeight.toString(),
-                decoration: const InputDecoration(
-                  labelText: 'Button Height',
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.number,
-                onChanged: (value) {
-                  final height = double.tryParse(value);
-                  if (height != null) {
-                    settings.setButtonDimensions(settings.buttonWidth, height);
-                  }
-                },
-              ),
-            ),
-          ],
-        ),
-        Constants.h16,
-        Row(
-          children: [
-            Expanded(
-              child: TextFormField(
-                initialValue: settings.buttonBorderRadius.toString(),
-                decoration: const InputDecoration(
-                  labelText: 'Button Border Radius',
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.number,
-                onChanged: (value) {
-                  final radius = double.tryParse(value);
-                  if (radius != null) {
-                    settings.setButtonBorderRadius(radius);
-                  }
-                },
-              ),
-            ),
-            Constants.w16,
-            Expanded(
-              child: TextFormField(
-                initialValue: settings.buttonFontSize.toString(),
-                decoration: const InputDecoration(
-                  labelText: 'Button Font Size',
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.number,
-                onChanged: (value) {
-                  final size = double.tryParse(value);
-                  if (size != null) {
-                    settings.setButtonFontSize(size);
-                  }
-                },
-              ),
-            ),
-          ],
-        ),
-        Constants.h16,
-        Row(
-          children: [
-            Expanded(
-              child: ListTile(
-                title: const Text('Button Color'),
-                leading: Container(
-                  width: 24,
-                  height: 24,
-                  decoration: BoxDecoration(
-                    color: settings.submitButtonColor,
-                    border: Border.all(color: AppColors.black),
-                  ),
-                ),
-                onTap: () async {
-                  final color = await _buildColorPickerWithLabel(
-                      context, settings.submitButtonTextColor);
-                  if (color != null) {
-                    settings.setSubmitButtonTextColor(color);
-                  }
-                },
-              ),
-            ),
-            Expanded(
-              child: ListTile(
-                title: const Text('Text Color'),
-                leading: Container(
-                  width: 24,
-                  height: 24,
-                  decoration: BoxDecoration(
-                    color: settings.submitButtonTextColor,
-                    border: Border.all(color: AppColors.black),
-                  ),
-                ),
-                onTap: () async {
-                  final color = await _buildColorPickerWithLabel(
-                      context, settings.submitButtonTextColor,
-                      label: "Button Text Color");
-                  if (color != null) {
-                    settings.setSubmitButtonTextColor(color);
-                  }
-                },
-              ),
-            ),
-          ],
-        ),
-        Constants.h16,
-        SwitchListTile(
-          title: const Text('Button Border'),
-          value: settings.buttonHasBorder,
-          onChanged: (value) {
-            settings.setButtonBorder(
-              value,
-              settings.buttonBorderWidth,
-              settings.buttonBorderColor,
-            );
-          },
-        ),
-        if (settings.buttonHasBorder)
-          Column(
-            children: [
-              Constants.h16,
-              Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      initialValue: settings.buttonBorderWidth.toString(),
-                      decoration: const InputDecoration(
-                        labelText: 'Border Width',
-                        border: OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.number,
-                      onChanged: (value) {
-                        final width = double.tryParse(value);
-                        if (width != null) {
-                          settings.setButtonBorder(
-                            settings.buttonHasBorder,
-                            width,
-                            settings.buttonBorderColor,
-                          );
-                        }
-                      },
-                    ),
-                  ),
-                  Constants.w16,
-                  Expanded(
-                    child: ListTile(
-                      title: const Text('Border Color'),
-                      leading: Container(
-                        width: 24,
-                        height: 24,
-                        decoration: BoxDecoration(
-                          color: settings.buttonBorderColor,
-                          border: Border.all(color: AppColors.black),
-                        ),
-                      ),
-                      onTap: () async {
-                        final color = await _buildColorPickerWithLabel(
-                            context, settings.buttonBorderColor);
-                        if (color != null) {
-                          settings.setButtonBorder(
-                            settings.buttonHasBorder,
-                            settings.buttonBorderWidth,
-                            color,
-                          );
-                        }
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        _buildSectionHeader('Button Text Styling'),
-        _buildDropdownWithLabel<FontWeight>(
-          label: 'Font Weight',
-          value: settings.buttonFontWeight,
-          items: {
-            FontWeight.w100: 'Thin',
-            FontWeight.w300: 'Light',
-            FontWeight.w400: 'Regular',
-            FontWeight.w500: 'Medium',
-            FontWeight.w700: 'Bold',
-            FontWeight.w900: 'Black',
-          },
-          onChanged: (value) {
-            if (value != null) {
-              settings.setButtonFontWeight(value);
-            }
-          },
-        ),
-        _buildSwitchWithLabel(
-          label: 'Italic',
-          value: settings.buttonIsItalic,
-          onChanged: (value) {
-            settings.setButtonIsItalic(value);
-          },
-        ),
-        _buildSectionHeader('Button Opacity'),
-        _buildSliderWithLabel(
-          label: 'Button Opacity',
-          value: settings.buttonOpacity,
-          min: 0.1,
-          max: 1.0,
-          divisions: 9,
-          onChanged: (value) {
-            settings.setButtonOpacity(value);
-          },
-        ),
-        _buildSliderWithLabel(
-          label: 'Text Opacity',
-          value: settings.buttonTextOpacity,
-          min: 0.1,
-          max: 1.0,
-          divisions: 9,
-          onChanged: (value) {
-            settings.setButtonTextOpacity(value);
-          },
-        ),
-        _buildSectionHeader('Button Padding'),
-        _buildSliderWithLabel(
-          label: 'Vertical Padding',
-          value: settings.buttonPadding.top, // Using top as vertical
-          min: 0,
-          max: 30,
-          divisions: 30,
-          onChanged: (value) {
-            settings.setButtonPadding(EdgeInsets.symmetric(
-              vertical: value,
-              horizontal:
-                  settings.buttonPadding.left, // Using left as horizontal
-            ));
-          },
-        ),
-        _buildSliderWithLabel(
-          label: 'Horizontal Padding',
-          value: settings.buttonPadding.left, // Using left as horizontal
-          min: 0,
-          max: 50,
-          divisions: 50,
-          onChanged: (value) {
-            settings.setButtonPadding(EdgeInsets.symmetric(
-              vertical: settings.buttonPadding.top, // Using top as vertical
-              horizontal: value,
-            ));
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildImageButtonSettings(RegistrationScreenProvider settings) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Constants.h16,
-        Row(
-          children: [
-            ElevatedButton(
-              onPressed: () async {
-                final result = await FilePicker.platform.pickFiles(
-                  type: FileType.image,
-                  allowMultiple: false,
-                );
-                if (result != null && result.files.isNotEmpty) {
-                  await settings.setButtonImage(
-                    result.files.first.path,
-                    isAsset: false,
-                  );
-                }
-              },
-              child: const Text('Select Button Image'),
-            ),
-            Constants.w16,
-            if (settings.buttonImagePath != null)
-              ElevatedButton(
-                onPressed: () {
-                  settings.setButtonImage(null);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.red,
-                ),
-                child: const Text('Remove Image'),
-              ),
-          ],
-        ),
-        if (settings.buttonImagePath != null)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: Container(
-              width: 200,
-              height: 60,
+      children: List.generate(options.length, (index) {
+        final bool isActive = selectedIndex == index;
+        return Expanded(
+          child: GestureDetector(
+            onTap: () => onSelected(index),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              margin:
+                  EdgeInsets.only(right: index < options.length - 1 ? 10 : 0),
               decoration: BoxDecoration(
-                border: Border.all(color: AppColors.black),
-                borderRadius:
-                    BorderRadius.circular(settings.buttonBorderRadius),
-                image: DecorationImage(
-                  image: settings.isButtonImageAsset
-                      ? AssetImage(settings.buttonImagePath!)
-                      : FileImage(File(settings.buttonImagePath!))
-                          as ImageProvider,
-                  fit: BoxFit.cover,
-                ),
+                borderRadius: BorderRadius.circular(10),
+                gradient: isActive
+                    ? const LinearGradient(colors: [
+                        AppColors.primaryGradientStart,
+                        AppColors.primaryGradientEnd
+                      ])
+                    : null,
+                color: isActive ? null : Colors.white.withOpacity(0.8),
+                border: Border.all(
+                    color: isActive
+                        ? AppColors.primaryGradientStart
+                        : AppColors.inputBorder,
+                    width: 2),
+                boxShadow: isActive
+                    ? [
+                        BoxShadow(
+                            color:
+                                AppColors.primaryGradientStart.withOpacity(0.3),
+                            blurRadius: 15,
+                            spreadRadius: -5)
+                      ]
+                    : [],
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                options[index],
+                style: textTheme.bodyMedium?.copyWith(
+                    color: isActive ? Colors.white : AppColors.labelText),
               ),
             ),
           ),
-        Constants.h16,
-        Row(
-          children: [
-            Expanded(
-              child: TextFormField(
-                initialValue: settings.buttonWidth.toString(),
-                decoration: const InputDecoration(
-                  labelText: 'Button Width',
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.number,
-                onChanged: (value) {
-                  final width = double.tryParse(value);
-                  if (width != null) {
-                    settings.setButtonDimensions(width, settings.buttonHeight);
-                  }
-                },
-              ),
-            ),
-            Constants.w16,
-            Expanded(
-              child: TextFormField(
-                initialValue: settings.buttonHeight.toString(),
-                decoration: const InputDecoration(
-                  labelText: 'Button Height',
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.number,
-                onChanged: (value) {
-                  final height = double.tryParse(value);
-                  if (height != null) {
-                    settings.setButtonDimensions(settings.buttonWidth, height);
-                  }
-                },
-              ),
-            ),
-          ],
-        ),
-        Constants.h16,
-        TextFormField(
-          initialValue: settings.buttonBorderRadius.toString(),
-          decoration: const InputDecoration(
-            labelText: 'Button Border Radius',
-            border: OutlineInputBorder(),
-          ),
-          keyboardType: TextInputType.number,
-          onChanged: (value) {
-            final radius = double.tryParse(value);
-            if (radius != null) {
-              settings.setButtonBorderRadius(radius);
-            }
-          },
-        ),
-        Constants.h16,
-        SwitchListTile(
-          title: const Text('Button Border'),
-          value: settings.buttonHasBorder,
-          onChanged: (value) {
-            settings.setButtonBorder(
-              value,
-              settings.buttonBorderWidth,
-              settings.buttonBorderColor,
-            );
-          },
-        ),
-        if (settings.buttonHasBorder)
-          Column(
-            children: [
-              Constants.h16,
-              Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      initialValue: settings.buttonBorderWidth.toString(),
-                      decoration: const InputDecoration(
-                        labelText: 'Border Width',
-                        border: OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.number,
-                      onChanged: (value) {
-                        final width = double.tryParse(value);
-                        if (width != null) {
-                          settings.setButtonBorder(
-                            settings.buttonHasBorder,
-                            width,
-                            settings.buttonBorderColor,
-                          );
-                        }
-                      },
-                    ),
-                  ),
-                  Constants.w16,
-                  Expanded(
-                    child: ListTile(
-                      title: const Text('Border Color'),
-                      leading: Container(
-                        width: 24,
-                        height: 24,
-                        decoration: BoxDecoration(
-                          color: settings.buttonBorderColor,
-                          border: Border.all(color: AppColors.black),
-                        ),
-                      ),
-                      onTap: () async {
-                        final color = await _buildColorPickerWithLabel(
-                            context, settings.buttonBorderColor);
-                        if (color != null) {
-                          settings.setButtonBorder(
-                            settings.buttonHasBorder,
-                            settings.buttonBorderWidth,
-                            color,
-                          );
-                        }
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        _buildSectionHeader('Image Button Opacity'),
-        _buildSliderWithLabel(
-          label: 'Image Opacity',
-          value: settings.buttonImageOpacity,
-          min: 0.1,
-          max: 1.0,
-          divisions: 9,
-          onChanged: (value) {
-            settings.setButtonImageOpacity(value);
-          },
-        ),
-        _buildSectionHeader('Image Button Margins'),
-      ],
+        );
+      }),
     );
   }
 }
