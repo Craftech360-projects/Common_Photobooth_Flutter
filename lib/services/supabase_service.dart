@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
@@ -46,12 +47,10 @@ class SupabaseService {
     }
 
     try {
-      // Generate a unique filename
       final fileExt = path.extension(imageFile.path);
       final fileName =
           '$prefix${userId ?? DateTime.now().millisecondsSinceEpoch.toString()}_${DateTime.now().millisecondsSinceEpoch}$fileExt';
 
-      // Upload to Supabase
       await _client.storage.from(bucket).uploadBinary(
             fileName,
             imageFile.readAsBytesSync(),
@@ -61,9 +60,7 @@ class SupabaseService {
             ),
           );
 
-      // Get public URL
       final imageUrl = _client.storage.from(bucket).getPublicUrl(fileName);
-
       return imageUrl;
     } on StorageException catch (e) {
       debugPrint(
@@ -80,13 +77,11 @@ class SupabaseService {
     }
   }
 
-  // Upload user face image to Supabase
   Future<String?> uploadUserFaceImage(File imageFile) async {
     return uploadImage(imageFile, null,
         bucket: 'inputimages', prefix: 'face_');
   }
 
-  // Store participant details in Supabase
   Future<String?> storeParticipantDetails({
     required String name,
     required String email,
@@ -106,7 +101,6 @@ class SupabaseService {
         'created_at': DateTime.now().toIso8601String(),
       }).select();
 
-      // Return the UUID from the result
       if (result.isNotEmpty && result[0]['unique_id'] != null) {
         return result[0]['unique_id'].toString();
       }
@@ -117,7 +111,44 @@ class SupabaseService {
     }
   }
 
-  // Get the most recent output image for a user
+  /// NEW: Selects a random character image from Supabase and updates the table.
+  Future<void> selectAndUpdateRandomCharacterImage({
+    required String uniqueId,
+    required String gender,
+    required String themeName,
+  }) async {
+    if (!_isInitialized) {
+      throw Exception('Supabase not initialized');
+    }
+
+    try {
+      final themeFolderName = themeName.toLowerCase().replaceAll(' ', '_');
+      final genderFolder = gender.toLowerCase();
+      final characterPrefix = gender.toLowerCase() == 'male' ? 'm' : 'f';
+      // Select a random number from 1 to 4
+      final randomNumber = Random().nextInt(4) + 1;
+      final imageName = '$characterPrefix$randomNumber.png';
+      
+      final fullPathInBucket = '$genderFolder/$themeFolderName/$imageName';
+      
+      debugPrint('Selecting character image from Supabase path: $fullPathInBucket');
+
+      // Get the public URL of the random character image
+      final publicUrl = _client.storage.from('themes').getPublicUrl(fullPathInBucket);
+
+      // Update the 'characterimage' column in the table for the user's row
+      await _client
+          .from('inputimagetable')
+          .update({'characterimage': publicUrl})
+          .eq('unique_id', uniqueId);
+
+      debugPrint('Successfully updated characterimage for unique_id: $uniqueId');
+    } on Exception catch (e) {
+      debugPrint('Error updating character image in Supabase: $e');
+      rethrow;
+    }
+  }
+
   Future<String?> getLatestOutputImage(String participantId,
       {DateTime? afterTime}) async {
     if (!_isInitialized) {

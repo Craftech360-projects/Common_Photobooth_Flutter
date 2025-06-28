@@ -1,5 +1,3 @@
-// lib/presentation/output_screen.dart
-
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -8,6 +6,7 @@ import 'package:photobooth_flutter/providers/admin_watermark_provider.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/providers/output_screen_provider.dart';
 import 'package:photobooth_flutter/providers/photobooth_provider.dart';
+import 'package:photobooth_flutter/routes/routes.dart';
 import 'package:photobooth_flutter/widgets/watermark_overlay.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -21,7 +20,6 @@ class SwappedFaceScreen extends StatefulWidget {
 }
 
 class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
-  // ... (initState and _processImage methods remain the same)
   bool _isLoading = true;
   String? _errorMessage;
 
@@ -60,7 +58,29 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
     final outputSettings = context.watch<OutputScreenProvider>();
     final globalSettings = context.watch<GlobalSettingsProvider>();
     final watermarkProvider = context.watch<AdminWatermarkProvider>();
+    // NEW: Get PhotoboothProvider to check for an image in preview mode
+    final photoboothProvider = context.watch<PhotoboothProvider>();
+
     return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        actions: [
+          if (!widget.isPreviewMode)
+            IconButton(
+              icon: const Icon(
+                Icons.settings_rounded,
+                color: AppColors.lightWhite,
+                size: 32,
+              ),
+              onPressed: () {
+                Navigator.pushNamed(context, AppRoutes.outputScreenSettings);
+              },
+            ),
+        ],
+      ),
       body: WatermarkOverlay(
         show: watermarkProvider.showWatermark,
         child: Container(
@@ -72,7 +92,9 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
               fit: BoxFit.cover,
             ),
           ),
-          child: widget.isPreviewMode
+          // UPDATED: This logic now decides whether to show the real content or placeholders in preview.
+          child: (widget.isPreviewMode &&
+                  photoboothProvider.capturedImageUrl == null)
               ? _buildPreviewContent(outputSettings)
               : _buildMainContent(),
         ),
@@ -81,7 +103,6 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
   }
 
   Widget _buildPreviewContent(OutputScreenProvider settings) {
-    // This preview can be simplified as it's just for layout guidance
     return Stack(
       children: [
         if (settings.showTitle)
@@ -108,21 +129,9 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
             decoration: BoxDecoration(
               color: Colors.grey[300],
               border: Border.all(color: Colors.grey.shade600),
+              borderRadius: BorderRadius.circular(settings.imageBorderRadius),
             ),
-            child: const Center(child: Text('Swaplab Image')),
-          ),
-        ),
-        Positioned(
-          left: settings.aiArtistryLeft,
-          top: settings.aiArtistryTop,
-          child: Container(
-            width: 400, // Example fixed size for preview
-            height: 400,
-            decoration: BoxDecoration(
-              color: Colors.grey[300],
-              border: Border.all(color: Colors.grey.shade600),
-            ),
-            child: const Center(child: Text('AI Artistry Image')),
+            child: const Center(child: Text('Output Image Preview')),
           ),
         ),
         Positioned(
@@ -133,22 +142,11 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
               size: settings.qrCodeSize,
               backgroundColor: Colors.white),
         ),
-        // Preview for Done Button
         Positioned(
           left: settings.doneButtonLeft,
           bottom: settings.doneButtonBottom,
           child: _buildButton(
             isDone: true,
-            settings: settings,
-            onPressed: () {},
-          ),
-        ),
-        // Preview for Download Button
-        Positioned(
-          left: settings.downloadButtonLeft,
-          bottom: settings.downloadButtonBottom,
-          child: _buildButton(
-            isDone: false,
             settings: settings,
             onPressed: () {},
           ),
@@ -173,7 +171,6 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
       BuildContext context, OutputScreenProvider settings) {
     final photoboothProvider = context.read<PhotoboothProvider>();
     final globalSettings = context.read<GlobalSettingsProvider>();
-
     final isSwaplabFlow = photoboothProvider.selectedTheme != null;
     final imageUrl = photoboothProvider.swappedImageUrl ??
         photoboothProvider.capturedImageUrl;
@@ -200,7 +197,21 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
           top: isSwaplabFlow ? settings.swaplabTop : settings.aiArtistryTop,
           width: isSwaplabFlow ? settings.swaplabImageWidth : null,
           height: isSwaplabFlow ? settings.swaplabImageHeight : null,
-          child: _buildOutputImage(imageUrl),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(settings.imageBorderRadius),
+              border: settings.showImageBorder
+                  ? Border.all(
+                      color: settings.imageBorderColor,
+                      width: settings.imageBorderWidth,
+                    )
+                  : null,
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(settings.imageBorderRadius),
+              child: _buildOutputImage(imageUrl),
+            ),
+          ),
         ),
         if (globalSettings.sharingMethod == 'QR Code')
           Positioned(
@@ -212,10 +223,21 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: QrImageView(
-                data: imageUrl ?? 'No Image',
-                version: QrVersions.auto,
-                size: settings.qrCodeSize,
+              child: Column(
+                children: [
+                  QrImageView(
+                    data: imageUrl ?? 'No Image',
+                    version: QrVersions.auto,
+                    size: settings.qrCodeSize,
+                  ),
+                  // const Text(
+                  //   "Scan the QR code to download your image",
+                  //   style: TextStyle(
+                  //     fontSize: 28,
+                  //     color: AppColors.white,
+                  //   ),
+                  // ),
+                ],
               ),
             ),
           )
@@ -228,7 +250,7 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
               padding: const EdgeInsets.all(16),
               margin: const EdgeInsets.symmetric(horizontal: 200),
               decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.6),
+                color: Colors.black.withOpacity(0.6),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
@@ -256,17 +278,6 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
             },
           ),
         ),
-        Positioned(
-          left: settings.downloadButtonLeft,
-          bottom: settings.downloadButtonBottom,
-          child: _buildButton(
-            isDone: false,
-            settings: settings,
-            onPressed: () {
-              // TODO: Implement Download Logic
-            },
-          ),
-        ),
       ],
     );
   }
@@ -276,19 +287,12 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
     required OutputScreenProvider settings,
     required VoidCallback onPressed,
   }) {
-    final useImage =
-        isDone ? settings.useDoneButtonImage : settings.useDownloadButtonImage;
-    final imagePath = isDone
-        ? settings.doneButtonImagePath
-        : settings.downloadButtonImagePath;
-    final isAsset = isDone
-        ? settings.isDoneButtonImageAsset
-        : settings.isDownloadButtonImageAsset;
-    final text = isDone ? settings.doneButtonText : settings.downloadButtonText;
-    final width =
-        isDone ? settings.doneButtonWidth : settings.downloadButtonWidth;
-    final height =
-        isDone ? settings.doneButtonHeight : settings.downloadButtonHeight;
+    final useImage = settings.useDoneButtonImage;
+    final imagePath = settings.doneButtonImagePath;
+    final isAsset = settings.isDoneButtonImageAsset;
+    final text = settings.doneButtonText;
+    final width = settings.doneButtonWidth;
+    final height = settings.doneButtonHeight;
 
     if (useImage && imagePath != null) {
       return GestureDetector(
@@ -307,13 +311,10 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
         ),
       );
     }
-
-    // Fallback to text button
     return ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
         minimumSize: Size(width, height),
-        // Add more styling from provider if needed for text buttons
       ),
       child: Text(text),
     );

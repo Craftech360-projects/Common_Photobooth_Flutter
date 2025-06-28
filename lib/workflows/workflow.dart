@@ -8,7 +8,7 @@ class Workflow {
   Workflow(this._workflow);
 
   static Future<Workflow> getWorkflow(String workflowFileName) async {
-    final jsonString = await rootBundle.loadString('lib/api/$workflowFileName');
+    final jsonString = await rootBundle.loadString('lib/workflows/$workflowFileName');
     final workflow = jsonDecode(jsonString);
     return Workflow(workflow);
   }

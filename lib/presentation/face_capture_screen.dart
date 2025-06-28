@@ -5,13 +5,17 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:camera_platform_interface/camera_platform_interface.dart';
+// NEW: Import the camera_macos package
+import 'package:camera_macos/camera_macos.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:photobooth_flutter/providers/face_capture_provider.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/providers/photobooth_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
 import 'package:provider/provider.dart';
+import 'package:path/path.dart' as path;
 
 class FaceCaptureScreen extends StatefulWidget {
   final bool isPreviewMode;
@@ -26,42 +30,38 @@ class FaceCaptureScreen extends StatefulWidget {
 }
 
 class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
-  String _cameraInfo = 'Unknown';
-  List<CameraDescription> _cameras = <CameraDescription>[];
-  int _cameraIndex = 0;
-  CameraController? _controller;
-  Future<void>? _initializeControllerFuture;
+  // NEW: Use a dynamic controller to hold either CameraController or CameraMacOSController
+  dynamic _controller;
   bool _cameraInitialized = false;
 
-  StreamSubscription<CameraErrorEvent>? _errorStreamSubscription;
-  StreamSubscription<CameraClosingEvent>? _cameraClosingStreamSubscription;
+  // Standard camera properties
+  List<CameraDescription> _cameras = <CameraDescription>[];
+  int _cameraIndex = 0;
+  Future<void>? _initializeControllerFuture;
+
+  // macOS-specific properties
+  String? _selectedMacosCameraId;
+
+  // NEW: Check the platform once
+  final bool _isMacos = Platform.isMacOS;
 
   @override
   void initState() {
     super.initState();
-    WidgetsFlutterBinding.ensureInitialized();
-
     if (widget.isPreviewMode) {
-      log("preview mode ${widget.isPreviewMode}");
+      log("preview mode on");
       return;
     }
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _fetchCameras()
-          .then((_) => _initializeCamera())
-          .catchError((dynamic error) {
-        if (mounted) {
-          setState(() {
-            _cameraInfo = 'Failed to get cameras: $error';
-          });
-        }
-      });
+      _initializeCamera();
     });
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    if (_isMacos) return; // macOS camera switching is handled differently if needed
+
     final settings = context.read<FaceCaptureProvider>();
     final selectedIndex = settings.selectedCameraIndex;
 
@@ -72,145 +72,127 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
     }
   }
 
-  Future<void> _fetchCameras() async {
-    String cameraInfo;
-    List<CameraDescription> cameras = <CameraDescription>[];
-    int cameraIndex = 0;
-    try {
-      cameras = await CameraPlatform.instance.availableCameras();
-      if (cameras.isEmpty) {
-        cameraInfo = 'No available cameras';
-      } else {
+  Future<void> _initializeCamera() async {
+    // PLATFORM-SPECIFIC INITIALIZATION
+    if (_isMacos) {
+      // For macOS, we just need to get the list of devices.
+      // The actual initialization happens within the CameraMacOSView widget.
+      List<CameraMacOSDevice> devices =
+          await CameraMacOS.instance.listDevices();
+      if (devices.isNotEmpty) {
+        if (mounted) {
+          setState(() {
+            _selectedMacosCameraId = devices.first.deviceId;
+            _cameraInitialized = true; // Ready to build the widget
+          });
+        }
+      }
+    } else {
+      // For other platforms (Windows, Android, iOS)
+      try {
+        _cameras = await availableCameras();
+        if (_cameras.isEmpty) {
+          log('No available cameras found.');
+          return;
+        }
         final settings = context.read<FaceCaptureProvider>();
-        cameraIndex = settings.selectedCameraIndex < cameras.length
+        _cameraIndex = settings.selectedCameraIndex < _cameras.length
             ? settings.selectedCameraIndex
             : 0;
-        cameraInfo = 'Found camera: ${cameras[cameraIndex].name}';
+
+        _controller = CameraController(
+          _cameras[_cameraIndex],
+          ResolutionPreset.high,
+          enableAudio: false,
+        );
+
+        _initializeControllerFuture = _controller?.initialize();
+        await _initializeControllerFuture;
+
+        if (mounted) {
+          setState(() {
+            _cameraInitialized = true;
+          });
+        }
+      } on CameraException catch (e) {
+        log('Failed to initialize camera: ${e.code}: ${e.description}');
       }
-    } on PlatformException catch (e) {
-      cameraInfo = 'Failed to get cameras: ${e.code}: ${e.message}';
-    }
-    if (mounted) {
-      setState(() {
-        _cameraIndex = cameraIndex;
-        _cameras = cameras;
-        _cameraInfo = cameraInfo;
-      });
     }
   }
 
-  Future<void> _switchCamera([int? specificIndex]) async {
-    if (_cameras.isEmpty) return;
+  Future<void> _switchCamera(int specificIndex) async {
+    if (_isMacos || _cameras.isEmpty) return;
     await _disposeCurrentCamera();
     setState(() {
-      if (specificIndex != null && specificIndex < _cameras.length) {
-        _cameraIndex = specificIndex;
-      } else {
-        _cameraIndex = (_cameraIndex + 1) % _cameras.length;
-      }
+      _cameraIndex = specificIndex;
     });
     final settings = context.read<FaceCaptureProvider>();
     settings.setSelectedCameraIndex(_cameraIndex);
     await _initializeCamera();
   }
 
-  @override
-  void dispose() {
-    _disposeCurrentCamera();
-    _controller?.dispose();
-    _errorStreamSubscription?.cancel();
-    _cameraClosingStreamSubscription?.cancel();
-    super.dispose();
-  }
-
-  Future<void> _initializeCamera() async {
-    assert(!_cameraInitialized);
-    if (_cameras.isEmpty) return;
-    try {
-      final int cameraIndex = _cameraIndex % _cameras.length;
-      final CameraDescription camera = _cameras[cameraIndex];
-      _controller = CameraController(
-        camera,
-        ResolutionPreset.high,
-        imageFormatGroup: ImageFormatGroup.bgra8888,
-        enableAudio: false,
-      );
-      _initializeControllerFuture = _controller?.initialize();
-      await _initializeControllerFuture;
-      if (mounted) {
-        setState(() {
-          _cameraInitialized = true;
-          _cameraIndex = cameraIndex;
-          _cameraInfo = 'Capturing camera: ${camera.name}';
-        });
-      }
-    } on CameraException catch (e) {
-      if (mounted) {
-        setState(() {
-          _cameraInitialized = false;
-          _cameraIndex = 0;
-          _controller = null;
-          _cameraInfo =
-              'Failed to initialize camera: ${e.code}: ${e.description}';
-        });
-      }
-    }
-  }
-
   Future<void> _disposeCurrentCamera() async {
-    if (_controller != null && _cameraInitialized) {
-      final currentController = _controller;
+    if (_controller != null) {
+      if (_isMacos) {
+        // macOS controller has a different lifecycle managed by its widget
+        await (_controller as CameraMacOSController?)?.destroy();
+      } else {
+        await (_controller as CameraController?)?.dispose();
+      }
       if (mounted) {
         setState(() {
-          _cameraInitialized = false;
           _controller = null;
-          _cameraInfo = 'Disposing camera...';
         });
-      } else {
-        _cameraInitialized = false;
-        _controller = null;
       }
-      try {
-        await currentController?.dispose();
-        if (mounted) setState(() => _cameraInfo = 'Camera disposed');
-      } on CameraException catch (e) {
-        debugPrint(
-            'Failed to dispose camera controller: ${e.code}: ${e.description}');
-        if (mounted) {
-          setState(() => _cameraInfo =
-              'Failed to dispose camera: ${e.code}: ${e.description}');
-        }
-      }
-    } else {
-      _cameraInitialized = false;
-      _controller = null;
     }
+    _cameraInitialized = false;
   }
 
   Future<void> _takePicture() async {
-    XFile? file;
-    try {
-      if (!_cameraInitialized || _controller == null) {
-        throw Exception("Camera not ready or controller not initialized.");
-      }
-      file = await _controller!.takePicture();
-      final imageFile = File(file.path);
-      if (!await imageFile.exists()) {
-        throw Exception("Captured image file does not exist at ${file.path}.");
-      }
-      await _disposeCurrentCamera();
-      if (!mounted) return;
-      context.read<PhotoboothProvider>().setFaceImage(file.path);
-      await Navigator.pushNamed(context, AppRoutes.loadingScreen);
-    } on Exception catch (e) {
-      debugPrint("Error during _takePicture: $e");
-      if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Failed to take picture: $e')));
-      if (_controller != null) await _disposeCurrentCamera();
-      if (!mounted) return;
-      if (_controller == null) await _initializeCamera();
+    if (!_cameraInitialized || _controller == null) {
+      log("Camera not ready or controller not initialized.");
+      return;
     }
+
+    try {
+      String? picturePath;
+      // PLATFORM-SPECIFIC PICTURE TAKING
+      if (_isMacos) {
+        CameraMacOSFile? file =
+            await (_controller as CameraMacOSController).takePicture();
+        // FIX: Add a null check for file.bytes before using it.
+        if (file != null && file.bytes != null) {
+          final Directory tempDir = await getTemporaryDirectory();
+          final String fileName =
+              'photobooth_${DateTime.now().millisecondsSinceEpoch}.jpg';
+          picturePath = path.join(tempDir.path, fileName);
+          // Use the non-nullable `file.bytes!` after the check.
+          await File(picturePath).writeAsBytes(file.bytes!);
+        }
+      } else {
+        final XFile file =
+            await (_controller as CameraController).takePicture();
+        picturePath = file.path;
+      }
+
+      if (picturePath != null) {
+        if (!mounted) return;
+        context.read<PhotoboothProvider>().setFaceImage(picturePath);
+        await Navigator.pushNamed(context, AppRoutes.loadingScreen);
+      }
+    } catch (e) {
+      log("Error during _takePicture: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to take picture: $e')));
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _disposeCurrentCamera();
+    super.dispose();
   }
 
   @override
@@ -260,7 +242,6 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
             left: settings.buttonLeft,
             child: _buildCaptureButton(settings),
           ),
-          // Bottom Right Back Button
           Positioned(
             bottom: 30,
             left: 30,
@@ -289,34 +270,74 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
       return Container(
         width: settings.previewWidth,
         height: settings.previewHeight,
-        decoration: settings.showPreviewBorder
-            ? BoxDecoration(
-                borderRadius:
-                    BorderRadius.circular(settings.previewBorderRadius),
-                border: Border.all(
+        decoration: BoxDecoration(
+          color: Colors.black38,
+          borderRadius: BorderRadius.circular(settings.previewBorderRadius),
+          border: settings.showPreviewBorder
+              ? Border.all(
                   color: settings.previewBorderColor,
                   width: settings.previewBorderWidth,
-                ),
-                color: Colors.white,
-              )
-            : BoxDecoration(
-                borderRadius:
-                    BorderRadius.circular(settings.previewBorderRadius),
-                color: Colors.black38,
-              ),
+                )
+              : null,
+        ),
         child: const Center(
           child: Icon(Icons.camera_alt, size: 50, color: Colors.white54),
         ),
       );
     }
-    if (!_cameraInitialized || _controller == null) {
-      return const Center(child: SizedBox());
+
+    if (!_cameraInitialized) {
+      return Container(
+        width: settings.previewWidth,
+        height: settings.previewHeight,
+        decoration: BoxDecoration(
+          color: Colors.black,
+          borderRadius: BorderRadius.circular(settings.previewBorderRadius),
+        ),
+        child: Center(
+            child:
+                CircularProgressIndicator(color: settings.previewBorderColor)),
+      );
     }
-    if (!_controller!.value.isInitialized) {
-      return Center(
-          child: CircularProgressIndicator(color: settings.previewBorderColor));
+
+    Widget cameraView;
+
+    // PLATFORM-SPECIFIC WIDGET RENDERING
+    if (_isMacos) {
+      cameraView = CameraMacOSView(
+        // FIX: Explicitly set the camera mode to photo.
+        cameraMode: CameraMacOSMode.photo,
+        deviceId: _selectedMacosCameraId,
+        fit: BoxFit.cover,
+        onCameraInizialized: (CameraMacOSController controller) {
+          if (mounted) {
+            setState(() {
+              _controller = controller;
+            });
+          }
+        },
+      );
+    } else {
+      if (_controller == null || !_controller!.value.isInitialized) {
+        return const Center(child: Text("Camera not initialized"));
+      }
+      final cameraAspectRatio = _controller!.value.aspectRatio;
+      cameraView = AspectRatio(
+        aspectRatio: settings.previewWidth / settings.previewHeight,
+        child: OverflowBox(
+          alignment: Alignment.center,
+          child: FittedBox(
+            fit: BoxFit.cover,
+            child: SizedBox(
+              width: settings.previewWidth,
+              height: settings.previewWidth / cameraAspectRatio,
+              child: CameraPreview(_controller!),
+            ),
+          ),
+        ),
+      );
     }
-    final cameraAspectRatio = _controller!.value.aspectRatio;
+
     return Container(
       width: settings.previewWidth,
       height: settings.previewHeight,
@@ -331,20 +352,7 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(settings.previewBorderRadius),
-        child: AspectRatio(
-          aspectRatio: settings.previewWidth / settings.previewHeight,
-          child: OverflowBox(
-            alignment: Alignment.center,
-            child: FittedBox(
-              fit: BoxFit.cover,
-              child: SizedBox(
-                width: settings.previewWidth,
-                height: settings.previewWidth / cameraAspectRatio,
-                child: CameraPreview(_controller!),
-              ),
-            ),
-          ),
-        ),
+        child: cameraView,
       ),
     );
   }

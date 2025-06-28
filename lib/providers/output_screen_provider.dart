@@ -1,5 +1,3 @@
-// lib/providers/output_screen_provider.dart
-
 import 'dart:convert';
 import 'dart:io';
 
@@ -19,32 +17,36 @@ class OutputScreenProvider extends ChangeNotifier {
   Color _titleColor = Colors.white;
   double _titleLeft = 0.0, _titleTop = 200.0, _titleWidth = 1080.0;
 
-  // AI Artistry Image
-  double _aiArtistryLeft = 90.0, _aiArtistryTop = 710.0;
+  // AI Artistry Image (Defaults for a 500x500 image on a 1080px screen)
+  double _aiArtistryLeft = 290.0; // (1080 - 500) / 2
+  double _aiArtistryTop = 710.0; // (1920 - 500) / 2
 
-  // Swaplab Image
-  double _swaplabLeft = 315.0, _swaplabTop = 450.0;
-  double _swaplabImageWidth = 450.0, _swaplabImageHeight = 675.0;
+  // Swaplab Image (Defaults for a 600x900 image on a 1080px screen)
+  double _swaplabLeft = 240.0; // (1080 - 600) / 2
+  double _swaplabTop = 510.0; // (1920 - 900) / 2
+  double _swaplabImageWidth = 600.0;
+  double _swaplabImageHeight = 900.0;
+  
+  // NEW: Image border properties
+  bool _showImageBorder = false;
+  double _imageBorderRadius = 15.0;
+  double _imageBorderWidth = 5.0;
+  Color _imageBorderColor = Colors.white;
 
   // QR Code
   double _qrCodeSize = 200.0;
   double _qrCodeLeft = 150.0, _qrCodeBottom = 100.0;
 
-  // Done Button
+  // "Done" button is now the only button
   bool _useDoneButtonImage = true;
   String? _doneButtonImagePath = 'assets/images/home_btn.png';
   bool _isDoneButtonImageAsset = true;
   String _doneButtonText = 'Done';
-  double _doneButtonWidth = 350.0, _doneButtonHeight = 180.0;
-  double _doneButtonLeft = 580.0, _doneButtonBottom = 100.0;
-
-  // Download Button
-  bool _useDownloadButtonImage = false;
-  String? _downloadButtonImagePath;
-  bool _isDownloadButtonImageAsset = true;
-  String _downloadButtonText = 'Download';
-  double _downloadButtonWidth = 200.0, _downloadButtonHeight = 80.0;
-  double _downloadButtonLeft = 580.0, _downloadButtonBottom = 280.0;
+  double _doneButtonWidth = 350.0;
+  double _doneButtonHeight = 180.0;
+  // NEW: Centered horizontally by default
+  double _doneButtonLeft = 365.0; // (1080 - 350) / 2
+  double _doneButtonBottom = 100.0;
 
   // Background
   String? _backgroundImagePath;
@@ -69,6 +71,11 @@ class OutputScreenProvider extends ChangeNotifier {
   double get swaplabImageWidth => _swaplabImageWidth;
   double get swaplabImageHeight => _swaplabImageHeight;
 
+  bool get showImageBorder => _showImageBorder;
+  double get imageBorderRadius => _imageBorderRadius;
+  double get imageBorderWidth => _imageBorderWidth;
+  Color get imageBorderColor => _imageBorderColor;
+
   double get qrCodeSize => _qrCodeSize;
   double get qrCodeLeft => _qrCodeLeft;
   double get qrCodeBottom => _qrCodeBottom;
@@ -81,21 +88,11 @@ class OutputScreenProvider extends ChangeNotifier {
   double get doneButtonHeight => _doneButtonHeight;
   double get doneButtonLeft => _doneButtonLeft;
   double get doneButtonBottom => _doneButtonBottom;
-
-  bool get useDownloadButtonImage => _useDownloadButtonImage;
-  String? get downloadButtonImagePath => _downloadButtonImagePath;
-  bool get isDownloadButtonImageAsset => _isDownloadButtonImageAsset;
-  String get downloadButtonText => _downloadButtonText;
-  double get downloadButtonWidth => _downloadButtonWidth;
-  double get downloadButtonHeight => _downloadButtonHeight;
-  double get downloadButtonLeft => _downloadButtonLeft;
-  double get downloadButtonBottom => _downloadButtonBottom;
-
+  
   String? get backgroundImagePath => _backgroundImagePath;
   bool get isBackgroundImageAsset => _isBackgroundImageAsset;
   bool get showBackground => _showBackground;
 
-  // --- Methods ---
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
     await loadSettings();
@@ -122,6 +119,11 @@ class OutputScreenProvider extends ChangeNotifier {
       _swaplabTop = s['swaplabTop'] ?? _swaplabTop;
       _swaplabImageWidth = s['swaplabImageWidth'] ?? _swaplabImageWidth;
       _swaplabImageHeight = s['swaplabImageHeight'] ?? _swaplabImageHeight;
+      
+      _showImageBorder = s['showImageBorder'] ?? _showImageBorder;
+      _imageBorderRadius = s['imageBorderRadius'] ?? _imageBorderRadius;
+      _imageBorderWidth = s['imageBorderWidth'] ?? _imageBorderWidth;
+      _imageBorderColor = Color(s['imageBorderColor'] ?? _imageBorderColor.value);
 
       _qrCodeSize = s['qrCodeSize'] ?? _qrCodeSize;
       _qrCodeLeft = s['qrCodeLeft'] ?? _qrCodeLeft;
@@ -136,20 +138,7 @@ class OutputScreenProvider extends ChangeNotifier {
       _doneButtonHeight = s['doneButtonHeight'] ?? _doneButtonHeight;
       _doneButtonLeft = s['doneButtonLeft'] ?? _doneButtonLeft;
       _doneButtonBottom = s['doneButtonBottom'] ?? _doneButtonBottom;
-
-      _useDownloadButtonImage =
-          s['useDownloadButtonImage'] ?? _useDownloadButtonImage;
-      _downloadButtonImagePath = s['downloadButtonImagePath'];
-      _isDownloadButtonImageAsset =
-          s['isDownloadButtonImageAsset'] ?? _isDownloadButtonImageAsset;
-      _downloadButtonText = s['downloadButtonText'] ?? _downloadButtonText;
-      _downloadButtonWidth = s['downloadButtonWidth'] ?? _downloadButtonWidth;
-      _downloadButtonHeight =
-          s['downloadButtonHeight'] ?? _downloadButtonHeight;
-      _downloadButtonLeft = s['downloadButtonLeft'] ?? _downloadButtonLeft;
-      _downloadButtonBottom =
-          s['downloadButtonBottom'] ?? _downloadButtonBottom;
-
+      
       _backgroundImagePath = s['backgroundImagePath'];
       _isBackgroundImageAsset = s['isBackgroundImageAsset'] ?? true;
       _showBackground = s['showBackground'] ?? _showBackground;
@@ -173,6 +162,10 @@ class OutputScreenProvider extends ChangeNotifier {
       'swaplabTop': _swaplabTop,
       'swaplabImageWidth': _swaplabImageWidth,
       'swaplabImageHeight': _swaplabImageHeight,
+      'showImageBorder': _showImageBorder,
+      'imageBorderRadius': _imageBorderRadius,
+      'imageBorderWidth': _imageBorderWidth,
+      'imageBorderColor': _imageBorderColor.value,
       'qrCodeSize': _qrCodeSize,
       'qrCodeLeft': _qrCodeLeft,
       'qrCodeBottom': _qrCodeBottom,
@@ -184,205 +177,95 @@ class OutputScreenProvider extends ChangeNotifier {
       'doneButtonHeight': _doneButtonHeight,
       'doneButtonLeft': _doneButtonLeft,
       'doneButtonBottom': _doneButtonBottom,
-      'useDownloadButtonImage': _useDownloadButtonImage,
-      'downloadButtonImagePath': _downloadButtonImagePath,
-      'isDownloadButtonImageAsset': _isDownloadButtonImageAsset,
-      'downloadButtonText': _downloadButtonText,
-      'downloadButtonWidth': _downloadButtonWidth,
-      'downloadButtonHeight': _downloadButtonHeight,
-      'downloadButtonLeft': _downloadButtonLeft,
-      'downloadButtonBottom': _downloadButtonBottom,
       'backgroundImagePath': _backgroundImagePath,
       'isBackgroundImageAsset': _isBackgroundImageAsset,
       'showBackground': _showBackground,
     };
     await _prefs.setString('output_screen_settings', jsonEncode(settings));
   }
+  
+  void _notifyAndSave() {
+    notifyListeners();
+    _saveSettings();
+  }
 
   // --- Setters ---
-  void setShowTitle(bool show) {
-    _showTitle = show;
-    notifyListeners();
-    _saveSettings();
-  }
-
-  void setTitleText(String text) {
-    _titleText = text;
-    notifyListeners();
-    _saveSettings();
-  }
-
-  void setTitleFontSize(double size) {
-    _titleFontSize = size;
-    notifyListeners();
-    _saveSettings();
-  }
-
-  void setTitleColor(Color color) {
-    _titleColor = color;
-    notifyListeners();
-    _saveSettings();
-  }
-
-  void setTitleStyle({FontWeight? fontWeight, Color? color}) {
-    if (fontWeight != null) _titleFontWeight = fontWeight;
-    if (color != null) _titleColor = color;
-    notifyListeners();
-    _saveSettings();
-  }
-
+  void setShowTitle(bool show) { _showTitle = show; _notifyAndSave(); }
+  void setTitleText(String text) { _titleText = text; _notifyAndSave(); }
+  void setTitleFontSize(double size) { _titleFontSize = size; _notifyAndSave(); }
+  void setTitleColor(Color color) { _titleColor = color; _notifyAndSave(); }
+  
   void setTitlePosition(double left, double top, double width) {
-    _titleLeft = left;
-    _titleTop = top;
-    _titleWidth = width;
-    notifyListeners();
-    _saveSettings();
+    _titleLeft = left; _titleTop = top; _titleWidth = width;
+    _notifyAndSave();
   }
 
   void setAiArtistryPosition(double left, double top) {
-    _aiArtistryLeft = left;
-    _aiArtistryTop = top;
-    notifyListeners();
-    _saveSettings();
+    _aiArtistryLeft = left; _aiArtistryTop = top;
+    _notifyAndSave();
   }
 
   void setSwaplabPosition(double left, double top) {
-    _swaplabLeft = left;
-    _swaplabTop = top;
-    notifyListeners();
-    _saveSettings();
+    _swaplabLeft = left; _swaplabTop = top;
+    _notifyAndSave();
   }
 
   void setSwaplabImageDimensions(double width, double height) {
-    _swaplabImageWidth = width;
-    _swaplabImageHeight = height;
-    notifyListeners();
-    _saveSettings();
+    _swaplabImageWidth = width; _swaplabImageHeight = height;
+    _notifyAndSave();
   }
+  
+  void setShowImageBorder(bool show) { _showImageBorder = show; _notifyAndSave(); }
+  void setImageBorderRadius(double radius) { _imageBorderRadius = radius; _notifyAndSave(); }
+  void setImageBorderWidth(double width) { _imageBorderWidth = width; _notifyAndSave(); }
+  void setImageBorderColor(Color color) { _imageBorderColor = color; _notifyAndSave(); }
 
-  void setQrCodeSize(double size) {
-    _qrCodeSize = size;
-    notifyListeners();
-    _saveSettings();
-  }
-
+  void setQrCodeSize(double size) { _qrCodeSize = size; _notifyAndSave(); }
   void setQrCodePosition(double left, double bottom) {
-    _qrCodeLeft = left;
-    _qrCodeBottom = bottom;
-    notifyListeners();
-    _saveSettings();
+    _qrCodeLeft = left; _qrCodeBottom = bottom;
+    _notifyAndSave();
   }
 
   // Done Button Setters
-  void setUseDoneButtonImage(bool use) {
-    _useDoneButtonImage = use;
-    notifyListeners();
-    _saveSettings();
-  }
-
-  void setDoneButtonText(String text) {
-    _doneButtonText = text;
-    notifyListeners();
-    _saveSettings();
-  }
-
-  void setDoneButtonWidth(double width) {
-    _doneButtonWidth = width;
-    notifyListeners();
-    _saveSettings();
-  }
-
-  void setDoneButtonHeight(double height) {
-    _doneButtonHeight = height;
-    notifyListeners();
-    _saveSettings();
-  }
-
+  void setUseDoneButtonImage(bool use) { _useDoneButtonImage = use; _notifyAndSave(); }
+  void setDoneButtonText(String text) { _doneButtonText = text; _notifyAndSave(); }
+  void setDoneButtonWidth(double width) { _doneButtonWidth = width; _notifyAndSave(); }
+  void setDoneButtonHeight(double height) { _doneButtonHeight = height; _notifyAndSave(); }
+  
   void setDoneButtonPosition(double left, double bottom) {
-    _doneButtonLeft = left;
-    _doneButtonBottom = bottom;
-    notifyListeners();
-    _saveSettings();
+    _doneButtonLeft = left; _doneButtonBottom = bottom;
+    _notifyAndSave();
   }
 
   Future<void> setDoneButtonImage(String? path) async {
-    await _setButtonImage(path, isDone: true);
+    await _setButtonImage(path);
     _saveSettings();
   }
 
-  // Download Button Setters
-  void setUseDownloadButtonImage(bool use) {
-    _useDownloadButtonImage = use;
-    notifyListeners();
-    _saveSettings();
-  }
-
-  void setDownloadButtonText(String text) {
-    _downloadButtonText = text;
-    notifyListeners();
-    _saveSettings();
-  }
-
-  void setDownloadButtonWidth(double width) {
-    _downloadButtonWidth = width;
-    notifyListeners();
-    _saveSettings();
-  }
-
-  void setDownloadButtonHeight(double height) {
-    _downloadButtonHeight = height;
-    notifyListeners();
-    _saveSettings();
-  }
-
-  void setDownloadButtonPosition(double left, double bottom) {
-    _downloadButtonLeft = left;
-    _downloadButtonBottom = bottom;
-    notifyListeners();
-    _saveSettings();
-  }
-
-  Future<void> setDownloadButtonImage(String? path) async {
-    await _setButtonImage(path, isDone: false);
-    _saveSettings();
-  }
-
-  Future<void> _setButtonImage(String? sourcePath,
-      {required bool isDone}) async {
+  Future<void> _setButtonImage(String? sourcePath) async {
     String? imagePath;
     bool isAsset = true;
 
     if (sourcePath != null) {
       try {
         final appDir = await getApplicationDocumentsDirectory();
-        final btnType = isDone ? 'done' : 'download';
-        final fileName =
-            'output_${btnType}_btn_${DateTime.now().millisecondsSinceEpoch}${p.extension(sourcePath)}';
+        final fileName = 'output_done_btn_${DateTime.now().millisecondsSinceEpoch}${p.extension(sourcePath)}';
         final destinationPath = p.join(appDir.path, fileName);
         await File(sourcePath).copy(destinationPath);
         imagePath = destinationPath;
         isAsset = false;
-      } on Exception catch (e) {
+      } catch (e) {
         debugPrint('Error copying button image: $e');
         return;
       }
     }
 
-    if (isDone) {
-      _doneButtonImagePath = imagePath;
-      _isDoneButtonImageAsset = isAsset;
-    } else {
-      _downloadButtonImagePath = imagePath;
-      _isDownloadButtonImageAsset = isAsset;
-    }
+    _doneButtonImagePath = imagePath;
+    _isDoneButtonImageAsset = isAsset;
     notifyListeners();
   }
 
-  void setShowBackground(bool show) {
-    _showBackground = show;
-    notifyListeners();
-    _saveSettings();
-  }
+  void setShowBackground(bool show) { _showBackground = show; _notifyAndSave(); }
 
   Future<void> setBackgroundImage(String? path) async {
     if (path == null) {
@@ -390,18 +273,16 @@ class OutputScreenProvider extends ChangeNotifier {
     } else {
       try {
         final appDir = await getApplicationDocumentsDirectory();
-        final fileName =
-            'output_bg_${DateTime.now().millisecondsSinceEpoch}${p.extension(path)}';
+        final fileName = 'output_bg_${DateTime.now().millisecondsSinceEpoch}${p.extension(path)}';
         final destinationPath = p.join(appDir.path, fileName);
         await File(path).copy(destinationPath);
         _backgroundImagePath = destinationPath;
         _isBackgroundImageAsset = false;
-      } on Exception catch (e) {
+      } catch (e) {
         debugPrint('Error copying background image: $e');
         return;
       }
     }
-    notifyListeners();
-    _saveSettings();
+    _notifyAndSave();
   }
 }

@@ -39,12 +39,12 @@ class PhotoboothProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setCharacter(String id, String imagePath, bool isAsset) {
-    selectedCharacterId = id;
-    characterImagePath = imagePath;
-    isCharacterAsset = isAsset;
-    notifyListeners();
-  }
+  // void setCharacter(String id, String imagePath, bool isAsset) {
+  //   selectedCharacterId = id;
+  //   characterImagePath = imagePath;
+  //   isCharacterAsset = isAsset;
+  //   notifyListeners();
+  // }
 
   void setFaceImage(String path) {
     faceImagePath = path;

@@ -13,7 +13,7 @@
       "source_faces_index": "0",
       "console_log_level": 1,
       "input_image": [
-        "46",
+        "45",
         0
       ],
       "source_image": [
@@ -68,22 +68,28 @@
       "table_name": "inputimagetable",
       "image_column": "image_url",
       "id_column": "unique_id",
-      "unique_id": "4c678108-c1ca-458e-90b1-1ca81e620282"
+      "unique_id": "28db5604-8d4a-4b09-bd8d-175d811c38b3"
     },
     "class_type": "SupabaseTableWatcherNode",
     "_meta": {
       "title": "Supabase Table Watcher"
     }
   },
-  "46": {
+  "45": {
     "inputs": {
-      "image_path": "C:/storage/themes/",
-      "RGBA": "false",
-      "filename_text_extension": "true"
+      "supabase_url": "https://kdkkutcmxtsfrqzbxmox.supabase.co",
+      "supabase_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtka2t1dGNteHRzZnJxemJ4bW94Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0OTU1NzM3NCwiZXhwIjoyMDY1MTMzMzc0fQ.aAMtFygC6smIHh9c132dWBZGqru_MtzLocboPW1epXU",
+      "table_name": "inputimagetable",
+      "image_column": "characterimage",
+      "id_column": "unique_id",
+      "unique_id": [
+        "44",
+        2
+      ]
     },
-    "class_type": "Image Load",
+    "class_type": "SupabaseTableWatcherNode",
     "_meta": {
-      "title": "Image Load"
+      "title": "Supabase Table Watcher"
     }
   }
 }

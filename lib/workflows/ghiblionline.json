@@ -102,7 +102,7 @@
   },
   "25": {
     "inputs": {
-      "noise_seed": 950225312606692
+      "noise_seed": 333438077079769
     },
     "class_type": "RandomNoise",
     "_meta": {
@@ -174,7 +174,7 @@
   },
   "216": {
     "inputs": {
-      "aspect_ratio": "16:9"
+      "aspect_ratio": "2:3"
     },
     "class_type": "SDXLAspectRatioSelector",
     "_meta": {
@@ -275,13 +275,13 @@
       "num_beams": 3,
       "do_sample": true,
       "output_mask_select": "",
-      "seed": 382494810762655,
+      "seed": 857518190599001,
       "image": [
         "256",
         0
       ],
       "florence2_model": [
-        "286",
+        "282",
         0
       ]
     },
@@ -406,13 +406,13 @@
       "num_beams": 3,
       "do_sample": true,
       "output_mask_select": "",
-      "seed": 382248176123444,
+      "seed": 333256144152171,
       "image": [
         "281",
         0
       ],
       "florence2_model": [
-        "286",
+        "282",
         0
       ]
     },
@@ -484,6 +484,17 @@
       "title": "LayerUtility: ImageBlend V2"
     }
   },
+  "282": {
+    "inputs": {
+      "model": "microsoft/Florence-2-base",
+      "precision": "fp16",
+      "attention": "sdpa"
+    },
+    "class_type": "DownloadAndLoadFlorence2Model",
+    "_meta": {
+      "title": "DownloadAndLoadFlorence2Model"
+    }
+  },
   "283": {
     "inputs": {
       "supabase_url": "https://kdkkutcmxtsfrqzbxmox.supabase.co",
@@ -521,28 +532,17 @@
       "title": "Upload Image to Supabase"
     }
   },
-  "286": {
+  "285": {
     "inputs": {
-      "model": "Florence-2-base",
-      "precision": "fp16",
-      "attention": "sdpa",
-      "convert_to_safetensors": true
-    },
-    "class_type": "Florence2ModelLoader",
-    "_meta": {
-      "title": "Florence2ModelLoader"
-    }
-  },
-  "287": {
-    "inputs": {
+      "filename_prefix": "ComfyUI",
       "images": [
-        "283",
+        "147",
         0
       ]
     },
-    "class_type": "PreviewImage",
+    "class_type": "SaveImage",
     "_meta": {
-      "title": "Preview Image"
+      "title": "Save Image"
     }
   }
 }

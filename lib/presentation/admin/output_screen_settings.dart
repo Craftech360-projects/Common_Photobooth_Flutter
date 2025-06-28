@@ -43,10 +43,8 @@ class OutputScreenSettings extends StatelessWidget {
   }
 }
 
-// --- UI SECTIONS ---
 class _PreviewSection extends StatelessWidget {
   const _PreviewSection();
-
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -66,7 +64,7 @@ class _PreviewSection extends StatelessWidget {
             top: 0,
             left: 0,
             child: Material(
-              color: AppColors.white.withValues(alpha: 0.9),
+              color: AppColors.white.withOpacity(0.9),
               shape: const CircleBorder(),
               elevation: 2.0,
               child: IconButton(
@@ -94,9 +92,9 @@ class _SettingsSection extends StatelessWidget {
           filter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.85),
+              color: Colors.white.withOpacity(0.85),
               borderRadius: BorderRadius.circular(20.0),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+              border: Border.all(color: Colors.white.withOpacity(0.2)),
             ),
             child: const Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -131,8 +129,6 @@ class _SettingsSection extends StatelessWidget {
     );
   }
 }
-
-// --- SETTINGS WIDGETS ---
 
 class _TitleSettingsGroup extends StatelessWidget {
   const _TitleSettingsGroup();
@@ -281,7 +277,7 @@ class _ImageSettingsGroup extends StatelessWidget {
                             label: 'Width',
                             value: settings.swaplabImageWidth,
                             min: 100,
-                            max: 800,
+                            max: 1080,
                             onChanged: (v) =>
                                 settings.setSwaplabImageDimensions(
                                     v, settings.swaplabImageHeight))),
@@ -290,11 +286,53 @@ class _ImageSettingsGroup extends StatelessWidget {
                             label: 'Height',
                             value: settings.swaplabImageHeight,
                             min: 100,
-                            max: 1000,
+                            max: 1620,
                             onChanged: (v) =>
                                 settings.setSwaplabImageDimensions(
                                     settings.swaplabImageWidth, v))),
                   ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 15),
+          // NEW: Image border and style settings
+          SettingsGroup(
+            isSubgroup: true,
+            icon: '🎨',
+            title: 'Image Border & Style',
+            child: Column(
+              children: [
+                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Show Border', style: Theme.of(context).textTheme.bodyLarge),
+                    Switch(
+                      value: settings.showImageBorder,
+                      onChanged: (value) => settings.setShowImageBorder(value),
+                    ),
+                  ],
+                ),
+                if (settings.showImageBorder)
+                  CustomSliderWithLabel(
+                    label: 'Border Width',
+                    value: settings.imageBorderWidth,
+                    min: 1,
+                    max: 20,
+                    onChanged: (v) => settings.setImageBorderWidth(v),
+                  ),
+                if (settings.showImageBorder)
+                  CustomColorPicker(
+                    label: 'Border Color',
+                    pickerColor: settings.imageBorderColor,
+                    onColorChanged: (c) => settings.setImageBorderColor(c),
+                  ),
+                CustomSliderWithLabel(
+                  label: 'Border Radius',
+                  value: settings.imageBorderRadius,
+                  min: 0,
+                  max: 100,
+                  onChanged: (v) => settings.setImageBorderRadius(v),
                 ),
               ],
             ),
@@ -358,75 +396,38 @@ class _ButtonSettingsGroup extends StatelessWidget {
   const _ButtonSettingsGroup();
   @override
   Widget build(BuildContext context) {
-    return SettingsGroup(
-      icon: '🔘',
-      title: 'Button Settings',
-      child: Column(
-        children: [
-          _buildButtonSettings(context, 'Done'),
-          const SizedBox(height: 15),
-          _buildButtonSettings(context, 'Download'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildButtonSettings(BuildContext context, String type) {
+    // UPDATED: Removed the logic for the download button.
     final settings = context.watch<OutputScreenProvider>();
-    final isDone = type == 'Done';
-
-    // Select properties based on button type
-    final useImage =
-        isDone ? settings.useDoneButtonImage : settings.useDownloadButtonImage;
-    final imagePath = isDone
-        ? settings.doneButtonImagePath
-        : settings.downloadButtonImagePath;
-    final text = isDone ? settings.doneButtonText : settings.downloadButtonText;
-    final width =
-        isDone ? settings.doneButtonWidth : settings.downloadButtonWidth;
-    final height =
-        isDone ? settings.doneButtonHeight : settings.downloadButtonHeight;
-    final left = isDone ? settings.doneButtonLeft : settings.downloadButtonLeft;
-    final bottom =
-        isDone ? settings.doneButtonBottom : settings.downloadButtonBottom;
-
     return SettingsGroup(
       isSubgroup: true,
-      icon: isDone ? '✅' : '📥',
-      title: '$type Button',
+      icon: '✅',
+      title: 'Home Button Settings',
       child: Column(
         children: [
           ToggleButtonGroup(
             options: const ['Text', 'Image'],
-            selectedIndex: useImage ? 1 : 0,
-            onSelected: (i) => isDone
-                ? settings.setUseDoneButtonImage(i == 1)
-                : settings.setUseDownloadButtonImage(i == 1),
+            selectedIndex: settings.useDoneButtonImage ? 1 : 0,
+            onSelected: (i) => settings.setUseDoneButtonImage(i == 1),
           ),
           const SizedBox(height: 15),
-          if (useImage)
+          if (settings.useDoneButtonImage)
             FileUploadArea(
               onTap: () async {
                 final result =
                     await FilePicker.platform.pickFiles(type: FileType.image);
                 if (result?.files.single.path != null) {
-                  isDone
-                      ? settings.setDoneButtonImage(result!.files.single.path)
-                      : settings
-                          .setDownloadButtonImage(result!.files.single.path);
+                  settings.setDoneButtonImage(result!.files.single.path);
                 }
               },
               icon: '🖼️',
-              text: 'Choose $type Button Image',
-              selectedFile: imagePath,
+              text: 'Choose Home Button Image',
+              selectedFile: settings.doneButtonImagePath,
             )
           else
             TextFormField(
-              initialValue: text,
-              decoration: _inputDecoration(context, '$type Button Text'),
-              onChanged: (v) => isDone
-                  ? settings.setDoneButtonText(v)
-                  : settings.setDownloadButtonText(v),
+              initialValue: settings.doneButtonText,
+              decoration: _inputDecoration(context, 'Home Button Text'),
+              onChanged: (v) => settings.setDoneButtonText(v),
             ),
           const SizedBox(height: 15),
           FormRow(
@@ -434,21 +435,17 @@ class _ButtonSettingsGroup extends StatelessWidget {
               Expanded(
                   child: CustomSliderWithLabel(
                       label: 'Width',
-                      value: width,
+                      value: settings.doneButtonWidth,
                       min: 100,
                       max: 500,
-                      onChanged: (v) => isDone
-                          ? settings.setDoneButtonWidth(v)
-                          : settings.setDownloadButtonWidth(v))),
+                      onChanged: (v) => settings.setDoneButtonWidth(v))),
               Expanded(
                   child: CustomSliderWithLabel(
                       label: 'Height',
-                      value: height,
+                      value: settings.doneButtonHeight,
                       min: 50,
                       max: 300,
-                      onChanged: (v) => isDone
-                          ? settings.setDoneButtonHeight(v)
-                          : settings.setDownloadButtonHeight(v))),
+                      onChanged: (v) => settings.setDoneButtonHeight(v))),
             ],
           ),
           FormRow(
@@ -456,21 +453,19 @@ class _ButtonSettingsGroup extends StatelessWidget {
               Expanded(
                   child: CustomSliderWithLabel(
                       label: 'From Left',
-                      value: left,
+                      value: settings.doneButtonLeft,
                       min: 0,
                       max: 1000,
-                      onChanged: (v) => isDone
-                          ? settings.setDoneButtonPosition(v, bottom)
-                          : settings.setDownloadButtonPosition(v, bottom))),
+                      onChanged: (v) =>
+                          settings.setDoneButtonPosition(v, settings.doneButtonBottom))),
               Expanded(
                   child: CustomSliderWithLabel(
                       label: 'From Bottom',
-                      value: bottom,
+                      value: settings.doneButtonBottom,
                       min: 0,
                       max: 1000,
-                      onChanged: (v) => isDone
-                          ? settings.setDoneButtonPosition(left, v)
-                          : settings.setDownloadButtonPosition(left, v))),
+                      onChanged: (v) =>
+                          settings.setDoneButtonPosition(settings.doneButtonLeft, v))),
             ],
           ),
         ],
@@ -503,16 +498,14 @@ class _BackgroundSettingsGroup extends StatelessWidget {
   }
 }
 
-// --- HELPER METHODS ---
-
 InputDecoration _inputDecoration(BuildContext context, String hintText) {
   final theme = Theme.of(context);
   return InputDecoration(
     hintText: hintText,
     filled: true,
-    fillColor: Colors.white.withValues(alpha: 0.8),
+    fillColor: Colors.white.withOpacity(0.8),
     hintStyle: theme.textTheme.bodyMedium
-        ?.copyWith(color: AppColors.labelText.withValues(alpha: 0.7)),
+        ?.copyWith(color: AppColors.labelText.withOpacity(0.7)),
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(10),
       borderSide: const BorderSide(color: AppColors.inputBorder, width: 2),

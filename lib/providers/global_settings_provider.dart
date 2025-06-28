@@ -20,6 +20,9 @@ class GlobalSettingsProvider with ChangeNotifier {
   bool _isOfflineMode = false;
   bool get isOfflineMode => _isOfflineMode;
 
+    String? _runpodApiUrl;
+  String? _runpodApiKey;
+
   // Add input/output directories for offline mode
   String? _inputDirectory;
   String? _outputDirectory;
@@ -32,8 +35,6 @@ class GlobalSettingsProvider with ChangeNotifier {
   double _fieldSpacing = 20.0;
   double _buttonSpacing = 40.0;
   double _borderRadius = 4.0;
-  String? _runpodApiUrl;
-  String? _runpodApiKey;
 
   // Getters
   String? get runpodApiUrl => _runpodApiUrl;
@@ -96,6 +97,8 @@ class GlobalSettingsProvider with ChangeNotifier {
     _emailJsPublicKey = _prefs.getString('emailjs_public_key');
     _emailJsPrivateKey = _prefs.getString('emailjs_private_key');
 
+   _runpodApiUrl = _prefs.getString('runpod_api_url');
+    _runpodApiKey = _prefs.getString('runpod_api_key');
 
     // Load ComfyAPI settings
     _comfyApiUrl = _prefs.getString('comfy_api_url') ?? 'http://127.0.0.1:8188';
@@ -137,21 +140,21 @@ class GlobalSettingsProvider with ChangeNotifier {
     await _prefs.setString('output_directory', _outputDirectory!);
   }
 
+  void setSharingMethod(String method) async {
+    _sharingMethod = method;
+    await _prefs.setString('sharing_method', method);
+    notifyListeners();
+  }
+
   void setRunpodApiUrl(String url) async {
     _runpodApiUrl = url;
-    await _prefs.setString('runpod_api_url', _runpodApiUrl ?? '');
+    await _prefs.setString('runpod_api_url', url);
     notifyListeners();
   }
 
   void setRunpodApiKey(String key) async {
     _runpodApiKey = key;
-    await _prefs.setString('runpod_api_key', _runpodApiKey ?? '');
-    notifyListeners();
-  }
-
-  void setSharingMethod(String method) async {
-    _sharingMethod = method;
-    await _prefs.setString('sharing_method', method);
+    await _prefs.setString('runpod_api_key', key);
     notifyListeners();
   }
 
@@ -272,6 +275,8 @@ class GlobalSettingsProvider with ChangeNotifier {
     _emailJsTemplateId = null;
     _emailJsPublicKey = null;
     _emailJsPrivateKey = null;
+    _runpodApiUrl = null;
+    _runpodApiKey = null;
     _isOfflineMode = false;
     _inputDirectory = null;
     _outputDirectory = null;

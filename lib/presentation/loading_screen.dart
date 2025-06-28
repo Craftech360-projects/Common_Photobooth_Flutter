@@ -1,16 +1,15 @@
 import 'dart:io';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
-import 'package:photobooth_flutter/services/email_services.dart';
-import 'package:photobooth_flutter/workflows/workflow.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/providers/photobooth_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
-import 'package:photobooth_flutter/services/comfy_api_service.dart';
+import 'package:photobooth_flutter/services/email_services.dart';
+import 'package:photobooth_flutter/services/runpod_service.dart';
 import 'package:photobooth_flutter/services/supabase_service.dart';
+import 'package:photobooth_flutter/workflows/workflow.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -69,12 +68,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
       return;
     }
 
-    if (!ComfyApiService.isInitialized) {
-      await ComfyApiService.initialize(
-        apiUrl: globalSettings.comfyApiUrl ?? "http://127.0.0.1:8188",
-      );
-    }
-
     final seed = DateTime.now().millisecondsSinceEpoch;
     final isSwaplabFlow = provider.selectedTheme != null;
     final prefs = await SharedPreferences.getInstance();
@@ -84,11 +77,11 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
     if (isSwaplabFlow) {
       workflowFileName = 'swaplabonline.json';
-      watcherNodeId = '44'; // As per swaplabonline.json
+      watcherNodeId = '44';
     } else {
       workflowFileName =
           prefs.getString('selected_workflow') ?? 'ghiblionline.json';
-      watcherNodeId = '283'; // As per AI Artistry JSON files
+      watcherNodeId = '283';
     }
 
     await _processOnlineFlow(
@@ -113,10 +106,25 @@ class _LoadingScreenState extends State<LoadingScreen> {
   }) async {
     final supabaseUrl = globalSettings.supabaseUrl;
     final supabaseAnonKey = globalSettings.supabaseAnonKey;
+    final runpodApiKey = globalSettings.runpodApiKey;
 
     if (supabaseUrl == null || supabaseAnonKey == null) {
       _setErrorMessage('Supabase credentials not configured.');
       return;
+    }
+
+    if (runpodApiKey == null) {
+      _setErrorMessage('RunPod API Key not configured in Admin settings.');
+      return;
+    }
+
+    // UPDATED: Determine the correct RunPod endpoint
+    final String endpointUrl;
+    if (isSwaplab) {
+      endpointUrl = 'https://api.runpod.ai/v2/wck8exca4aup5b/runsync';
+    } else {
+      endpointUrl = globalSettings.runpodApiUrl ??
+          'https://api.runpod.ai/v2/tdme3jq4u7zg1s/runsync';
     }
 
     if (!SupabaseService.instance.isInitialized) {
@@ -146,41 +154,39 @@ class _LoadingScreenState extends State<LoadingScreen> {
       }
 
       final workflow = await Workflow.getWorkflow(workflowFileName);
-
-      // Update nodes common to all online workflows
       workflow.updateSupabaseWatcherNode(uniqueId, nodeId: watcherNodeId);
       workflow.updateNoiseSeed(seed);
 
-      // Specific updates for Swaplab workflow
+      // UPDATED: New logic for Swaplab flow
       if (isSwaplab) {
-        final themeName =
-            provider.selectedTheme!.name.toLowerCase().replaceAll(' ', '_');
-        final gender = provider.gender ?? 'male';
-        final characterNumber = Random().nextInt(4) + 1;
-        final characterImageName =
-            '${gender == 'male' ? 'm' : 'f'}$characterNumber.png';
-        final characterImagePath =
-            'C:/storage/themes/$gender/$themeName/$characterImageName';
-        workflow.updateSwaplabCharacterImage(characterImagePath);
+        // This call will now handle selecting a random image from Supabase
+        // and updating the 'characterimage' column in your table.
+        await SupabaseService.instance.selectAndUpdateRandomCharacterImage(
+          uniqueId: uniqueId,
+          gender: provider.gender ?? 'male',
+          themeName: provider.selectedTheme!.name,
+        );
+        // REMOVED: The old logic that updated the workflow with a local file path.
+        // The new workflow now fetches this from the Supabase table directly.
       } else if (workflowFileName == 'packagingonline.json') {
-        // Specific updates for Packaging workflow
         final gender = provider.gender ?? 'person';
         final accessories =
             provider.accessories ?? 'shoes, sunglasses, helmet, motorbikes';
         workflow.updatePackagingPrompt(gender, accessories);
       }
 
-      print("Workflow :::: ${workflow.toJSON()}");
-      final response =
-          await ComfyApiService.instance.sendOnlineWorkflow(workflow.toMap());
+      await RunPodService.triggerRunPodWorkflow(
+        workflow: workflow.toMap(),
+        apiUrl: endpointUrl, // Use the conditional endpoint
+        apiKey: runpodApiKey,
+      );
 
-      if (response.containsKey('sentTime')) {
-        provider.setWorkflowSentTime(DateTime.parse(response['sentTime']));
-      }
+      print("Workflow sent to RunPod successfully: ${workflow.toJSON()}");
 
-      // Polling for the result
+      provider.setWorkflowSentTime(DateTime.now());
+
       int attempts = 0;
-      const maxAttempts = 150; // 4 minutes timeout
+      const maxAttempts = 150;
       const pollDelay = Duration(seconds: 2);
 
       while (attempts < maxAttempts) {
@@ -195,7 +201,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
           provider.setSwappedImage(supabaseImageUrl);
           provider.setCapturedImageUrl(supabaseImageUrl);
 
-          // Check sharing method and send email if selected
           if (globalSettings.sharingMethod == 'Email') {
             await EmailService.sendEmail(
               toEmail: provider.email!,

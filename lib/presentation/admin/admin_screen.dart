@@ -36,6 +36,8 @@ class _AdminScreenState extends State<AdminScreen> {
   final _emailJsTemplateIdController = TextEditingController();
   final _emailJsPublicKeyController = TextEditingController();
   final _emailJsPrivateKeyController = TextEditingController();
+  final _runpodApiUrlController = TextEditingController();
+  final _runpodApiKeyController = TextEditingController();
 
   @override
   void initState() {
@@ -49,6 +51,12 @@ class _AdminScreenState extends State<AdminScreen> {
       _emailJsTemplateIdController.text =
           globalSettings.emailJsTemplateId ?? '';
       _emailJsPublicKeyController.text = globalSettings.emailJsPublicKey ?? '';
+      // FIX: Initialize the private key controller
+      _emailJsPrivateKeyController.text =
+          globalSettings.emailJsPrivateKey ?? '';
+
+      _runpodApiUrlController.text = globalSettings.runpodApiUrl ?? '';
+      _runpodApiKeyController.text = globalSettings.runpodApiKey ?? '';
 
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final watermarkProvider =
@@ -64,6 +72,10 @@ class _AdminScreenState extends State<AdminScreen> {
     _emailJsServiceIdController.dispose();
     _emailJsTemplateIdController.dispose();
     _emailJsPublicKeyController.dispose();
+    // FIX: Dispose all controllers
+    _emailJsPrivateKeyController.dispose();
+    _runpodApiUrlController.dispose();
+    _runpodApiKeyController.dispose();
     super.dispose();
   }
 
@@ -77,12 +89,11 @@ class _AdminScreenState extends State<AdminScreen> {
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text('Admin Dashboard',
-            style:
-                textTheme.headlineMedium?.copyWith(color: AppColors.darkGrey)),
+            style: textTheme.headlineMedium?.copyWith(color: Colors.white)),
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.darkGrey),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -106,9 +117,10 @@ class _AdminScreenState extends State<AdminScreen> {
                 _GlobalSettingsSection(
                   supabaseUrlController: _supabaseUrlController,
                   supabaseAnonKeyController: _supabaseAnonKeyController,
+                  runpodApiUrlController: _runpodApiUrlController,
+                  runpodApiKeyController: _runpodApiKeyController,
                 ),
-                const Divider(height: 32, color: AppColors.darkGrey),
-                // FIX: Called the method with positional arguments as per its definition.
+                const Divider(height: 32, color: Colors.white54),
                 _buildSharingSettings(
                   context,
                   globalSettings,
@@ -117,7 +129,7 @@ class _AdminScreenState extends State<AdminScreen> {
                   _emailJsPublicKeyController,
                   _emailJsPrivateKeyController,
                 ),
-                const Divider(height: 32, color: AppColors.darkGrey),
+                const Divider(height: 32, color: Colors.white54),
                 const SizedBox(height: 25),
                 const _ScreenSettingsSection(),
                 const SizedBox(height: 25),
@@ -214,14 +226,12 @@ class _AdminScreenState extends State<AdminScreen> {
                     TextFormField(
                       controller: emailJsPublicKeyController,
                       decoration: inputDecoration(context, 'Public Key'),
-                      // FIX: Used the correct variable `settings` instead of out-of-scope `globalSettings`
                       onChanged: (value) => settings.setEmailJsPublicKey(value),
                     ),
                     Constants.h16,
                     TextFormField(
                       controller: emailJsPrivateKeyController,
                       decoration: inputDecoration(context, 'Private Key'),
-                      // FIX: Used the correct variable `settings` instead of out-of-scope `globalSettings`
                       onChanged: (value) =>
                           settings.setEmailJsPrivateKey(value),
                     ),
@@ -229,14 +239,12 @@ class _AdminScreenState extends State<AdminScreen> {
                     TextFormField(
                       controller: emailJsServiceIdController,
                       decoration: inputDecoration(context, 'Service ID'),
-                      // FIX: Used the correct variable `settings`
                       onChanged: (value) => settings.setEmailJsServiceId(value),
                     ),
                     Constants.h16,
                     TextFormField(
                       controller: emailJsTemplateIdController,
                       decoration: inputDecoration(context, 'Template ID'),
-                      // FIX: Used the correct variable `settings`
                       onChanged: (value) =>
                           settings.setEmailJsTemplateId(value),
                     ),
@@ -300,6 +308,9 @@ class _AdminScreenState extends State<AdminScreen> {
               _emailJsServiceIdController.text = '';
               _emailJsTemplateIdController.text = '';
               _emailJsPublicKeyController.text = '';
+              _emailJsPrivateKeyController.text = '';
+              _runpodApiKeyController.text = '';
+              _runpodApiUrlController.text = '';
 
               if (mounted) {
                 showSnackBar(context, 'All settings have been reset.');
@@ -320,10 +331,14 @@ class _AdminScreenState extends State<AdminScreen> {
 class _GlobalSettingsSection extends StatelessWidget {
   final TextEditingController supabaseUrlController;
   final TextEditingController supabaseAnonKeyController;
+  final TextEditingController runpodApiUrlController;
+  final TextEditingController runpodApiKeyController;
 
   const _GlobalSettingsSection({
     required this.supabaseUrlController,
     required this.supabaseAnonKeyController,
+    required this.runpodApiUrlController,
+    required this.runpodApiKeyController,
   });
 
   @override
@@ -382,6 +397,27 @@ class _GlobalSettingsSection extends StatelessWidget {
                   decoration: inputDecoration(context, 'Supabase Anon Key'),
                   onChanged: (value) =>
                       globalSettings.setSupabaseAnonKey(value),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 15),
+          SettingsGroup(
+            isSubgroup: true,
+            icon: '🚀',
+            title: 'RunPod Configuration',
+            child: Column(
+              children: [
+                TextFormField(
+                  controller: runpodApiUrlController,
+                  decoration: inputDecoration(context, 'RunPod API URL'),
+                  onChanged: (value) => globalSettings.setRunpodApiUrl(value),
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: runpodApiKeyController,
+                  decoration: inputDecoration(context, 'RunPod API Key'),
+                  onChanged: (value) => globalSettings.setRunpodApiKey(value),
                 ),
               ],
             ),
@@ -532,7 +568,7 @@ class _AdvancedSettingsSection extends StatelessWidget {
               icon: const Icon(Icons.logout),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.black.withValues(alpha: 0.6),
-                foregroundColor: AppColors.greyOffWhite,
+                foregroundColor: AppColors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
               onPressed: () async {
@@ -553,7 +589,7 @@ class _AdvancedSettingsSection extends StatelessWidget {
               icon: const Icon(Icons.refresh),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.red.withValues(alpha: 0.8),
-                foregroundColor: AppColors.greyOffWhite,
+                foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
               onPressed: onReset,

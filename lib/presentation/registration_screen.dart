@@ -3,6 +3,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/providers/admin_watermark_provider.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/providers/photobooth_provider.dart';
@@ -61,6 +62,25 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
     final watermarkProvider = context.watch<AdminWatermarkProvider>();
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        backgroundColor: Colors.transparent,
+        actions: [
+          IconButton(
+            icon: const Icon(
+              Icons.settings_rounded,
+              color: AppColors.lightWhite,
+              size: 32,
+            ),
+            onPressed: () {
+              Navigator.pushNamed(
+                  context, AppRoutes.registrationScreenSettings);
+            },
+          ),
+        ],
+      ),
       body: WatermarkOverlay(
         show: watermarkProvider.showWatermark,
         child: Stack(
@@ -113,7 +133,7 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
                               : FontStyle.normal,
                         ),
                         decoration: InputDecoration(
-                          isDense: true, // Add this
+                          // isDense: true, // Add this
                           contentPadding: EdgeInsets.zero, // And add this
                           floatingLabelBehavior: FloatingLabelBehavior.never,
                           labelText: field.label,

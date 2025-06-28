@@ -50,7 +50,7 @@ class CustomTextField {
     this.borderColor = AppColors.black,
     this.borderRadius = 0.0,
     this.width = 650.0, // Default absolute width
-    this.height = 70.0,
+    this.height = 100.0,
     this.left = 180.0,
     this.top = 880.0,
     this.fieldType = TextFieldType.custom,
@@ -151,7 +151,7 @@ class CustomTextField {
       borderRadius: json['borderRadius']?.toDouble() ?? 4.0,
       // *** FIX: Use a consistent absolute pixel default value ***
       width: json['width']?.toDouble() ?? 650.0, // Was 0.55
-      height: json['height']?.toDouble() ?? 70.0, // Increased default height
+      height: json['height']?.toDouble() ?? 100.0, // Increased default height
       left: json['left']?.toDouble() ?? 180.0, // Adjusted default position
       top: json['top']?.toDouble() ?? 880.0, // Adjusted default position
       fieldType: getTextFieldTypeFromName(json['fieldType']),

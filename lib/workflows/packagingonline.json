@@ -102,7 +102,7 @@
   },
   "25": {
     "inputs": {
-      "noise_seed": 793157357417183
+      "noise_seed": 1021513419095586
     },
     "class_type": "RandomNoise",
     "_meta": {
@@ -174,7 +174,7 @@
   },
   "216": {
     "inputs": {
-      "aspect_ratio": "16:9"
+      "aspect_ratio": "2:3"
     },
     "class_type": "SDXLAspectRatioSelector",
     "_meta": {
@@ -275,13 +275,13 @@
       "num_beams": 3,
       "do_sample": true,
       "output_mask_select": "",
-      "seed": 589371105467038,
+      "seed": 510811895027367,
       "image": [
         "256",
         0
       ],
       "florence2_model": [
-        "285",
+        "282",
         0
       ]
     },
@@ -406,13 +406,13 @@
       "num_beams": 3,
       "do_sample": true,
       "output_mask_select": "",
-      "seed": 269892263108428,
+      "seed": 275155823080713,
       "image": [
         "281",
         0
       ],
       "florence2_model": [
-        "285",
+        "282",
         0
       ]
     },
@@ -423,7 +423,7 @@
   },
   "270": {
     "inputs": {
-      "text": "TRAINBOX, Create an artistic image of a fashion action figure styled like a doll in plastic packaging. The packaging should be sleek and modern.To the right of the figure, neatly arranged in separate compartments within the packaging, include the following accessories:  \\nshoes sunglasses helmet motorbikes\\n\\n",
+      "text": "TRAINBOX, Create an artistic image of a fashion action figure styled like a doll in plastic packaging. The packaging should be sleek and modern, labeled with a luxury brand name at the top (e.g., \\\"COUNT VALENTINE – LONDON\\\"). The central figure is a stylish woman standing upright, wearing a neutral-toned, bodycon long-sleeve mini dress, paired with strappy high heels. Her pose is confident, and she wears black cat-eye sunglasses.\nTo the right of the figure, neatly arranged in separate compartments within the packaging, include the following accessories:\nA pair of gold hoop earrings. \nA structured handbag that matches the dress.\nA second pair of gold dangle earrings as an alternative option.\nThe entire layout should resemble a high-fashion collectible, merging editorial aesthetics with toy packaging design. Use a clean white background with subtle shadows to give depth and a high-end feel.\n[caption]",
       "old": "[caption]",
       "new": [
         "268",
@@ -484,6 +484,17 @@
       "title": "LayerUtility: ImageBlend V2"
     }
   },
+  "282": {
+    "inputs": {
+      "model": "microsoft/Florence-2-base",
+      "precision": "fp16",
+      "attention": "sdpa"
+    },
+    "class_type": "DownloadAndLoadFlorence2Model",
+    "_meta": {
+      "title": "DownloadAndLoadFlorence2Model"
+    }
+  },
   "283": {
     "inputs": {
       "supabase_url": "https://kdkkutcmxtsfrqzbxmox.supabase.co",
@@ -519,30 +530,6 @@
     "class_type": "SupabaseImageUploader",
     "_meta": {
       "title": "Upload Image to Supabase"
-    }
-  },
-  "285": {
-    "inputs": {
-      "model": "Florence-2-base",
-      "precision": "fp16",
-      "attention": "sdpa",
-      "convert_to_safetensors": true
-    },
-    "class_type": "Florence2ModelLoader",
-    "_meta": {
-      "title": "Florence2ModelLoader"
-    }
-  },
-  "286": {
-    "inputs": {
-      "images": [
-        "283",
-        0
-      ]
-    },
-    "class_type": "PreviewImage",
-    "_meta": {
-      "title": "Preview Image"
     }
   }
 }
