@@ -1,5 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:photobooth_flutter/core/constants/constants.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/providers/admin_watermark_provider.dart';
 import 'package:photobooth_flutter/providers/auth_provider.dart';
@@ -31,6 +32,10 @@ class AdminScreen extends StatefulWidget {
 class _AdminScreenState extends State<AdminScreen> {
   final _supabaseUrlController = TextEditingController();
   final _supabaseAnonKeyController = TextEditingController();
+  final _emailJsServiceIdController = TextEditingController();
+  final _emailJsTemplateIdController = TextEditingController();
+  final _emailJsPublicKeyController = TextEditingController();
+  final _emailJsPrivateKeyController = TextEditingController();
 
   @override
   void initState() {
@@ -40,6 +45,10 @@ class _AdminScreenState extends State<AdminScreen> {
           Provider.of<GlobalSettingsProvider>(context, listen: false);
       _supabaseUrlController.text = globalSettings.supabaseUrl ?? '';
       _supabaseAnonKeyController.text = globalSettings.supabaseAnonKey ?? '';
+      _emailJsServiceIdController.text = globalSettings.emailJsServiceId ?? '';
+      _emailJsTemplateIdController.text =
+          globalSettings.emailJsTemplateId ?? '';
+      _emailJsPublicKeyController.text = globalSettings.emailJsPublicKey ?? '';
 
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final watermarkProvider =
@@ -52,23 +61,28 @@ class _AdminScreenState extends State<AdminScreen> {
   void dispose() {
     _supabaseUrlController.dispose();
     _supabaseAnonKeyController.dispose();
+    _emailJsServiceIdController.dispose();
+    _emailJsTemplateIdController.dispose();
+    _emailJsPublicKeyController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final watermarkProvider = context.watch<AdminWatermarkProvider>();
+    final globalSettings = context.watch<GlobalSettingsProvider>();
     final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text('Admin Dashboard',
-            style: textTheme.headlineMedium?.copyWith(color: Colors.white)),
+            style:
+                textTheme.headlineMedium?.copyWith(color: AppColors.darkGrey)),
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: AppColors.darkGrey),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -93,6 +107,17 @@ class _AdminScreenState extends State<AdminScreen> {
                   supabaseUrlController: _supabaseUrlController,
                   supabaseAnonKeyController: _supabaseAnonKeyController,
                 ),
+                const Divider(height: 32, color: AppColors.darkGrey),
+                // FIX: Called the method with positional arguments as per its definition.
+                _buildSharingSettings(
+                  context,
+                  globalSettings,
+                  _emailJsServiceIdController,
+                  _emailJsTemplateIdController,
+                  _emailJsPublicKeyController,
+                  _emailJsPrivateKeyController,
+                ),
+                const Divider(height: 32, color: AppColors.darkGrey),
                 const SizedBox(height: 25),
                 const _ScreenSettingsSection(),
                 const SizedBox(height: 25),
@@ -102,6 +127,123 @@ class _AdminScreenState extends State<AdminScreen> {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSharingSettings(
+    BuildContext context,
+    GlobalSettingsProvider settings,
+    TextEditingController emailJsServiceIdController,
+    TextEditingController emailJsTemplateIdController,
+    TextEditingController emailJsPublicKeyController,
+    TextEditingController emailJsPrivateKeyController,
+  ) {
+    return SettingsGroup(
+      icon: '📤',
+      title: 'Sharing Settings',
+      child: Theme(
+        data: Theme.of(context).copyWith(
+          unselectedWidgetColor: AppColors.darkGrey,
+          radioTheme: RadioThemeData(
+            fillColor: WidgetStateProperty.resolveWith<Color>(
+              (states) {
+                if (states.contains(WidgetState.selected)) {
+                  return AppColors.darkGrey;
+                }
+                return AppColors.darkGrey;
+              },
+            ),
+            overlayColor: WidgetStateProperty.all(AppColors.darkGrey),
+          ),
+        ),
+        child: Column(
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                color: AppColors.darkGrey.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: RadioListTile<String>(
+                title: const Text('QR Code',
+                    style: TextStyle(
+                        color: AppColors.darkGrey,
+                        fontWeight: FontWeight.bold)),
+                subtitle: const Text(
+                    'Display a QR code on the output screen for users to scan.',
+                    style: TextStyle(color: AppColors.darkGrey, fontSize: 12)),
+                value: 'QR Code',
+                activeColor: AppColors.darkGrey,
+                groupValue: settings.sharingMethod,
+                onChanged: (value) {
+                  settings.setSharingMethod(value!);
+                },
+              ),
+            ),
+            Constants.h16,
+            Container(
+              decoration: BoxDecoration(
+                color: AppColors.darkGrey.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: RadioListTile<String>(
+                title: const Text('Email',
+                    style: TextStyle(
+                        color: AppColors.darkGrey,
+                        fontWeight: FontWeight.bold)),
+                subtitle: const Text(
+                    'Send the output image directly to the user\'s email address.',
+                    style: TextStyle(color: AppColors.darkGrey, fontSize: 12)),
+                value: 'Email',
+                activeColor: AppColors.darkGrey,
+                groupValue: settings.sharingMethod,
+                onChanged: (value) {
+                  settings.setSharingMethod(value!);
+                },
+              ),
+            ),
+            const SizedBox(height: 15),
+            if (settings.sharingMethod == "Email")
+              SettingsGroup(
+                isSubgroup: true,
+                icon: '✉️',
+                title: 'EmailJS Configuration',
+                child: Column(
+                  children: [
+                    TextFormField(
+                      controller: emailJsPublicKeyController,
+                      decoration: inputDecoration(context, 'Public Key'),
+                      // FIX: Used the correct variable `settings` instead of out-of-scope `globalSettings`
+                      onChanged: (value) => settings.setEmailJsPublicKey(value),
+                    ),
+                    Constants.h16,
+                    TextFormField(
+                      controller: emailJsPrivateKeyController,
+                      decoration: inputDecoration(context, 'Private Key'),
+                      // FIX: Used the correct variable `settings` instead of out-of-scope `globalSettings`
+                      onChanged: (value) =>
+                          settings.setEmailJsPrivateKey(value),
+                    ),
+                    Constants.h16,
+                    TextFormField(
+                      controller: emailJsServiceIdController,
+                      decoration: inputDecoration(context, 'Service ID'),
+                      // FIX: Used the correct variable `settings`
+                      onChanged: (value) => settings.setEmailJsServiceId(value),
+                    ),
+                    Constants.h16,
+                    TextFormField(
+                      controller: emailJsTemplateIdController,
+                      decoration: inputDecoration(context, 'Template ID'),
+                      // FIX: Used the correct variable `settings`
+                      onChanged: (value) =>
+                          settings.setEmailJsTemplateId(value),
+                    ),
+                  ],
+                ),
+              )
+          ],
         ),
       ),
     );
@@ -155,6 +297,9 @@ class _AdminScreenState extends State<AdminScreen> {
 
               _supabaseUrlController.text = '';
               _supabaseAnonKeyController.text = '';
+              _emailJsServiceIdController.text = '';
+              _emailJsTemplateIdController.text = '';
+              _emailJsPublicKeyController.text = '';
 
               if (mounted) {
                 showSnackBar(context, 'All settings have been reset.');
@@ -226,10 +371,12 @@ class _GlobalSettingsSection extends StatelessWidget {
                 TextFormField(
                   controller: supabaseUrlController,
                   decoration: inputDecoration(
-                      context, 'https://your-project.supabase.co'),
+                    context,
+                    'Supabase Project URL',
+                  ),
                   onChanged: (value) => globalSettings.setSupabaseUrl(value),
                 ),
-                const SizedBox(height: 12),
+                Constants.h16,
                 TextFormField(
                   controller: supabaseAnonKeyController,
                   decoration: inputDecoration(context, 'Supabase Anon Key'),
@@ -339,28 +486,29 @@ class _ScreenSettingItem extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.1),
+          color: AppColors.darkGrey.withOpacity(0.1),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.white.withOpacity(0.2)),
+          border: Border.all(color: AppColors.darkGrey.withOpacity(0.2)),
         ),
         child: Row(
           children: [
-            Icon(icon, size: 32, color: Colors.black.withOpacity(0.8)),
+            Icon(icon, size: 32, color: AppColors.darkGrey.withOpacity(0.8)),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(title,
-                      style:
-                          textTheme.titleMedium?.copyWith(color: Colors.black)),
+                      style: textTheme.titleMedium
+                          ?.copyWith(color: AppColors.darkGrey)),
                   Text(subtitle,
-                      style: textTheme.bodySmall
-                          ?.copyWith(color: Colors.black.withOpacity(0.7))),
+                      style: textTheme.bodySmall?.copyWith(
+                          color: AppColors.darkGrey.withOpacity(0.7))),
                 ],
               ),
             ),
-            Icon(Icons.arrow_forward_ios, color: Colors.black.withOpacity(0.8)),
+            Icon(Icons.arrow_forward_ios,
+                color: AppColors.darkGrey.withOpacity(0.8)),
           ],
         ),
       ),
@@ -383,8 +531,8 @@ class _AdvancedSettingsSection extends StatelessWidget {
             child: ElevatedButton.icon(
               icon: const Icon(Icons.logout),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.black.withOpacity(0.6),
-                foregroundColor: Colors.white,
+                backgroundColor: AppColors.black.withValues(alpha: 0.6),
+                foregroundColor: AppColors.greyOffWhite,
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
               onPressed: () async {
@@ -404,8 +552,8 @@ class _AdvancedSettingsSection extends StatelessWidget {
             child: ElevatedButton.icon(
               icon: const Icon(Icons.refresh),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.red.withOpacity(0.8),
-                foregroundColor: Colors.white,
+                backgroundColor: AppColors.red.withValues(alpha: 0.8),
+                foregroundColor: AppColors.greyOffWhite,
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
               onPressed: onReset,

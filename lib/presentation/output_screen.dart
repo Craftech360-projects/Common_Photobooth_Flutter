@@ -172,6 +172,8 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
   Widget _buildSuccessContent(
       BuildContext context, OutputScreenProvider settings) {
     final photoboothProvider = context.read<PhotoboothProvider>();
+    final globalSettings = context.read<GlobalSettingsProvider>();
+
     final isSwaplabFlow = photoboothProvider.selectedTheme != null;
     final imageUrl = photoboothProvider.swappedImageUrl ??
         photoboothProvider.capturedImageUrl;
@@ -200,22 +202,46 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
           height: isSwaplabFlow ? settings.swaplabImageHeight : null,
           child: _buildOutputImage(imageUrl),
         ),
-        Positioned(
-          left: settings.qrCodeLeft,
-          bottom: settings.qrCodeBottom,
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
+        if (globalSettings.sharingMethod == 'QR Code')
+          Positioned(
+            left: settings.qrCodeLeft,
+            bottom: settings.qrCodeBottom,
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: QrImageView(
+                data: imageUrl ?? 'No Image',
+                version: QrVersions.auto,
+                size: settings.qrCodeSize,
+              ),
             ),
-            child: QrImageView(
-              data: imageUrl ?? 'No Image',
-              version: QrVersions.auto,
-              size: settings.qrCodeSize,
+          )
+        else
+          Positioned(
+            left: settings.qrCodeLeft,
+            right: settings.qrCodeLeft,
+            bottom: settings.qrCodeBottom,
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.symmetric(horizontal: 200),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.6),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                'Your generated image has been sent to\n${photoboothProvider.email}',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ),
-        ),
         Positioned(
           left: settings.doneButtonLeft,
           bottom: settings.doneButtonBottom,

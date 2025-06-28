@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
+import 'package:photobooth_flutter/services/email_services.dart';
 import 'package:photobooth_flutter/workflows/workflow.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/providers/photobooth_provider.dart';
@@ -24,7 +25,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
   late final Player _player;
   late final VideoController _videoController;
   String? _errorMessage;
-  final bool _isProcessing = true;
 
   @override
   void initState() {
@@ -170,7 +170,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
         workflow.updatePackagingPrompt(gender, accessories);
       }
 
-      print("Workflow: ${workflow.toMap()}");
+      print("Workflow :::: ${workflow.toJSON()}");
       final response =
           await ComfyApiService.instance.sendOnlineWorkflow(workflow.toMap());
 
@@ -194,6 +194,19 @@ class _LoadingScreenState extends State<LoadingScreen> {
           debugPrint('Found new image in Supabase: $supabaseImageUrl');
           provider.setSwappedImage(supabaseImageUrl);
           provider.setCapturedImageUrl(supabaseImageUrl);
+
+          // Check sharing method and send email if selected
+          if (globalSettings.sharingMethod == 'Email') {
+            await EmailService.sendEmail(
+              toEmail: provider.email!,
+              imageUrl: supabaseImageUrl,
+              serviceId: globalSettings.emailJsServiceId,
+              templateId: globalSettings.emailJsTemplateId,
+              publicKey: globalSettings.emailJsPublicKey,
+              privateKey: globalSettings.emailJsPrivateKey,
+            );
+          }
+
           if (mounted) {
             await Navigator.of(context)
                 .pushReplacementNamed(AppRoutes.swappedFace);

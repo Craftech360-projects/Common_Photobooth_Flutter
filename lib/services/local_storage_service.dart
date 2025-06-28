@@ -154,7 +154,7 @@ class LocalStorageService {
         debugPrint('File ${newestFile.path} appears stable (size: $finalLength). Proceeding.');
         return newestFile.path;
 
-      } catch (e) {
+      } on Exception catch (e) {
         debugPrint('Error checking file stability for ${newestFile.path}: $e');
         return null;
       }

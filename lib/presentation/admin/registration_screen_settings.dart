@@ -323,7 +323,7 @@ class _BackgroundSettingsGroup extends StatelessWidget {
             isAsset: false);
         showSnackBar(context, 'Background updated');
       }
-    } catch (e) {
+    } on Exception catch (e) {
       showSnackBar(context, 'Error selecting file: $e');
     }
   }
@@ -618,7 +618,7 @@ class _ImageButtonSettings extends StatelessWidget {
                     isAsset: false);
                 showSnackBar(context, 'Button image updated');
               }
-            } catch (e) {
+            }  on Exception catch (e) {
               showSnackBar(context, 'Error selecting file: $e');
             }
           },

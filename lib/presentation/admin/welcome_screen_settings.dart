@@ -20,10 +20,6 @@ class _AppTextStyles {
     fontWeight: FontWeight.bold,
     color: AppColors.settingsTitle,
   );
-  static const TextStyle settingsSubtitle = TextStyle(
-    fontSize: 14,
-    color: AppColors.settingsSubtitle,
-  );
   static const TextStyle groupTitle = TextStyle(
     fontSize: 18,
     fontWeight: FontWeight.w600,
@@ -427,7 +423,7 @@ class _BackgroundSettingsGroup extends StatelessWidget {
             isAsset: false);
         showSnackBar(context, 'Welcome screen background updated');
       }
-    } catch (e) {
+    } on Exception catch (e) {
       showSnackBar(context, 'Error selecting file: $e');
     }
   }
@@ -593,7 +589,7 @@ class _ImageButtonSettings extends StatelessWidget {
                 isAsset: false);
             showSnackBar(context, 'Button image updated');
           }
-        } catch (e) {
+        } on Exception catch (e) {
           showSnackBar(context, 'Error selecting file: $e');
         }
       },

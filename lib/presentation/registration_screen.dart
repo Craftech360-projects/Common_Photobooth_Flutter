@@ -96,12 +96,13 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
                 .map((field) => Positioned(
                       left: field.left,
                       top: field.top,
-                      width: field.width, // CONFIRMED: Uses absolute width
+                      width: field.width,
                       height: field.height,
                       child: TextFormField(
                         controller: _controllers[field.id],
                         focusNode: _focusNodes[field.id],
-                        readOnly: false,
+                        maxLines: 1,
+                        textAlignVertical: TextAlignVertical.center, // Add this
                         showCursor: true,
                         style: TextStyle(
                           color: field.textColor,
@@ -112,6 +113,8 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
                               : FontStyle.normal,
                         ),
                         decoration: InputDecoration(
+                          isDense: true, // Add this
+                          contentPadding: EdgeInsets.zero, // And add this
                           floatingLabelBehavior: FloatingLabelBehavior.never,
                           labelText: field.label,
                           hintText: field.hintText,

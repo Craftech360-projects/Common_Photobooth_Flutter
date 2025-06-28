@@ -12,6 +12,10 @@ class GlobalSettingsProvider with ChangeNotifier {
   String? _comfyApiUrl;
   String? get comfyApiUrl => _comfyApiUrl;
 
+  // Sharing settings
+  String _sharingMethod = 'QR Code'; // Default to QR Code
+  String get sharingMethod => _sharingMethod;
+
   // Add offline mode toggle
   bool _isOfflineMode = false;
   bool get isOfflineMode => _isOfflineMode;
@@ -50,14 +54,24 @@ class GlobalSettingsProvider with ChangeNotifier {
   // Add these properties
   String? _supabaseUrl;
   String? _supabaseAnonKey;
+  String? _emailJsServiceId;
+  String? _emailJsTemplateId;
+  String? _emailJsPublicKey;
+  String? _emailJsPrivateKey;
 
   // Add these getters
   String? get supabaseUrl => _supabaseUrl;
   String? get supabaseAnonKey => _supabaseAnonKey;
+  String? get emailJsServiceId => _emailJsServiceId;
+  String? get emailJsTemplateId => _emailJsTemplateId;
+  String? get emailJsPublicKey => _emailJsPublicKey;
+  String? get emailJsPrivateKey => _emailJsPrivateKey;
 
   Future<void> loadSettings() async {
     _backgroundImage = _prefs.getString('background_image');
     _isAssetImage = _prefs.getBool('is_asset_image') ?? true;
+
+    _sharingMethod = _prefs.getString('sharing_method') ?? 'QR Code';
 
     // Verify background image file exists if it's not an asset
     if (_backgroundImage != null && !_isAssetImage) {
@@ -75,6 +89,13 @@ class GlobalSettingsProvider with ChangeNotifier {
     // Load Supabase settings
     _supabaseUrl = _prefs.getString('supabase_url');
     _supabaseAnonKey = _prefs.getString('supabase_anon_key');
+
+    // Load EmailJS settings
+    _emailJsServiceId = _prefs.getString('emailjs_service_id');
+    _emailJsTemplateId = _prefs.getString('emailjs_template_id');
+    _emailJsPublicKey = _prefs.getString('emailjs_public_key');
+    _emailJsPrivateKey = _prefs.getString('emailjs_private_key');
+
 
     // Load ComfyAPI settings
     _comfyApiUrl = _prefs.getString('comfy_api_url') ?? 'http://127.0.0.1:8188';
@@ -125,6 +146,12 @@ class GlobalSettingsProvider with ChangeNotifier {
   void setRunpodApiKey(String key) async {
     _runpodApiKey = key;
     await _prefs.setString('runpod_api_key', _runpodApiKey ?? '');
+    notifyListeners();
+  }
+
+  void setSharingMethod(String method) async {
+    _sharingMethod = method;
+    await _prefs.setString('sharing_method', method);
     notifyListeners();
   }
 
@@ -188,6 +215,30 @@ class GlobalSettingsProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void setEmailJsServiceId(String serviceId) async {
+    _emailJsServiceId = serviceId;
+    await _prefs.setString('emailjs_service_id', serviceId);
+    notifyListeners();
+  }
+
+  void setEmailJsTemplateId(String templateId) async {
+    _emailJsTemplateId = templateId;
+    await _prefs.setString('emailjs_template_id', templateId);
+    notifyListeners();
+  }
+
+  void setEmailJsPublicKey(String publicKey) async {
+    _emailJsPublicKey = publicKey;
+    await _prefs.setString('emailjs_public_key', publicKey);
+    notifyListeners();
+  }
+
+  void setEmailJsPrivateKey(String privateKey) async {
+    _emailJsPrivateKey = privateKey;
+    await _prefs.setString('emailjs_private_key', privateKey);
+    notifyListeners();
+  }
+
   void setComfyApiUrl(String url) async {
     _comfyApiUrl = url;
     await _prefs.setString('comfy_api_url', url);
@@ -217,6 +268,10 @@ class GlobalSettingsProvider with ChangeNotifier {
     _borderRadius = 4.0;
     _supabaseUrl = null;
     _supabaseAnonKey = null;
+    _emailJsServiceId = null;
+    _emailJsTemplateId = null;
+    _emailJsPublicKey = null;
+    _emailJsPrivateKey = null;
     _isOfflineMode = false;
     _inputDirectory = null;
     _outputDirectory = null;

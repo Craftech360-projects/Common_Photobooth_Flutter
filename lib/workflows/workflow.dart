@@ -50,4 +50,9 @@ class Workflow {
   Map<String, dynamic> toMap() {
     return _workflow;
   }
+
+  /// Converts the workflow map to a JSON string.
+  String toJSON() {
+    return jsonEncode(_workflow);
+  }
 }
