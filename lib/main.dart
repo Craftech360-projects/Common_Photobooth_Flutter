@@ -48,7 +48,7 @@ void main() async {
   final authProvider = AuthProvider();
   await authProvider.init();
 
-  // final appFlowProvider = AppFlowProvider();         ====> Commented out as per request
+  // final appFlowProvider = AppFlowProvider();  ====>  Commented out as per request
   // await appFlowProvider.init();
 
   final welcomeSettings = WelcomeScreenProvider();

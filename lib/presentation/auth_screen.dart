@@ -1,6 +1,8 @@
+import 'dart:convert'; // Import for utf8 decoding
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/core/constants/constants.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
@@ -36,15 +38,12 @@ class _AuthScreenState extends State<AuthScreen> {
 
       bool success;
       if (_showLicenseInput) {
-        // Verify license certificate
         if (_licenseContent == null) {
-          // Use the new setError method instead of direct assignment
           authProvider.setError('Please upload the license key!');
           return;
         }
         success = await authProvider.verifyLicense(_licenseContent!);
       } else {
-        // Verify with request ID and auth code
         success = await authProvider.verifyAuthCode(
           requestId: _requestIdController.text.trim(),
           authCode: _authCodeController.text.trim(),
@@ -58,24 +57,39 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
+  // UPDATED: This function is now web-compatible
   Future<void> _pickLicenseFile() async {
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['lic', 'txt'],
+        type: FileType.any,
+        allowedExtensions: ['.lic'],
+        withData: kIsWeb, // Only get bytes on the web
       );
 
       if (result != null) {
-        File file = File(result.files.single.path!);
-        String content = await file.readAsString();
+        String content;
+        // Check if we are on the web or mobile
+        if (kIsWeb) {
+          // Web: Read from bytes
+          content = utf8.decode(result.files.single.bytes!);
+        } else {
+          // Mobile: Read from the file path
+          final path = result.files.single.path!;
+          final file = File(path);
+          content = await file.readAsString();
+        }
+
         setState(() {
           _licenseContent = content;
           _licenseFileName = result.files.single.name;
         });
+      } else {
+        // User canceled the picker
+        final authProvider = Provider.of<AuthProvider>(context, listen: false);
+        authProvider.setError('No license file was selected.');
       }
     } on Exception catch (e) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      // Use the new setError method here too
       authProvider.setError('Error reading license key: $e');
     }
   }
@@ -135,7 +149,6 @@ class _AuthScreenState extends State<AuthScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Icon
                   Container(
                     width: 80,
                     height: 80,
@@ -150,8 +163,6 @@ class _AuthScreenState extends State<AuthScreen> {
                     ),
                   ),
                   Constants.h24,
-
-                  // Title
                   const Text(
                     'Authentication Required',
                     style: TextStyle(
@@ -160,8 +171,6 @@ class _AuthScreenState extends State<AuthScreen> {
                     ),
                   ),
                   Constants.h8,
-
-                  // Toggle between auth methods
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -194,14 +203,11 @@ class _AuthScreenState extends State<AuthScreen> {
                     ],
                   ),
                   Constants.h16,
-
-                  // Form
                   Form(
                     key: _formKey,
                     child: Column(
                       children: [
                         if (!_showLicenseInput) ...[
-                          // Event ID field
                           TextFormField(
                             controller: _requestIdController,
                             decoration: InputDecoration(
@@ -220,8 +226,6 @@ class _AuthScreenState extends State<AuthScreen> {
                             enabled: !authProvider.isLoading,
                           ),
                           Constants.h16,
-
-                          // Auth code field
                           TextFormField(
                             controller: _authCodeController,
                             decoration: InputDecoration(
@@ -244,7 +248,6 @@ class _AuthScreenState extends State<AuthScreen> {
                             enabled: !authProvider.isLoading,
                           ),
                         ] else ...[
-                          // License certificate input
                           Column(
                             children: [
                               if (_licenseFileName != null)
