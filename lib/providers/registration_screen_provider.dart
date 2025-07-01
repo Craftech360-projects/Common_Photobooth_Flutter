@@ -49,10 +49,10 @@ class CustomTextField {
     this.borderWidth = 1.0,
     this.borderColor = AppColors.black,
     this.borderRadius = 0.0,
-    this.width = 650.0, // Default absolute width
-    this.height = 100.0,
-    this.left = 180.0,
-    this.top = 880.0,
+    this.width = 0.6, // Default to 60%
+    this.height = 0.05, // Default to 5%
+    this.left = 0.2, // Default to 20%
+    this.top = 0.45, // Default to 45%
     this.fieldType = TextFieldType.custom,
   });
 
@@ -126,6 +126,14 @@ class CustomTextField {
       };
 
   factory CustomTextField.fromJson(Map<String, dynamic> json) {
+    const double refWidth = 1080.0;
+    const double refHeight = 1920.0;
+
+    double toPercent(dynamic value, double defaultValue, double reference) {
+      double val = (value as num?)?.toDouble() ?? defaultValue;
+      return val > 1.0 ? val / reference : val;
+    }
+
     TextFieldType getTextFieldTypeFromName(String? name) {
       if (name == null) return TextFieldType.custom;
       return TextFieldType.values.firstWhere((e) => e.name == name,
@@ -149,11 +157,10 @@ class CustomTextField {
       borderWidth: json['borderWidth']?.toDouble() ?? 1.0,
       borderColor: Color(json['borderColor'] ?? AppColors.black.value),
       borderRadius: json['borderRadius']?.toDouble() ?? 4.0,
-      // *** FIX: Use a consistent absolute pixel default value ***
-      width: json['width']?.toDouble() ?? 650.0, // Was 0.55
-      height: json['height']?.toDouble() ?? 100.0, // Increased default height
-      left: json['left']?.toDouble() ?? 180.0, // Adjusted default position
-      top: json['top']?.toDouble() ?? 880.0, // Adjusted default position
+      width: toPercent(json['width'], 0.6, refWidth),
+      height: toPercent(json['height'], 0.05, refHeight),
+      left: toPercent(json['left'], 0.2, refWidth),
+      top: toPercent(json['top'], 0.45, refHeight),
       fieldType: getTextFieldTypeFromName(json['fieldType']),
     );
   }
@@ -169,6 +176,12 @@ class RegistrationScreenProvider extends ChangeNotifier {
   double _borderRadius = 4.0;
   List<CustomTextField> _textFields = [];
 
+  double _titleLeft = 0.36;
+  double _titleTop = 0.47;
+  double _titleWidth = 0.28;
+  double _buttonLeft = 0.22;
+  double _buttonBottom = 0.27;
+
   // Title settings
   bool _showTitle = false;
   String _titleText = "";
@@ -177,17 +190,14 @@ class RegistrationScreenProvider extends ChangeNotifier {
   double _titleLineHeight = 1.0;
   TextAlign _titleTextAlign = TextAlign.center;
   Color _titleTextColor = AppColors.white;
-  double _titleLeft = 395.0;
-  double _titleTop = 900.0;
-  double _titleWidth = 300.0;
 
   // Button settings
   bool _useImageButton = true;
   String _submitButtonText = 'SUBMIT';
   Color _submitButtonColor = AppColors.goldenYellow;
   Color _submitButtonTextColor = AppColors.black;
-  double _buttonWidth = 585.0;
-  double _buttonHeight = 150.0;
+  double _buttonWidth = 0.54; // ~585px on a 1080p screen
+  double _buttonHeight = 0.08; // ~150px on a 1920p screen
   double _buttonBorderRadius = 0.0;
   double _buttonFontSize = 18.0;
   FontWeight _buttonFontWeight = FontWeight.w500;
@@ -199,8 +209,6 @@ class RegistrationScreenProvider extends ChangeNotifier {
       const EdgeInsets.symmetric(horizontal: 30, vertical: 15);
   double _buttonOpacity = 1.0;
   double _buttonTextOpacity = 1.0;
-  double _buttonLeft = 246.0;
-  double _buttonBottom = 530.0;
 
   // Image button settings
   String? _buttonImagePath = 'assets/images/submit_btn.png';
@@ -263,7 +271,24 @@ class RegistrationScreenProvider extends ChangeNotifier {
   }
 
   Future<void> loadSettings() async {
-    // Load registration screen settings
+    const double refWidth = 1080.0;
+    const double refHeight = 1920.0;
+
+    double toPercent(String key, double defaultValue, double reference) {
+      double val = _prefs.getDouble(key) ?? defaultValue;
+      return val > 1.0 ? val / reference : val;
+    }
+
+    // --- Apply conversion to all position and size values ---
+    _titleLeft = toPercent('registration_title_left', 0.36, refWidth);
+    _titleTop = toPercent('registration_title_top', 0.47, refHeight);
+    _titleWidth = toPercent('registration_title_width', 0.28, refWidth);
+
+    _buttonLeft = toPercent('registration_button_left', 0.22, refWidth);
+    _buttonBottom = toPercent('registration_button_bottom', 0.27, refHeight);
+    _buttonWidth = toPercent('registration_button_width', 0.54, refWidth);
+    _buttonHeight = toPercent('registration_button_height', 0.08, refHeight);
+
     _showRegistrationScreen =
         _prefs.getBool('registration_show_screen') ?? _showRegistrationScreen;
     _fieldSpacing =
@@ -289,15 +314,6 @@ class RegistrationScreenProvider extends ChangeNotifier {
     _titleTextColor = Color(_prefs.getInt('registration_title_text_color') ??
         _titleTextColor.value);
 
-    _titleLeft = _prefs.getDouble('registration_title_left') ?? _titleLeft;
-    _titleTop = _prefs.getDouble('registration_title_top') ?? _titleTop;
-    _titleWidth = _prefs.getDouble('registration_title_width') ?? _titleWidth;
-
-// Load button position
-    _buttonLeft = _prefs.getDouble('registration_button_left') ?? _buttonLeft;
-    _buttonBottom =
-        _prefs.getDouble('registration_button_bottom') ?? _buttonBottom;
-
     // Load button padding
     final double verticalPadding =
         _prefs.getDouble('registration_button_padding_vertical') ?? 12.0;
@@ -310,19 +326,14 @@ class RegistrationScreenProvider extends ChangeNotifier {
     final String? fieldsJson = _prefs.getString('registration_text_fields');
     if (fieldsJson != null) {
       try {
-        // Add try-catch for robust parsing
         final List<dynamic> fields = jsonDecode(fieldsJson);
-        _textFields.clear();
-        _textFields.addAll(
-          fields.map((field) =>
-              CustomTextField.fromJson(field)), // Use factory constructor
-        );
-      } on Exception catch (e) {
-        debugPrint("Error decoding text fields JSON: $e. Using defaults.");
-        _setDefaultTextFields(); // Fallback to defaults on error
+        _textFields =
+            fields.map((field) => CustomTextField.fromJson(field)).toList();
+      } on Exception {
+        _setDefaultTextFields();
       }
     } else {
-      _setDefaultTextFields(); // Use default text fields
+      _setDefaultTextFields();
     }
 
     // Load button settings
@@ -476,27 +487,33 @@ class RegistrationScreenProvider extends ChangeNotifier {
   void _setDefaultTextFields() {
     _textFields = [
       CustomTextField(
-          id: 'name',
-          label: 'Full Name',
-          hintText: '',
-          fieldType: TextFieldType.name,
-          hasBorder: false,
-          fillColor: Colors.transparent,
-          labelColor: Colors.white,
-          textColor: Colors.white,
-          left: 180,
-          top: 880.0),
+        id: 'name',
+        label: 'Full Name',
+        hintText: '',
+        fieldType: TextFieldType.name,
+        hasBorder: false,
+        fillColor: Colors.transparent,
+        labelColor: Colors.white,
+        textColor: Colors.white,
+        left: 0.16,
+        top: 0.45,
+        width: 0.6,
+        height: 0.05,
+      ),
       CustomTextField(
-          id: 'email',
-          label: 'Email Address',
-          hintText: '',
-          fieldType: TextFieldType.email,
-          hasBorder: false,
-          fillColor: Colors.transparent,
-          labelColor: Colors.white,
-          textColor: Colors.white,
-          left: 180,
-          top: 1066.0),
+        id: 'email',
+        label: 'Email Address',
+        hintText: '',
+        fieldType: TextFieldType.email,
+        hasBorder: false,
+        fillColor: Colors.transparent,
+        labelColor: Colors.white,
+        textColor: Colors.white,
+        left: 0.16,
+        top: 0.55,
+        width: 0.6,
+        height: 0.05,
+      ),
     ];
   }
 
@@ -590,6 +607,14 @@ class RegistrationScreenProvider extends ChangeNotifier {
     }
   }
 
+  void setButtonDimensions(double width, double height) async {
+    _buttonWidth = width;
+    _buttonHeight = height;
+    await _prefs.setDouble('registration_button_width', width);
+    await _prefs.setDouble('registration_button_height', height);
+    notifyListeners();
+  }
+
   void updateTextField(String id, CustomTextField updatedField) {
     final index = _textFields.indexWhere((field) => field.id == id);
     if (index != -1) {
@@ -681,14 +706,6 @@ class RegistrationScreenProvider extends ChangeNotifier {
   void setSubmitButtonTextColor(Color color) async {
     _submitButtonTextColor = color;
     await _prefs.setInt('registration_button_text_color', color.value);
-    notifyListeners();
-  }
-
-  void setButtonDimensions(double width, double height) async {
-    _buttonWidth = width;
-    _buttonHeight = height;
-    await _prefs.setDouble('registration_button_width', width);
-    await _prefs.setDouble('registration_button_height', height);
     notifyListeners();
   }
 

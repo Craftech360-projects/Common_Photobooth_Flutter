@@ -1,76 +1,75 @@
-// lib/presentation/gender_screen_settings.dart
-
-import 'dart:ui';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
-import 'package:photobooth_flutter/presentation/gender_selection_screen.dart';
-import 'package:photobooth_flutter/providers/gender_selection_provider.dart';
+import 'package:photobooth_flutter/presentation/gender_screen.dart';
+import 'package:photobooth_flutter/providers/gender_screen_provider.dart';
+import 'package:photobooth_flutter/widgets/color_picker.dart';
+import 'package:photobooth_flutter/widgets/custom_dropdown.dart';
 import 'package:photobooth_flutter/widgets/custom_slider.dart';
 import 'package:photobooth_flutter/widgets/file_upload_area.dart';
-import 'package:photobooth_flutter/widgets/improved_color_picker.dart';
+import 'package:photobooth_flutter/widgets/form_row.dart';
+import 'package:photobooth_flutter/widgets/input_decoration.dart';
 import 'package:photobooth_flutter/widgets/settings_group.dart';
 import 'package:photobooth_flutter/widgets/settings_header.dart';
-import 'package:photobooth_flutter/widgets/settings_preview.dart';
 import 'package:provider/provider.dart';
 
-class GenderScreenSettings extends StatelessWidget {
+class GenderScreenSettings extends StatefulWidget {
   const GenderScreenSettings({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              AppColors.primaryGradientStart,
-              AppColors.primaryGradientEnd
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: const Row(
-          children: [
-            _PreviewSection(),
-            Expanded(child: _SettingsSection()),
-          ],
-        ),
-      ),
-    );
-  }
+  State<GenderScreenSettings> createState() => _GenderScreenSettingsState();
 }
 
-// --- UI SECTIONS ---
-class _PreviewSection extends StatelessWidget {
-  const _PreviewSection();
+class _GenderScreenSettingsState extends State<GenderScreenSettings> {
+  bool _isPanelOpen = true;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(12.0),
-      child: Stack(
+    const double settingsPanelWidth = 450.0;
+    return Scaffold(
+      body: Stack(
         children: [
-          const Center(
-            child: SettingsPreview(
-              width: 1080,
-              height: 1920,
-              child: GenderSelectionScreen(),
+          // Full-screen preview
+          const GenderSelectionScreen(),
+
+          // Sliding settings panel
+          AnimatedPositioned(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOutCubic,
+            right: _isPanelOpen ? 0 : -settingsPanelWidth,
+            top: 0,
+            bottom: 0,
+            width: settingsPanelWidth,
+            child: const _SettingsSection(),
+          ),
+
+          // Control Buttons
+          Positioned(
+            top: 20,
+            left: 20,
+            child: FloatingActionButton.small(
+              heroTag: 'genderBack', // Unique tag
+              tooltip: 'Back',
+              backgroundColor: AppColors.white.withOpacity(0.8),
+              child: const Icon(Icons.arrow_back,
+                  color: AppColors.primaryGradientEnd),
+              onPressed: () => Navigator.of(context).pop(),
             ),
           ),
-          Positioned(
-            top: 0,
-            left: 0,
-            child: Material(
-              color: AppColors.white.withValues(alpha: 0.9),
-              shape: const CircleBorder(),
-              elevation: 2.0,
-              child: IconButton(
-                icon: const Icon(Icons.arrow_back, color: AppColors.labelText),
-                onPressed: () => Navigator.of(context).pop(),
-                tooltip: 'Back',
+          AnimatedPositioned(
+            duration: const Duration(milliseconds: 300),
+            top: 20,
+            right: _isPanelOpen ? settingsPanelWidth + 20 : 20,
+            child: FloatingActionButton(
+              heroTag: 'genderToggle', // Unique tag
+              tooltip: 'Toggle Settings',
+              backgroundColor: AppColors.white,
+              onPressed: () => setState(() => _isPanelOpen = !_isPanelOpen),
+              child: Icon(
+                _isPanelOpen
+                    ? Icons.arrow_forward_ios_rounded
+                    : Icons.arrow_back_ios_rounded,
+                color: AppColors.primaryGradientEnd,
               ),
             ),
           ),
@@ -89,43 +88,40 @@ class _SettingsSection extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(0, 20, 20, 20),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20.0),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.85),
-              borderRadius: BorderRadius.circular(20.0),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-            ),
-            child: const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SettingsHeader(
-                  title: 'Gender Screen Settings',
-                  subtitle: 'Customize the gender selection options and style',
-                ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.all(30),
-                    child: Column(
-                      children: [
-                        _TitleSettingsGroup(),
-                        SizedBox(height: 25),
-                        _BackgroundSettingsGroup(),
-                        SizedBox(height: 25),
-                        _GenderImagesGroup(),
-                        SizedBox(height: 25),
-                        _SelectionEffectGroup(),
-                        SizedBox(height: 25),
-                        _ButtonSettingsGroup(),
-                        SizedBox(height: 25),
-                        _LayoutSettingsGroup(),
-                      ],
-                    ),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(20.0),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+          ),
+          child: const Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SettingsHeader(
+                title: 'Gender Screen Settings',
+                subtitle: 'Customize the gender selection options and style',
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.all(30),
+                  child: Column(
+                    children: [
+                      _TitleSettingsGroup(),
+                      SizedBox(height: 25),
+                      _BackgroundSettingsGroup(),
+                      SizedBox(height: 25),
+                      _GenderImagesGroup(),
+                      SizedBox(height: 25),
+                      _SelectionEffectGroup(),
+                      SizedBox(height: 25),
+                      _ButtonSettingsGroup(),
+                      SizedBox(height: 25),
+                      _LayoutSettingsGroup(),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -134,7 +130,6 @@ class _SettingsSection extends StatelessWidget {
 }
 
 // --- SETTINGS GROUPS ---
-
 class _TitleSettingsGroup extends StatelessWidget {
   const _TitleSettingsGroup();
 
@@ -151,14 +146,14 @@ class _TitleSettingsGroup extends StatelessWidget {
         children: [
           TextFormField(
             initialValue: settings.titleText,
-            decoration: _inputDecoration(context, 'Enter title text'),
+            decoration: inputDecoration(context, 'Enter title text'),
             onChanged: (value) => settings.setTitleText(value),
           ),
           const SizedBox(height: 15),
-          _FormRow(
+          FormRow(
             children: [
               Expanded(
-                  child: CustomSliderWithLabel(
+                  child: SliderWithLabel(
                 label: 'Font Size',
                 value: settings.titleFontSize,
                 min: 16,
@@ -166,7 +161,7 @@ class _TitleSettingsGroup extends StatelessWidget {
                 onChanged: (v) => settings.setTitleStyle(fontSize: v),
               )),
               Expanded(
-                  child: CustomSliderWithLabel(
+                  child: SliderWithLabel(
                 label: 'Opacity',
                 value: settings.titleOpacity,
                 min: 0.1,
@@ -183,7 +178,7 @@ class _TitleSettingsGroup extends StatelessWidget {
               title: 'Styling',
               child: Column(
                 children: [
-                  _CustomDropdown<FontWeight>(
+                  CustomDropdown<FontWeight>(
                     label: 'Font Weight',
                     value: settings.titleFontWeight,
                     items: const {
@@ -245,30 +240,36 @@ class _TitleSettingsGroup extends StatelessWidget {
             title: 'Positioning',
             child: Column(
               children: [
-                CustomSliderWithLabel(
-                    label: 'From Left',
-                    value: settings.titleLeft,
-                    min: 0,
-                    max: 1000,
-                    onChanged: (v) => settings.setTitlePosition(
-                        v, settings.titleTop, settings.titleWidth)),
-                CustomSliderWithLabel(
-                    label: 'From Top',
-                    value: settings.titleTop,
-                    min: 0,
-                    max: 1000,
-                    onChanged: (v) => settings.setTitlePosition(
-                        settings.titleLeft, v, settings.titleWidth)),
-                CustomSliderWithLabel(
-                    label: 'Width',
-                    value: settings.titleWidth,
-                    min: 200,
-                    max: 900,
-                    onChanged: (v) => settings.setTitlePosition(
-                        settings.titleLeft, settings.titleTop, v)),
+                SliderWithLabel(
+                  label: 'Horizontal Position (%)',
+                  value: settings.titleLeft,
+                  min: 0.0,
+                  max: 1.0,
+                  step: 0.01,
+                  onChanged: (v) => settings.setTitlePosition(
+                      v, settings.titleTop, settings.titleWidth),
+                ),
+                SliderWithLabel(
+                  label: 'Vertical Position (%)',
+                  value: settings.titleTop,
+                  min: 0.0,
+                  max: 1.0,
+                  step: 0.01,
+                  onChanged: (v) => settings.setTitlePosition(
+                      settings.titleLeft, v, settings.titleWidth),
+                ),
+                SliderWithLabel(
+                  label: 'Width (%)',
+                  value: settings.titleWidth,
+                  min: 0.1,
+                  max: 1.0,
+                  step: 0.01,
+                  onChanged: (v) => settings.setTitlePosition(
+                      settings.titleLeft, settings.titleTop, v),
+                ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );
@@ -329,7 +330,7 @@ class _GenderImagesGroup extends StatelessWidget {
       title: 'Gender Images',
       child: Column(
         children: [
-          _FormRow(
+          FormRow(
             children: [
               Expanded(
                 child: FileUploadArea(
@@ -370,29 +371,31 @@ class _GenderImagesGroup extends StatelessWidget {
             title: 'Sizing & Spacing',
             child: Column(
               children: [
-                _FormRow(
+                FormRow(
                   children: [
                     Expanded(
-                        child: CustomSliderWithLabel(
+                        child: SliderWithLabel(
                       label: 'Image Width',
                       value: settings.imageWidth,
-                      min: 80,
-                      max: 900,
+                      min: 0.1,
+                      max: 1.0,
+                      step: 0.01,
                       onChanged: (v) =>
                           settings.setImageDimensions(v, settings.imageHeight),
                     )),
                     Expanded(
-                        child: CustomSliderWithLabel(
+                        child: SliderWithLabel(
                       label: 'Image Height',
                       value: settings.imageHeight,
-                      min: 80,
-                      max: 900,
+                      min: 0.1,
+                      max: 1.0,
+                      step: 0.01,
                       onChanged: (v) =>
                           settings.setImageDimensions(settings.imageWidth, v),
                     )),
                   ],
                 ),
-                CustomSliderWithLabel(
+                SliderWithLabel(
                   label: 'Spacing Between',
                   value: settings.imageSpacing,
                   min: 0,
@@ -409,19 +412,21 @@ class _GenderImagesGroup extends StatelessWidget {
             title: "Positioning",
             child: Column(
               children: [
-                CustomSliderWithLabel(
+                SliderWithLabel(
                   label: 'From Left',
                   value: settings.genderSelectionLeft,
-                  min: 0,
-                  max: 1000,
+                  min: 0.0,
+                  max: 1.0,
+                  step: 0.01,
                   onChanged: (v) => settings.setGenderCardPosition(
                       v, settings.genderSelectionTop),
                 ),
-                CustomSliderWithLabel(
+                SliderWithLabel(
                   label: 'From Top',
                   value: settings.genderSelectionTop,
-                  min: 0,
-                  max: 1000,
+                  min: 0.0,
+                  max: 1.0,
+                  step: 0.01,
                   onChanged: (v) => settings.setGenderCardPosition(
                       settings.genderSelectionLeft, v),
                 )
@@ -457,7 +462,7 @@ class _SelectionEffectGroup extends StatelessWidget {
           ),
           if (settings.useSelectionEffect) ...[
             const SizedBox(height: 15),
-            CustomSliderWithLabel(
+            SliderWithLabel(
               label: 'Selected Image Scale',
               value: settings.selectedImageScale,
               min: 1.0,
@@ -485,9 +490,9 @@ class _SelectionEffectGroup extends StatelessWidget {
                 onColorChanged: (c) =>
                     settings.setSelectionEffect(glowColor: c),
               ),
-              _FormRow(children: [
+              FormRow(children: [
                 Expanded(
-                  child: CustomSliderWithLabel(
+                  child: SliderWithLabel(
                     label: 'Glow Intensity',
                     value: settings.selectionGlowIntensity,
                     min: 0.1,
@@ -498,7 +503,7 @@ class _SelectionEffectGroup extends StatelessWidget {
                   ),
                 ),
                 Expanded(
-                  child: CustomSliderWithLabel(
+                  child: SliderWithLabel(
                     label: 'Glow Spread',
                     value: settings.selectionGlowSpread,
                     min: 1.0,
@@ -526,7 +531,7 @@ class _ButtonSettingsGroup extends StatelessWidget {
       title: 'Next Button',
       child: Column(
         children: [
-          _ToggleButtonGroup(
+          ToggleButtonGroup(
             options: const ['Text Button', 'Image Button'],
             selectedIndex: settings.useImageButton ? 1 : 0,
             onSelected: (i) => settings.setUseImageButton(i == 1),
@@ -551,11 +556,11 @@ class _ButtonSettingsGroup extends StatelessWidget {
               children: [
                 TextFormField(
                   initialValue: settings.buttonText,
-                  decoration: _inputDecoration(context, 'Button Text'),
+                  decoration: inputDecoration(context, 'Button Text'),
                   onChanged: (v) => settings.setButtonText(v),
                 ),
                 const SizedBox(height: 15),
-                _FormRow(children: [
+                FormRow(children: [
                   Expanded(
                     child: _CustomColorPicker(
                       label: 'Button Color',
@@ -582,45 +587,49 @@ class _ButtonSettingsGroup extends StatelessWidget {
             title: 'Sizing & Positioning',
             child: Column(
               children: [
-                _FormRow(children: [
+                FormRow(children: [
                   Expanded(
-                    child: CustomSliderWithLabel(
+                    child: SliderWithLabel(
                       label: 'Width',
                       value: settings.buttonWidth,
-                      min: 100,
-                      max: 800,
+                      min: 0.1,
+                      max: 1.0,
+                      step: 0.01,
                       onChanged: (v) => settings.setButtonDimensions(
                           v, settings.buttonHeight),
                     ),
                   ),
                   Expanded(
-                    child: CustomSliderWithLabel(
+                    child: SliderWithLabel(
                       label: 'Height',
                       value: settings.buttonHeight,
-                      min: 40,
-                      max: 200,
+                      min: 0.1,
+                      max: 1.0,
+                      step: 0.01,
                       onChanged: (v) =>
                           settings.setButtonDimensions(settings.buttonWidth, v),
                     ),
                   )
                 ]),
-                _FormRow(children: [
+                FormRow(children: [
                   Expanded(
-                    child: CustomSliderWithLabel(
+                    child: SliderWithLabel(
                       label: 'From Left',
                       value: settings.buttonLeft,
-                      min: 0,
-                      max: 1000,
+                      min: 0.0,
+                      max: 1.0,
+                      step: 0.01,
                       onChanged: (v) =>
                           settings.setButtonPosition(v, settings.buttonBottom),
                     ),
                   ),
                   Expanded(
-                    child: CustomSliderWithLabel(
+                    child: SliderWithLabel(
                       label: 'From Bottom',
                       value: settings.buttonBottom,
-                      min: 0,
-                      max: 1000,
+                      min: 0.0,
+                      max: 1.0,
+                      step: 0.01,
                       onChanged: (v) =>
                           settings.setButtonPosition(settings.buttonLeft, v),
                     ),
@@ -644,95 +653,13 @@ class _LayoutSettingsGroup extends StatelessWidget {
     return SettingsGroup(
       icon: '📏',
       title: 'Layout',
-      child: CustomSliderWithLabel(
+      child: SliderWithLabel(
         label: 'Screen Padding',
         value: settings.screenPadding,
         min: 0,
         max: 64,
         onChanged: (v) => settings.setScreenPadding(v),
       ),
-    );
-  }
-}
-
-// --- TEMPORARY HELPERS (Can be moved to global files) ---
-// These are added here for completeness, but should be moved to the settings_ui_helpers directory.
-
-class _FormRow extends StatelessWidget {
-  final List<Widget> children;
-  const _FormRow({required this.children});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 15.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          children[0],
-          const SizedBox(width: 20),
-          if (children.length > 1) children[1],
-        ],
-      ),
-    );
-  }
-}
-
-InputDecoration _inputDecoration(BuildContext context, String hintText) {
-  final theme = Theme.of(context);
-  return InputDecoration(
-    hintText: hintText,
-    filled: true,
-    fillColor: Colors.white.withValues(alpha: 0.8),
-    hintStyle: theme.textTheme.bodyMedium
-        ?.copyWith(color: AppColors.labelText.withValues(alpha: 0.7)),
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: AppColors.inputBorder, width: 2),
-    ),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: AppColors.inputBorder, width: 2),
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10),
-      borderSide:
-          const BorderSide(color: AppColors.primaryGradientStart, width: 2),
-    ),
-    contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-  );
-}
-
-class _CustomDropdown<T> extends StatelessWidget {
-  final String label;
-  final T value;
-  final Map<T, String> items;
-  final ValueChanged<T?> onChanged;
-
-  const _CustomDropdown(
-      {required this.label,
-      required this.value,
-      required this.items,
-      required this.onChanged});
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: textTheme.bodyMedium),
-        const SizedBox(height: 8),
-        DropdownButtonFormField<T>(
-          value: value,
-          items: items.entries
-              .map((e) =>
-                  DropdownMenuItem<T>(value: e.key, child: Text(e.value)))
-              .toList(),
-          onChanged: onChanged,
-          decoration: _inputDecoration(context, ''),
-        ),
-      ],
     );
   }
 }
@@ -809,13 +736,14 @@ class _CustomColorPicker extends StatelessWidget {
   }
 }
 
-class _ToggleButtonGroup extends StatelessWidget {
+class ToggleButtonGroup extends StatelessWidget {
   final List<String> options;
   final int selectedIndex;
   final ValueChanged<int> onSelected;
 
-  const _ToggleButtonGroup(
-      {required this.options,
+  const ToggleButtonGroup(
+      {super.key,
+      required this.options,
       required this.selectedIndex,
       required this.onSelected});
 

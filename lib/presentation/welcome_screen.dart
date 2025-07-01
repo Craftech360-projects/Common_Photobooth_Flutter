@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/providers/admin_watermark_provider.dart';
@@ -21,23 +22,22 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     final welcomeSettings = context.watch<WelcomeScreenProvider>();
     final globalSettings = context.watch<GlobalSettingsProvider>();
     final watermarkProvider = context.watch<AdminWatermarkProvider>();
+    final screenSize = MediaQuery.of(context).size;
 
-    // If welcome screen is disabled, navigate directly to participant details
     if (!welcomeSettings.showWelcomeScreen) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.pushReplacementNamed(context, AppRoutes.participantDetails);
       });
-      return const SizedBox.shrink(); // Return empty widget while redirecting
+      return const SizedBox.shrink();
     }
 
+    // --- Responsive Scaling Logic ---
+    // This is used for font sizes and non-stretching elements
+    const refWidth = 1080.0;
+    const refHeight = 1920.0;
+    final textScale = min(screenSize.width / refWidth, screenSize.height / refHeight);
+
     return Scaffold(
-      // appBar: AppBar(
-      //   leading: IconButton(
-      //     onPressed: () =>
-      //         Navigator.pushNamed(context, AppRoutes.welcomeScreenSettings),
-      //     icon: const Icon(Icons.star),
-      //   ),
-      // ),
       body: WatermarkOverlay(
         show: watermarkProvider.showWatermark,
         child: Stack(
@@ -54,18 +54,18 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               ),
             ),
 
-            // Content
+            // --- CORRECTED POSITIONING ---
             Positioned(
-              left: welcomeSettings.welcomeMessageLeft,
-              top: welcomeSettings.welcomeMessageTop,
-              width: welcomeSettings.welcomeMessageWidth,
+              left: welcomeSettings.welcomeMessageLeft * screenSize.width,
+              top: welcomeSettings.welcomeMessageTop * screenSize.height,
+              width: welcomeSettings.welcomeMessageWidth * screenSize.width,
               child: Text(
                 welcomeSettings.welcomeMessage,
                 style: TextStyle(
-                  fontSize: welcomeSettings.welcomeMessageFontSize,
+                  fontSize: welcomeSettings.welcomeMessageFontSize * textScale,
                   fontWeight: welcomeSettings.welcomeMessageFontWeight,
                   color: welcomeSettings.welcomeMessageColor
-                      .withValues(alpha: welcomeSettings.welcomeMessageOpacity),
+                      .withOpacity(welcomeSettings.welcomeMessageOpacity),
                   fontStyle: welcomeSettings.welcomeMessageItalic
                       ? FontStyle.italic
                       : FontStyle.normal,
@@ -74,16 +74,16 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 textAlign: welcomeSettings.welcomeMessageTextAlign,
               ),
             ),
-
             Positioned(
-              left: welcomeSettings.buttonLeft,
-              bottom: welcomeSettings.buttonBottom,
+              left: welcomeSettings.buttonLeft * screenSize.width,
+              bottom: welcomeSettings.buttonBottom * screenSize.height,
               child: welcomeSettings.useImageButton
-                  ? _buildImageButton(welcomeSettings)
-                  : _buildTextButton(welcomeSettings),
+                  ? _buildImageButton(welcomeSettings, textScale)
+                  : _buildTextButton(welcomeSettings, textScale),
             ),
+            // --- END OF CORRECTION ---
 
-            // Admin access button (hidden at bottom)
+            // Admin access button
             Positioned(
               right: 0,
               top: 0,
@@ -93,9 +93,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 child: Container(
                   width: 50,
                   height: 50,
-                  decoration: const BoxDecoration(
-                    color: Colors.transparent,
-                  ),
+                  color: Colors.transparent,
                 ),
               ),
             ),
@@ -105,93 +103,78 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     );
   }
 
-  Widget _buildTextButton(WelcomeScreenProvider settings) {
-    return Opacity(
-      opacity: settings.buttonOpacity,
-      child: ElevatedButton(
-        onPressed: () =>
-            Navigator.pushNamed(context, AppRoutes.participantDetails),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: settings.welcomeButtonColor,
-          foregroundColor: settings.welcomeButtonTextColor,
-          minimumSize: Size(settings.buttonWidth, settings.buttonHeight),
-          padding: EdgeInsets.symmetric(
-            vertical: settings.buttonPaddingVertical,
-            horizontal: settings.buttonPaddingHorizontal,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
-          ),
-        ),
-        child: Text(
-          settings.welcomeButtonText,
-          style: TextStyle(
-            fontSize: settings.buttonTextFontSize,
-            fontWeight: settings.buttonTextFontWeight,
-            color: settings.welcomeButtonTextColor
-                .withValues(alpha: settings.buttonTextOpacity),
-            fontStyle:
-                settings.buttonTextItalic ? FontStyle.italic : FontStyle.normal,
-            height: settings.buttonTextLineHeight,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildImageButton(WelcomeScreenProvider settings) {
-    if (settings.buttonImagePath == null) {
-      // Fallback to text button if no image is selected
-      return _buildTextButton(settings);
-    }
-
-    return Opacity(
-      opacity: settings.buttonOpacity,
-      child: GestureDetector(
-        onTap: () => Navigator.pushNamed(context, AppRoutes.participantDetails),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
-          child: Container(
-            width: settings.buttonWidth,
-            height: settings.buttonHeight,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
-              image: DecorationImage(
-                image: settings.isButtonImageAsset
-                    ? AssetImage(settings.buttonImagePath!)
-                    : FileImage(File(settings.buttonImagePath!))
-                        as ImageProvider,
-                fit: BoxFit.cover,
-                opacity: settings.buttonImageOpacity,
+  // Button build methods now only need textScale for fonts and border radius
+  Widget _buildTextButton(WelcomeScreenProvider settings, double textScale) {
+      return Opacity(
+          opacity: settings.buttonOpacity,
+          child: ElevatedButton(
+              onPressed: () =>
+                  Navigator.pushNamed(context, AppRoutes.participantDetails),
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: settings.welcomeButtonColor,
+                  foregroundColor: settings.welcomeButtonTextColor,
+                  minimumSize: Size(settings.buttonWidth, settings.buttonHeight),
+                  padding: EdgeInsets.symmetric(
+                      vertical: settings.buttonPaddingVertical,
+                      horizontal: settings.buttonPaddingHorizontal,
+                  ),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(settings.buttonBorderRadius * textScale),
+                  ),
               ),
-            ),
+              child: Text(
+                  settings.welcomeButtonText,
+                  style: TextStyle(
+                      fontSize: settings.buttonTextFontSize * textScale,
+                      fontWeight: settings.buttonTextFontWeight,
+                      color: settings.welcomeButtonTextColor
+                          .withOpacity(settings.buttonTextOpacity),
+                      fontStyle:
+                          settings.buttonTextItalic ? FontStyle.italic : FontStyle.normal,
+                      height: settings.buttonTextLineHeight,
+                  ),
+              ),
           ),
+      );
+  }
+
+  Widget _buildImageButton(WelcomeScreenProvider settings, double textScale) {
+    if (settings.buttonImagePath == null) {
+      return _buildTextButton(settings, textScale);
+    }
+    return Opacity(
+        opacity: settings.buttonOpacity,
+        child: GestureDetector(
+            onTap: () => Navigator.pushNamed(context, AppRoutes.participantDetails),
+            child: ClipRRect(
+                borderRadius: BorderRadius.circular(settings.buttonBorderRadius * textScale),
+                child: SizedBox(
+                    width: settings.buttonWidth,
+                    height: settings.buttonHeight,
+                    child: Image(
+                        image: settings.isButtonImageAsset
+                            ? AssetImage(settings.buttonImagePath!)
+                            : FileImage(File(settings.buttonImagePath!)) as ImageProvider,
+                        fit: BoxFit.cover,
+                        opacity: AlwaysStoppedAnimation(settings.buttonImageOpacity),
+                    ),
+                ),
+            ),
         ),
-      ),
     );
   }
 
-  ImageProvider _getBackgroundImage(WelcomeScreenProvider welcomeSettings,
-      GlobalSettingsProvider globalSettings) {
-    // First try to use welcome screen specific background
+  ImageProvider _getBackgroundImage(WelcomeScreenProvider welcomeSettings, GlobalSettingsProvider globalSettings) {
     if (welcomeSettings.welcomeScreenBackground != null) {
-      if (welcomeSettings.isWelcomeScreenBackgroundAsset) {
-        return AssetImage(welcomeSettings.welcomeScreenBackground!);
-      } else {
-        return FileImage(File(welcomeSettings.welcomeScreenBackground!));
-      }
+      return welcomeSettings.isWelcomeScreenBackgroundAsset
+          ? AssetImage(welcomeSettings.welcomeScreenBackground!)
+          : FileImage(File(welcomeSettings.welcomeScreenBackground!));
     }
-
-    // Fall back to global background
     if (globalSettings.backgroundImage != null) {
-      if (globalSettings.isAssetImage) {
-        return AssetImage(globalSettings.backgroundImage!);
-      } else {
-        return FileImage(File(globalSettings.backgroundImage!));
-      }
+      return globalSettings.isAssetImage
+          ? AssetImage(globalSettings.backgroundImage!)
+          : FileImage(File(globalSettings.backgroundImage!));
     }
-
-    // Default background
     return const AssetImage('assets/images/background.jpg');
   }
 }

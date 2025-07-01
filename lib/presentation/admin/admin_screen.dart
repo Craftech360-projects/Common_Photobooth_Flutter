@@ -6,7 +6,7 @@ import 'package:photobooth_flutter/providers/admin_watermark_provider.dart';
 import 'package:photobooth_flutter/providers/auth_provider.dart';
 import 'package:photobooth_flutter/providers/category_settings_provider.dart';
 import 'package:photobooth_flutter/providers/face_capture_provider.dart';
-import 'package:photobooth_flutter/providers/gender_selection_provider.dart';
+import 'package:photobooth_flutter/providers/gender_screen_provider.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/providers/loading_screen_provider.dart';
 import 'package:photobooth_flutter/providers/output_screen_provider.dart';

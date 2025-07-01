@@ -62,7 +62,7 @@ class _AuthScreenState extends State<AuthScreen> {
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.any,
-        allowedExtensions: ['.lic'],
+        // allowedExtensions: ['.lic'],
         withData: kIsWeb, // Only get bytes on the web
       );
 

@@ -8,6 +8,21 @@ import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class GenderSelectionProvider extends ChangeNotifier {
+  double _titleLeft = 0.36; // ~395px on 1080p
+  double _titleTop = 0.41; // ~795px on 1920p
+  double _titleWidth = 0.28; // ~300px on 1080p
+
+  double _imageWidth = 0.38; // ~410px on 1080p
+  double _imageHeight = 0.26; // ~495px on 1920p
+  double _imageSpacing = 40.0; // Spacing can remain in logical pixels
+  double _genderSelectionLeft = 0.09; // ~100px on 1080p
+  double _genderSelectionTop = 0.43; // ~830px on 1920p
+
+  double _buttonLeft = 0.22; // ~245px on 1080p
+  double _buttonBottom = 0.2; // ~380px on 1920p
+  double _buttonWidth = 0.54; // ~585px on 1080p
+  double _buttonHeight = 0.08; // ~150px on 1920p
+
   // Title settings
   String _titleText = '';
   double _titleFontSize = 22.0;
@@ -17,25 +32,17 @@ class GenderSelectionProvider extends ChangeNotifier {
   bool _titleItalic = false;
   double _titleOpacity = 1.0;
   TextAlign _titleAlignment = TextAlign.center;
-  // Position properties for welcome message
-  double _titleLeft = 395.0;
-  double _titleTop = 795.0;
-  double _titleWidth = 300.0;
 
   // Gender images settings
   String? _maleImagePath = 'assets/images/male_avatar.png';
   String? _femaleImagePath = 'assets/images/female_avatar.png';
   bool _isMaleImageAsset = true;
   bool _isFemaleImageAsset = true;
-  double _imageWidth = 410.0;
-  double _imageHeight = 495.0;
-  double _imageSpacing = 40.0;
+
   double _imageBorderRadius = 0.0;
   bool _showImageBorder = false;
   double _imageBorderWidth = 0.0;
   Color _imageBorderColor = AppColors.yellow;
-  double _genderSelectionLeft = 100.0;
-  double _genderSelectionTop = 830.0;
 
   // Selection effect settings
   bool _useSelectionEffect = true;
@@ -47,8 +54,6 @@ class GenderSelectionProvider extends ChangeNotifier {
 
   // Button settings
   String _buttonText = 'Continue';
-  double _buttonWidth = 585.0;
-  double _buttonHeight = 150.0;
   double _buttonFontSize = 18.0;
   FontWeight _buttonFontWeight = FontWeight.w500;
   Color _buttonColor = AppColors.yellow;
@@ -62,10 +67,6 @@ class GenderSelectionProvider extends ChangeNotifier {
   bool _isButtonImageAsset = true;
   EdgeInsets _buttonPadding =
       const EdgeInsets.symmetric(vertical: 0, horizontal: 0);
-
-  // Position properties for button
-  double _buttonLeft = 245.0;
-  double _buttonBottom = 380.0;
 
   // Layout settings
   double _screenPadding = 0.0;
@@ -103,7 +104,7 @@ class GenderSelectionProvider extends ChangeNotifier {
   double get genderSelectionTop => _genderSelectionTop;
 
   String get buttonText => _buttonText;
-double get buttonWidth => _buttonWidth;
+  double get buttonWidth => _buttonWidth;
   double get buttonHeight => _buttonHeight;
   double get buttonFontSize => _buttonFontSize;
   FontWeight get buttonFontWeight => _buttonFontWeight;
@@ -162,8 +163,8 @@ double get buttonWidth => _buttonWidth;
     _titleLeft = left;
     _titleTop = top;
     _titleWidth = width;
-    notifyListeners();
     await _saveSettings();
+    notifyListeners();
   }
 
   void setGenderCardPosition(double left, double top) {
@@ -367,6 +368,15 @@ double get buttonWidth => _buttonWidth;
     if (settingsJson != null) {
       final Map<String, dynamic> settings = jsonDecode(settingsJson);
 
+      const double refWidth = 1080.0;
+      const double refHeight = 1920.0;
+
+      // Helper to convert old pixel values to new percentage values
+      double toPercent(dynamic value, double defaultValue, double reference) {
+        double val = (value as num?)?.toDouble() ?? defaultValue;
+        return val > 1.0 ? val / reference : val;
+      }
+
       // Title settings
       _titleText = settings['titleText'] ?? _titleText;
       _titleFontSize = settings['titleFontSize'] ?? _titleFontSize;
@@ -380,18 +390,26 @@ double get buttonWidth => _buttonWidth;
       _titleAlignment =
           TextAlign.values[settings['titleAlignment'] ?? _titleAlignment.index];
 
-      // Load position properties
-      _titleLeft = settings['titleLeft'] ?? _titleLeft;
-      _titleTop = settings['titleTop'] ?? _titleTop;
-      _titleWidth = settings['titleWidth'] ?? _titleWidth;
-      // Gender selection position
-      _genderSelectionLeft =
-          settings['genderSelectionLeft'] ?? _genderSelectionLeft;
-      _genderSelectionTop =
-          settings['genderSelectionTop'] ?? _genderSelectionTop;
-      // Button position
-      _buttonLeft = settings['buttonLeft'] ?? _buttonLeft;
-      _buttonBottom = settings['buttonBottom'] ?? _buttonBottom;
+      // --- Apply migration logic to all position and size values ---
+      _titleLeft = toPercent(settings['titleLeft'], _titleLeft, refWidth);
+      _titleTop = toPercent(settings['titleTop'], _titleTop, refHeight);
+      _titleWidth = toPercent(settings['titleWidth'], _titleWidth, refWidth);
+
+      _imageWidth = toPercent(settings['imageWidth'], _imageWidth, refWidth);
+      _imageHeight =
+          toPercent(settings['imageHeight'], _imageHeight, refHeight);
+
+      _genderSelectionLeft = toPercent(
+          settings['genderSelectionLeft'], _genderSelectionLeft, refWidth);
+      _genderSelectionTop = toPercent(
+          settings['genderSelectionTop'], _genderSelectionTop, refHeight);
+
+      _buttonLeft = toPercent(settings['buttonLeft'], _buttonLeft, refWidth);
+      _buttonBottom =
+          toPercent(settings['buttonBottom'], _buttonBottom, refHeight);
+      _buttonWidth = toPercent(settings['buttonWidth'], _buttonWidth, refWidth);
+      _buttonHeight =
+          toPercent(settings['buttonHeight'], _buttonHeight, refHeight);
 
       // Gender images settings - with validation
       if (settings.containsKey('maleImagePath')) {
@@ -424,8 +442,6 @@ double get buttonWidth => _buttonWidth;
         }
       }
 
-      _imageWidth = settings['imageWidth'] ?? _imageWidth;
-      _imageHeight = settings['imageHeight'] ?? _imageHeight;
       _imageSpacing = settings['imageSpacing'] ?? _imageSpacing;
       _imageBorderRadius = settings['imageBorderRadius'] ?? _imageBorderRadius;
       _showImageBorder = settings['showImageBorder'] ?? _showImageBorder;
@@ -448,8 +464,6 @@ double get buttonWidth => _buttonWidth;
 
       // Button settings
       _buttonText = settings['buttonText'] ?? _buttonText;
-      _buttonWidth = settings['buttonWidth'] ?? _buttonWidth;
-      _buttonHeight = settings['buttonHeight'] ?? _buttonHeight;
       _buttonFontSize = settings['buttonFontSize'] ?? _buttonFontSize;
       _buttonFontWeight = FontWeight
           .values[settings['buttonFontWeight'] ?? _buttonFontWeight.index];

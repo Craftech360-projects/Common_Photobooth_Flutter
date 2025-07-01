@@ -8,7 +8,7 @@ import 'package:photobooth_flutter/providers/category_settings_provider.dart';
 import 'package:photobooth_flutter/widgets/custom_slider.dart';
 import 'package:photobooth_flutter/widgets/file_upload_area.dart';
 import 'package:photobooth_flutter/widgets/form_row.dart';
-import 'package:photobooth_flutter/widgets/improved_color_picker.dart';
+import 'package:photobooth_flutter/widgets/color_picker.dart';
 import 'package:photobooth_flutter/widgets/settings_group.dart';
 import 'package:photobooth_flutter/widgets/settings_header.dart';
 import 'package:photobooth_flutter/widgets/settings_preview.dart';
@@ -161,7 +161,7 @@ class _TitleSettingsGroup extends StatelessWidget {
               onChanged: (value) => provider.setTitleText(value),
             ),
             const SizedBox(height: 15),
-            CustomSliderWithLabel(
+            SliderWithLabel(
               label: 'Font Size',
               value: provider.titleFontSize,
               min: 16.0,
@@ -324,7 +324,7 @@ Widget _buildCardSettingsGroup(BuildContext context,
           child: FormRow(
             children: [
               Expanded(
-                child: CustomSliderWithLabel(
+                child: SliderWithLabel(
                   label: 'Width',
                   value: settings.width,
                   min: 100,
@@ -334,7 +334,7 @@ Widget _buildCardSettingsGroup(BuildContext context,
                 ),
               ),
               Expanded(
-                child: CustomSliderWithLabel(
+                child: SliderWithLabel(
                   label: 'Height',
                   value: settings.height,
                   min: 100,
@@ -353,7 +353,7 @@ Widget _buildCardSettingsGroup(BuildContext context,
           title: 'Border & Glow',
           child: Column(
             children: [
-              CustomSliderWithLabel(
+              SliderWithLabel(
                 label: 'Border Radius',
                 value: settings.borderRadius,
                 min: 0,
@@ -378,7 +378,7 @@ Widget _buildCardSettingsGroup(BuildContext context,
                   children: [
                     Expanded(
                       flex: 2,
-                      child: CustomSliderWithLabel(
+                      child: SliderWithLabel(
                         label: 'Border Width',
                         value: settings.borderWidth,
                         min: 1,

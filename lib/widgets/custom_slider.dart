@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 
-class CustomSliderWithLabel extends StatelessWidget {
-  final String label;
+class SliderWithLabel extends StatelessWidget {
+   final String label;
   final double value;
   final double min;
   final double max;
   final double? step;
   final ValueChanged<double> onChanged;
 
-  const CustomSliderWithLabel({
+  const SliderWithLabel({
     super.key,
     required this.label,
     required this.value,
@@ -21,11 +21,19 @@ class CustomSliderWithLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Clamp the value to ensure it's within the min/max range, preventing crashes
+    final safeValue = value.clamp(min, max);
+
     int? divisions = step != null ? ((max - min) / step!).round() : null;
-    String valueLabel =
-        step == 0.1 ? value.toStringAsFixed(1) : value.round().toString();
-    final textTheme = Theme.of(context).textTheme;
-    final clampedValue = value.clamp(min, max);
+    String valueLabel;
+
+    if (max == 1.0 && min == 0.0) {
+      valueLabel = '${(safeValue * 100).toStringAsFixed(0)}%'; // Show as percentage
+    } else if (step == 0.1) {
+      valueLabel = safeValue.toStringAsFixed(1);
+    } else {
+      valueLabel = safeValue.round().toString();
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -33,10 +41,8 @@ class CustomSliderWithLabel extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(label, style: textTheme.bodyMedium),
-            Text(valueLabel,
-                style: textTheme.bodyMedium
-                    ?.copyWith(fontWeight: FontWeight.bold)),
+            Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.labelText)),
+            Text(valueLabel, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.labelText)),
           ],
         ),
         SliderTheme(
@@ -46,10 +52,10 @@ class CustomSliderWithLabel extends StatelessWidget {
             trackHeight: 6.0,
             thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10.0),
             thumbColor: AppColors.primaryGradientStart,
-            overlayColor: AppColors.primaryGradientStart.withValues(alpha: 0.2),
+            overlayColor: AppColors.primaryGradientStart.withOpacity(0.2),
           ),
           child: Slider(
-            value: clampedValue,
+            value: safeValue,
             min: min,
             max: max,
             divisions: divisions,

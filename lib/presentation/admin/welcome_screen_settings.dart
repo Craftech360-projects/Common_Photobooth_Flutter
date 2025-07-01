@@ -1,103 +1,87 @@
-import 'dart:io';
 import 'dart:ui';
 
-import 'package:dotted_border/dotted_border.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/presentation/welcome_screen.dart';
 import 'package:photobooth_flutter/providers/admin_watermark_provider.dart';
 import 'package:photobooth_flutter/providers/welcome_screen_provider.dart';
-import 'package:photobooth_flutter/widgets/improved_color_picker.dart';
-import 'package:photobooth_flutter/widgets/settings_preview.dart';
+import 'package:photobooth_flutter/widgets/custom_dropdown.dart';
+import 'package:photobooth_flutter/widgets/file_upload_area.dart';
+import 'package:photobooth_flutter/widgets/form_row.dart';
+import 'package:photobooth_flutter/widgets/color_picker.dart';
+import 'package:photobooth_flutter/widgets/input_decoration.dart';
+import 'package:photobooth_flutter/widgets/settings_group.dart';
+import 'package:photobooth_flutter/widgets/custom_slider.dart';
 import 'package:photobooth_flutter/widgets/snackbar.dart';
+import 'package:photobooth_flutter/widgets/toggle_btn_group.dart';
 import 'package:photobooth_flutter/widgets/watermark_overlay.dart';
 import 'package:provider/provider.dart';
 
-class _AppTextStyles {
-  static const TextStyle settingsTitle = TextStyle(
-    fontSize: 28,
-    fontWeight: FontWeight.bold,
-    color: AppColors.settingsTitle,
-  );
-  static const TextStyle groupTitle = TextStyle(
-    fontSize: 18,
-    fontWeight: FontWeight.w600,
-    color: AppColors.settingsTitle,
-  );
-  static const TextStyle label = TextStyle(
-    fontSize: 14,
-    fontWeight: FontWeight.w500,
-    color: AppColors.labelText,
-  );
+// --- MAIN WELCOME SCREEN SETTINGS WIDGET ---
+class WelcomeScreenSettings extends StatefulWidget {
+  const WelcomeScreenSettings({super.key});
+
+  @override
+  State<WelcomeScreenSettings> createState() => _WelcomeScreenSettingsState();
 }
 
-// --- MAIN WELCOME SCREEN SETTINGS WIDGET ---
-class WelcomeScreenSettings extends StatelessWidget {
-  const WelcomeScreenSettings({super.key});
+class _WelcomeScreenSettingsState extends State<WelcomeScreenSettings> {
+  bool _isPanelOpen = true;
 
   @override
   Widget build(BuildContext context) {
     final watermarkProvider = context.watch<AdminWatermarkProvider>();
+    double settingsPanelWidth = MediaQuery.of(context).size.width * 0.8;
 
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              AppColors.primaryGradientStart,
-              AppColors.primaryGradientEnd
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: WatermarkOverlay(
-          show: watermarkProvider.showWatermark,
-          child: const Row(
-            children: [
-              _PreviewSection(),
-              Expanded(child: _SettingsSection()),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// --- UI SECTIONS ---
-class _PreviewSection extends StatelessWidget {
-  const _PreviewSection();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(12.0),
-      child: Stack(
-        children: [
-          const Center(
-            child: SettingsPreview(
-              width: 1080,
-              height: 1920,
-              child: WelcomeScreen(),
+      body: WatermarkOverlay(
+        show: watermarkProvider.showWatermark,
+        child: Stack(
+          children: [
+            const WelcomeScreen(),
+            AnimatedPositioned(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOutCubic,
+              right: _isPanelOpen ? 0 : -settingsPanelWidth,
+              top: 0,
+              bottom: 0,
+              width: settingsPanelWidth,
+              child: const _SettingsSection(),
             ),
-          ),
-          Positioned(
-            top: 0,
-            left: 0,
-            child: Material(
-              color: AppColors.white.withValues(alpha: 0.9),
-              shape: const CircleBorder(),
-              elevation: 2.0,
-              child: IconButton(
-                icon: const Icon(Icons.arrow_back, color: AppColors.labelText),
-                onPressed: () => Navigator.of(context).pop(),
+            Positioned(
+              top: 20,
+              left: 20,
+              child: FloatingActionButton.small(
+                heroTag: 'backButtonWelcome', // Unique tag
                 tooltip: 'Back',
+                backgroundColor: Colors.white.withOpacity(0.8),
+                child: const Icon(Icons.arrow_back, color: Colors.blue),
+                onPressed: () => Navigator.of(context).pop(),
               ),
             ),
-          ),
-        ],
+            AnimatedPositioned(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOutCubic,
+              top: 20,
+              right: _isPanelOpen ? settingsPanelWidth + 20 : 20,
+              child: FloatingActionButton(
+                heroTag: 'toggleButtonWelcome', // Unique tag
+                tooltip: 'Toggle Settings',
+                backgroundColor: Colors.white,
+                onPressed: () {
+                  setState(() {
+                    _isPanelOpen = !_isPanelOpen;
+                  });
+                },
+                child: Icon(
+                  _isPanelOpen ? Icons.arrow_forward_ios : Icons.arrow_back_ios,
+                  color: Colors.blue,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -114,12 +98,12 @@ class _SettingsSection extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20.0),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
+          filter: ImageFilter.blur(sigmaX: 0.0, sigmaY: 0.0),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.85),
+              color: Colors.white.withOpacity(1),
               borderRadius: BorderRadius.circular(20.0),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+              border: Border.all(color: Colors.white.withOpacity(0.2)),
             ),
             child: Column(
               children: [
@@ -161,14 +145,15 @@ class _SettingsHeader extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.8),
-        border: Border(
-            bottom: BorderSide(color: Colors.black.withValues(alpha: 0.1))),
+        color: Colors.white.withOpacity(0.8),
+        border:
+            Border(bottom: BorderSide(color: Colors.black.withOpacity(0.1))),
       ),
-      child: const Column(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Welcome Screen Settings', style: _AppTextStyles.settingsTitle),
+          Text('Welcome Screen Settings',
+              style: Theme.of(context).textTheme.bodyMedium),
         ],
       ),
     );
@@ -176,18 +161,18 @@ class _SettingsHeader extends StatelessWidget {
 }
 
 // --- SETTINGS GROUPS ---
-
 class _GeneralSettingsGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final welcomeSettings = context.watch<WelcomeScreenProvider>();
-    return _SettingsGroup(
+    return SettingsGroup(
       icon: '🎯',
       title: 'General Settings',
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text('Enable Welcome Screen', style: _AppTextStyles.label),
+          Text('Enable Welcome Screen',
+              style: Theme.of(context).textTheme.bodyMedium),
           Switch(
             value: welcomeSettings.showWelcomeScreen,
             onChanged: (value) {
@@ -195,8 +180,7 @@ class _GeneralSettingsGroup extends StatelessWidget {
               showSnackBar(context,
                   value ? 'Welcome screen enabled' : 'Welcome screen disabled');
             },
-            activeTrackColor:
-                AppColors.primaryGradientStart.withValues(alpha: 0.7),
+            activeTrackColor: AppColors.primaryGradientStart.withOpacity(0.7),
             activeColor: AppColors.primaryGradientEnd,
           ),
         ],
@@ -209,17 +193,17 @@ class _WelcomeMessageGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final welcomeSettings = context.watch<WelcomeScreenProvider>();
-    return _SettingsGroup(
+    return SettingsGroup(
       icon: '💬',
       title: 'Welcome Message',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Message Text', style: _AppTextStyles.label),
+          Text('Message Text', style: Theme.of(context).textTheme.bodyMedium),
           const SizedBox(height: 8),
           TextFormField(
             initialValue: welcomeSettings.welcomeMessage,
-            decoration: _inputDecoration('Enter welcome message'),
+            decoration: inputDecoration(context, 'Enter welcome message'),
             onChanged: (value) => welcomeSettings.setWelcomeMessage(value),
           ),
         ],
@@ -232,15 +216,16 @@ class _TextStylingGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final welcomeSettings = context.watch<WelcomeScreenProvider>();
-    return _SettingsGroup(
+    return SettingsGroup(
+      // Using the refactored widget
       icon: '🎨',
       title: 'Text Styling',
       child: Column(
         children: [
-          _FormRow(
+          FormRow(
             children: [
               Expanded(
-                child: _CustomSliderWithLabel(
+                child: SliderWithLabel(
                   label: 'Font Size',
                   value: welcomeSettings.welcomeMessageFontSize,
                   min: 12,
@@ -250,7 +235,7 @@ class _TextStylingGroup extends StatelessWidget {
                 ),
               ),
               Expanded(
-                child: _CustomDropdown<FontWeight>(
+                child: CustomDropdown<FontWeight>(
                   label: 'Font Weight',
                   value: welcomeSettings.welcomeMessageFontWeight,
                   items: const {
@@ -267,10 +252,10 @@ class _TextStylingGroup extends StatelessWidget {
               ),
             ],
           ),
-          _FormRow(
+          FormRow(
             children: [
               Expanded(
-                child: _CustomSliderWithLabel(
+                child: SliderWithLabel(
                   label: 'Line Height',
                   value: welcomeSettings.welcomeMessageLineHeight,
                   min: 0.8,
@@ -281,7 +266,7 @@ class _TextStylingGroup extends StatelessWidget {
                 ),
               ),
               Expanded(
-                child: _CustomDropdown<TextAlign>(
+                child: CustomDropdown<TextAlign>(
                   label: 'Text Alignment',
                   value: welcomeSettings.welcomeMessageTextAlign,
                   items: const {
@@ -295,7 +280,7 @@ class _TextStylingGroup extends StatelessWidget {
               ),
             ],
           ),
-          _FormRow(
+          FormRow(
             children: [
               Expanded(
                 child: _CustomColorPicker(
@@ -306,7 +291,7 @@ class _TextStylingGroup extends StatelessWidget {
                 ),
               ),
               Expanded(
-                child: _CustomSliderWithLabel(
+                child: SliderWithLabel(
                   label: 'Text Opacity',
                   value: welcomeSettings.welcomeMessageOpacity,
                   min: 0.1,
@@ -320,48 +305,54 @@ class _TextStylingGroup extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Italic Style', style: _AppTextStyles.label),
+              Text('Italic Style',
+                  style: Theme.of(context).textTheme.bodyMedium),
               Switch(
                 value: welcomeSettings.welcomeMessageItalic,
                 onChanged: (v) => welcomeSettings.setWelcomeMessageItalic(v),
                 activeTrackColor:
-                    AppColors.primaryGradientStart.withValues(alpha: 0.7),
+                    AppColors.primaryGradientStart.withOpacity(0.7),
                 activeColor: AppColors.primaryGradientEnd,
               ),
             ],
           ),
           const SizedBox(height: 20),
-          _SettingsGroup(
+          SettingsGroup(
             isSubgroup: true,
             icon: '📍',
-            title: 'Positioning',
+            title: 'Positioning (Percentage-based)', // Updated title
             child: Column(
               children: [
-                _CustomSliderWithLabel(
-                  label: 'Left Position',
-                  value: welcomeSettings.welcomeMessageLeft,
-                  min: 0,
-                  max: 1080,
+                SliderWithLabel(
+                  label: 'Horizontal Position (%)',
+                  value: welcomeSettings
+                      .welcomeMessageLeft, // This now represents a percentage
+                  min: 0.0, // Min is 0%
+                  max: 1.0, // Max is 100%
+                  step: 0.01, // 1% increments
                   onChanged: (v) => welcomeSettings.setWelcomeMessagePosition(
                       v,
                       welcomeSettings.welcomeMessageTop,
                       welcomeSettings.welcomeMessageWidth),
                 ),
-                _CustomSliderWithLabel(
-                  label: 'Top Position',
+                SliderWithLabel(
+                  label: 'Vertical Position (%)',
                   value: welcomeSettings.welcomeMessageTop,
-                  min: 0,
-                  max: 1000,
+                  min: 0.0,
+                  max: 1.0,
+                  step: 0.01,
                   onChanged: (v) => welcomeSettings.setWelcomeMessagePosition(
                       welcomeSettings.welcomeMessageLeft,
                       v,
                       welcomeSettings.welcomeMessageWidth),
                 ),
-                _CustomSliderWithLabel(
-                  label: 'Width',
+                // The width can remain a percentage of the screen width
+                SliderWithLabel(
+                  label: 'Width (%)',
                   value: welcomeSettings.welcomeMessageWidth,
-                  min: 200,
-                  max: 1080,
+                  min: 0.1, // 10% of screen width
+                  max: 1.0, // 100% of screen width
+                  step: 0.01,
                   onChanged: (v) => welcomeSettings.setWelcomeMessagePosition(
                       welcomeSettings.welcomeMessageLeft,
                       welcomeSettings.welcomeMessageTop,
@@ -382,12 +373,12 @@ class _BackgroundSettingsGroup extends StatelessWidget {
     final welcomeSettings = context.watch<WelcomeScreenProvider>();
     final hasCustomBg = welcomeSettings.welcomeScreenBackground != null;
 
-    return _SettingsGroup(
+    return SettingsGroup(
       icon: '🖼️',
       title: 'Background Settings',
       child: Column(
         children: [
-          _ToggleButtonGroup(
+          ToggleButtonGroup(
             options: const ['Choose Custom', 'Use Global'],
             selectedIndex: hasCustomBg ? 0 : 1,
             onSelected: (index) {
@@ -402,7 +393,7 @@ class _BackgroundSettingsGroup extends StatelessWidget {
             },
           ),
           const SizedBox(height: 15),
-          _FileUploadArea(
+          FileUploadArea(
             onTap: () => _pickBgImage(context, welcomeSettings),
             icon: '📁',
             text: 'Click to upload or drag and drop',
@@ -433,34 +424,36 @@ class _ButtonSettingsGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final welcomeSettings = context.watch<WelcomeScreenProvider>();
-    return _SettingsGroup(
+    return SettingsGroup(
       icon: '🔘',
       title: 'Button Settings',
       child: Column(
         children: [
-          _FormRow(children: [
+          FormRow(children: [
             Expanded(
-                child: _CustomSliderWithLabel(
-              label: 'Position (Left)',
-              value: welcomeSettings.buttonLeft,
-              min: 0,
-              max: 1000,
+                child: SliderWithLabel(
+              label: 'Position (Left %)',
+              value: welcomeSettings.buttonLeft, // Now a percentage
+              min: 0.0,
+              max: 1.0,
+              step: 0.01,
               onChanged: (v) => welcomeSettings.setButtonPosition(
                   v, welcomeSettings.buttonBottom),
             )),
             Expanded(
-                child: _CustomSliderWithLabel(
-              label: 'Position (Bottom)',
-              value: welcomeSettings.buttonBottom,
-              min: 0,
-              max: 1000,
+                child: SliderWithLabel(
+              label: 'Position (Bottom %)',
+              value: welcomeSettings.buttonBottom, // Now a percentage
+              min: 0.0,
+              max: 1.0,
+              step: 0.01,
               onChanged: (v) => welcomeSettings.setButtonPosition(
                   welcomeSettings.buttonLeft, v),
             )),
           ]),
-          _FormRow(children: [
+          FormRow(children: [
             Expanded(
-                child: _CustomSliderWithLabel(
+                child: SliderWithLabel(
               label: 'Width',
               value: welcomeSettings.buttonWidth,
               min: 100,
@@ -468,7 +461,7 @@ class _ButtonSettingsGroup extends StatelessWidget {
               onChanged: (v) => welcomeSettings.setButtonWidth(v),
             )),
             Expanded(
-                child: _CustomSliderWithLabel(
+                child: SliderWithLabel(
               label: 'Height',
               value: welcomeSettings.buttonHeight,
               min: 20,
@@ -476,9 +469,9 @@ class _ButtonSettingsGroup extends StatelessWidget {
               onChanged: (v) => welcomeSettings.setButtonHeight(v),
             )),
           ]),
-          _FormRow(children: [
+          FormRow(children: [
             Expanded(
-                child: _CustomSliderWithLabel(
+                child: SliderWithLabel(
               label: 'Border Radius',
               value: welcomeSettings.buttonBorderRadius,
               min: 0,
@@ -486,7 +479,7 @@ class _ButtonSettingsGroup extends StatelessWidget {
               onChanged: (v) => welcomeSettings.setButtonBorderRadius(v),
             )),
             Expanded(
-                child: _CustomSliderWithLabel(
+                child: SliderWithLabel(
               label: 'Opacity',
               value: welcomeSettings.buttonOpacity,
               min: 0.1,
@@ -496,7 +489,7 @@ class _ButtonSettingsGroup extends StatelessWidget {
             )),
           ]),
           const SizedBox(height: 15),
-          _ToggleButtonGroup(
+          ToggleButtonGroup(
             options: const ['Text Button', 'Image Button'],
             selectedIndex: welcomeSettings.useImageButton ? 1 : 0,
             onSelected: (index) =>
@@ -522,15 +515,15 @@ class _TextButtonSettings extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Button Text', style: _AppTextStyles.label),
+        Text('Button Text', style: Theme.of(context).textTheme.bodyMedium),
         const SizedBox(height: 8),
         TextFormField(
           initialValue: welcomeSettings.welcomeButtonText,
-          decoration: _inputDecoration('Enter Button Text'),
+          decoration: inputDecoration(context, 'Enter Button Text'),
           onChanged: (v) => welcomeSettings.setWelcomeButtonText(v),
         ),
         const SizedBox(height: 15),
-        _FormRow(children: [
+        FormRow(children: [
           Expanded(
               child: _CustomColorPicker(
             label: 'Button Color',
@@ -544,9 +537,9 @@ class _TextButtonSettings extends StatelessWidget {
             onColorChanged: (c) => welcomeSettings.setWelcomeButtonTextColor(c),
           )),
         ]),
-        _FormRow(children: [
+        FormRow(children: [
           Expanded(
-              child: _CustomSliderWithLabel(
+              child: SliderWithLabel(
             label: 'Text Font Size',
             value: welcomeSettings.buttonTextFontSize,
             min: 12,
@@ -554,7 +547,7 @@ class _TextButtonSettings extends StatelessWidget {
             onChanged: (v) => welcomeSettings.setButtonTextFontSize(v),
           )),
           Expanded(
-              child: _CustomDropdown<FontWeight>(
+              child: CustomDropdown<FontWeight>(
             label: 'Text Font Weight',
             value: welcomeSettings.buttonTextFontWeight,
             items: const {
@@ -579,7 +572,7 @@ class _ImageButtonSettings extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final welcomeSettings = context.watch<WelcomeScreenProvider>();
-    return _FileUploadArea(
+    return FileUploadArea(
       onTap: () async {
         try {
           final result =
@@ -600,204 +593,6 @@ class _ImageButtonSettings extends StatelessWidget {
   }
 }
 
-// --- GENERIC WIDGETS ---
-
-class _SettingsGroup extends StatelessWidget {
-  final String icon;
-  final String title;
-  final Widget child;
-  final bool isSubgroup;
-
-  const _SettingsGroup({
-    required this.icon,
-    required this.title,
-    required this.child,
-    this.isSubgroup = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(25),
-      decoration: BoxDecoration(
-        color: isSubgroup
-            ? Colors.white.withValues(alpha: 0.5)
-            : Colors.white.withValues(alpha: 0.7),
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
-        boxShadow: isSubgroup
-            ? []
-            : [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 15,
-                  offset: const Offset(0, 4),
-                )
-              ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 24,
-                height: 24,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(colors: [
-                    AppColors.primaryGradientStart,
-                    AppColors.primaryGradientEnd
-                  ]),
-                ),
-                alignment: Alignment.center,
-                child: Text(icon, style: const TextStyle(fontSize: 12)),
-              ),
-              const SizedBox(width: 10),
-              Text(title, style: _AppTextStyles.groupTitle),
-            ],
-          ),
-          const SizedBox(height: 20),
-          child,
-        ],
-      ),
-    );
-  }
-}
-
-class _CustomSliderWithLabel extends StatelessWidget {
-  final String label;
-  final double value;
-  final double min;
-  final double max;
-  final double? step;
-  final ValueChanged<double> onChanged;
-
-  const _CustomSliderWithLabel({
-    required this.label,
-    required this.value,
-    required this.min,
-    required this.max,
-    this.step,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    int? divisions = step != null ? ((max - min) / step!).round() : null;
-    String valueLabel =
-        step == 0.1 ? value.toStringAsFixed(1) : value.round().toString();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(label, style: _AppTextStyles.label),
-            Text(valueLabel,
-                style:
-                    _AppTextStyles.label.copyWith(fontWeight: FontWeight.bold)),
-          ],
-        ),
-        SliderTheme(
-          data: SliderTheme.of(context).copyWith(
-            activeTrackColor: AppColors.primaryGradientEnd,
-            inactiveTrackColor: AppColors.inputBorder,
-            trackHeight: 6.0,
-            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10.0),
-            thumbColor: AppColors.primaryGradientStart,
-            overlayColor: AppColors.primaryGradientStart.withValues(alpha: 0.2),
-          ),
-          child: Slider(
-            value: value,
-            min: min,
-            max: max,
-            divisions: divisions,
-            onChanged: onChanged,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _FormRow extends StatelessWidget {
-  final List<Widget> children;
-  const _FormRow({required this.children});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 15.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          children[0],
-          const SizedBox(width: 20),
-          if (children.length > 1) children[1],
-        ],
-      ),
-    );
-  }
-}
-
-InputDecoration _inputDecoration(String hintText) {
-  return InputDecoration(
-    hintText: hintText,
-    filled: true,
-    fillColor: Colors.white.withValues(alpha: 0.8),
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: AppColors.inputBorder, width: 2),
-    ),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: AppColors.inputBorder, width: 2),
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10),
-      borderSide:
-          const BorderSide(color: AppColors.primaryGradientStart, width: 2),
-    ),
-    contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-  );
-}
-
-class _CustomDropdown<T> extends StatelessWidget {
-  final String label;
-  final T value;
-  final Map<T, String> items;
-  final ValueChanged<T?> onChanged;
-
-  const _CustomDropdown({
-    required this.label,
-    required this.value,
-    required this.items,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: _AppTextStyles.label),
-        const SizedBox(height: 8),
-        DropdownButtonFormField<T>(
-          value: value,
-          items: items.entries
-              .map((e) =>
-                  DropdownMenuItem<T>(value: e.key, child: Text(e.value)))
-              .toList(),
-          onChanged: onChanged,
-          decoration: _inputDecoration(''),
-        ),
-      ],
-    );
-  }
-}
-
 class _CustomColorPicker extends StatelessWidget {
   final String label;
   final Color color;
@@ -811,7 +606,7 @@ class _CustomColorPicker extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: _AppTextStyles.label),
+        Text(label, style: Theme.of(context).textTheme.bodyMedium),
         const SizedBox(height: 8),
         GestureDetector(
           onTap: () => _showColorPickerDialog(context),
@@ -821,7 +616,7 @@ class _CustomColorPicker extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
               border: Border.all(color: AppColors.inputBorder, width: 2),
-              color: Colors.white.withValues(alpha: 0.8),
+              color: Colors.white.withOpacity(0.8),
             ),
             child: Row(
               children: [
@@ -837,7 +632,7 @@ class _CustomColorPicker extends StatelessWidget {
                 const SizedBox(width: 10),
                 Text(
                   '#${color.value.toRadixString(16).substring(2).toUpperCase()}',
-                  style: _AppTextStyles.label,
+                  style: Theme.of(context).textTheme.bodyMedium,
                 ),
               ],
             ),
@@ -864,131 +659,6 @@ class _CustomColorPicker extends StatelessWidget {
             child: const Text('Done'),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _ToggleButtonGroup extends StatelessWidget {
-  final List<String> options;
-  final int selectedIndex;
-  final ValueChanged<int> onSelected;
-
-  const _ToggleButtonGroup(
-      {required this.options,
-      required this.selectedIndex,
-      required this.onSelected});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: List.generate(options.length, (index) {
-        final bool isActive = selectedIndex == index;
-        return Expanded(
-          child: GestureDetector(
-            onTap: () => onSelected(index),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              margin: EdgeInsets.only(right: index == 0 ? 10 : 0),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                gradient: isActive
-                    ? const LinearGradient(colors: [
-                        AppColors.primaryGradientStart,
-                        AppColors.primaryGradientEnd
-                      ])
-                    : null,
-                color: isActive ? null : Colors.white.withValues(alpha: 0.8),
-                border: Border.all(
-                    color: isActive
-                        ? AppColors.primaryGradientStart
-                        : AppColors.inputBorder,
-                    width: 2),
-                boxShadow: isActive
-                    ? [
-                        BoxShadow(
-                            color: AppColors.primaryGradientStart
-                                .withValues(alpha: 0.3),
-                            blurRadius: 15,
-                            spreadRadius: -5)
-                      ]
-                    : [],
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                options[index],
-                style: _AppTextStyles.label.copyWith(
-                    color: isActive ? Colors.white : AppColors.labelText),
-              ),
-            ),
-          ),
-        );
-      }),
-    );
-  }
-}
-
-class _FileUploadArea extends StatelessWidget {
-  final VoidCallback onTap;
-  final String icon;
-  final String text;
-  final String? selectedFile;
-
-  const _FileUploadArea(
-      {required this.onTap,
-      required this.icon,
-      required this.text,
-      this.selectedFile});
-
-  @override
-  Widget build(BuildContext context) {
-    final fileName = selectedFile != null
-        ? File(selectedFile!).path.split(Platform.pathSeparator).last
-        : null;
-    return GestureDetector(
-      onTap: onTap,
-      child: DottedBorder(
-        options: const RoundedRectDottedBorderOptions(
-          dashPattern: [10, 5],
-          strokeWidth: 2,
-          radius: Radius.circular(16),
-          color: AppColors.fileUploadBorder,
-          padding: EdgeInsets.all(16),
-        ),
-        child: Container(
-          padding: const EdgeInsets.all(30),
-          decoration: BoxDecoration(
-            color: AppColors.primaryGradientStart.withValues(alpha: 0.02),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(icon, style: const TextStyle(fontSize: 32)),
-                const SizedBox(height: 10),
-                Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(
-                          text: '$text\n',
-                          style: const TextStyle(
-                              color: AppColors.fileUploadText, fontSize: 14)),
-                      if (fileName != null)
-                        TextSpan(
-                          text: 'Selected: $fileName',
-                          style: _AppTextStyles.label.copyWith(
-                              fontSize: 12, fontWeight: FontWeight.bold),
-                        ),
-                    ],
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }

@@ -8,7 +8,7 @@ import 'package:photobooth_flutter/providers/output_screen_provider.dart';
 import 'package:photobooth_flutter/widgets/custom_slider.dart';
 import 'package:photobooth_flutter/widgets/file_upload_area.dart';
 import 'package:photobooth_flutter/widgets/form_row.dart';
-import 'package:photobooth_flutter/widgets/improved_color_picker.dart';
+import 'package:photobooth_flutter/widgets/color_picker.dart';
 import 'package:photobooth_flutter/widgets/settings_group.dart';
 import 'package:photobooth_flutter/widgets/settings_header.dart';
 import 'package:photobooth_flutter/widgets/settings_preview.dart';
@@ -158,7 +158,7 @@ class _TitleSettingsGroup extends StatelessWidget {
               onChanged: (value) => settings.setTitleText(value),
             ),
             const SizedBox(height: 15),
-            CustomSliderWithLabel(
+            SliderWithLabel(
               label: 'Font Size',
               value: settings.titleFontSize,
               min: 16,
@@ -177,21 +177,21 @@ class _TitleSettingsGroup extends StatelessWidget {
               title: 'Positioning',
               child: Column(
                 children: [
-                  CustomSliderWithLabel(
+                  SliderWithLabel(
                       label: 'From Top',
                       value: settings.titleTop,
                       min: 0,
                       max: 1200,
                       onChanged: (v) => settings.setTitlePosition(
                           settings.titleLeft, v, settings.titleWidth)),
-                  CustomSliderWithLabel(
+                  SliderWithLabel(
                       label: 'From Left',
                       value: settings.titleLeft,
                       min: 0,
                       max: 1080,
                       onChanged: (v) => settings.setTitlePosition(
                           v, settings.titleTop, settings.titleWidth)),
-                  CustomSliderWithLabel(
+                  SliderWithLabel(
                       label: 'Width',
                       value: settings.titleWidth,
                       min: 100,
@@ -225,7 +225,7 @@ class _ImageSettingsGroup extends StatelessWidget {
             child: FormRow(
               children: [
                 Expanded(
-                    child: CustomSliderWithLabel(
+                    child: SliderWithLabel(
                         label: 'From Left',
                         value: settings.aiArtistryLeft,
                         min: 0,
@@ -233,7 +233,7 @@ class _ImageSettingsGroup extends StatelessWidget {
                         onChanged: (v) => settings.setAiArtistryPosition(
                             v, settings.aiArtistryTop))),
                 Expanded(
-                    child: CustomSliderWithLabel(
+                    child: SliderWithLabel(
                         label: 'From Top',
                         value: settings.aiArtistryTop,
                         min: 0,
@@ -253,7 +253,7 @@ class _ImageSettingsGroup extends StatelessWidget {
                 FormRow(
                   children: [
                     Expanded(
-                        child: CustomSliderWithLabel(
+                        child: SliderWithLabel(
                             label: 'From Left',
                             value: settings.swaplabLeft,
                             min: 0,
@@ -261,7 +261,7 @@ class _ImageSettingsGroup extends StatelessWidget {
                             onChanged: (v) => settings.setSwaplabPosition(
                                 v, settings.swaplabTop))),
                     Expanded(
-                        child: CustomSliderWithLabel(
+                        child: SliderWithLabel(
                             label: 'From Top',
                             value: settings.swaplabTop,
                             min: 0,
@@ -273,7 +273,7 @@ class _ImageSettingsGroup extends StatelessWidget {
                 FormRow(
                   children: [
                     Expanded(
-                        child: CustomSliderWithLabel(
+                        child: SliderWithLabel(
                             label: 'Width',
                             value: settings.swaplabImageWidth,
                             min: 100,
@@ -282,7 +282,7 @@ class _ImageSettingsGroup extends StatelessWidget {
                                 settings.setSwaplabImageDimensions(
                                     v, settings.swaplabImageHeight))),
                     Expanded(
-                        child: CustomSliderWithLabel(
+                        child: SliderWithLabel(
                             label: 'Height',
                             value: settings.swaplabImageHeight,
                             min: 100,
@@ -303,10 +303,11 @@ class _ImageSettingsGroup extends StatelessWidget {
             title: 'Image Border & Style',
             child: Column(
               children: [
-                 Row(
+                Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Show Border', style: Theme.of(context).textTheme.bodyLarge),
+                    Text('Show Border',
+                        style: Theme.of(context).textTheme.bodyLarge),
                     Switch(
                       value: settings.showImageBorder,
                       onChanged: (value) => settings.setShowImageBorder(value),
@@ -314,7 +315,7 @@ class _ImageSettingsGroup extends StatelessWidget {
                   ],
                 ),
                 if (settings.showImageBorder)
-                  CustomSliderWithLabel(
+                  SliderWithLabel(
                     label: 'Border Width',
                     value: settings.imageBorderWidth,
                     min: 1,
@@ -327,7 +328,7 @@ class _ImageSettingsGroup extends StatelessWidget {
                     pickerColor: settings.imageBorderColor,
                     onColorChanged: (c) => settings.setImageBorderColor(c),
                   ),
-                CustomSliderWithLabel(
+                SliderWithLabel(
                   label: 'Border Radius',
                   value: settings.imageBorderRadius,
                   min: 0,
@@ -353,7 +354,7 @@ class _QrCodeSettingsGroup extends StatelessWidget {
       title: 'QR Code Settings',
       child: Column(
         children: [
-          CustomSliderWithLabel(
+          SliderWithLabel(
             label: 'QR Code Size',
             value: settings.qrCodeSize,
             min: 50,
@@ -368,7 +369,7 @@ class _QrCodeSettingsGroup extends StatelessWidget {
             child: FormRow(
               children: [
                 Expanded(
-                    child: CustomSliderWithLabel(
+                    child: SliderWithLabel(
                         label: 'From Left',
                         value: settings.qrCodeLeft,
                         min: 0,
@@ -376,7 +377,7 @@ class _QrCodeSettingsGroup extends StatelessWidget {
                         onChanged: (v) => settings.setQrCodePosition(
                             v, settings.qrCodeBottom))),
                 Expanded(
-                    child: CustomSliderWithLabel(
+                    child: SliderWithLabel(
                         label: 'From Bottom',
                         value: settings.qrCodeBottom,
                         min: 0,
@@ -433,14 +434,14 @@ class _ButtonSettingsGroup extends StatelessWidget {
           FormRow(
             children: [
               Expanded(
-                  child: CustomSliderWithLabel(
+                  child: SliderWithLabel(
                       label: 'Width',
                       value: settings.doneButtonWidth,
                       min: 100,
                       max: 500,
                       onChanged: (v) => settings.setDoneButtonWidth(v))),
               Expanded(
-                  child: CustomSliderWithLabel(
+                  child: SliderWithLabel(
                       label: 'Height',
                       value: settings.doneButtonHeight,
                       min: 50,
@@ -451,21 +452,21 @@ class _ButtonSettingsGroup extends StatelessWidget {
           FormRow(
             children: [
               Expanded(
-                  child: CustomSliderWithLabel(
+                  child: SliderWithLabel(
                       label: 'From Left',
                       value: settings.doneButtonLeft,
                       min: 0,
                       max: 1000,
-                      onChanged: (v) =>
-                          settings.setDoneButtonPosition(v, settings.doneButtonBottom))),
+                      onChanged: (v) => settings.setDoneButtonPosition(
+                          v, settings.doneButtonBottom))),
               Expanded(
-                  child: CustomSliderWithLabel(
+                  child: SliderWithLabel(
                       label: 'From Bottom',
                       value: settings.doneButtonBottom,
                       min: 0,
                       max: 1000,
-                      onChanged: (v) =>
-                          settings.setDoneButtonPosition(settings.doneButtonLeft, v))),
+                      onChanged: (v) => settings.setDoneButtonPosition(
+                          settings.doneButtonLeft, v))),
             ],
           ),
         ],

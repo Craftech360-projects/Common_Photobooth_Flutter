@@ -163,14 +163,14 @@ class _TitleSettingsGroup extends StatelessWidget {
               onChanged: (value) => settings.setTitleText(value),
             ),
             const SizedBox(height: 15),
-            CustomSliderWithLabel(
+            SliderWithLabel(
               label: 'Font Size',
               value: settings.titleFontSize,
               min: 16,
               max: 90,
               onChanged: (v) => settings.setTitleFontSize(v),
             ),
-            CustomSliderWithLabel(
+            SliderWithLabel(
               label: 'Top Position',
               value: settings.titleTop,
               min: 50,
@@ -241,21 +241,21 @@ class _CarouselSettingsGroup extends StatelessWidget {
       title: 'Carousel & Card Settings',
       child: Column(
         children: [
-          CustomSliderWithLabel(
+          SliderWithLabel(
             label: 'Carousel Top Position',
             value: settings.carouselTop,
             min: 100,
             max: 1200,
             onChanged: (v) => settings.setCarouselTop(v),
           ),
-          CustomSliderWithLabel(
+          SliderWithLabel(
             label: 'Carousel Height',
             value: settings.carouselHeight,
             min: 300,
             max: 1000,
             onChanged: (v) => settings.setCarouselHeight(v),
           ),
-          CustomSliderWithLabel(
+          SliderWithLabel(
             label: 'Arrow Spacing',
             value: settings.arrowSpacing,
             min: 0,
@@ -272,7 +272,7 @@ class _CarouselSettingsGroup extends StatelessWidget {
                 FormRow(
                   children: [
                     Expanded(
-                      child: CustomSliderWithLabel(
+                      child: SliderWithLabel(
                         label: 'Card Width',
                         value: settings.cardWidth,
                         min: 200,
@@ -281,7 +281,7 @@ class _CarouselSettingsGroup extends StatelessWidget {
                       ),
                     ),
                     Expanded(
-                      child: CustomSliderWithLabel(
+                      child: SliderWithLabel(
                         label: 'Card Height',
                         value: settings.cardHeight,
                         min: 300,
@@ -291,7 +291,7 @@ class _CarouselSettingsGroup extends StatelessWidget {
                     ),
                   ],
                 ),
-                CustomSliderWithLabel(
+                SliderWithLabel(
                   label: 'Card Border Radius',
                   value: settings.cardBorderRadius,
                   min: 0,
@@ -349,7 +349,7 @@ class _ButtonSettingsGroup extends StatelessWidget {
           FormRow(
             children: [
               Expanded(
-                child: CustomSliderWithLabel(
+                child: SliderWithLabel(
                   label: 'Button Width',
                   value: settings.buttonWidth,
                   min: 100,
@@ -358,7 +358,7 @@ class _ButtonSettingsGroup extends StatelessWidget {
                 ),
               ),
               Expanded(
-                child: CustomSliderWithLabel(
+                child: SliderWithLabel(
                   label: 'Button Height',
                   value: settings.buttonHeight,
                   min: 50,
@@ -368,7 +368,7 @@ class _ButtonSettingsGroup extends StatelessWidget {
               ),
             ],
           ),
-          CustomSliderWithLabel(
+          SliderWithLabel(
             label: 'Button Bottom Position',
             value: settings.buttonBottom,
             min: 100,

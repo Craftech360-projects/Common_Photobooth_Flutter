@@ -22,14 +22,12 @@ class WelcomeScreenProvider extends ChangeNotifier {
   double _welcomeMessageOpacity = 1.0;
   bool _welcomeMessageItalic = false;
 
-  // Position properties for welcome message
-  double _welcomeMessageLeft = 400.0;
-  double _welcomeMessageTop = 900.0;
-  double _welcomeMessageWidth = 300.0;
-
-  // Position properties for button
-  double _buttonLeft = 245.0;
-  double _buttonBottom = 660.0;
+  // Default to percentage-based positioning
+  double _welcomeMessageLeft = 0.37; // ~400px on a 1080p screen
+  double _welcomeMessageTop = 0.47; // ~900px on a 1920p screen
+  double _welcomeMessageWidth = 0.28; // ~300px
+  double _buttonLeft = 0.22; // ~245px
+  double _buttonBottom = 0.34; // ~660px
 
   // Button settings
   bool _useImageButton = true; // Default to image button
@@ -133,15 +131,49 @@ class WelcomeScreenProvider extends ChangeNotifier {
     _welcomeMessageItalic =
         _prefs.getBool('welcome_message_italic') ?? _welcomeMessageItalic;
 
-    // Load position properties
-    _welcomeMessageLeft =
+    const double refWidth = 1080.0;
+    const double refHeight = 1920.0;
+
+    double loadedLeft =
         _prefs.getDouble('welcome_message_left') ?? _welcomeMessageLeft;
-    _welcomeMessageTop =
+    if (loadedLeft > 1.0) {
+      // If it's an old pixel value
+      _welcomeMessageLeft = loadedLeft / refWidth;
+    } else {
+      _welcomeMessageLeft = loadedLeft;
+    }
+
+    double loadedTop =
         _prefs.getDouble('welcome_message_top') ?? _welcomeMessageTop;
-    _welcomeMessageWidth =
+    if (loadedTop > 1.0) {
+      _welcomeMessageTop = loadedTop / refHeight;
+    } else {
+      _welcomeMessageTop = loadedTop;
+    }
+
+    double loadedWidth =
         _prefs.getDouble('welcome_message_width') ?? _welcomeMessageWidth;
-    _buttonLeft = _prefs.getDouble('welcome_button_left') ?? _buttonLeft;
-    _buttonBottom = _prefs.getDouble('welcome_button_bottom') ?? _buttonBottom;
+    if (loadedWidth > 1.0) {
+      _welcomeMessageWidth = loadedWidth / refWidth;
+    } else {
+      _welcomeMessageWidth = loadedWidth;
+    }
+
+    double loadedButtonLeft =
+        _prefs.getDouble('welcome_button_left') ?? _buttonLeft;
+    if (loadedButtonLeft > 1.0) {
+      _buttonLeft = loadedButtonLeft / refWidth;
+    } else {
+      _buttonLeft = loadedButtonLeft;
+    }
+
+    double loadedButtonBottom =
+        _prefs.getDouble('welcome_button_bottom') ?? _buttonBottom;
+    if (loadedButtonBottom > 1.0) {
+      _buttonBottom = loadedButtonBottom / refHeight;
+    } else {
+      _buttonBottom = loadedButtonBottom;
+    }
 
     // Load button settings
     _useImageButton =

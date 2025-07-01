@@ -11,7 +11,7 @@ import 'package:photobooth_flutter/widgets/custom_dropdown.dart';
 import 'package:photobooth_flutter/widgets/custom_slider.dart';
 import 'package:photobooth_flutter/widgets/file_upload_area.dart';
 import 'package:photobooth_flutter/widgets/form_row.dart';
-import 'package:photobooth_flutter/widgets/improved_color_picker.dart';
+import 'package:photobooth_flutter/widgets/color_picker.dart';
 import 'package:photobooth_flutter/widgets/settings_group.dart';
 import 'package:photobooth_flutter/widgets/settings_header.dart';
 import 'package:photobooth_flutter/widgets/settings_preview.dart';
@@ -164,7 +164,7 @@ class _TitleSettingsGroup extends StatelessWidget {
             FormRow(
               children: [
                 Expanded(
-                  child: CustomSliderWithLabel(
+                  child: SliderWithLabel(
                     label: 'Font Size',
                     value: settings.titleFontSize,
                     min: 16,
@@ -173,7 +173,7 @@ class _TitleSettingsGroup extends StatelessWidget {
                   ),
                 ),
                 Expanded(
-                  child: CustomSliderWithLabel(
+                  child: SliderWithLabel(
                     label: 'Opacity',
                     value: settings.titleOpacity,
                     min: 0.1,
@@ -220,14 +220,14 @@ class _TitleSettingsGroup extends StatelessWidget {
               title: 'Positioning',
               child: Column(
                 children: [
-                  CustomSliderWithLabel(
+                  SliderWithLabel(
                     label: 'From Top',
                     value: settings.titleTop,
                     min: 0,
                     max: 1000,
                     onChanged: (value) => settings.setTitleTop(value),
                   ),
-                  CustomSliderWithLabel(
+                  SliderWithLabel(
                     label: 'From Left',
                     value: settings.titleLeft,
                     min: 0,
@@ -261,7 +261,7 @@ class _LoaderSettingsGroup extends StatelessWidget {
             child: FormRow(
               children: [
                 Expanded(
-                  child: CustomSliderWithLabel(
+                  child: SliderWithLabel(
                     label: 'Loader Width',
                     value: settings.loaderWidth,
                     min: 50,
@@ -270,7 +270,7 @@ class _LoaderSettingsGroup extends StatelessWidget {
                   ),
                 ),
                 Expanded(
-                  child: CustomSliderWithLabel(
+                  child: SliderWithLabel(
                     label: 'Loader Height',
                     value: settings.loaderHeight,
                     min: 50,
@@ -288,14 +288,14 @@ class _LoaderSettingsGroup extends StatelessWidget {
             title: 'Positioning',
             child: Column(
               children: [
-                CustomSliderWithLabel(
+                SliderWithLabel(
                   label: 'From Top',
                   value: settings.loaderTop,
                   min: 0,
                   max: 1000,
                   onChanged: (value) => settings.setLoaderTop(value),
                 ),
-                CustomSliderWithLabel(
+                SliderWithLabel(
                   label: 'From Left',
                   value: settings.loaderLeft,
                   min: 0,

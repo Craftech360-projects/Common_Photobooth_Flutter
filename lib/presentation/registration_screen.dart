@@ -1,6 +1,5 @@
-// lib/presentation/registration_screen.dart
-
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
@@ -13,15 +12,14 @@ import 'package:photobooth_flutter/widgets/snackbar.dart';
 import 'package:photobooth_flutter/widgets/watermark_overlay.dart';
 import 'package:provider/provider.dart';
 
-class ParticipantDetailsScreen extends StatefulWidget {
-  const ParticipantDetailsScreen({super.key});
+class RegistrationScreen extends StatefulWidget {
+  const RegistrationScreen({super.key});
 
   @override
-  State<ParticipantDetailsScreen> createState() =>
-      _ParticipantDetailsScreenState();
+  State<RegistrationScreen> createState() => _RegistrationScreenState();
 }
 
-class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
+class _RegistrationScreenState extends State<RegistrationScreen> {
   final Map<String, TextEditingController> _controllers = {};
   final Map<String, FocusNode> _focusNodes = {};
 
@@ -60,6 +58,9 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
     final registrationSettings = context.watch<RegistrationScreenProvider>();
     final globalSettings = context.watch<GlobalSettingsProvider>();
     final watermarkProvider = context.watch<AdminWatermarkProvider>();
+    final screenSize = MediaQuery.of(context).size;
+
+    final textScale = min(screenSize.width / 1080.0, screenSize.height / 1920.0);
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -96,28 +97,28 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
                 ),
               ),
             ),
-            if (registrationSettings.showTitle)
+           if (registrationSettings.showTitle)
               Positioned(
-                left: registrationSettings.titleLeft,
-                top: registrationSettings.titleTop,
-                width: registrationSettings.titleWidth,
+                left: registrationSettings.titleLeft * screenSize.width,
+                top: registrationSettings.titleTop * screenSize.height,
+                width: registrationSettings.titleWidth * screenSize.width,
                 child: Text(
                   registrationSettings.titleText,
                   style: TextStyle(
-                    fontSize: registrationSettings.titleFontSize,
+                    fontSize: registrationSettings.titleFontSize * textScale,
                     fontWeight: registrationSettings.titleFontWeight,
                     color: registrationSettings.titleTextColor,
                   ),
                   textAlign: registrationSettings.titleTextAlign,
                 ),
               ),
-            ...registrationSettings.textFields
+          ...registrationSettings.textFields
                 .where((field) => field.isEnabled)
                 .map((field) => Positioned(
-                      left: field.left,
-                      top: field.top,
-                      width: field.width,
-                      height: field.height,
+                      left: field.left * screenSize.width,
+                      top: field.top * screenSize.height,
+                      width: field.width * screenSize.width,
+                      height: field.height * screenSize.height,
                       child: TextFormField(
                         controller: _controllers[field.id],
                         focusNode: _focusNodes[field.id],
@@ -126,7 +127,7 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
                         showCursor: true,
                         style: TextStyle(
                           color: field.textColor,
-                          fontSize: field.fontSize,
+                          fontSize: field.fontSize * textScale,
                           fontWeight: field.fontWeight,
                           fontStyle: field.isItalic
                               ? FontStyle.italic
@@ -139,7 +140,7 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
                           labelText: field.label,
                           hintText: field.hintText,
                           labelStyle: TextStyle(
-                              fontSize: field.fontSize,
+                              fontSize: field.fontSize * textScale,
                               color: field.labelColor),
                           filled: false,
                           fillColor: field.fillColor,
@@ -171,11 +172,11 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
                       ),
                     )),
             Positioned(
-              left: registrationSettings.buttonLeft,
-              bottom: registrationSettings.buttonBottom,
+              left: registrationSettings.buttonLeft * screenSize.width,
+              bottom: registrationSettings.buttonBottom * screenSize.height,
               child: registrationSettings.useImageButton
-                  ? _buildImageButton(registrationSettings)
-                  : _buildTextButton(registrationSettings),
+                  ? _buildImageButton(registrationSettings, textScale)
+                  : _buildTextButton(registrationSettings, textScale),
             ),
             Positioned(
               right: 0,
@@ -213,7 +214,7 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
     );
   }
 
-  Widget _buildTextButton(RegistrationScreenProvider settings) {
+  Widget _buildTextButton(RegistrationScreenProvider settings, double textScale) {
     return Opacity(
       opacity: settings.buttonOpacity,
       child: ElevatedButton(
@@ -222,9 +223,10 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
           backgroundColor: settings.submitButtonColor,
           foregroundColor: settings.submitButtonTextColor,
           padding: settings.buttonPadding,
-          minimumSize: Size(settings.buttonWidth, settings.buttonHeight),
+          minimumSize: Size(settings.buttonWidth * MediaQuery.of(context).size.width,
+                              settings.buttonHeight * MediaQuery.of(context).size.height),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
+            borderRadius: BorderRadius.circular(settings.buttonBorderRadius * textScale),
             side: settings.buttonHasBorder
                 ? BorderSide(
                     color: settings.buttonBorderColor,
@@ -236,7 +238,7 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
         child: Text(
           settings.submitButtonText,
           style: TextStyle(
-            fontSize: settings.buttonFontSize,
+            fontSize: settings.buttonFontSize * textScale,
             fontWeight: settings.buttonFontWeight,
             fontStyle:
                 settings.buttonIsItalic ? FontStyle.italic : FontStyle.normal,
@@ -248,9 +250,9 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
     );
   }
 
-  Widget _buildImageButton(RegistrationScreenProvider settings) {
+  Widget _buildImageButton(RegistrationScreenProvider settings, double textScale) {
     if (settings.buttonImagePath == null) {
-      return _buildTextButton(settings);
+      return _buildTextButton(settings, textScale);
     }
 
     return Opacity(
@@ -258,10 +260,10 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
       child: GestureDetector(
         onTap: _handleSubmit,
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
+        borderRadius: BorderRadius.circular(settings.buttonBorderRadius * textScale),
           child: Container(
-            width: settings.buttonWidth,
-            height: settings.buttonHeight,
+           width: settings.buttonWidth * MediaQuery.of(context).size.width,
+            height: settings.buttonHeight * MediaQuery.of(context).size.height,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
               image: DecorationImage(

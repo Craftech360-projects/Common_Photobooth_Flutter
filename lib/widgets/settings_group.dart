@@ -15,27 +15,21 @@ class SettingsGroup extends StatelessWidget {
     this.isSubgroup = false,
   });
 
-  @override
+   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
     return Container(
-      margin: isSubgroup ? const EdgeInsets.only(top: 10) : EdgeInsets.zero,
       padding: const EdgeInsets.all(25),
       decoration: BoxDecoration(
-        color: isSubgroup
-            ? Colors.white.withValues(alpha: 0.5)
-            : Colors.white.withValues(alpha: 0.7),
+        color: isSubgroup ? Colors.white.withOpacity(0.5) : Colors.white.withOpacity(0.7),
         borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
-        boxShadow: isSubgroup
-            ? []
-            : [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 15,
-                  offset: const Offset(0, 4),
-                )
-              ],
+        border: Border.all(color: Colors.black.withOpacity(0.05)),
+        boxShadow: isSubgroup ? [] : [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 15,
+            offset: const Offset(0, 4),
+          )
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -47,16 +41,13 @@ class SettingsGroup extends StatelessWidget {
                 height: 24,
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: LinearGradient(colors: [
-                    AppColors.primaryGradientStart,
-                    AppColors.primaryGradientEnd
-                  ]),
+                  gradient: LinearGradient(colors: [AppColors.primaryGradientStart, AppColors.primaryGradientEnd]),
                 ),
                 alignment: Alignment.center,
                 child: Text(icon, style: const TextStyle(fontSize: 12)),
               ),
               const SizedBox(width: 10),
-              Expanded(child: Text(title, style: textTheme.titleLarge)),
+              Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.settingsTitle)),
             ],
           ),
           const SizedBox(height: 20),

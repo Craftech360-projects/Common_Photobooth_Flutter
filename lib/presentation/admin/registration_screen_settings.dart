@@ -1,5 +1,3 @@
-// lib/presentation/registration_screen_settings.dart
-
 import 'dart:ui';
 
 import 'package:file_picker/file_picker.dart';
@@ -7,73 +5,80 @@ import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/presentation/registration_screen.dart';
 import 'package:photobooth_flutter/providers/registration_screen_provider.dart';
+import 'package:photobooth_flutter/widgets/color_picker.dart';
 import 'package:photobooth_flutter/widgets/custom_dropdown.dart';
 import 'package:photobooth_flutter/widgets/custom_slider.dart';
 import 'package:photobooth_flutter/widgets/file_upload_area.dart';
 import 'package:photobooth_flutter/widgets/form_row.dart';
-import 'package:photobooth_flutter/widgets/improved_color_picker.dart';
 import 'package:photobooth_flutter/widgets/input_decoration.dart';
-import 'package:photobooth_flutter/widgets/settings_preview.dart';
+import 'package:photobooth_flutter/widgets/settings_group.dart';
+import 'package:photobooth_flutter/widgets/settings_header.dart';
 import 'package:photobooth_flutter/widgets/snackbar.dart';
 import 'package:photobooth_flutter/widgets/toggle_btn_group.dart';
 import 'package:provider/provider.dart';
 
-class RegistrationScreenSettings extends StatelessWidget {
+class RegistrationScreenSettings extends StatefulWidget {
   const RegistrationScreenSettings({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              AppColors.primaryGradientStart,
-              AppColors.primaryGradientEnd
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: const Row(
-          children: [
-            _PreviewSection(),
-            Expanded(child: _SettingsSection()),
-          ],
-        ),
-      ),
-    );
-  }
+  State<RegistrationScreenSettings> createState() =>
+      _RegistrationScreenSettingsState();
 }
 
-// --- UI SECTIONS ---
-class _PreviewSection extends StatelessWidget {
-  const _PreviewSection();
+class _RegistrationScreenSettingsState
+    extends State<RegistrationScreenSettings> {
+  bool _isPanelOpen = true;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(12.0),
-      child: Stack(
+    double settingsPanelWidth = MediaQuery.of(context).size.width * 0.8;
+    return Scaffold(
+      body: Stack(
         children: [
-          const Center(
-            child: SettingsPreview(
-              width: 1080,
-              height: 1920,
-              child: ParticipantDetailsScreen(),
+          const RegistrationScreen(),
+
+          AnimatedPositioned(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOutCubic,
+            right: _isPanelOpen ? 0 : -settingsPanelWidth,
+            top: 0,
+            bottom: 0,
+            width: settingsPanelWidth,
+            child: const _SettingsSection(),
+          ),
+
+          // Control Buttons
+          Positioned(
+            top: 20,
+            left: 20,
+            child: FloatingActionButton.small(
+              heroTag: 'registrationBack', // Unique tag
+              tooltip: 'Back',
+              backgroundColor: AppColors.white.withOpacity(0.8),
+              child: const Icon(Icons.arrow_back,
+                  color: AppColors.primaryGradientEnd),
+              onPressed: () => Navigator.of(context).pop(),
             ),
           ),
-          Positioned(
-            top: 0,
-            left: 0,
-            child: Material(
-              color: AppColors.white.withValues(alpha: 0.9),
-              shape: const CircleBorder(),
-              elevation: 2.0,
-              child: IconButton(
-                icon: const Icon(Icons.arrow_back, color: AppColors.labelText),
-                onPressed: () => Navigator.of(context).pop(),
-                tooltip: 'Back',
+          AnimatedPositioned(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOutCubic,
+            top: 20,
+            right: _isPanelOpen ? settingsPanelWidth + 20 : 20,
+            child: FloatingActionButton(
+              heroTag: 'registrationToggle', // Unique tag
+              tooltip: 'Toggle Settings',
+              backgroundColor: AppColors.white,
+              onPressed: () {
+                setState(() {
+                  _isPanelOpen = !_isPanelOpen;
+                });
+              },
+              child: Icon(
+                _isPanelOpen
+                    ? Icons.arrow_forward_ios_rounded
+                    : Icons.arrow_back_ios_rounded,
+                color: AppColors.primaryGradientEnd,
               ),
             ),
           ),
@@ -94,17 +99,17 @@ class _SettingsSection extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20.0),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
+          filter: ImageFilter.blur(sigmaX: 1.0, sigmaY: 1.0),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.85),
+              color: Colors.white.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(20.0),
               border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const _SettingsHeader(
+                const SettingsHeader(
                   title: 'Registration Screen Settings',
                   subtitle:
                       'Customize the fields and appearance of the registration form',
@@ -138,15 +143,13 @@ class _SettingsSection extends StatelessWidget {
   }
 }
 
-// --- SETTINGS GROUPS ---
-
 class _GeneralSettingsGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final settings = context.watch<RegistrationScreenProvider>();
     final textTheme = Theme.of(context).textTheme;
 
-    return _SettingsGroup(
+    return SettingsGroup(
       icon: '⚙️',
       title: 'General',
       child: Row(
@@ -172,7 +175,7 @@ class _TitleSettingsGroup extends StatelessWidget {
     final settings = context.watch<RegistrationScreenProvider>();
     final textTheme = Theme.of(context).textTheme;
 
-    return _SettingsGroup(
+    return SettingsGroup(
       icon: '✏️',
       title: 'Screen Title',
       child: Column(
@@ -200,7 +203,7 @@ class _TitleSettingsGroup extends StatelessWidget {
             const SizedBox(height: 15),
             FormRow(children: [
               Expanded(
-                child: CustomSliderWithLabel(
+                child: SliderWithLabel(
                   label: 'Font Size',
                   value: settings.titleFontSize,
                   min: 12,
@@ -209,7 +212,7 @@ class _TitleSettingsGroup extends StatelessWidget {
                 ),
               ),
               Expanded(
-                child: CustomSliderWithLabel(
+                child: SliderWithLabel(
                   label: 'Line Height',
                   value: settings.titleLineHeight,
                   min: 0.8,
@@ -251,40 +254,44 @@ class _TitleSettingsGroup extends StatelessWidget {
             FormRow(
               children: [
                 Expanded(
-                  child: CustomColorPicker(
-                    pickerColor: settings.titleTextColor,
+                  child: _CustomColorPicker(
+                    label: "Title Color",
+                    color: settings.titleTextColor,
                     onColorChanged: (c) => settings.setTitleTextColor(c),
                   ),
                 ),
               ],
             ),
-            _SettingsGroup(
+            SettingsGroup(
               isSubgroup: true,
               icon: '📍',
               title: 'Positioning',
               child: Column(
                 children: [
-                  CustomSliderWithLabel(
-                    label: 'From Left',
+                  SliderWithLabel(
+                    label: 'Horizontal Position (%)',
                     value: settings.titleLeft,
-                    min: 0,
-                    max: 1000,
+                    min: 0.0,
+                    max: 1.0,
+                    step: 0.01,
                     onChanged: (v) => settings.setTitlePosition(
                         v, settings.titleTop, settings.titleWidth),
                   ),
-                  CustomSliderWithLabel(
-                    label: 'From Top',
+                  SliderWithLabel(
+                    label: 'Vertical Position (%)',
                     value: settings.titleTop,
-                    min: 0,
-                    max: 1000,
+                    min: 0.0,
+                    max: 1.0,
+                    step: 0.01,
                     onChanged: (v) => settings.setTitlePosition(
                         settings.titleLeft, v, settings.titleWidth),
                   ),
-                  CustomSliderWithLabel(
-                    label: 'Width',
+                  SliderWithLabel(
+                    label: 'Width (%)',
                     value: settings.titleWidth,
-                    min: 0,
-                    max: 1000,
+                    min: 0.1,
+                    max: 1.0,
+                    step: 0.01,
                     onChanged: (v) => settings.setTitlePosition(
                         settings.titleLeft, settings.titleTop, v),
                   ),
@@ -302,7 +309,7 @@ class _BackgroundSettingsGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final settings = context.watch<RegistrationScreenProvider>();
-    return _SettingsGroup(
+    return SettingsGroup(
       icon: '🖼️',
       title: 'Background Image',
       child: FileUploadArea(
@@ -335,7 +342,7 @@ class _TextFieldsSettingsGroup extends StatelessWidget {
     final settings = context.watch<RegistrationScreenProvider>();
     final textTheme = Theme.of(context).textTheme;
 
-    return _SettingsGroup(
+    return SettingsGroup(
       icon: '📝',
       title: 'Input Fields',
       child: Column(
@@ -359,7 +366,7 @@ class _TextFieldsSettingsGroup extends StatelessWidget {
 
   Widget _buildTextFieldCard(BuildContext context, CustomTextField field,
       RegistrationScreenProvider settings, TextTheme textTheme) {
-    return _SettingsGroup(
+    return SettingsGroup(
       isSubgroup: true,
       icon: '🔹',
       title: field.label,
@@ -404,30 +411,26 @@ class _TextFieldsSettingsGroup extends StatelessWidget {
                 field.id, field.copyWith(label: value)),
           ),
           const SizedBox(height: 15),
-          FormRow(
-            children: [
-              Expanded(
-                  child: CustomSliderWithLabel(
-                label: 'Width',
-                value: field.width,
-                min: 200,
-                max: 1000,
-                onChanged: (v) => settings.updateTextField(
-                    field.id, field.copyWith(width: v)),
-              )),
-              Expanded(
-                  child: CustomSliderWithLabel(
-                label: 'Height',
-                value: field.height,
-                min: 40,
-                max: 200,
-                onChanged: (v) => settings.updateTextField(
-                    field.id, field.copyWith(height: v)),
-              ))
-            ],
-          ),
+          FormRow(children: [
+            Expanded(
+                child: SliderWithLabel(
+              label: 'Width (%)',
+              value: field.width,
+              min: 0.1, max: 1.0, step: 0.01, // Percentage range
+              onChanged: (v) =>
+                  settings.updateTextField(field.id, field.copyWith(width: v)),
+            )),
+            Expanded(
+                child: SliderWithLabel(
+              label: 'Height (%)',
+              value: field.height,
+              min: 0.01, max: 0.2, step: 0.01, // Percentage range
+              onChanged: (v) =>
+                  settings.updateTextField(field.id, field.copyWith(height: v)),
+            )),
+          ]),
           const SizedBox(height: 15),
-          _SettingsGroup(
+          SettingsGroup(
               isSubgroup: true,
               icon: '🎨',
               title: 'Styling',
@@ -435,20 +438,22 @@ class _TextFieldsSettingsGroup extends StatelessWidget {
                 children: [
                   FormRow(children: [
                     Expanded(
-                        child: CustomColorPicker(
-                            pickerColor: field.fillColor,
+                        child: _CustomColorPicker(
+                        label: "Fill Color",
+                            color: field.fillColor,
                             onColorChanged: (c) => settings.updateTextField(
                                 field.id, field.copyWith(fillColor: c)))),
                     Expanded(
-                        child: CustomColorPicker(
-                            pickerColor: field.textColor,
+                        child: _CustomColorPicker(
+                        label: "Text Color",
+                            color: field.textColor,
                             onColorChanged: (c) => settings.updateTextField(
                                 field.id, field.copyWith(textColor: c)))),
                   ]),
                   FormRow(
                     children: [
                       Expanded(
-                          child: CustomSliderWithLabel(
+                          child: SliderWithLabel(
                               label: 'Font Size',
                               value: field.fontSize,
                               min: 10,
@@ -458,7 +463,7 @@ class _TextFieldsSettingsGroup extends StatelessWidget {
                                     field.id, field.copyWith(fontSize: v));
                               })),
                       Expanded(
-                          child: CustomSliderWithLabel(
+                          child: SliderWithLabel(
                               label: 'Border Radius',
                               value: field.borderRadius,
                               min: 0,
@@ -470,28 +475,31 @@ class _TextFieldsSettingsGroup extends StatelessWidget {
                 ],
               )),
           const SizedBox(height: 15),
-          _SettingsGroup(
-              isSubgroup: true,
-              icon: '📍',
-              title: 'Positioning',
-              child: Column(
-                children: [
-                  CustomSliderWithLabel(
-                      label: "From Left",
-                      value: field.left,
-                      min: 0,
-                      max: 1000,
-                      onChanged: (v) => settings.updateTextFieldPosition(
-                          field.id, v, field.top)),
-                  CustomSliderWithLabel(
-                      label: "From Top",
-                      value: field.top,
-                      min: 0,
-                      max: 1800,
-                      onChanged: (v) => settings.updateTextFieldPosition(
-                          field.id, field.left, v)),
-                ],
-              ))
+          SettingsGroup(
+            isSubgroup: true,
+            icon: '📍',
+            title: 'Positioning',
+            child: Column(
+              children: [
+                SliderWithLabel(
+                    label: "Horizontal Position (%)",
+                    value: field.left,
+                    min: 0.0,
+                    max: 1.0,
+                    step: 0.01,
+                    onChanged: (v) => settings.updateTextFieldPosition(
+                        field.id, v, field.top)),
+                SliderWithLabel(
+                    label: "Vertical Position (%)",
+                    value: field.top,
+                    min: 0.0,
+                    max: 1.0,
+                    step: 0.01,
+                    onChanged: (v) => settings.updateTextFieldPosition(
+                        field.id, field.left, v)),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -502,7 +510,7 @@ class _ButtonSettingsGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final settings = context.watch<RegistrationScreenProvider>();
-    return _SettingsGroup(
+    return SettingsGroup(
       icon: '🔘',
       title: 'Submit Button',
       child: Column(
@@ -518,29 +526,31 @@ class _ButtonSettingsGroup extends StatelessWidget {
           else
             const _TextButtonSettings(),
           const SizedBox(height: 20),
-          _SettingsGroup(
+          SettingsGroup(
             isSubgroup: true,
             icon: '📍',
             title: 'Positioning',
             child: Column(
               children: [
-                CustomSliderWithLabel(
-                    label: 'From Left',
+                SliderWithLabel(
+                    label: 'From Left (%)',
                     value: settings.buttonLeft,
-                    min: 0,
-                    max: 1100,
+                    min: 0.0,
+                    max: 1.0,
+                    step: 0.01,
                     onChanged: (v) =>
                         settings.setButtonPosition(v, settings.buttonBottom)),
-                CustomSliderWithLabel(
-                    label: 'From Bottom',
+                SliderWithLabel(
+                    label: 'From Bottom (%)',
                     value: settings.buttonBottom,
-                    min: 0,
-                    max: 1100,
+                    min: 0.0,
+                    max: 1.0,
+                    step: 0.01,
                     onChanged: (v) =>
                         settings.setButtonPosition(settings.buttonLeft, v)),
               ],
             ),
-          )
+          ),
         ],
       ),
     );
@@ -562,35 +572,39 @@ class _TextButtonSettings extends StatelessWidget {
         const SizedBox(height: 15),
         FormRow(children: [
           Expanded(
-            child: CustomSliderWithLabel(
-                label: 'Width',
+            child: SliderWithLabel(
+                label: 'Width (%)',
                 value: settings.buttonWidth,
-                min: 100,
-                max: 800,
+                min: 0.1,
+                max: 1.0,
+                step: 0.01, // Percentage range
                 onChanged: (v) =>
                     settings.setButtonDimensions(v, settings.buttonHeight)),
           ),
           Expanded(
-            child: CustomSliderWithLabel(
-                label: 'Height',
+            child: SliderWithLabel(
+                label: 'Height (%)',
                 value: settings.buttonHeight,
-                min: 40,
-                max: 200,
+                min: 0.01,
+                max: 0.2,
+                step: 0.01, // Percentage range
                 onChanged: (v) =>
                     settings.setButtonDimensions(settings.buttonWidth, v)),
           ),
         ]),
         FormRow(children: [
           Expanded(
-              child: CustomColorPicker(
-                  pickerColor: settings.submitButtonColor,
+              child: _CustomColorPicker(
+              label: "Button Fill Color",
+                  color: settings.submitButtonColor,
                   onColorChanged: (c) => settings.setSubmitButtonColor(c))),
           Expanded(
-              child: CustomColorPicker(
-                  pickerColor: settings.submitButtonTextColor,
+              child: _CustomColorPicker(
+              label: "Button Text Color",
+                  color: settings.submitButtonTextColor,
                   onColorChanged: (c) => settings.setSubmitButtonTextColor(c)))
         ]),
-        CustomSliderWithLabel(
+        SliderWithLabel(
             label: 'Border Radius',
             value: settings.buttonBorderRadius,
             min: 0,
@@ -618,7 +632,7 @@ class _ImageButtonSettings extends StatelessWidget {
                     isAsset: false);
                 showSnackBar(context, 'Button image updated');
               }
-            }  on Exception catch (e) {
+            } on Exception catch (e) {
               showSnackBar(context, 'Error selecting file: $e');
             }
           },
@@ -629,25 +643,27 @@ class _ImageButtonSettings extends StatelessWidget {
         const SizedBox(height: 15),
         FormRow(children: [
           Expanded(
-            child: CustomSliderWithLabel(
-                label: 'Width',
+            child: SliderWithLabel(
+                label: 'Width (%)',
                 value: settings.buttonWidth,
-                min: 100,
-                max: 800,
+                min: 0.1,
+                max: 1.0,
+                step: 0.01, // Percentage range
                 onChanged: (v) =>
                     settings.setButtonDimensions(v, settings.buttonHeight)),
           ),
           Expanded(
-            child: CustomSliderWithLabel(
-                label: 'Height',
+            child: SliderWithLabel(
+                label: 'Height (%)',
                 value: settings.buttonHeight,
-                min: 40,
-                max: 200,
+                min: 0.01,
+                max: 0.2,
+                step: 0.01, // Percentage range
                 onChanged: (v) =>
                     settings.setButtonDimensions(settings.buttonWidth, v)),
           ),
         ]),
-        CustomSliderWithLabel(
+        SliderWithLabel(
             label: 'Border Radius',
             value: settings.buttonBorderRadius,
             min: 0,
@@ -658,93 +674,71 @@ class _ImageButtonSettings extends StatelessWidget {
   }
 }
 
-// --- GENERIC HELPER WIDGETS (can be extracted to separate files) ---
+class _CustomColorPicker extends StatelessWidget {
+  final String label;
+  final Color color;
+  final ValueChanged<Color> onColorChanged;
 
-class _SettingsHeader extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  const _SettingsHeader({required this.title, required this.subtitle});
+  const _CustomColorPicker(
+      {required this.label, required this.color, required this.onColorChanged});
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 25),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.8),
-        border: Border(
-            bottom: BorderSide(color: Colors.black.withValues(alpha: 0.1))),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: textTheme.headlineMedium),
-          const SizedBox(height: 5),
-          Text(subtitle, style: textTheme.bodyMedium),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: Theme.of(context).textTheme.bodyMedium),
+        const SizedBox(height: 8),
+        GestureDetector(
+          onTap: () => _showColorPickerDialog(context),
+          child: Container(
+            height: 48,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: AppColors.inputBorder, width: 2),
+              color: Colors.white.withOpacity(0.8),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    color: color,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey.shade400),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  '#${color.value.toRadixString(16).substring(2).toUpperCase()}',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
-}
 
-class _SettingsGroup extends StatelessWidget {
-  final String icon;
-  final String title;
-  final Widget child;
-  final bool isSubgroup;
-
-  const _SettingsGroup(
-      {required this.icon,
-      required this.title,
-      required this.child,
-      this.isSubgroup = false});
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    return Container(
-      margin: isSubgroup ? const EdgeInsets.only(top: 10) : EdgeInsets.zero,
-      padding: const EdgeInsets.all(25),
-      decoration: BoxDecoration(
-        color: isSubgroup
-            ? Colors.white.withValues(alpha: 0.5)
-            : Colors.white.withValues(alpha: 0.7),
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
-        boxShadow: isSubgroup
-            ? []
-            : [
-                BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 15,
-                    offset: const Offset(0, 4))
-              ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 24,
-                height: 24,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(colors: [
-                    AppColors.primaryGradientStart,
-                    AppColors.primaryGradientEnd
-                  ]),
-                ),
-                alignment: Alignment.center,
-                child: Text(icon, style: const TextStyle(fontSize: 12)),
-              ),
-              const SizedBox(width: 10),
-              Expanded(child: Text(title, style: textTheme.titleLarge)),
-            ],
+  void _showColorPickerDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Select $label'),
+        content: SingleChildScrollView(
+          child: CustomColorPicker(
+            pickerColor: color,
+            onColorChanged: onColorChanged,
           ),
-          const SizedBox(height: 20),
-          child,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Done'),
+          ),
         ],
       ),
     );

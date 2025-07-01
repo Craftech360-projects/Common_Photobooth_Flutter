@@ -11,7 +11,7 @@ import 'package:photobooth_flutter/presentation/admin/welcome_screen_settings.da
 import 'package:photobooth_flutter/presentation/auth_screen.dart';
 import 'package:photobooth_flutter/presentation/category_screen.dart';
 import 'package:photobooth_flutter/presentation/face_capture_screen.dart';
-import 'package:photobooth_flutter/presentation/gender_selection_screen.dart';
+import 'package:photobooth_flutter/presentation/gender_screen.dart';
 import 'package:photobooth_flutter/presentation/loading_screen.dart';
 import 'package:photobooth_flutter/presentation/output_screen.dart';
 import 'package:photobooth_flutter/presentation/registration_screen.dart';
@@ -56,7 +56,7 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => const WelcomeScreen());
       case participantDetails:
         return MaterialPageRoute(
-            builder: (_) => const ParticipantDetailsScreen());
+            builder: (_) => const RegistrationScreen());
       case categoriesScreen:
         return MaterialPageRoute(builder: (_) => const CategoriesScreen());
       case themeSelection:

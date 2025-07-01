@@ -1,9 +1,10 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/providers/admin_watermark_provider.dart';
-import 'package:photobooth_flutter/providers/gender_selection_provider.dart';
+import 'package:photobooth_flutter/providers/gender_screen_provider.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/providers/photobooth_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
@@ -39,6 +40,11 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
     final settings = context.watch<GenderSelectionProvider>();
     final globalSettings = context.watch<GlobalSettingsProvider>();
     final watermarkProvider = context.watch<AdminWatermarkProvider>();
+    final screenSize = MediaQuery.of(context).size;
+
+    // Scaling for fonts and other non-stretching elements
+    final textScale =
+        min(screenSize.width / 1080.0, screenSize.height / 1920.0);
 
     return Scaffold(
       body: WatermarkOverlay(
@@ -57,13 +63,13 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
               ),
             ),
             Positioned(
-              left: settings.titleLeft,
-              top: settings.titleTop,
-              width: settings.titleWidth,
+              left: settings.titleLeft * screenSize.width,
+              top: settings.titleTop * screenSize.height,
+              width: settings.titleWidth * screenSize.width,
               child: Text(
                 settings.titleText,
                 style: TextStyle(
-                  fontSize: settings.titleFontSize,
+                  fontSize: settings.titleFontSize * textScale,
                   fontWeight: settings.titleFontWeight,
                   color: settings.titleColor
                       .withValues(alpha: settings.titleOpacity),
@@ -75,18 +81,22 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
                 textAlign: settings.titleAlignment,
               ),
             ),
+
             Positioned(
-              left: settings.genderSelectionLeft,
-              top: settings.genderSelectionTop,
+              left: settings.genderSelectionLeft * screenSize.width,
+              top: settings.genderSelectionTop * screenSize.height,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _buildGenderOption('male', settings),
-                  SizedBox(width: settings.imageSpacing),
-                  _buildGenderOption('female', settings),
+                  _buildGenderOption('male', settings, screenSize),
+                  SizedBox(
+                      width: settings
+                          .imageSpacing), // Spacing is fine in logical pixels
+                  _buildGenderOption('female', settings, screenSize),
                 ],
               ),
             ),
+
             if (_showError)
               Positioned(
                 bottom: settings.buttonBottom + 80,
@@ -98,13 +108,15 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
                   ),
                 ),
               ),
+
             Positioned(
-              left: settings.buttonLeft,
-              bottom: settings.buttonBottom,
+              left: settings.buttonLeft * screenSize.width,
+              bottom: settings.buttonBottom * screenSize.height,
               child: settings.useImageButton
-                  ? _buildImageButton(settings)
-                  : _buildTextButton(settings),
+                  ? _buildImageButton(settings, screenSize)
+                  : _buildTextButton(settings, screenSize),
             ),
+
             Positioned(
               right: 0,
               top: 0,
@@ -141,7 +153,11 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
     );
   }
 
-  Widget _buildGenderOption(String gender, GenderSelectionProvider settings) {
+  Widget _buildGenderOption(
+      String gender, GenderSelectionProvider settings, Size screenSize) {
+    final imageWidth = settings.imageWidth * screenSize.width;
+    final imageHeight = settings.imageHeight * screenSize.height;
+
     final isSelected = _selectedGender == gender;
     final isMale = gender == 'male';
 
@@ -167,11 +183,11 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         width: isSelected && settings.useSelectionEffect
-            ? settings.imageWidth * settings.selectedImageScale
-            : settings.imageWidth,
+            ? imageWidth * settings.selectedImageScale
+            : imageWidth,
         height: isSelected && settings.useSelectionEffect
-            ? settings.imageHeight * settings.selectedImageScale
-            : settings.imageHeight,
+            ? imageHeight * settings.selectedImageScale
+            : imageHeight,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(settings.imageBorderRadius),
           border: settings.showImageBorder
@@ -203,9 +219,9 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
     );
   }
 
-  Widget _buildImageButton(GenderSelectionProvider settings) {
+  Widget _buildImageButton(GenderSelectionProvider settings, Size screenSize) {
     if (settings.buttonImagePath == null) {
-      return _buildTextButton(settings);
+      return _buildTextButton(settings, screenSize);
     }
 
     return Opacity(
@@ -215,8 +231,8 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
           child: Container(
-            width: settings.buttonWidth,
-            height: settings.buttonHeight,
+            width: settings.buttonWidth * screenSize.width,
+            height: settings.buttonHeight * screenSize.height,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
               image: DecorationImage(
@@ -239,10 +255,10 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
     );
   }
 
-  Widget _buildTextButton(GenderSelectionProvider settings) {
+  Widget _buildTextButton(GenderSelectionProvider settings, Size screenSize) {
     return SizedBox(
-      width: settings.buttonWidth,
-      height: settings.buttonHeight,
+      width: settings.buttonWidth * screenSize.width,
+      height: settings.buttonHeight * screenSize.height,
       child: ElevatedButton(
         onPressed: _handleContinue,
         style: ElevatedButton.styleFrom(

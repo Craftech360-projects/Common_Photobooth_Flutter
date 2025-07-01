@@ -12,7 +12,7 @@ import 'package:photobooth_flutter/widgets/custom_dropdown.dart';
 import 'package:photobooth_flutter/widgets/custom_slider.dart';
 import 'package:photobooth_flutter/widgets/file_upload_area.dart';
 import 'package:photobooth_flutter/widgets/form_row.dart';
-import 'package:photobooth_flutter/widgets/improved_color_picker.dart';
+import 'package:photobooth_flutter/widgets/color_picker.dart';
 import 'package:photobooth_flutter/widgets/settings_group.dart';
 import 'package:photobooth_flutter/widgets/settings_header.dart';
 import 'package:photobooth_flutter/widgets/settings_preview.dart';
@@ -201,7 +201,7 @@ class _TitleSettingsGroup extends StatelessWidget {
               onChanged: (v) => settings.setTitleText(v),
             ),
             const SizedBox(height: 15),
-            CustomSliderWithLabel(
+            SliderWithLabel(
               label: 'Font Size',
               value: settings.titleFontSize,
               min: 16,
@@ -215,13 +215,13 @@ class _TitleSettingsGroup extends StatelessWidget {
               title: 'Positioning',
               child: Column(
                 children: [
-                  CustomSliderWithLabel(
+                  SliderWithLabel(
                       label: 'From Top',
                       value: settings.titleTop,
                       min: 0,
                       max: 1200,
                       onChanged: (v) => settings.setTitleTop(v)),
-                  CustomSliderWithLabel(
+                  SliderWithLabel(
                       label: 'From Left',
                       value: settings.titleLeft,
                       min: 0,
@@ -275,27 +275,27 @@ class _CameraPreviewSettingsGroup extends StatelessWidget {
               children: [
                 FormRow(children: [
                   Expanded(
-                      child: CustomSliderWithLabel(
+                      child: SliderWithLabel(
                           label: 'Preview Width',
                           value: settings.previewWidth,
                           min: 200,
                           max: 900,
                           onChanged: (v) => settings.setPreviewWidth(v))),
                   Expanded(
-                      child: CustomSliderWithLabel(
+                      child: SliderWithLabel(
                           label: 'Preview Height',
                           value: settings.previewHeight,
                           min: 200,
                           max: 900,
                           onChanged: (v) => settings.setPreviewHeight(v))),
                 ]),
-                CustomSliderWithLabel(
+                SliderWithLabel(
                     label: 'From Top',
                     value: settings.previewTop,
                     min: 0,
                     max: 1000,
                     onChanged: (v) => settings.setPreviewTop(v)),
-                CustomSliderWithLabel(
+                SliderWithLabel(
                     label: 'From Left',
                     value: settings.previewLeft,
                     min: 0,
@@ -368,27 +368,27 @@ class _ButtonSettingsGroup extends StatelessWidget {
               children: [
                 FormRow(children: [
                   Expanded(
-                      child: CustomSliderWithLabel(
+                      child: SliderWithLabel(
                           label: 'Button Width',
                           value: settings.buttonWidth,
                           min: 100,
                           max: 500,
                           onChanged: (v) => settings.setButtonWidth(v))),
                   Expanded(
-                      child: CustomSliderWithLabel(
+                      child: SliderWithLabel(
                           label: 'Button Height',
                           value: settings.buttonHeight,
                           min: 40,
                           max: 200,
                           onChanged: (v) => settings.setButtonHeight(v))),
                 ]),
-                CustomSliderWithLabel(
+                SliderWithLabel(
                     label: 'From Top',
                     value: settings.buttonTop,
                     min: 0,
                     max: 1500,
                     onChanged: (v) => settings.setButtonTop(v)),
-                CustomSliderWithLabel(
+                SliderWithLabel(
                     label: 'From Left',
                     value: settings.buttonLeft,
                     min: 0,
