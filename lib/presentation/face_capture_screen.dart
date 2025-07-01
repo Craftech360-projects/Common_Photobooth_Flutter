@@ -4,18 +4,19 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:camera/camera.dart';
-import 'package:camera_platform_interface/camera_platform_interface.dart';
 // NEW: Import the camera_macos package
 import 'package:camera_macos/camera_macos.dart';
+import 'package:camera_platform_interface/camera_platform_interface.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
+import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/providers/face_capture_provider.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/providers/photobooth_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
 import 'package:provider/provider.dart';
-import 'package:path/path.dart' as path;
 
 class FaceCaptureScreen extends StatefulWidget {
   final bool isPreviewMode;
@@ -60,7 +61,8 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_isMacos) return; // macOS camera switching is handled differently if needed
+    if (_isMacos)
+      return; // macOS camera switching is handled differently if needed
 
     final settings = context.read<FaceCaptureProvider>();
     final selectedIndex = settings.selectedCameraIndex;
@@ -291,7 +293,7 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
         width: settings.previewWidth,
         height: settings.previewHeight,
         decoration: BoxDecoration(
-          color: Colors.black,
+          color: AppColors.black,
           borderRadius: BorderRadius.circular(settings.previewBorderRadius),
         ),
         child: Center(

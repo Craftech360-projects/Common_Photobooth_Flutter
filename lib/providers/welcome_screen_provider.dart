@@ -29,7 +29,7 @@ class WelcomeScreenProvider extends ChangeNotifier {
 
   // Position properties for button
   double _buttonLeft = 245.0;
-  double _buttonBottom = 660.0;
+  double _buttonBottom = 460.0;
 
   // Button settings
   bool _useImageButton = true; // Default to image button

@@ -55,7 +55,7 @@ class AuthProvider extends ChangeNotifier {
         final serviceDetails =
             await AuthService.instance.fetchServiceDetails(requestId);
         if (serviceDetails != null) {
-          await LicenseService.instance.storeServiceDetails(serviceDetails);
+          // await LicenseService.instance.storeServiceDetails(serviceDetails);
           _isAuthenticated = true;
           _updateWatermarkVisibility();
         } else {

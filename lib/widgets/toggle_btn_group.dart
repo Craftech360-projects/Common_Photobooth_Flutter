@@ -34,7 +34,7 @@ class ToggleButtonGroup extends StatelessWidget {
                         AppColors.primaryGradientEnd
                       ])
                     : null,
-                color: isActive ? null : Colors.white.withValues(alpha: 0.8),
+                color: isActive ? null : AppColors.white.withValues(alpha: 0.8),
                 border: Border.all(
                     color: isActive
                         ? AppColors.primaryGradientStart
@@ -54,7 +54,7 @@ class ToggleButtonGroup extends StatelessWidget {
               child: Text(
                 options[index],
                 style: textTheme.bodyMedium?.copyWith(
-                    color: isActive ? Colors.white : AppColors.labelText),
+                    color: isActive ? AppColors.white : AppColors.labelText),
               ),
             ),
           ),

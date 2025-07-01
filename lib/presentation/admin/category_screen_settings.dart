@@ -8,7 +8,8 @@ import 'package:photobooth_flutter/providers/category_settings_provider.dart';
 import 'package:photobooth_flutter/widgets/custom_slider.dart';
 import 'package:photobooth_flutter/widgets/file_upload_area.dart';
 import 'package:photobooth_flutter/widgets/form_row.dart';
-import 'package:photobooth_flutter/widgets/improved_color_picker.dart';
+import 'package:photobooth_flutter/widgets/color_picker.dart';
+import 'package:photobooth_flutter/widgets/input_decoration.dart';
 import 'package:photobooth_flutter/widgets/settings_group.dart';
 import 'package:photobooth_flutter/widgets/settings_header.dart';
 import 'package:photobooth_flutter/widgets/settings_preview.dart';
@@ -92,9 +93,9 @@ class _SettingsSection extends StatelessWidget {
           filter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.85),
+              color: AppColors.white.withValues(alpha: 0.85),
               borderRadius: BorderRadius.circular(20.0),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+              border: Border.all(color: AppColors.white.withValues(alpha: 0.2)),
             ),
             child: const Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -157,7 +158,7 @@ class _TitleSettingsGroup extends StatelessWidget {
             const SizedBox(height: 15),
             TextFormField(
               initialValue: provider.titleText,
-              decoration: _inputDecoration(context, 'Enter title text'),
+              decoration: inputDecoration(context, 'Enter title text'),
               onChanged: (value) => provider.setTitleText(value),
             ),
             const SizedBox(height: 15),
@@ -169,8 +170,9 @@ class _TitleSettingsGroup extends StatelessWidget {
               onChanged: (value) => provider.setTitleStyle(fontSize: value),
             ),
             const SizedBox(height: 15),
-            CustomColorPicker(
-              pickerColor: provider.titleColor,
+            ColorPickerWidget(
+            label: "Title Text Color",
+              color: provider.titleColor,
               onColorChanged: (color) => provider.setTitleStyle(color: color),
             ),
           ],
@@ -389,8 +391,9 @@ Widget _buildCardSettingsGroup(BuildContext context,
                     ),
                     Expanded(
                       flex: 3,
-                      child: CustomColorPicker(
-                        pickerColor: settings.borderColor,
+                      child: ColorPickerWidget(
+                      label: "Border Color",
+                        color: settings.borderColor,
                         onColorChanged: (color) => provider.updateCardSettings(
                             cardKey, settings.copyWith(borderColor: color)),
                       ),
@@ -410,8 +413,9 @@ Widget _buildCardSettingsGroup(BuildContext context,
                 ],
               ),
               if (settings.useGlow)
-                CustomColorPicker(
-                  pickerColor: settings.glowColor,
+                ColorPickerWidget(
+                label: "Glow Color",
+                  color: settings.glowColor,
                   onColorChanged: (color) => provider.updateCardSettings(
                       cardKey, settings.copyWith(glowColor: color)),
                 ),
@@ -420,32 +424,5 @@ Widget _buildCardSettingsGroup(BuildContext context,
         ),
       ],
     ),
-  );
-}
-
-// --- HELPER METHODS ---
-
-InputDecoration _inputDecoration(BuildContext context, String hintText) {
-  final theme = Theme.of(context);
-  return InputDecoration(
-    hintText: hintText,
-    filled: true,
-    fillColor: Colors.white.withValues(alpha: 0.8),
-    hintStyle: theme.textTheme.bodyMedium
-        ?.copyWith(color: AppColors.labelText.withValues(alpha: 0.7)),
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: AppColors.inputBorder, width: 2),
-    ),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: AppColors.inputBorder, width: 2),
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10),
-      borderSide:
-          const BorderSide(color: AppColors.primaryGradientStart, width: 2),
-    ),
-    contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
   );
 }

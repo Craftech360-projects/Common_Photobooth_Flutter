@@ -11,8 +11,10 @@ import 'package:photobooth_flutter/widgets/custom_dropdown.dart';
 import 'package:photobooth_flutter/widgets/custom_slider.dart';
 import 'package:photobooth_flutter/widgets/file_upload_area.dart';
 import 'package:photobooth_flutter/widgets/form_row.dart';
-import 'package:photobooth_flutter/widgets/improved_color_picker.dart';
+import 'package:photobooth_flutter/widgets/color_picker.dart';
 import 'package:photobooth_flutter/widgets/input_decoration.dart';
+import 'package:photobooth_flutter/widgets/settings_group.dart';
+import 'package:photobooth_flutter/widgets/settings_header.dart';
 import 'package:photobooth_flutter/widgets/settings_preview.dart';
 import 'package:photobooth_flutter/widgets/snackbar.dart';
 import 'package:photobooth_flutter/widgets/toggle_btn_group.dart';
@@ -97,14 +99,14 @@ class _SettingsSection extends StatelessWidget {
           filter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.85),
+              color: AppColors.white.withValues(alpha: 0.85),
               borderRadius: BorderRadius.circular(20.0),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+              border: Border.all(color: AppColors.white.withValues(alpha: 0.2)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const _SettingsHeader(
+                const SettingsHeader(
                   title: 'Registration Screen Settings',
                   subtitle:
                       'Customize the fields and appearance of the registration form',
@@ -146,7 +148,7 @@ class _GeneralSettingsGroup extends StatelessWidget {
     final settings = context.watch<RegistrationScreenProvider>();
     final textTheme = Theme.of(context).textTheme;
 
-    return _SettingsGroup(
+    return SettingsGroup(
       icon: '⚙️',
       title: 'General',
       child: Row(
@@ -172,7 +174,7 @@ class _TitleSettingsGroup extends StatelessWidget {
     final settings = context.watch<RegistrationScreenProvider>();
     final textTheme = Theme.of(context).textTheme;
 
-    return _SettingsGroup(
+    return SettingsGroup(
       icon: '✏️',
       title: 'Screen Title',
       child: Column(
@@ -251,14 +253,15 @@ class _TitleSettingsGroup extends StatelessWidget {
             FormRow(
               children: [
                 Expanded(
-                  child: CustomColorPicker(
-                    pickerColor: settings.titleTextColor,
+                  child: ColorPickerWidget(
+                    label: "Title Text Color",
+                    color: settings.titleTextColor,
                     onColorChanged: (c) => settings.setTitleTextColor(c),
                   ),
                 ),
               ],
             ),
-            _SettingsGroup(
+            SettingsGroup(
               isSubgroup: true,
               icon: '📍',
               title: 'Positioning',
@@ -302,7 +305,7 @@ class _BackgroundSettingsGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final settings = context.watch<RegistrationScreenProvider>();
-    return _SettingsGroup(
+    return SettingsGroup(
       icon: '🖼️',
       title: 'Background Image',
       child: FileUploadArea(
@@ -335,7 +338,7 @@ class _TextFieldsSettingsGroup extends StatelessWidget {
     final settings = context.watch<RegistrationScreenProvider>();
     final textTheme = Theme.of(context).textTheme;
 
-    return _SettingsGroup(
+    return SettingsGroup(
       icon: '📝',
       title: 'Input Fields',
       child: Column(
@@ -359,7 +362,7 @@ class _TextFieldsSettingsGroup extends StatelessWidget {
 
   Widget _buildTextFieldCard(BuildContext context, CustomTextField field,
       RegistrationScreenProvider settings, TextTheme textTheme) {
-    return _SettingsGroup(
+    return SettingsGroup(
       isSubgroup: true,
       icon: '🔹',
       title: field.label,
@@ -427,7 +430,7 @@ class _TextFieldsSettingsGroup extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 15),
-          _SettingsGroup(
+          SettingsGroup(
               isSubgroup: true,
               icon: '🎨',
               title: 'Styling',
@@ -435,13 +438,15 @@ class _TextFieldsSettingsGroup extends StatelessWidget {
                 children: [
                   FormRow(children: [
                     Expanded(
-                        child: CustomColorPicker(
-                            pickerColor: field.fillColor,
+                        child: ColorPickerWidget(
+                            label: "Fill Color",
+                            color: field.fillColor,
                             onColorChanged: (c) => settings.updateTextField(
                                 field.id, field.copyWith(fillColor: c)))),
                     Expanded(
-                        child: CustomColorPicker(
-                            pickerColor: field.textColor,
+                        child: ColorPickerWidget(
+                            label: "Text Color",
+                            color: field.textColor,
                             onColorChanged: (c) => settings.updateTextField(
                                 field.id, field.copyWith(textColor: c)))),
                   ]),
@@ -470,7 +475,7 @@ class _TextFieldsSettingsGroup extends StatelessWidget {
                 ],
               )),
           const SizedBox(height: 15),
-          _SettingsGroup(
+          SettingsGroup(
               isSubgroup: true,
               icon: '📍',
               title: 'Positioning',
@@ -502,7 +507,7 @@ class _ButtonSettingsGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final settings = context.watch<RegistrationScreenProvider>();
-    return _SettingsGroup(
+    return SettingsGroup(
       icon: '🔘',
       title: 'Submit Button',
       child: Column(
@@ -518,7 +523,7 @@ class _ButtonSettingsGroup extends StatelessWidget {
           else
             const _TextButtonSettings(),
           const SizedBox(height: 20),
-          _SettingsGroup(
+          SettingsGroup(
             isSubgroup: true,
             icon: '📍',
             title: 'Positioning',
@@ -582,12 +587,14 @@ class _TextButtonSettings extends StatelessWidget {
         ]),
         FormRow(children: [
           Expanded(
-              child: CustomColorPicker(
-                  pickerColor: settings.submitButtonColor,
+              child: ColorPickerWidget(
+                  label: "Button Fill Color",
+                  color: settings.submitButtonColor,
                   onColorChanged: (c) => settings.setSubmitButtonColor(c))),
           Expanded(
-              child: CustomColorPicker(
-                  pickerColor: settings.submitButtonTextColor,
+              child: ColorPickerWidget(
+                  label: "Button Text Color",
+                  color: settings.submitButtonTextColor,
                   onColorChanged: (c) => settings.setSubmitButtonTextColor(c)))
         ]),
         CustomSliderWithLabel(
@@ -618,7 +625,7 @@ class _ImageButtonSettings extends StatelessWidget {
                     isAsset: false);
                 showSnackBar(context, 'Button image updated');
               }
-            }  on Exception catch (e) {
+            } on Exception catch (e) {
               showSnackBar(context, 'Error selecting file: $e');
             }
           },
@@ -654,99 +661,6 @@ class _ImageButtonSettings extends StatelessWidget {
             max: 50,
             onChanged: (v) => settings.setButtonBorderRadius(v))
       ],
-    );
-  }
-}
-
-// --- GENERIC HELPER WIDGETS (can be extracted to separate files) ---
-
-class _SettingsHeader extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  const _SettingsHeader({required this.title, required this.subtitle});
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 25),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.8),
-        border: Border(
-            bottom: BorderSide(color: Colors.black.withValues(alpha: 0.1))),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: textTheme.headlineMedium),
-          const SizedBox(height: 5),
-          Text(subtitle, style: textTheme.bodyMedium),
-        ],
-      ),
-    );
-  }
-}
-
-class _SettingsGroup extends StatelessWidget {
-  final String icon;
-  final String title;
-  final Widget child;
-  final bool isSubgroup;
-
-  const _SettingsGroup(
-      {required this.icon,
-      required this.title,
-      required this.child,
-      this.isSubgroup = false});
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    return Container(
-      margin: isSubgroup ? const EdgeInsets.only(top: 10) : EdgeInsets.zero,
-      padding: const EdgeInsets.all(25),
-      decoration: BoxDecoration(
-        color: isSubgroup
-            ? Colors.white.withValues(alpha: 0.5)
-            : Colors.white.withValues(alpha: 0.7),
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
-        boxShadow: isSubgroup
-            ? []
-            : [
-                BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 15,
-                    offset: const Offset(0, 4))
-              ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 24,
-                height: 24,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(colors: [
-                    AppColors.primaryGradientStart,
-                    AppColors.primaryGradientEnd
-                  ]),
-                ),
-                alignment: Alignment.center,
-                child: Text(icon, style: const TextStyle(fontSize: 12)),
-              ),
-              const SizedBox(width: 10),
-              Expanded(child: Text(title, style: textTheme.titleLarge)),
-            ],
-          ),
-          const SizedBox(height: 20),
-          child,
-        ],
-      ),
     );
   }
 }

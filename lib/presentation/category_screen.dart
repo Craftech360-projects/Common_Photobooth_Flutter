@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/presentation/theme_selection_screen.dart';
 import 'package:photobooth_flutter/providers/category_provider.dart';
 import 'package:photobooth_flutter/providers/category_settings_provider.dart';
@@ -279,7 +280,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                   focusNode: _accessoriesFocusNode,
                   readOnly: false,
                   showCursor: true,
-                  style: const TextStyle(color: Colors.white, fontSize: 24),
+                  style: const TextStyle(color: AppColors.white, fontSize: 24),
                   decoration: InputDecoration(
                     labelText: 'Enter Accessories (e.g., shoes, helmet)',
                     labelStyle:
@@ -289,7 +290,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.white),
+                      borderSide: const BorderSide(color: AppColors.white),
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class OutputScreenProvider extends ChangeNotifier {
@@ -14,7 +15,7 @@ class OutputScreenProvider extends ChangeNotifier {
   String _titleText = 'Thank You!';
   double _titleFontSize = 48.0;
   FontWeight _titleFontWeight = FontWeight.bold;
-  Color _titleColor = Colors.white;
+  Color _titleColor = AppColors.white;
   double _titleLeft = 0.0, _titleTop = 200.0, _titleWidth = 1080.0;
 
   // AI Artistry Image (Defaults for a 500x500 image on a 1080px screen)
@@ -26,12 +27,12 @@ class OutputScreenProvider extends ChangeNotifier {
   double _swaplabTop = 510.0; // (1920 - 900) / 2
   double _swaplabImageWidth = 600.0;
   double _swaplabImageHeight = 900.0;
-  
+
   // NEW: Image border properties
   bool _showImageBorder = false;
   double _imageBorderRadius = 15.0;
   double _imageBorderWidth = 5.0;
-  Color _imageBorderColor = Colors.white;
+  Color _imageBorderColor = AppColors.white;
 
   // QR Code
   double _qrCodeSize = 200.0;
@@ -88,7 +89,7 @@ class OutputScreenProvider extends ChangeNotifier {
   double get doneButtonHeight => _doneButtonHeight;
   double get doneButtonLeft => _doneButtonLeft;
   double get doneButtonBottom => _doneButtonBottom;
-  
+
   String? get backgroundImagePath => _backgroundImagePath;
   bool get isBackgroundImageAsset => _isBackgroundImageAsset;
   bool get showBackground => _showBackground;
@@ -119,11 +120,12 @@ class OutputScreenProvider extends ChangeNotifier {
       _swaplabTop = s['swaplabTop'] ?? _swaplabTop;
       _swaplabImageWidth = s['swaplabImageWidth'] ?? _swaplabImageWidth;
       _swaplabImageHeight = s['swaplabImageHeight'] ?? _swaplabImageHeight;
-      
+
       _showImageBorder = s['showImageBorder'] ?? _showImageBorder;
       _imageBorderRadius = s['imageBorderRadius'] ?? _imageBorderRadius;
       _imageBorderWidth = s['imageBorderWidth'] ?? _imageBorderWidth;
-      _imageBorderColor = Color(s['imageBorderColor'] ?? _imageBorderColor.value);
+      _imageBorderColor =
+          Color(s['imageBorderColor'] ?? _imageBorderColor.value);
 
       _qrCodeSize = s['qrCodeSize'] ?? _qrCodeSize;
       _qrCodeLeft = s['qrCodeLeft'] ?? _qrCodeLeft;
@@ -138,7 +140,7 @@ class OutputScreenProvider extends ChangeNotifier {
       _doneButtonHeight = s['doneButtonHeight'] ?? _doneButtonHeight;
       _doneButtonLeft = s['doneButtonLeft'] ?? _doneButtonLeft;
       _doneButtonBottom = s['doneButtonBottom'] ?? _doneButtonBottom;
-      
+
       _backgroundImagePath = s['backgroundImagePath'];
       _isBackgroundImageAsset = s['isBackgroundImageAsset'] ?? true;
       _showBackground = s['showBackground'] ?? _showBackground;
@@ -183,57 +185,113 @@ class OutputScreenProvider extends ChangeNotifier {
     };
     await _prefs.setString('output_screen_settings', jsonEncode(settings));
   }
-  
+
   void _notifyAndSave() {
     notifyListeners();
     _saveSettings();
   }
 
   // --- Setters ---
-  void setShowTitle(bool show) { _showTitle = show; _notifyAndSave(); }
-  void setTitleText(String text) { _titleText = text; _notifyAndSave(); }
-  void setTitleFontSize(double size) { _titleFontSize = size; _notifyAndSave(); }
-  void setTitleColor(Color color) { _titleColor = color; _notifyAndSave(); }
-  
+  void setShowTitle(bool show) {
+    _showTitle = show;
+    _notifyAndSave();
+  }
+
+  void setTitleText(String text) {
+    _titleText = text;
+    _notifyAndSave();
+  }
+
+  void setTitleFontSize(double size) {
+    _titleFontSize = size;
+    _notifyAndSave();
+  }
+
+  void setTitleColor(Color color) {
+    _titleColor = color;
+    _notifyAndSave();
+  }
+
   void setTitlePosition(double left, double top, double width) {
-    _titleLeft = left; _titleTop = top; _titleWidth = width;
+    _titleLeft = left;
+    _titleTop = top;
+    _titleWidth = width;
     _notifyAndSave();
   }
 
   void setAiArtistryPosition(double left, double top) {
-    _aiArtistryLeft = left; _aiArtistryTop = top;
+    _aiArtistryLeft = left;
+    _aiArtistryTop = top;
     _notifyAndSave();
   }
 
   void setSwaplabPosition(double left, double top) {
-    _swaplabLeft = left; _swaplabTop = top;
+    _swaplabLeft = left;
+    _swaplabTop = top;
     _notifyAndSave();
   }
 
   void setSwaplabImageDimensions(double width, double height) {
-    _swaplabImageWidth = width; _swaplabImageHeight = height;
+    _swaplabImageWidth = width;
+    _swaplabImageHeight = height;
     _notifyAndSave();
   }
-  
-  void setShowImageBorder(bool show) { _showImageBorder = show; _notifyAndSave(); }
-  void setImageBorderRadius(double radius) { _imageBorderRadius = radius; _notifyAndSave(); }
-  void setImageBorderWidth(double width) { _imageBorderWidth = width; _notifyAndSave(); }
-  void setImageBorderColor(Color color) { _imageBorderColor = color; _notifyAndSave(); }
 
-  void setQrCodeSize(double size) { _qrCodeSize = size; _notifyAndSave(); }
+  void setShowImageBorder(bool show) {
+    _showImageBorder = show;
+    _notifyAndSave();
+  }
+
+  void setImageBorderRadius(double radius) {
+    _imageBorderRadius = radius;
+    _notifyAndSave();
+  }
+
+  void setImageBorderWidth(double width) {
+    _imageBorderWidth = width;
+    _notifyAndSave();
+  }
+
+  void setImageBorderColor(Color color) {
+    _imageBorderColor = color;
+    _notifyAndSave();
+  }
+
+  void setQrCodeSize(double size) {
+    _qrCodeSize = size;
+    _notifyAndSave();
+  }
+
   void setQrCodePosition(double left, double bottom) {
-    _qrCodeLeft = left; _qrCodeBottom = bottom;
+    _qrCodeLeft = left;
+    _qrCodeBottom = bottom;
     _notifyAndSave();
   }
 
   // Done Button Setters
-  void setUseDoneButtonImage(bool use) { _useDoneButtonImage = use; _notifyAndSave(); }
-  void setDoneButtonText(String text) { _doneButtonText = text; _notifyAndSave(); }
-  void setDoneButtonWidth(double width) { _doneButtonWidth = width; _notifyAndSave(); }
-  void setDoneButtonHeight(double height) { _doneButtonHeight = height; _notifyAndSave(); }
-  
+  void setUseDoneButtonImage(bool use) {
+    _useDoneButtonImage = use;
+    _notifyAndSave();
+  }
+
+  void setDoneButtonText(String text) {
+    _doneButtonText = text;
+    _notifyAndSave();
+  }
+
+  void setDoneButtonWidth(double width) {
+    _doneButtonWidth = width;
+    _notifyAndSave();
+  }
+
+  void setDoneButtonHeight(double height) {
+    _doneButtonHeight = height;
+    _notifyAndSave();
+  }
+
   void setDoneButtonPosition(double left, double bottom) {
-    _doneButtonLeft = left; _doneButtonBottom = bottom;
+    _doneButtonLeft = left;
+    _doneButtonBottom = bottom;
     _notifyAndSave();
   }
 
@@ -249,7 +307,8 @@ class OutputScreenProvider extends ChangeNotifier {
     if (sourcePath != null) {
       try {
         final appDir = await getApplicationDocumentsDirectory();
-        final fileName = 'output_done_btn_${DateTime.now().millisecondsSinceEpoch}${p.extension(sourcePath)}';
+        final fileName =
+            'output_done_btn_${DateTime.now().millisecondsSinceEpoch}${p.extension(sourcePath)}';
         final destinationPath = p.join(appDir.path, fileName);
         await File(sourcePath).copy(destinationPath);
         imagePath = destinationPath;
@@ -265,7 +324,10 @@ class OutputScreenProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setShowBackground(bool show) { _showBackground = show; _notifyAndSave(); }
+  void setShowBackground(bool show) {
+    _showBackground = show;
+    _notifyAndSave();
+  }
 
   Future<void> setBackgroundImage(String? path) async {
     if (path == null) {
@@ -273,7 +335,8 @@ class OutputScreenProvider extends ChangeNotifier {
     } else {
       try {
         final appDir = await getApplicationDocumentsDirectory();
-        final fileName = 'output_bg_${DateTime.now().millisecondsSinceEpoch}${p.extension(path)}';
+        final fileName =
+            'output_bg_${DateTime.now().millisecondsSinceEpoch}${p.extension(path)}';
         final destinationPath = p.join(appDir.path, fileName);
         await File(path).copy(destinationPath);
         _backgroundImagePath = destinationPath;

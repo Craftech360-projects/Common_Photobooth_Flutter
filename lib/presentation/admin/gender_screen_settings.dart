@@ -1,5 +1,3 @@
-// lib/presentation/gender_screen_settings.dart
-
 import 'dart:ui';
 
 import 'package:file_picker/file_picker.dart';
@@ -7,12 +5,16 @@ import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/presentation/gender_selection_screen.dart';
 import 'package:photobooth_flutter/providers/gender_selection_provider.dart';
+import 'package:photobooth_flutter/widgets/custom_dropdown.dart';
 import 'package:photobooth_flutter/widgets/custom_slider.dart';
 import 'package:photobooth_flutter/widgets/file_upload_area.dart';
-import 'package:photobooth_flutter/widgets/improved_color_picker.dart';
+import 'package:photobooth_flutter/widgets/color_picker.dart';
+import 'package:photobooth_flutter/widgets/form_row.dart';
+import 'package:photobooth_flutter/widgets/input_decoration.dart';
 import 'package:photobooth_flutter/widgets/settings_group.dart';
 import 'package:photobooth_flutter/widgets/settings_header.dart';
 import 'package:photobooth_flutter/widgets/settings_preview.dart';
+import 'package:photobooth_flutter/widgets/toggle_btn_group.dart';
 import 'package:provider/provider.dart';
 
 class GenderScreenSettings extends StatelessWidget {
@@ -93,9 +95,9 @@ class _SettingsSection extends StatelessWidget {
           filter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.85),
+              color: AppColors.white.withValues(alpha: 0.85),
               borderRadius: BorderRadius.circular(20.0),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+              border: Border.all(color: AppColors.white.withValues(alpha: 0.2)),
             ),
             child: const Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -151,11 +153,11 @@ class _TitleSettingsGroup extends StatelessWidget {
         children: [
           TextFormField(
             initialValue: settings.titleText,
-            decoration: _inputDecoration(context, 'Enter title text'),
+            decoration: inputDecoration(context, 'Enter title text'),
             onChanged: (value) => settings.setTitleText(value),
           ),
           const SizedBox(height: 15),
-          _FormRow(
+          FormRow(
             children: [
               Expanded(
                   child: CustomSliderWithLabel(
@@ -183,7 +185,7 @@ class _TitleSettingsGroup extends StatelessWidget {
               title: 'Styling',
               child: Column(
                 children: [
-                  _CustomDropdown<FontWeight>(
+                  CustomDropdown<FontWeight>(
                     label: 'Font Weight',
                     value: settings.titleFontWeight,
                     items: const {
@@ -196,7 +198,7 @@ class _TitleSettingsGroup extends StatelessWidget {
                     onChanged: (v) => settings.setTitleStyle(fontWeight: v),
                   ),
                   const SizedBox(height: 15),
-                  _CustomColorPicker(
+                  ColorPickerWidget(
                     label: 'Title Color',
                     color: settings.titleColor,
                     onColorChanged: (c) => settings.setTitleStyle(color: c),
@@ -329,7 +331,7 @@ class _GenderImagesGroup extends StatelessWidget {
       title: 'Gender Images',
       child: Column(
         children: [
-          _FormRow(
+          FormRow(
             children: [
               Expanded(
                 child: FileUploadArea(
@@ -370,7 +372,7 @@ class _GenderImagesGroup extends StatelessWidget {
             title: 'Sizing & Spacing',
             child: Column(
               children: [
-                _FormRow(
+                FormRow(
                   children: [
                     Expanded(
                         child: CustomSliderWithLabel(
@@ -479,13 +481,13 @@ class _SelectionEffectGroup extends StatelessWidget {
             ),
             if (settings.useSelectionGlow) ...[
               const SizedBox(height: 15),
-              _CustomColorPicker(
+              ColorPickerWidget(
                 label: 'Glow Color',
                 color: settings.selectionGlowColor,
                 onColorChanged: (c) =>
                     settings.setSelectionEffect(glowColor: c),
               ),
-              _FormRow(children: [
+              FormRow(children: [
                 Expanded(
                   child: CustomSliderWithLabel(
                     label: 'Glow Intensity',
@@ -526,7 +528,7 @@ class _ButtonSettingsGroup extends StatelessWidget {
       title: 'Next Button',
       child: Column(
         children: [
-          _ToggleButtonGroup(
+          ToggleButtonGroup(
             options: const ['Text Button', 'Image Button'],
             selectedIndex: settings.useImageButton ? 1 : 0,
             onSelected: (i) => settings.setUseImageButton(i == 1),
@@ -551,13 +553,13 @@ class _ButtonSettingsGroup extends StatelessWidget {
               children: [
                 TextFormField(
                   initialValue: settings.buttonText,
-                  decoration: _inputDecoration(context, 'Button Text'),
+                  decoration: inputDecoration(context, 'Button Text'),
                   onChanged: (v) => settings.setButtonText(v),
                 ),
                 const SizedBox(height: 15),
-                _FormRow(children: [
+                FormRow(children: [
                   Expanded(
-                    child: _CustomColorPicker(
+                    child: ColorPickerWidget(
                       label: 'Button Color',
                       color: settings.buttonColor,
                       onColorChanged: (c) =>
@@ -565,7 +567,7 @@ class _ButtonSettingsGroup extends StatelessWidget {
                     ),
                   ),
                   Expanded(
-                    child: _CustomColorPicker(
+                    child: ColorPickerWidget(
                       label: 'Text Color',
                       color: settings.buttonTextColor,
                       onColorChanged: (c) =>
@@ -582,7 +584,7 @@ class _ButtonSettingsGroup extends StatelessWidget {
             title: 'Sizing & Positioning',
             child: Column(
               children: [
-                _FormRow(children: [
+                FormRow(children: [
                   Expanded(
                     child: CustomSliderWithLabel(
                       label: 'Width',
@@ -604,7 +606,7 @@ class _ButtonSettingsGroup extends StatelessWidget {
                     ),
                   )
                 ]),
-                _FormRow(children: [
+                FormRow(children: [
                   Expanded(
                     child: CustomSliderWithLabel(
                       label: 'From Left',
@@ -651,222 +653,6 @@ class _LayoutSettingsGroup extends StatelessWidget {
         max: 64,
         onChanged: (v) => settings.setScreenPadding(v),
       ),
-    );
-  }
-}
-
-// --- TEMPORARY HELPERS (Can be moved to global files) ---
-// These are added here for completeness, but should be moved to the settings_ui_helpers directory.
-
-class _FormRow extends StatelessWidget {
-  final List<Widget> children;
-  const _FormRow({required this.children});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 15.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          children[0],
-          const SizedBox(width: 20),
-          if (children.length > 1) children[1],
-        ],
-      ),
-    );
-  }
-}
-
-InputDecoration _inputDecoration(BuildContext context, String hintText) {
-  final theme = Theme.of(context);
-  return InputDecoration(
-    hintText: hintText,
-    filled: true,
-    fillColor: Colors.white.withValues(alpha: 0.8),
-    hintStyle: theme.textTheme.bodyMedium
-        ?.copyWith(color: AppColors.labelText.withValues(alpha: 0.7)),
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: AppColors.inputBorder, width: 2),
-    ),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: AppColors.inputBorder, width: 2),
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10),
-      borderSide:
-          const BorderSide(color: AppColors.primaryGradientStart, width: 2),
-    ),
-    contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-  );
-}
-
-class _CustomDropdown<T> extends StatelessWidget {
-  final String label;
-  final T value;
-  final Map<T, String> items;
-  final ValueChanged<T?> onChanged;
-
-  const _CustomDropdown(
-      {required this.label,
-      required this.value,
-      required this.items,
-      required this.onChanged});
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: textTheme.bodyMedium),
-        const SizedBox(height: 8),
-        DropdownButtonFormField<T>(
-          value: value,
-          items: items.entries
-              .map((e) =>
-                  DropdownMenuItem<T>(value: e.key, child: Text(e.value)))
-              .toList(),
-          onChanged: onChanged,
-          decoration: _inputDecoration(context, ''),
-        ),
-      ],
-    );
-  }
-}
-
-class _CustomColorPicker extends StatelessWidget {
-  final String label;
-  final Color color;
-  final ValueChanged<Color> onColorChanged;
-
-  const _CustomColorPicker(
-      {required this.label, required this.color, required this.onColorChanged});
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: textTheme.bodyMedium),
-        const SizedBox(height: 8),
-        GestureDetector(
-          onTap: () => _showColorPickerDialog(context),
-          child: Container(
-            height: 48,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppColors.inputBorder, width: 2),
-              color: Colors.white.withValues(alpha: 0.8),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 30,
-                  height: 30,
-                  decoration: BoxDecoration(
-                    color: color,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey.shade400),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  '#${color.value.toRadixString(16).substring(2).toUpperCase()}',
-                  style: textTheme.bodyMedium,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  void _showColorPickerDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Select $label'),
-        content: SingleChildScrollView(
-          child: CustomColorPicker(
-            pickerColor: color,
-            onColorChanged: onColorChanged,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Done'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ToggleButtonGroup extends StatelessWidget {
-  final List<String> options;
-  final int selectedIndex;
-  final ValueChanged<int> onSelected;
-
-  const _ToggleButtonGroup(
-      {required this.options,
-      required this.selectedIndex,
-      required this.onSelected});
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    return Row(
-      children: List.generate(options.length, (index) {
-        final bool isActive = selectedIndex == index;
-        return Expanded(
-          child: GestureDetector(
-            onTap: () => onSelected(index),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              margin:
-                  EdgeInsets.only(right: index < options.length - 1 ? 10 : 0),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                gradient: isActive
-                    ? const LinearGradient(colors: [
-                        AppColors.primaryGradientStart,
-                        AppColors.primaryGradientEnd
-                      ])
-                    : null,
-                color: isActive ? null : Colors.white.withValues(alpha: 0.8),
-                border: Border.all(
-                    color: isActive
-                        ? AppColors.primaryGradientStart
-                        : AppColors.inputBorder,
-                    width: 2),
-                boxShadow: isActive
-                    ? [
-                        BoxShadow(
-                            color: AppColors.primaryGradientStart
-                                .withValues(alpha: 0.3),
-                            blurRadius: 15,
-                            spreadRadius: -5)
-                      ]
-                    : [],
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                options[index],
-                style: textTheme.bodyMedium?.copyWith(
-                    color: isActive ? Colors.white : AppColors.labelText),
-              ),
-            ),
-          ),
-        );
-      }),
     );
   }
 }

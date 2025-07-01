@@ -4,6 +4,75 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:photobooth_flutter/core/constants/constants.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 
+class ColorPickerWidget extends StatelessWidget {
+  final String label;
+  final Color color;
+  final ValueChanged<Color> onColorChanged;
+
+  const ColorPickerWidget(
+      {super.key,
+      required this.label,
+      required this.color,
+      required this.onColorChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: Theme.of(context).textTheme.bodyMedium),
+        const SizedBox(height: 8),
+        GestureDetector(
+          onTap: () => _showColorPickerDialog(context),
+          child: Container(
+            height: 48,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: AppColors.inputBorder, width: 2),
+              color: AppColors.white.withValues(alpha: 0.8),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    color: color,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey.shade400),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showColorPickerDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Select $label'),
+        content: SingleChildScrollView(
+          child: CustomColorPicker(
+            pickerColor: color,
+            onColorChanged: onColorChanged,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Done'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class CustomColorPicker extends StatefulWidget {
   final String? label;
   final Color pickerColor;

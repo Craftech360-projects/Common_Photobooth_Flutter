@@ -94,9 +94,9 @@ class _SettingsSection extends StatelessWidget {
           filter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.85),
+              color: AppColors.white.withValues(alpha: 0.85),
               borderRadius: BorderRadius.circular(20.0),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+              border: Border.all(color: AppColors.white.withValues(alpha: 0.2)),
             ),
             child: const Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -255,13 +255,13 @@ class _CarouselSettingsGroup extends StatelessWidget {
             max: 1000,
             onChanged: (v) => settings.setCarouselHeight(v),
           ),
-          CustomSliderWithLabel(
-            label: 'Arrow Spacing',
-            value: settings.arrowSpacing,
-            min: 0,
-            max: 150,
-            onChanged: (v) => settings.setArrowSpacing(v),
-          ),
+          // CustomSliderWithLabel(    =========>   Need to Check
+          //   label: 'Arrow Spacing',
+          //   value: settings.arrowSpacing,
+          //   min: 0,
+          //   max: 150,
+          //   onChanged: (v) => settings.setArrowSpacing(v),
+          // ),
           const SizedBox(height: 15),
           SettingsGroup(
             isSubgroup: true,
@@ -388,7 +388,7 @@ InputDecoration _inputDecoration(BuildContext context, String hintText) {
   return InputDecoration(
     hintText: hintText,
     filled: true,
-    fillColor: Colors.white.withValues(alpha: 0.8),
+    fillColor: AppColors.white.withValues(alpha: 0.8),
     hintStyle: theme.textTheme.bodyMedium
         ?.copyWith(color: AppColors.labelText.withValues(alpha: 0.7)),
     border: OutlineInputBorder(

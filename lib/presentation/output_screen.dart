@@ -140,7 +140,7 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
           child: QrImageView(
               data: 'PREVIEW',
               size: settings.qrCodeSize,
-              backgroundColor: Colors.white),
+              backgroundColor: AppColors.white),
         ),
         Positioned(
           left: settings.doneButtonLeft,
@@ -220,7 +220,7 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
             child: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.white,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
@@ -250,14 +250,14 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
               padding: const EdgeInsets.all(16),
               margin: const EdgeInsets.symmetric(horizontal: 200),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.6),
+                color: AppColors.black.withOpacity(0.6),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
                 'Your generated image has been sent to\n${photoboothProvider.email}',
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: AppColors.white,
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
@@ -324,7 +324,7 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
     if (imageUrl == null) {
       return const Center(
           child: Text('No image available',
-              style: TextStyle(color: Colors.white)));
+              style: TextStyle(color: AppColors.white)));
     }
     if (!imageUrl.startsWith('http')) {
       return Image.file(File.fromUri(Uri.file(imageUrl)), fit: BoxFit.cover);

@@ -12,7 +12,7 @@ import 'package:photobooth_flutter/widgets/custom_dropdown.dart';
 import 'package:photobooth_flutter/widgets/custom_slider.dart';
 import 'package:photobooth_flutter/widgets/file_upload_area.dart';
 import 'package:photobooth_flutter/widgets/form_row.dart';
-import 'package:photobooth_flutter/widgets/improved_color_picker.dart';
+import 'package:photobooth_flutter/widgets/color_picker.dart';
 import 'package:photobooth_flutter/widgets/settings_group.dart';
 import 'package:photobooth_flutter/widgets/settings_header.dart';
 import 'package:photobooth_flutter/widgets/settings_preview.dart';
@@ -135,9 +135,9 @@ class _SettingsSection extends StatelessWidget {
           filter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.85),
+              color: AppColors.white.withValues(alpha: 0.85),
               borderRadius: BorderRadius.circular(20.0),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+              border: Border.all(color: AppColors.white.withValues(alpha: 0.2)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -451,7 +451,7 @@ InputDecoration _inputDecoration(BuildContext context, String hintText) {
   return InputDecoration(
     hintText: hintText,
     filled: true,
-    fillColor: Colors.white.withValues(alpha: 0.8),
+    fillColor: AppColors.white.withValues(alpha: 0.8),
     hintStyle: theme.textTheme.bodyMedium
         ?.copyWith(color: AppColors.labelText.withValues(alpha: 0.7)),
     border: OutlineInputBorder(

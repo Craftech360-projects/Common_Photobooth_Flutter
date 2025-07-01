@@ -122,7 +122,7 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
                         controller: _controllers[field.id],
                         focusNode: _focusNodes[field.id],
                         maxLines: 1,
-                        textAlignVertical: TextAlignVertical.center, // Add this
+                        // textAlignVertical: TextAlignVertical.top, // Add this
                         showCursor: true,
                         style: TextStyle(
                           color: field.textColor,
@@ -133,15 +133,15 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
                               : FontStyle.normal,
                         ),
                         decoration: InputDecoration(
-                          // isDense: true, // Add this
-                          contentPadding: EdgeInsets.zero, // And add this
+                          isDense: true,
+                          contentPadding: EdgeInsets.zero,
                           floatingLabelBehavior: FloatingLabelBehavior.never,
                           labelText: field.label,
                           hintText: field.hintText,
                           labelStyle: TextStyle(
                               fontSize: field.fontSize,
                               color: field.labelColor),
-                          filled: false,
+                          filled: true,
                           fillColor: field.fillColor,
                           border: field.hasBorder
                               ? OutlineInputBorder(
@@ -269,7 +269,7 @@ class _ParticipantDetailsScreenState extends State<ParticipantDetailsScreen> {
                     ? AssetImage(settings.buttonImagePath!)
                     : FileImage(File(settings.buttonImagePath!))
                         as ImageProvider,
-                fit: BoxFit.cover,
+                fit: BoxFit.contain,
               ),
               border: settings.buttonHasBorder
                   ? Border.all(

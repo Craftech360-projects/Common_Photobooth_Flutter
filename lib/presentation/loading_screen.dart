@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
+import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/providers/photobooth_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
@@ -230,7 +231,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppColors.black,
       body: Center(
         child: _errorMessage != null
             ? _buildErrorDisplay()
@@ -253,7 +254,9 @@ class _LoadingScreenState extends State<LoadingScreen> {
           const Text(
             'An Error Occurred',
             style: TextStyle(
-                color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
+                color: AppColors.white,
+                fontSize: 28,
+                fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
           Text(

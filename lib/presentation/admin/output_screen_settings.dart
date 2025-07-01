@@ -8,7 +8,7 @@ import 'package:photobooth_flutter/providers/output_screen_provider.dart';
 import 'package:photobooth_flutter/widgets/custom_slider.dart';
 import 'package:photobooth_flutter/widgets/file_upload_area.dart';
 import 'package:photobooth_flutter/widgets/form_row.dart';
-import 'package:photobooth_flutter/widgets/improved_color_picker.dart';
+import 'package:photobooth_flutter/widgets/color_picker.dart';
 import 'package:photobooth_flutter/widgets/settings_group.dart';
 import 'package:photobooth_flutter/widgets/settings_header.dart';
 import 'package:photobooth_flutter/widgets/settings_preview.dart';
@@ -92,9 +92,9 @@ class _SettingsSection extends StatelessWidget {
           filter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.85),
+              color: AppColors.white.withOpacity(0.85),
               borderRadius: BorderRadius.circular(20.0),
-              border: Border.all(color: Colors.white.withOpacity(0.2)),
+              border: Border.all(color: AppColors.white.withOpacity(0.2)),
             ),
             child: const Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -303,10 +303,11 @@ class _ImageSettingsGroup extends StatelessWidget {
             title: 'Image Border & Style',
             child: Column(
               children: [
-                 Row(
+                Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Show Border', style: Theme.of(context).textTheme.bodyLarge),
+                    Text('Show Border',
+                        style: Theme.of(context).textTheme.bodyLarge),
                     Switch(
                       value: settings.showImageBorder,
                       onChanged: (value) => settings.setShowImageBorder(value),
@@ -456,16 +457,16 @@ class _ButtonSettingsGroup extends StatelessWidget {
                       value: settings.doneButtonLeft,
                       min: 0,
                       max: 1000,
-                      onChanged: (v) =>
-                          settings.setDoneButtonPosition(v, settings.doneButtonBottom))),
+                      onChanged: (v) => settings.setDoneButtonPosition(
+                          v, settings.doneButtonBottom))),
               Expanded(
                   child: CustomSliderWithLabel(
                       label: 'From Bottom',
                       value: settings.doneButtonBottom,
                       min: 0,
                       max: 1000,
-                      onChanged: (v) =>
-                          settings.setDoneButtonPosition(settings.doneButtonLeft, v))),
+                      onChanged: (v) => settings.setDoneButtonPosition(
+                          settings.doneButtonLeft, v))),
             ],
           ),
         ],
@@ -503,7 +504,7 @@ InputDecoration _inputDecoration(BuildContext context, String hintText) {
   return InputDecoration(
     hintText: hintText,
     filled: true,
-    fillColor: Colors.white.withOpacity(0.8),
+    fillColor: AppColors.white.withOpacity(0.8),
     hintStyle: theme.textTheme.bodyMedium
         ?.copyWith(color: AppColors.labelText.withOpacity(0.7)),
     border: OutlineInputBorder(

@@ -89,11 +89,11 @@ class _AdminScreenState extends State<AdminScreen> {
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text('Admin Dashboard',
-            style: textTheme.headlineMedium?.copyWith(color: Colors.white)),
+            style: textTheme.headlineMedium?.copyWith(color: AppColors.white)),
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: AppColors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -589,7 +589,7 @@ class _AdvancedSettingsSection extends StatelessWidget {
               icon: const Icon(Icons.refresh),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.red.withValues(alpha: 0.8),
-                foregroundColor: Colors.white,
+                foregroundColor: AppColors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
               onPressed: onReset,

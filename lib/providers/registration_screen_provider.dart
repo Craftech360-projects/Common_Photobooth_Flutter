@@ -481,9 +481,6 @@ class RegistrationScreenProvider extends ChangeNotifier {
           hintText: '',
           fieldType: TextFieldType.name,
           hasBorder: false,
-          fillColor: Colors.transparent,
-          labelColor: Colors.white,
-          textColor: Colors.white,
           left: 180,
           top: 880.0),
       CustomTextField(
@@ -492,9 +489,6 @@ class RegistrationScreenProvider extends ChangeNotifier {
           hintText: '',
           fieldType: TextFieldType.email,
           hasBorder: false,
-          fillColor: Colors.transparent,
-          labelColor: Colors.white,
-          textColor: Colors.white,
           left: 180,
           top: 1066.0),
     ];
