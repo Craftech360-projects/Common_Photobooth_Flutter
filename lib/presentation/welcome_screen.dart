@@ -155,7 +155,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         image: settings.isButtonImageAsset
                             ? AssetImage(settings.buttonImagePath!)
                             : FileImage(File(settings.buttonImagePath!)) as ImageProvider,
-                        fit: BoxFit.cover,
+                        fit: BoxFit.contain,
                         opacity: AlwaysStoppedAnimation(settings.buttonImageOpacity),
                     ),
                 ),

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
@@ -24,6 +25,11 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> {
     final settings = context.watch<theme_provider.ThemeSelectionProvider>();
     final photoboothProvider = context.read<PhotoboothProvider>();
     final globalSettings = context.read<GlobalSettingsProvider>();
+    final screenSize = MediaQuery.of(context).size;
+
+    // Scale factor for fonts and other non-stretching elements
+    final textScale =
+        min(screenSize.width / 1080.0, screenSize.height / 1920.0);
 
     return Scaffold(
       body: Container(
@@ -37,26 +43,28 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> {
           children: [
             if (settings.showTitle)
               Positioned(
-                top: settings.titleTop,
+                top: settings.titleTop * screenSize.height,
                 child: Text(
                   settings.titleText,
                   style: TextStyle(
-                    fontSize: settings.titleFontSize,
+                    fontSize: settings.titleFontSize * textScale,
                     color: settings.titleColor,
                     fontWeight: settings.titleFontWeight,
                   ),
                 ),
               ),
             Positioned(
-              top: settings.carouselTop,
-              height: settings.carouselHeight,
+              top: settings.carouselTop * screenSize.height,
+              height: settings.carouselHeight * screenSize.height,
               left: 0,
               right: 0,
-              child: _buildThemeCarousel(context, settings),
+              child:
+                  _buildThemeCarousel(context, settings, screenSize, textScale),
             ),
             Positioned(
-              bottom: settings.buttonBottom,
-              child: _buildSelectButton(context, settings, photoboothProvider),
+              bottom: settings.buttonBottom * screenSize.height,
+              child: _buildSelectButton(
+                  context, settings, photoboothProvider, screenSize),
             ),
             Positioned(
               right: 0,
@@ -119,7 +127,10 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> {
   }
 
   Widget _buildThemeCarousel(
-      BuildContext context, theme_provider.ThemeSelectionProvider settings) {
+      BuildContext context,
+      theme_provider.ThemeSelectionProvider settings,
+      Size screenSize,
+      double textScale) {
     final themes = settings.themes;
     final orderedStackChildren = <Widget>[];
     final count = themes.length;
@@ -161,9 +172,13 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> {
             ..translate(xOffset, yOffset)
             ..scale(scale),
           child: _buildThemeCard(
+              textScale: textScale,
+              screenSize: screenSize,
               theme: theme,
               isSelected: displayIndex == 0,
-              onTap: () => setState(() => _currentIndex = cardIndex),
+              onTap: () => setState(
+                    () => _currentIndex = cardIndex,
+                  ),
               settings: settings),
         ),
       );
@@ -179,13 +194,13 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> {
           onPressed: () => setState(() => _currentIndex =
               (_currentIndex - 1 + themes.length) % themes.length),
         ),
-        const SizedBox(width: 150),
+        SizedBox(width: settings.arrowSpacing * screenSize.width),
         SizedBox(
-            width: 500,
-            height: settings.carouselHeight,
+            width: settings.cardWidth * 1.8,
+            height: settings.carouselHeight * screenSize.height,
             child: Stack(
                 alignment: Alignment.center, children: orderedStackChildren)),
-        const SizedBox(width: 150),
+        SizedBox(width: settings.arrowSpacing * screenSize.width),
         IconButton(
           icon: Image.asset('assets/images/forward_arrow.png',
               width: 50, height: 50),
@@ -196,19 +211,23 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> {
     );
   }
 
-  Widget _buildThemeCard(
-      {required theme_provider.Theme theme,
-      required bool isSelected,
-      required VoidCallback onTap,
-      required theme_provider.ThemeSelectionProvider settings}) {
+  Widget _buildThemeCard({
+    required theme_provider.Theme theme,
+    required bool isSelected,
+    required VoidCallback onTap,
+    required theme_provider.ThemeSelectionProvider settings,
+    required Size screenSize,
+    required double textScale,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        width: settings.cardWidth,
-        height: settings.cardHeight,
+        width: settings.cardWidth * screenSize.width,
+        height: settings.cardHeight * screenSize.height,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(settings.cardBorderRadius),
+          borderRadius:
+              BorderRadius.circular(settings.cardBorderRadius * textScale),
           image: DecorationImage(
               image: AssetImage(theme.imagePath), fit: BoxFit.contain),
           boxShadow: isSelected
@@ -226,9 +245,11 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> {
   }
 
   Widget _buildSelectButton(
-      BuildContext context,
-      theme_provider.ThemeSelectionProvider settings,
-      PhotoboothProvider photoboothProvider) {
+    BuildContext context,
+    theme_provider.ThemeSelectionProvider settings,
+    PhotoboothProvider photoboothProvider,
+    Size screenSize,
+  ) {
     onPressed() {
       final selectedTheme = settings.themes[_currentIndex];
       photoboothProvider.setTheme(selectedTheme);
@@ -239,8 +260,8 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> {
       return GestureDetector(
         onTap: onPressed,
         child: Image.asset(settings.buttonImagePath!,
-            width: settings.buttonWidth,
-            height: settings.buttonHeight,
+            width: settings.buttonWidth * screenSize.width,
+            height: settings.buttonHeight * screenSize.height,
             fit: BoxFit.contain),
       );
     } else {
@@ -249,7 +270,8 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.goldenYellow,
           foregroundColor: AppColors.black,
-          minimumSize: Size(settings.buttonWidth, settings.buttonHeight),
+          minimumSize: Size(settings.buttonWidth * screenSize.width,
+              settings.buttonHeight * screenSize.height),
           textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         child: const Text('Select'),

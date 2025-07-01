@@ -14,7 +14,7 @@ class Theme {
 
 class ThemeSelectionProvider extends ChangeNotifier {
   late SharedPreferences _prefs;
-  bool _isInitialized = false; // Flag to check if init() has completed
+  bool _isInitialized = false;
 
   final List<Theme> _themes = [
     Theme(
@@ -32,31 +32,31 @@ class ThemeSelectionProvider extends ChangeNotifier {
         imagePath: 'assets/characters/supervillains.png'),
   ];
 
-  // Title
+  // --- Defaults updated to be percentage-based ---
   bool _showTitle = true;
   String _titleText = 'Set the scene';
   double _titleFontSize = 80.0;
   FontWeight _titleFontWeight = FontWeight.w700;
   Color _titleColor = AppColors.yellow;
-  double _titleTop = 505.0;
+  double _titleTop = 0.26; // ~505px on 1920p
 
   // Carousel
-  double _carouselTop = 570.0;
-  double _carouselHeight = 795.0;
-  double _arrowSpacing = 100.0;
+  double _carouselTop = 0.3; // ~570px on 1920p
+  double _carouselHeight = 0.41; // ~795px on 1920p
+  double _arrowSpacing = 0.09; // ~100px on 1080p
 
   // Cards
-  double _cardWidth = 548.0;
-  double _cardHeight = 640.0;
+  double _cardWidth = 0.5; // ~548px on 1080p
+  double _cardHeight = 0.33; // ~640px on 1920p
   double _cardBorderRadius = 0.0;
 
   // Button
   bool _useImageButton = true;
   String? _buttonImagePath = 'assets/images/next_btn.png';
   bool _isButtonImageAsset = true;
-  double _buttonWidth = 585.0;
-  double _buttonHeight = 150.0;
-  double _buttonBottom = 395.0;
+  double _buttonWidth = 0.54; // ~585px on 1080p
+  double _buttonHeight = 0.08; // ~150px on 1920p
+  double _buttonBottom = 0.2; // ~395px on 1920p
 
   // Background
   bool _showBackground = true;
@@ -227,21 +227,23 @@ class ThemeSelectionProvider extends ChangeNotifier {
     // FIX: Add a guard clause to prevent saving before initialization is complete.
     if (!_isInitialized) return;
 
-    await _prefs.setBool('theme_showTitle', _showTitle);
-    await _prefs.setString('theme_titleText', _titleText);
-    await _prefs.setDouble('theme_titleFontSize', _titleFontSize);
-    await _prefs.setInt('theme_titleFontWeight', _titleFontWeight.index);
-    await _prefs.setInt('theme_titleColor', _titleColor.value);
     await _prefs.setDouble('theme_titleTop', _titleTop);
     await _prefs.setDouble('theme_carouselTop', _carouselTop);
     await _prefs.setDouble('theme_carouselHeight', _carouselHeight);
     await _prefs.setDouble('theme_arrowSpacing', _arrowSpacing);
     await _prefs.setDouble('theme_cardWidth', _cardWidth);
     await _prefs.setDouble('theme_cardHeight', _cardHeight);
-    await _prefs.setDouble('theme_cardBorderRadius', _cardBorderRadius);
     await _prefs.setDouble('theme_buttonWidth', _buttonWidth);
     await _prefs.setDouble('theme_buttonHeight', _buttonHeight);
     await _prefs.setDouble('theme_buttonBottom', _buttonBottom);
+
+    await _prefs.setBool('theme_showTitle', _showTitle);
+    await _prefs.setString('theme_titleText', _titleText);
+    await _prefs.setDouble('theme_titleFontSize', _titleFontSize);
+    await _prefs.setInt('theme_titleFontWeight', _titleFontWeight.index);
+    await _prefs.setInt('theme_titleColor', _titleColor.value);
+
+    await _prefs.setDouble('theme_cardBorderRadius', _cardBorderRadius);
     await _prefs.setBool('theme_use_image_button', _useImageButton);
     await _prefs.setString('theme_button_image_path', _buttonImagePath ?? '');
     await _prefs.setBool('theme_is_button_image_asset', _isButtonImageAsset);
@@ -253,24 +255,34 @@ class ThemeSelectionProvider extends ChangeNotifier {
   }
 
   Future<void> _loadSettings() async {
+    const double refWidth = 1080.0;
+    const double refHeight = 1920.0;
+
+    // Helper to convert old pixel values
+    double toPercent(String key, double defaultValue, double reference) {
+      double val = _prefs.getDouble(key) ?? defaultValue;
+      return val > 1.0 ? val / reference : val;
+    }
+
     _showTitle = _prefs.getBool('theme_showTitle') ?? _showTitle;
     _titleText = _prefs.getString('theme_titleText') ?? _titleText;
     _titleFontSize = _prefs.getDouble('theme_titleFontSize') ?? _titleFontSize;
     _titleFontWeight = FontWeight.values[
         _prefs.getInt('theme_titleFontWeight') ?? _titleFontWeight.index];
     _titleColor = Color(_prefs.getInt('theme_titleColor') ?? _titleColor.value);
-    _titleTop = _prefs.getDouble('theme_titleTop') ?? _titleTop;
-    _carouselTop = _prefs.getDouble('theme_carouselTop') ?? _carouselTop;
+
+    _titleTop = toPercent('theme_titleTop', _titleTop, refHeight);
+    _carouselTop = toPercent('theme_carouselTop', _carouselTop, refHeight);
     _carouselHeight =
-        _prefs.getDouble('theme_carouselHeight') ?? _carouselHeight;
-    _arrowSpacing = _prefs.getDouble('theme_arrowSpacing') ?? _arrowSpacing;
-    _cardWidth = _prefs.getDouble('theme_cardWidth') ?? _cardWidth;
-    _cardHeight = _prefs.getDouble('theme_cardHeight') ?? _cardHeight;
+        toPercent('theme_carouselHeight', _carouselHeight, refHeight);
+    _arrowSpacing = toPercent('theme_arrowSpacing', _arrowSpacing, refWidth);
+    _cardWidth = toPercent('theme_cardWidth', _cardWidth, refWidth);
+    _cardHeight = toPercent('theme_cardHeight', _cardHeight, refHeight);
+    _buttonWidth = toPercent('theme_buttonWidth', _buttonWidth, refWidth);
+    _buttonHeight = toPercent('theme_buttonHeight', _buttonHeight, refHeight);
+    _buttonBottom = toPercent('theme_buttonBottom', _buttonBottom, refHeight);
     _cardBorderRadius =
         _prefs.getDouble('theme_cardBorderRadius') ?? _cardBorderRadius;
-    _buttonWidth = _prefs.getDouble('theme_buttonWidth') ?? _buttonWidth;
-    _buttonHeight = _prefs.getDouble('theme_buttonHeight') ?? _buttonHeight;
-    _buttonBottom = _prefs.getDouble('theme_buttonBottom') ?? _buttonBottom;
     _useImageButton =
         _prefs.getBool('theme_use_image_button') ?? _useImageButton;
     _buttonImagePath =

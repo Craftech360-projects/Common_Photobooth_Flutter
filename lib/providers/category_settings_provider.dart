@@ -13,6 +13,8 @@ class CategoryCardSettings {
   double borderRadius;
   bool showBorder;
   double borderWidth;
+  double subCategoryWidth;
+  double subCategoryHeight;
   Color borderColor;
   double scale;
   bool useGlow;
@@ -23,9 +25,11 @@ class CategoryCardSettings {
   CategoryCardSettings({
     required this.imagePath,
     this.isAsset = true,
-    this.width = 408.0,
-    this.height = 494.0,
+    this.width = 0.38, // Default to 38%
+    this.height = 0.26, // Default to 26%
     this.borderRadius = 0.0,
+    this.subCategoryWidth = 0.46, // ~500px on 1080p
+    this.subCategoryHeight = 0.31, // ~600px on 1920p
     this.showBorder = false,
     this.borderWidth = 0.0,
     this.borderColor = AppColors.goldenYellow,
@@ -37,22 +41,34 @@ class CategoryCardSettings {
   });
 
   /// Creates a [CategoryCardSettings] object from a JSON map.
-  factory CategoryCardSettings.fromJson(Map<String, dynamic> json) =>
-      CategoryCardSettings(
-        imagePath: json['imagePath'],
-        isAsset: json['isAsset'] ?? true,
-        width: json['width']?.toDouble() ?? 280.0,
-        height: json['height']?.toDouble() ?? 420.0,
-        borderRadius: json['borderRadius']?.toDouble() ?? 16.0,
-        showBorder: json['showBorder'] ?? true,
-        borderWidth: json['borderWidth']?.toDouble() ?? 3.0,
-        borderColor: Color(json['borderColor'] ?? AppColors.goldenYellow.value),
-        scale: json['scale']?.toDouble() ?? 1.05,
-        useGlow: json['useGlow'] ?? true,
-        glowColor: Color(json['glowColor'] ?? AppColors.goldenYellow.value),
-        glowIntensity: json['glowIntensity']?.toDouble() ?? 0.5,
-        glowSpread: json['glowSpread']?.toDouble() ?? 10.0,
-      );
+  factory CategoryCardSettings.fromJson(Map<String, dynamic> json) {
+    const double refWidth = 1080.0;
+    const double refHeight = 1920.0;
+
+    // Helper to convert old pixel values
+    double toPercent(dynamic value, double defaultValue, double reference) {
+      double val = (value as num?)?.toDouble() ?? defaultValue;
+      return val > 1.0 ? val / reference : val;
+    }
+
+    return CategoryCardSettings(
+      imagePath: json['imagePath'],
+      isAsset: json['isAsset'] ?? true,
+      width: toPercent(json['width'], 0.38, refWidth),
+      height: toPercent(json['height'], 0.26, refHeight),
+      subCategoryWidth: toPercent(json['subCategoryWidth'], 0.46, 1080.0),
+      subCategoryHeight: toPercent(json['subCategoryHeight'], 0.31, 1920.0),
+      borderRadius: json['borderRadius']?.toDouble() ?? 16.0,
+      showBorder: json['showBorder'] ?? true,
+      borderWidth: json['borderWidth']?.toDouble() ?? 3.0,
+      borderColor: Color(json['borderColor'] ?? AppColors.goldenYellow.value),
+      scale: json['scale']?.toDouble() ?? 1.05,
+      useGlow: json['useGlow'] ?? true,
+      glowColor: Color(json['glowColor'] ?? AppColors.goldenYellow.value),
+      glowIntensity: json['glowIntensity']?.toDouble() ?? 0.5,
+      glowSpread: json['glowSpread']?.toDouble() ?? 10.0,
+    );
+  }
 
   /// Converts this [CategoryCardSettings] object to a JSON map.
   Map<String, dynamic> toJson() => {
@@ -115,6 +131,44 @@ class CategorySettingsProvider extends ChangeNotifier {
   FontWeight _titleFontWeight = FontWeight.bold;
   bool _showTitle = false;
 
+  // Carousel and Arrow controls
+  double _arrowSpacing = 0.11; // 11% of screen width
+  double _carouselWidth = 0.46; // 46% of screen width
+  double _carouselHeight = 0.31; // 31% of screen height
+
+  // Button controls
+  double _buttonLeft = 0.22;
+  double _buttonBottom = 0.21;
+  double _buttonWidth = 0.54;
+  double _buttonHeight = 0.08;
+
+  // Packaging TextField controls
+  double _packagingFieldLeft = 0.22;
+  double _packagingFieldBottom = 0.31;
+  double _packagingFieldWidth = 0.55;
+  double _packagingFieldFontSize = 24.0;
+  Color _packagingFieldTextColor = Colors.white;
+  Color _packagingFieldBorderColor = Colors.white54;
+
+  // Title settings now use percentages for position and size
+  double _titleLeft = 0.0;
+  double _titleTop = 0.1; // Default to 10% from top
+  double _titleWidth = 1.0; // Default to 100% width
+
+  double get arrowSpacing => _arrowSpacing;
+  double get carouselWidth => _carouselWidth;
+  double get carouselHeight => _carouselHeight;
+  double get buttonLeft => _buttonLeft;
+  double get buttonBottom => _buttonBottom;
+  double get buttonWidth => _buttonWidth;
+  double get buttonHeight => _buttonHeight;
+  double get packagingFieldLeft => _packagingFieldLeft;
+  double get packagingFieldBottom => _packagingFieldBottom;
+  double get packagingFieldWidth => _packagingFieldWidth;
+  double get packagingFieldFontSize => _packagingFieldFontSize;
+  Color get packagingFieldTextColor => _packagingFieldTextColor;
+  Color get packagingFieldBorderColor => _packagingFieldBorderColor;
+
   // Background settings
   String _backgroundImagePath = "assets/images/categories_bg.png";
   bool _isBackgroundImageAsset = true;
@@ -140,6 +194,9 @@ class CategorySettingsProvider extends ChangeNotifier {
   Color get titleColor => _titleColor;
   FontWeight get titleFontWeight => _titleFontWeight;
   bool get showTitle => _showTitle;
+  double get titleLeft => _titleLeft;
+  double get titleTop => _titleTop;
+  double get titleWidth => _titleWidth;
 
   String? get backgroundImagePath => _backgroundImagePath;
   bool get isBackgroundImageAsset => _isBackgroundImageAsset;
@@ -191,6 +248,14 @@ class CategorySettingsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setTitlePosition(double left, double top, double width) {
+    _titleLeft = left;
+    _titleTop = top;
+    _titleWidth = width;
+    _saveSettings();
+    notifyListeners();
+  }
+
   void updateCardSettings(String cardKey, CategoryCardSettings newSettings) {
     switch (cardKey) {
       case 'aiArtistry':
@@ -218,6 +283,51 @@ class CategorySettingsProvider extends ChangeNotifier {
     final settingsJson = _prefs.getString('category_screen_settings');
     if (settingsJson != null) {
       final settings = jsonDecode(settingsJson);
+
+      const double refWidth = 1080.0;
+      const double refHeight = 1920.0;
+
+      // Helper to convert old pixel values to new percentage values
+      double toPercent(dynamic value, double defaultValue, double reference) {
+        double val = (value as num?)?.toDouble() ?? defaultValue;
+        return val > 1.0 ? val / reference : val;
+      }
+
+      // Apply migration logic to title positioning
+      _titleLeft = toPercent(settings['titleLeft'], _titleLeft, refWidth);
+      _titleTop = toPercent(settings['titleTop'], _titleTop, refHeight);
+      _titleWidth = toPercent(settings['titleWidth'], _titleWidth, refWidth);
+
+      _arrowSpacing =
+          _prefs.getDouble('category_arrow_spacing') ?? _arrowSpacing;
+      _carouselWidth =
+          _prefs.getDouble('category_carousel_width') ?? _carouselWidth;
+      _carouselHeight =
+          _prefs.getDouble('category_carousel_height') ?? _carouselHeight;
+      _buttonLeft = _prefs.getDouble('category_button_left') ?? _buttonLeft;
+      _buttonBottom =
+          _prefs.getDouble('category_button_bottom') ?? _buttonBottom;
+      _buttonWidth = _prefs.getDouble('category_button_width') ?? _buttonWidth;
+      _buttonHeight =
+          _prefs.getDouble('category_button_height') ?? _buttonHeight;
+      _packagingFieldLeft = _prefs.getDouble('category_packaging_field_left') ??
+          _packagingFieldLeft;
+      _packagingFieldBottom =
+          _prefs.getDouble('category_packaging_field_bottom') ??
+              _packagingFieldBottom;
+      _packagingFieldWidth =
+          _prefs.getDouble('category_packaging_field_width') ??
+              _packagingFieldWidth;
+      _packagingFieldFontSize =
+          _prefs.getDouble('category_packaging_field_font_size') ??
+              _packagingFieldFontSize;
+      _packagingFieldTextColor = Color(
+          _prefs.getInt('category_packaging_field_text_color') ??
+              _packagingFieldTextColor.value);
+      _packagingFieldBorderColor = Color(
+          _prefs.getInt('category_packaging_field_border_color') ??
+              _packagingFieldBorderColor.value);
+
       _titleText = settings['titleText'] ?? _titleText;
       _showTitle = settings['showTitle'] ?? _showTitle;
       _titleFontSize = settings['titleFontSize'] ?? _titleFontSize;
@@ -268,5 +378,73 @@ class CategorySettingsProvider extends ChangeNotifier {
       'packagingCard': _packagingCard.toJson(),
     };
     await _prefs.setString('category_screen_settings', jsonEncode(settings));
+    await _prefs.setDouble('category_arrow_spacing', _arrowSpacing);
+    await _prefs.setDouble('category_carousel_width', _carouselWidth);
+    await _prefs.setDouble('category_carousel_height', _carouselHeight);
+    await _prefs.setDouble('category_button_left', _buttonLeft);
+    await _prefs.setDouble('category_button_bottom', _buttonBottom);
+    await _prefs.setDouble('category_button_width', _buttonWidth);
+    await _prefs.setDouble('category_button_height', _buttonHeight);
+    await _prefs.setDouble(
+        'category_packaging_field_left', _packagingFieldLeft);
+    await _prefs.setDouble(
+        'category_packaging_field_bottom', _packagingFieldBottom);
+    await _prefs.setDouble(
+        'category_packaging_field_width', _packagingFieldWidth);
+    await _prefs.setDouble(
+        'category_packaging_field_font_size', _packagingFieldFontSize);
+    await _prefs.setInt(
+        'category_packaging_field_text_color', _packagingFieldTextColor.value);
+    await _prefs.setInt('category_packaging_field_border_color',
+        _packagingFieldBorderColor.value);
+  }
+
+  void setArrowSpacing(double value) {
+    _arrowSpacing = value;
+    _saveSettings();
+    notifyListeners();
+  }
+
+  void setCarouselDimensions(double width, double height) {
+    _carouselWidth = width;
+    _carouselHeight = height;
+    _saveSettings();
+    notifyListeners();
+  }
+
+  void setButtonPosition(double left, double bottom) {
+    _buttonLeft = left;
+    _buttonBottom = bottom;
+    _saveSettings();
+    notifyListeners();
+  }
+
+  void setButtonDimensions(double width, double height) {
+    _buttonWidth = width;
+    _buttonHeight = height;
+    _saveSettings();
+    notifyListeners();
+  }
+
+  void setPackagingFieldPosition(double left, double bottom) {
+    _packagingFieldLeft = left;
+    _packagingFieldBottom = bottom;
+    _saveSettings();
+    notifyListeners();
+  }
+
+  void setPackagingFieldWidth(double value) {
+    _packagingFieldWidth = value;
+    _saveSettings();
+    notifyListeners();
+  }
+
+  void setPackagingFieldStyle(
+      {double? fontSize, Color? textColor, Color? borderColor}) {
+    if (fontSize != null) _packagingFieldFontSize = fontSize;
+    if (textColor != null) _packagingFieldTextColor = textColor;
+    if (borderColor != null) _packagingFieldBorderColor = borderColor;
+    _saveSettings();
+    notifyListeners();
   }
 }

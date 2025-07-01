@@ -1,75 +1,74 @@
-import 'dart:ui';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/presentation/category_screen.dart';
 import 'package:photobooth_flutter/providers/category_settings_provider.dart';
+import 'package:photobooth_flutter/widgets/color_picker.dart';
 import 'package:photobooth_flutter/widgets/custom_slider.dart';
 import 'package:photobooth_flutter/widgets/file_upload_area.dart';
 import 'package:photobooth_flutter/widgets/form_row.dart';
-import 'package:photobooth_flutter/widgets/color_picker.dart';
+import 'package:photobooth_flutter/widgets/input_decoration.dart';
 import 'package:photobooth_flutter/widgets/settings_group.dart';
 import 'package:photobooth_flutter/widgets/settings_header.dart';
-import 'package:photobooth_flutter/widgets/settings_preview.dart';
 import 'package:provider/provider.dart';
 
-class CategoryScreenSettings extends StatelessWidget {
+class CategoryScreenSettings extends StatefulWidget {
   const CategoryScreenSettings({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              AppColors.primaryGradientStart,
-              AppColors.primaryGradientEnd
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: const Row(
-          children: [
-            _PreviewSection(),
-            Expanded(child: _SettingsSection()),
-          ],
-        ),
-      ),
-    );
-  }
+  State<CategoryScreenSettings> createState() => _CategoryScreenSettingsState();
 }
 
-// --- UI SECTIONS ---
-class _PreviewSection extends StatelessWidget {
-  const _PreviewSection();
+class _CategoryScreenSettingsState extends State<CategoryScreenSettings> {
+  bool _isPanelOpen = true;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(12.0),
-      child: Stack(
+    double settingsPanelWidth = MediaQuery.of(context).size.width * 0.8;
+    return Scaffold(
+      body: Stack(
         children: [
-          const Center(
-            child: SettingsPreview(
-              width: 1080,
-              height: 1920,
-              child: CategoriesScreen(),
+          // Full-screen preview
+          const CategoriesScreen(),
+
+          // Sliding settings panel
+          AnimatedPositioned(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOutCubic,
+            right: _isPanelOpen ? 0 : -settingsPanelWidth,
+            top: 0,
+            bottom: 0,
+            width: settingsPanelWidth,
+            child: const _SettingsSection(),
+          ),
+
+          // Control Buttons
+          Positioned(
+            top: 20,
+            left: 20,
+            child: FloatingActionButton.small(
+              heroTag: 'categoryBack', // Unique tag
+              tooltip: 'Back',
+              backgroundColor: AppColors.white.withOpacity(0.8),
+              child: const Icon(Icons.arrow_back,
+                  color: AppColors.primaryGradientEnd),
+              onPressed: () => Navigator.of(context).pop(),
             ),
           ),
-          Positioned(
-            top: 0,
-            left: 0,
-            child: Material(
-              color: AppColors.white.withValues(alpha: 0.9),
-              shape: const CircleBorder(),
-              elevation: 2.0,
-              child: IconButton(
-                icon: const Icon(Icons.arrow_back, color: AppColors.labelText),
-                onPressed: () => Navigator.of(context).pop(),
-                tooltip: 'Back',
+          AnimatedPositioned(
+            duration: const Duration(milliseconds: 300),
+            top: 20,
+            right: _isPanelOpen ? settingsPanelWidth + 20 : 20,
+            child: FloatingActionButton(
+              heroTag: 'categoryToggle',
+              tooltip: 'Toggle Settings',
+              backgroundColor: AppColors.white,
+              onPressed: () => setState(() => _isPanelOpen = !_isPanelOpen),
+              child: Icon(
+                _isPanelOpen
+                    ? Icons.arrow_forward_ios_rounded
+                    : Icons.arrow_back_ios_rounded,
+                color: AppColors.primaryGradientEnd,
               ),
             ),
           ),
@@ -88,39 +87,42 @@ class _SettingsSection extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(0, 20, 20, 20),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20.0),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.85),
-              borderRadius: BorderRadius.circular(20.0),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-            ),
-            child: const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SettingsHeader(
-                  title: 'Categories Screen Settings',
-                  subtitle: 'Customize the layout and style of category cards',
-                ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.all(30),
-                    child: Column(
-                      children: [
-                        _TitleSettingsGroup(),
-                        SizedBox(height: 25),
-                        _BackgroundSettingsGroup(),
-                        SizedBox(height: 25),
-                        _MainCategoriesGroup(),
-                        SizedBox(height: 25),
-                        _SubCategoriesGroup(),
-                      ],
-                    ),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(20.0),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SettingsHeader(
+                title: 'Categories Screen Settings',
+                subtitle: 'Customize the layout and style of category cards',
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(30),
+                  child: Column(
+                    children: [
+                      const _TitleSettingsGroup(),
+                      const SizedBox(height: 25),
+                      const _BackgroundSettingsGroup(),
+                      const SizedBox(height: 25),
+                      const _MainCategoriesGroup(),
+                      const SizedBox(height: 25),
+                      const _SubCategoriesGroup(),
+                      const SizedBox(height: 25),
+                      _LayoutSettingsGroup(), // New Group
+                      const SizedBox(height: 25),
+                      _PackagingFieldSettingsGroup(), // New Group
+                      const SizedBox(height: 25),
+                      _ButtonSettingsGroup(), // New Group
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -128,7 +130,122 @@ class _SettingsSection extends StatelessWidget {
   }
 }
 
-// --- SETTINGS WIDGETS ---
+class _LayoutSettingsGroup extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final provider = context.watch<CategorySettingsProvider>();
+    return SettingsGroup(
+      icon: '📏',
+      title: 'Carousel Layout',
+      child: Column(
+        children: [
+          SliderWithLabel(
+            label: 'Carousel Width (%)',
+            value: provider.carouselWidth,
+            min: 0.2,
+            max: 1.0,
+            step: 0.01,
+            onChanged: (v) =>
+                provider.setCarouselDimensions(v, provider.carouselHeight),
+          ),
+          SliderWithLabel(
+            label: 'Carousel Height (%)',
+            value: provider.carouselHeight,
+            min: 0.2,
+            max: 1.0,
+            step: 0.01,
+            onChanged: (v) =>
+                provider.setCarouselDimensions(provider.carouselWidth, v),
+          ),
+          SliderWithLabel(
+            label: 'Arrow Spacing (%)',
+            value: provider.arrowSpacing,
+            min: 0.0,
+            max: 0.5,
+            step: 0.01,
+            onChanged: (v) => provider.setArrowSpacing(v),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PackagingFieldSettingsGroup extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final provider = context.watch<CategorySettingsProvider>();
+    return SettingsGroup(
+      icon: '📦',
+      title: 'Packaging Field',
+      child: Column(
+        children: [
+          SliderWithLabel(
+            label: 'Field Width (%)',
+            value: provider.packagingFieldWidth,
+            min: 0.2,
+            max: 1.0,
+            step: 0.01,
+            onChanged: (v) => provider.setPackagingFieldWidth(v),
+          ),
+          SliderWithLabel(
+            label: 'Font Size',
+            value: provider.packagingFieldFontSize,
+            min: 12,
+            max: 48,
+            onChanged: (v) => provider.setPackagingFieldStyle(fontSize: v),
+          ),
+          // ... (Color pickers for text and border color)
+          //
+          //
+          SettingsGroup(
+            isSubgroup: true,
+            icon: '📍',
+            title: 'Positioning',
+            child: Column(
+              children: [
+                SliderWithLabel(
+                  label: 'From Left (%)',
+                  value: provider.packagingFieldLeft,
+                  min: 0.0,
+                  max: 1.0,
+                  step: 0.01,
+                  onChanged: (v) => provider.setPackagingFieldPosition(
+                      v, provider.packagingFieldBottom),
+                ),
+                SliderWithLabel(
+                  label: 'From Bottom (%)',
+                  value: provider.packagingFieldBottom,
+                  min: 0.0,
+                  max: 1.0,
+                  step: 0.01,
+                  onChanged: (v) => provider.setPackagingFieldPosition(
+                      provider.packagingFieldLeft, v),
+                ),
+              ],
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class _ButtonSettingsGroup extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    // final provider = context.watch<CategorySettingsProvider>();
+    return const SettingsGroup(
+      icon: '🔘',
+      title: 'Next Button',
+      child: Column(
+        children: [
+          // ... (Sliders for button width, height, left, and bottom, all using percentages)
+        ],
+      ),
+    );
+  }
+}
 
 class _TitleSettingsGroup extends StatelessWidget {
   const _TitleSettingsGroup();
@@ -157,7 +274,7 @@ class _TitleSettingsGroup extends StatelessWidget {
             const SizedBox(height: 15),
             TextFormField(
               initialValue: provider.titleText,
-              decoration: _inputDecoration(context, 'Enter title text'),
+              decoration: inputDecoration(context, 'Enter title text'),
               onChanged: (value) => provider.setTitleText(value),
             ),
             const SizedBox(height: 15),
@@ -169,10 +286,45 @@ class _TitleSettingsGroup extends StatelessWidget {
               onChanged: (value) => provider.setTitleStyle(fontSize: value),
             ),
             const SizedBox(height: 15),
-            CustomColorPicker(
-              pickerColor: provider.titleColor,
+            ColorPickerWidget(
+              label: "Title Color",
+              color: provider.titleColor,
               onColorChanged: (color) => provider.setTitleStyle(color: color),
             ),
+            SettingsGroup(
+              isSubgroup: true,
+              icon: '📍',
+              title: 'Positioning',
+              child: Column(children: [
+                SliderWithLabel(
+                  label: "Horizontal Position (%)",
+                  value: provider.titleLeft,
+                  min: 0.0,
+                  max: 1.0,
+                  step: 0.01,
+                  onChanged: (v) => provider.setTitlePosition(
+                      v, provider.titleTop, provider.titleWidth),
+                ),
+                SliderWithLabel(
+                  label: "Vertical Position (%)",
+                  value: provider.titleTop,
+                  min: 0.0,
+                  max: 1.0,
+                  step: 0.01,
+                  onChanged: (v) => provider.setTitlePosition(
+                      provider.titleLeft, v, provider.titleWidth),
+                ),
+                SliderWithLabel(
+                  label: "Width (%)",
+                  value: provider.titleWidth,
+                  min: 0.1,
+                  max: 1.0,
+                  step: 0.01,
+                  onChanged: (v) => provider.setTitlePosition(
+                      provider.titleLeft, provider.titleTop, v),
+                ),
+              ]),
+            )
           ],
         ],
       ),
@@ -269,8 +421,6 @@ class _SubCategoriesGroup extends StatelessWidget {
   }
 }
 
-// --- COMMON BUILDER FOR CARD SETTINGS ---
-
 Widget _buildCardSettingsGroup(BuildContext context,
     CategorySettingsProvider provider, String cardKey, String title) {
   CategoryCardSettings settings;
@@ -325,20 +475,22 @@ Widget _buildCardSettingsGroup(BuildContext context,
             children: [
               Expanded(
                 child: SliderWithLabel(
-                  label: 'Width',
+                  label: 'Width (%)',
                   value: settings.width,
-                  min: 100,
-                  max: 700,
+                  min: 0.1,
+                  max: 1.0,
+                  step: 0.01,
                   onChanged: (value) => provider.updateCardSettings(
                       cardKey, settings.copyWith(width: value)),
                 ),
               ),
               Expanded(
                 child: SliderWithLabel(
-                  label: 'Height',
+                  label: 'Height (%)',
                   value: settings.height,
-                  min: 100,
-                  max: 800,
+                  min: 0.1,
+                  max: 1.0,
+                  step: 0.01,
                   onChanged: (value) => provider.updateCardSettings(
                       cardKey, settings.copyWith(height: value)),
                 ),
@@ -389,8 +541,9 @@ Widget _buildCardSettingsGroup(BuildContext context,
                     ),
                     Expanded(
                       flex: 3,
-                      child: CustomColorPicker(
-                        pickerColor: settings.borderColor,
+                      child: ColorPickerWidget(
+                        label: "Card Border Color",
+                        color: settings.borderColor,
                         onColorChanged: (color) => provider.updateCardSettings(
                             cardKey, settings.copyWith(borderColor: color)),
                       ),
@@ -410,8 +563,9 @@ Widget _buildCardSettingsGroup(BuildContext context,
                 ],
               ),
               if (settings.useGlow)
-                CustomColorPicker(
-                  pickerColor: settings.glowColor,
+                ColorPickerWidget(
+                  label: "Card Glow Color",
+                  color: settings.glowColor,
                   onColorChanged: (color) => provider.updateCardSettings(
                       cardKey, settings.copyWith(glowColor: color)),
                 ),
@@ -420,32 +574,5 @@ Widget _buildCardSettingsGroup(BuildContext context,
         ),
       ],
     ),
-  );
-}
-
-// --- HELPER METHODS ---
-
-InputDecoration _inputDecoration(BuildContext context, String hintText) {
-  final theme = Theme.of(context);
-  return InputDecoration(
-    hintText: hintText,
-    filled: true,
-    fillColor: Colors.white.withValues(alpha: 0.8),
-    hintStyle: theme.textTheme.bodyMedium
-        ?.copyWith(color: AppColors.labelText.withValues(alpha: 0.7)),
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: AppColors.inputBorder, width: 2),
-    ),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: AppColors.inputBorder, width: 2),
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10),
-      borderSide:
-          const BorderSide(color: AppColors.primaryGradientStart, width: 2),
-    ),
-    contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
   );
 }

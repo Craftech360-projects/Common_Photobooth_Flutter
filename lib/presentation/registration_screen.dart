@@ -271,7 +271,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     ? AssetImage(settings.buttonImagePath!)
                     : FileImage(File(settings.buttonImagePath!))
                         as ImageProvider,
-                fit: BoxFit.cover,
+                fit: BoxFit.contain,
               ),
               border: settings.buttonHasBorder
                   ? Border.all(

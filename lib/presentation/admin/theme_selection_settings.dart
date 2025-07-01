@@ -1,7 +1,5 @@
 // lib/presentation/theme_selection_settings.dart
 
-import 'dart:ui';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
@@ -13,65 +11,63 @@ import 'package:photobooth_flutter/widgets/file_upload_area.dart';
 import 'package:photobooth_flutter/widgets/form_row.dart';
 import 'package:photobooth_flutter/widgets/settings_group.dart';
 import 'package:photobooth_flutter/widgets/settings_header.dart';
-import 'package:photobooth_flutter/widgets/settings_preview.dart';
 import 'package:provider/provider.dart';
 
-class ThemeSelectionSettingsScreen extends StatelessWidget {
+class ThemeSelectionSettingsScreen extends StatefulWidget {
   const ThemeSelectionSettingsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              AppColors.primaryGradientStart,
-              AppColors.primaryGradientEnd
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: const Row(
-          children: [
-            _PreviewSection(),
-            Expanded(child: _SettingsSection()),
-          ],
-        ),
-      ),
-    );
-  }
+  State<ThemeSelectionSettingsScreen> createState() =>
+      _ThemeSelectionSettingsScreenState();
 }
 
-// --- UI SECTIONS ---
-class _PreviewSection extends StatelessWidget {
-  const _PreviewSection();
+class _ThemeSelectionSettingsScreenState
+    extends State<ThemeSelectionSettingsScreen> {
+  bool _isPanelOpen = true;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(12.0),
-      child: Stack(
+    // --- New Sidebar Layout ---
+    double settingsPanelWidth = MediaQuery.of(context).size.width * 0.8;
+    return Scaffold(
+      body: Stack(
         children: [
-          const Center(
-            child: SettingsPreview(
-              width: 1080,
-              height: 1920,
-              child: ThemeSelectionScreen(),
-            ),
+          const ThemeSelectionScreen(), // Full-screen preview
+          AnimatedPositioned(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOutCubic,
+            right: _isPanelOpen ? 0 : -settingsPanelWidth,
+            top: 0,
+            bottom: 0,
+            width: settingsPanelWidth,
+            child: const _SettingsSection(),
           ),
           Positioned(
-            top: 0,
-            left: 0,
-            child: Material(
-              color: AppColors.white.withValues(alpha: 0.9),
-              shape: const CircleBorder(),
-              elevation: 2.0,
-              child: IconButton(
-                icon: const Icon(Icons.arrow_back, color: AppColors.labelText),
-                onPressed: () => Navigator.of(context).pop(),
-                tooltip: 'Back',
+            top: 20,
+            left: 20,
+            child: FloatingActionButton.small(
+              heroTag: 'themeBack', // Unique tag
+              tooltip: 'Back',
+              backgroundColor: AppColors.white.withOpacity(0.8),
+              child: const Icon(Icons.arrow_back,
+                  color: AppColors.primaryGradientEnd),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ),
+          AnimatedPositioned(
+            duration: const Duration(milliseconds: 300),
+            top: 20,
+            right: _isPanelOpen ? settingsPanelWidth + 20 : 20,
+            child: FloatingActionButton(
+              heroTag: 'themeToggle', // Unique tag
+              tooltip: 'Toggle Settings',
+              backgroundColor: AppColors.white,
+              onPressed: () => setState(() => _isPanelOpen = !_isPanelOpen),
+              child: Icon(
+                _isPanelOpen
+                    ? Icons.arrow_forward_ios_rounded
+                    : Icons.arrow_back_ios_rounded,
+                color: AppColors.primaryGradientEnd,
               ),
             ),
           ),
@@ -90,47 +86,42 @@ class _SettingsSection extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(0, 20, 20, 20),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20.0),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.85),
-              borderRadius: BorderRadius.circular(20.0),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-            ),
-            child: const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SettingsHeader(
-                  title: 'Theme Screen Settings',
-                  subtitle: 'Customize the theme selection carousel and layout',
-                ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.all(30),
-                    child: Column(
-                      children: [
-                        _TitleSettingsGroup(),
-                        SizedBox(height: 25),
-                        _BackgroundSettingsGroup(),
-                        SizedBox(height: 25),
-                        _CarouselSettingsGroup(),
-                        SizedBox(height: 25),
-                        _ButtonSettingsGroup(),
-                      ],
-                    ),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(20.0),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+          ),
+          child: const Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SettingsHeader(
+                title: 'Theme Screen Settings',
+                subtitle: 'Customize the theme selection carousel and layout',
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.all(30),
+                  child: Column(
+                    children: [
+                      _TitleSettingsGroup(),
+                      SizedBox(height: 25),
+                      _BackgroundSettingsGroup(),
+                      SizedBox(height: 25),
+                      _CarouselSettingsGroup(),
+                      SizedBox(height: 25),
+                      _ButtonSettingsGroup(),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 }
-
-// --- SETTINGS WIDGETS ---
 
 class _TitleSettingsGroup extends StatelessWidget {
   const _TitleSettingsGroup();
@@ -173,8 +164,9 @@ class _TitleSettingsGroup extends StatelessWidget {
             SliderWithLabel(
               label: 'Top Position',
               value: settings.titleTop,
-              min: 50,
-              max: 900,
+              min: 0.0,
+              max: 1.0,
+              step: 0.01,
               onChanged: (v) => settings.setTitleTop(v),
             ),
           ],
@@ -244,22 +236,25 @@ class _CarouselSettingsGroup extends StatelessWidget {
           SliderWithLabel(
             label: 'Carousel Top Position',
             value: settings.carouselTop,
-            min: 100,
-            max: 1200,
+            min: 0.0,
+            max: 1.0,
+            step: 0.01,
             onChanged: (v) => settings.setCarouselTop(v),
           ),
           SliderWithLabel(
             label: 'Carousel Height',
             value: settings.carouselHeight,
-            min: 300,
-            max: 1000,
+            min: 0.1,
+            max: 1.0,
+            step: 0.01,
             onChanged: (v) => settings.setCarouselHeight(v),
           ),
           SliderWithLabel(
             label: 'Arrow Spacing',
             value: settings.arrowSpacing,
-            min: 0,
-            max: 150,
+            min: 0.0,
+            max: 1.0,
+            step: 0.01,
             onChanged: (v) => settings.setArrowSpacing(v),
           ),
           const SizedBox(height: 15),
@@ -352,8 +347,9 @@ class _ButtonSettingsGroup extends StatelessWidget {
                 child: SliderWithLabel(
                   label: 'Button Width',
                   value: settings.buttonWidth,
-                  min: 100,
-                  max: 800,
+                  min: 0.1,
+                  max: 1.0,
+                  step: 0.01,
                   onChanged: (v) => settings.setButtonWidth(v),
                 ),
               ),
@@ -361,8 +357,9 @@ class _ButtonSettingsGroup extends StatelessWidget {
                 child: SliderWithLabel(
                   label: 'Button Height',
                   value: settings.buttonHeight,
-                  min: 50,
-                  max: 300,
+                  min: 0.1,
+                  max: 1.0,
+                  step: 0.01,
                   onChanged: (v) => settings.setButtonHeight(v),
                 ),
               ),
@@ -371,8 +368,9 @@ class _ButtonSettingsGroup extends StatelessWidget {
           SliderWithLabel(
             label: 'Button Bottom Position',
             value: settings.buttonBottom,
-            min: 100,
-            max: 1000,
+            min: 0.0,
+            max: 1.0,
+            step: 0.01,
             onChanged: (v) => settings.setButtonBottom(v),
           ),
         ],

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/presentation/theme_selection_screen.dart';
@@ -35,7 +36,12 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   Widget build(BuildContext context) {
     final settingsProvider = context.watch<CategorySettingsProvider>();
     final globalSettings = context.watch<GlobalSettingsProvider>();
-    final categoryProvider = context.read<CategoryProvider>();
+    final screenSize = MediaQuery.of(context).size;
+    final categoryProvider = context.watch<CategoryProvider>();
+
+    // Scale factor for fonts and non-stretching elements
+    final textScale =
+        min(screenSize.width / 1080.0, screenSize.height / 1920.0);
 
     return Scaffold(
       body: Container(
@@ -46,6 +52,21 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
         ),
         child: Stack(
           children: [
+            if (settingsProvider.showTitle)
+              Positioned(
+                left: settingsProvider.titleLeft * screenSize.width,
+                top: settingsProvider.titleTop * screenSize.height,
+                width: settingsProvider.titleWidth * screenSize.width,
+                child: Text(
+                  settingsProvider.titleText,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: settingsProvider.titleFontSize * textScale,
+                    color: settingsProvider.titleColor,
+                    fontWeight: settingsProvider.titleFontWeight,
+                  ),
+                ),
+              ),
             Center(
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 500),
@@ -160,6 +181,9 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   }
 
   Widget _buildSubCategoryView(BuildContext context, {Key? key}) {
+    final settingsProvider = context.watch<CategorySettingsProvider>();
+    final screenSize = MediaQuery.of(context).size;
+
     final subCategories = [
       {
         'key': 'ghibli',
@@ -253,15 +277,17 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                   onPressed: () => setState(() => _currentSubCategoryIndex =
                       (_currentSubCategoryIndex + 1) % subCategories.length),
                 ),
-                const SizedBox(width: 120),
                 SizedBox(
-                  width: 500,
-                  height: 600,
+                    width: settingsProvider.arrowSpacing * screenSize.width),
+                SizedBox(
+                  width: settingsProvider.carouselWidth * screenSize.width,
+                  height: settingsProvider.carouselHeight * screenSize.height,
                   child: Stack(
                       alignment: Alignment.center,
                       children: orderedStackChildren),
                 ),
-                const SizedBox(width: 120),
+                SizedBox(
+                    width: settingsProvider.arrowSpacing * screenSize.width),
                 IconButton(
                   icon: Image.asset('assets/images/forward_arrow.png',
                       width: 50, height: 50),
@@ -272,20 +298,26 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
               ],
             ),
             if (isPackagingSelected)
-              SizedBox(
-                width: 600,
+              Positioned(
+                left: settingsProvider.packagingFieldLeft * screenSize.width,
+                bottom:
+                    settingsProvider.packagingFieldBottom * screenSize.height,
+                width: settingsProvider.packagingFieldWidth * screenSize.width,
                 child: TextField(
                   controller: _accessoriesController,
                   focusNode: _accessoriesFocusNode,
                   readOnly: false,
                   showCursor: true,
-                  style: const TextStyle(color: Colors.white, fontSize: 24),
+                  style: TextStyle(
+                      color: settingsProvider.packagingFieldTextColor,
+                      fontSize: settingsProvider.packagingFieldFontSize),
                   decoration: InputDecoration(
                     labelText: 'Enter Accessories (e.g., shoes, helmet)',
                     labelStyle:
                         const TextStyle(color: Colors.white70, fontSize: 24),
                     enabledBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.white54),
+                      borderSide: BorderSide(
+                          color: settingsProvider.packagingFieldBorderColor),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     focusedBorder: OutlineInputBorder(
@@ -298,7 +330,8 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
           ],
         ),
         Positioned(
-          bottom: 400,
+          left: settingsProvider.buttonLeft * screenSize.width,
+          bottom: settingsProvider.buttonBottom * screenSize.height,
           child: _buildNextButton(context),
         )
       ],
@@ -308,6 +341,8 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   Widget _buildNextButton(BuildContext context) {
     final flowProvider = context.read<CategoryProvider>();
     final photoProvider = context.read<PhotoboothProvider>();
+    final settingsProvider = context.read<CategorySettingsProvider>();
+    final screenSize = MediaQuery.of(context).size;
 
     final subCategories = [
       {'key': 'ghibli', 'workflow': 'ghiblionline.json'},
@@ -334,7 +369,9 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     return GestureDetector(
       onTap: onPressed,
       child: Image.asset('assets/images/next_btn.png',
-          width: 585.0, height: 150.0, fit: BoxFit.contain),
+          width: settingsProvider.buttonWidth * screenSize.width,
+          height: settingsProvider.buttonHeight * screenSize.height,
+          fit: BoxFit.contain),
     );
   }
 }
@@ -362,6 +399,7 @@ class _TappableCategoryCardState extends State<TappableCategoryCard> {
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
     final bool isInteractable = widget.provideFeedback;
     final double scale = isInteractable && _isPressed ? 0.95 : 1.0;
 
@@ -385,8 +423,8 @@ class _TappableCategoryCardState extends State<TappableCategoryCard> {
         duration: const Duration(milliseconds: 150),
         transform: Matrix4.identity()..scale(scale),
         transformAlignment: Alignment.center,
-        width: widget.settings.width,
-        height: widget.settings.height,
+        width: widget.settings.subCategoryWidth * screenSize.width,
+        height: widget.settings.subCategoryHeight * screenSize.height,
         decoration: BoxDecoration(
           border: widget.settings.showBorder
               ? Border.all(

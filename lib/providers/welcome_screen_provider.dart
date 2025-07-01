@@ -26,15 +26,15 @@ class WelcomeScreenProvider extends ChangeNotifier {
   double _welcomeMessageLeft = 0.37; // ~400px on a 1080p screen
   double _welcomeMessageTop = 0.47; // ~900px on a 1920p screen
   double _welcomeMessageWidth = 0.28; // ~300px
-  double _buttonLeft = 0.22; // ~245px
-  double _buttonBottom = 0.34; // ~660px
+  double _buttonLeft = 0.31; // ~245px
+  double _buttonBottom = 0.15; // ~660px
 
   // Button settings
   bool _useImageButton = true; // Default to image button
   String _welcomeButtonText = 'Get Started';
   Color _welcomeButtonColor = AppColors.goldenYellow;
   Color _welcomeButtonTextColor = AppColors.black;
-  double _buttonWidth = 585.0;
+  double _buttonWidth = 307.0;
   double _buttonHeight = 150.0;
   double _buttonBorderRadius = 0.0;
 

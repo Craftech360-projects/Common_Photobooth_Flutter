@@ -34,7 +34,7 @@ class FileUploadArea extends StatelessWidget {
           dashPattern: [10, 5],
           strokeWidth: 2,
           radius: Radius.circular(16),
-          color: AppColors.fileUploadBorder,
+          color: AppColors.darkGrey,
           padding: EdgeInsets.all(16),
         ),
         child: Container(

@@ -254,7 +254,7 @@ class _TitleSettingsGroup extends StatelessWidget {
             FormRow(
               children: [
                 Expanded(
-                  child: _CustomColorPicker(
+                  child: ColorPickerWidget(
                     label: "Title Color",
                     color: settings.titleTextColor,
                     onColorChanged: (c) => settings.setTitleTextColor(c),
@@ -438,14 +438,14 @@ class _TextFieldsSettingsGroup extends StatelessWidget {
                 children: [
                   FormRow(children: [
                     Expanded(
-                        child: _CustomColorPicker(
-                        label: "Fill Color",
+                        child: ColorPickerWidget(
+                            label: "Fill Color",
                             color: field.fillColor,
                             onColorChanged: (c) => settings.updateTextField(
                                 field.id, field.copyWith(fillColor: c)))),
                     Expanded(
-                        child: _CustomColorPicker(
-                        label: "Text Color",
+                        child: ColorPickerWidget(
+                            label: "Text Color",
                             color: field.textColor,
                             onColorChanged: (c) => settings.updateTextField(
                                 field.id, field.copyWith(textColor: c)))),
@@ -594,13 +594,13 @@ class _TextButtonSettings extends StatelessWidget {
         ]),
         FormRow(children: [
           Expanded(
-              child: _CustomColorPicker(
-              label: "Button Fill Color",
+              child: ColorPickerWidget(
+                  label: "Button Fill Color",
                   color: settings.submitButtonColor,
                   onColorChanged: (c) => settings.setSubmitButtonColor(c))),
           Expanded(
-              child: _CustomColorPicker(
-              label: "Button Text Color",
+              child: ColorPickerWidget(
+                  label: "Button Text Color",
                   color: settings.submitButtonTextColor,
                   onColorChanged: (c) => settings.setSubmitButtonTextColor(c)))
         ]),
@@ -670,77 +670,6 @@ class _ImageButtonSettings extends StatelessWidget {
             max: 50,
             onChanged: (v) => settings.setButtonBorderRadius(v))
       ],
-    );
-  }
-}
-
-class _CustomColorPicker extends StatelessWidget {
-  final String label;
-  final Color color;
-  final ValueChanged<Color> onColorChanged;
-
-  const _CustomColorPicker(
-      {required this.label, required this.color, required this.onColorChanged});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: Theme.of(context).textTheme.bodyMedium),
-        const SizedBox(height: 8),
-        GestureDetector(
-          onTap: () => _showColorPickerDialog(context),
-          child: Container(
-            height: 48,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppColors.inputBorder, width: 2),
-              color: Colors.white.withOpacity(0.8),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 30,
-                  height: 30,
-                  decoration: BoxDecoration(
-                    color: color,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey.shade400),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  '#${color.value.toRadixString(16).substring(2).toUpperCase()}',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  void _showColorPickerDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Select $label'),
-        content: SingleChildScrollView(
-          child: CustomColorPicker(
-            pickerColor: color,
-            onColorChanged: onColorChanged,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Done'),
-          ),
-        ],
-      ),
     );
   }
 }

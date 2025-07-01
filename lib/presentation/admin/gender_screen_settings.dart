@@ -11,6 +11,7 @@ import 'package:photobooth_flutter/widgets/form_row.dart';
 import 'package:photobooth_flutter/widgets/input_decoration.dart';
 import 'package:photobooth_flutter/widgets/settings_group.dart';
 import 'package:photobooth_flutter/widgets/settings_header.dart';
+import 'package:photobooth_flutter/widgets/toggle_btn_group.dart';
 import 'package:provider/provider.dart';
 
 class GenderScreenSettings extends StatefulWidget {
@@ -25,7 +26,7 @@ class _GenderScreenSettingsState extends State<GenderScreenSettings> {
 
   @override
   Widget build(BuildContext context) {
-    const double settingsPanelWidth = 450.0;
+    double settingsPanelWidth = MediaQuery.of(context).size.width * 0.8;
     return Scaffold(
       body: Stack(
         children: [
@@ -191,7 +192,7 @@ class _TitleSettingsGroup extends StatelessWidget {
                     onChanged: (v) => settings.setTitleStyle(fontWeight: v),
                   ),
                   const SizedBox(height: 15),
-                  _CustomColorPicker(
+                  ColorPickerWidget(
                     label: 'Title Color',
                     color: settings.titleColor,
                     onColorChanged: (c) => settings.setTitleStyle(color: c),
@@ -484,7 +485,7 @@ class _SelectionEffectGroup extends StatelessWidget {
             ),
             if (settings.useSelectionGlow) ...[
               const SizedBox(height: 15),
-              _CustomColorPicker(
+              ColorPickerWidget(
                 label: 'Glow Color',
                 color: settings.selectionGlowColor,
                 onColorChanged: (c) =>
@@ -562,7 +563,7 @@ class _ButtonSettingsGroup extends StatelessWidget {
                 const SizedBox(height: 15),
                 FormRow(children: [
                   Expanded(
-                    child: _CustomColorPicker(
+                    child: ColorPickerWidget(
                       label: 'Button Color',
                       color: settings.buttonColor,
                       onColorChanged: (c) =>
@@ -570,7 +571,7 @@ class _ButtonSettingsGroup extends StatelessWidget {
                     ),
                   ),
                   Expanded(
-                    child: _CustomColorPicker(
+                    child: ColorPickerWidget(
                       label: 'Text Color',
                       color: settings.buttonTextColor,
                       onColorChanged: (c) =>
@@ -660,141 +661,6 @@ class _LayoutSettingsGroup extends StatelessWidget {
         max: 64,
         onChanged: (v) => settings.setScreenPadding(v),
       ),
-    );
-  }
-}
-
-class _CustomColorPicker extends StatelessWidget {
-  final String label;
-  final Color color;
-  final ValueChanged<Color> onColorChanged;
-
-  const _CustomColorPicker(
-      {required this.label, required this.color, required this.onColorChanged});
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: textTheme.bodyMedium),
-        const SizedBox(height: 8),
-        GestureDetector(
-          onTap: () => _showColorPickerDialog(context),
-          child: Container(
-            height: 48,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppColors.inputBorder, width: 2),
-              color: Colors.white.withValues(alpha: 0.8),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 30,
-                  height: 30,
-                  decoration: BoxDecoration(
-                    color: color,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey.shade400),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  '#${color.value.toRadixString(16).substring(2).toUpperCase()}',
-                  style: textTheme.bodyMedium,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  void _showColorPickerDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Select $label'),
-        content: SingleChildScrollView(
-          child: CustomColorPicker(
-            pickerColor: color,
-            onColorChanged: onColorChanged,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Done'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class ToggleButtonGroup extends StatelessWidget {
-  final List<String> options;
-  final int selectedIndex;
-  final ValueChanged<int> onSelected;
-
-  const ToggleButtonGroup(
-      {super.key,
-      required this.options,
-      required this.selectedIndex,
-      required this.onSelected});
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    return Row(
-      children: List.generate(options.length, (index) {
-        final bool isActive = selectedIndex == index;
-        return Expanded(
-          child: GestureDetector(
-            onTap: () => onSelected(index),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              margin:
-                  EdgeInsets.only(right: index < options.length - 1 ? 10 : 0),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                gradient: isActive
-                    ? const LinearGradient(colors: [
-                        AppColors.primaryGradientStart,
-                        AppColors.primaryGradientEnd
-                      ])
-                    : null,
-                color: isActive ? null : Colors.white.withValues(alpha: 0.8),
-                border: Border.all(
-                    color: isActive
-                        ? AppColors.primaryGradientStart
-                        : AppColors.inputBorder,
-                    width: 2),
-                boxShadow: isActive
-                    ? [
-                        BoxShadow(
-                            color: AppColors.primaryGradientStart
-                                .withValues(alpha: 0.3),
-                            blurRadius: 15,
-                            spreadRadius: -5)
-                      ]
-                    : [],
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                options[index],
-                style: textTheme.bodyMedium?.copyWith(
-                    color: isActive ? Colors.white : AppColors.labelText),
-              ),
-            ),
-          ),
-        );
-      }),
     );
   }
 }

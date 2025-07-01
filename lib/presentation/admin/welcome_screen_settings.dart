@@ -1,24 +1,21 @@
-import 'dart:ui';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/presentation/welcome_screen.dart';
 import 'package:photobooth_flutter/providers/admin_watermark_provider.dart';
 import 'package:photobooth_flutter/providers/welcome_screen_provider.dart';
+import 'package:photobooth_flutter/widgets/color_picker.dart';
 import 'package:photobooth_flutter/widgets/custom_dropdown.dart';
+import 'package:photobooth_flutter/widgets/custom_slider.dart';
 import 'package:photobooth_flutter/widgets/file_upload_area.dart';
 import 'package:photobooth_flutter/widgets/form_row.dart';
-import 'package:photobooth_flutter/widgets/color_picker.dart';
 import 'package:photobooth_flutter/widgets/input_decoration.dart';
 import 'package:photobooth_flutter/widgets/settings_group.dart';
-import 'package:photobooth_flutter/widgets/custom_slider.dart';
 import 'package:photobooth_flutter/widgets/snackbar.dart';
 import 'package:photobooth_flutter/widgets/toggle_btn_group.dart';
 import 'package:photobooth_flutter/widgets/watermark_overlay.dart';
 import 'package:provider/provider.dart';
 
-// --- MAIN WELCOME SCREEN SETTINGS WIDGET ---
 class WelcomeScreenSettings extends StatefulWidget {
   const WelcomeScreenSettings({super.key});
 
@@ -97,39 +94,36 @@ class _SettingsSection extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20.0),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 0.0, sigmaY: 0.0),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(1),
-              borderRadius: BorderRadius.circular(20.0),
-              border: Border.all(color: Colors.white.withOpacity(0.2)),
-            ),
-            child: Column(
-              children: [
-                const _SettingsHeader(),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      children: [
-                        _GeneralSettingsGroup(),
-                        if (welcomeSettings.showWelcomeScreen) ...[
-                          const SizedBox(height: 25),
-                          _WelcomeMessageGroup(),
-                          const SizedBox(height: 25),
-                          _TextStylingGroup(),
-                          const SizedBox(height: 25),
-                          _BackgroundSettingsGroup(),
-                          const SizedBox(height: 25),
-                          _ButtonSettingsGroup(),
-                        ],
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.5),
+            borderRadius: BorderRadius.circular(20.0),
+            border: Border.all(color: Colors.white.withOpacity(0.2)),
+          ),
+          child: Column(
+            children: [
+              const _SettingsHeader(),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      _GeneralSettingsGroup(),
+                      if (welcomeSettings.showWelcomeScreen) ...[
+                        const SizedBox(height: 25),
+                        _WelcomeMessageGroup(),
+                        const SizedBox(height: 25),
+                        _TextStylingGroup(),
+                        const SizedBox(height: 25),
+                        _BackgroundSettingsGroup(),
+                        const SizedBox(height: 25),
+                        _ButtonSettingsGroup(),
                       ],
-                    ),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -283,7 +277,7 @@ class _TextStylingGroup extends StatelessWidget {
           FormRow(
             children: [
               Expanded(
-                child: _CustomColorPicker(
+                child: ColorPickerWidget(
                   label: 'Text Color',
                   color: welcomeSettings.welcomeMessageColor,
                   onColorChanged: (c) =>
@@ -525,13 +519,13 @@ class _TextButtonSettings extends StatelessWidget {
         const SizedBox(height: 15),
         FormRow(children: [
           Expanded(
-              child: _CustomColorPicker(
+              child: ColorPickerWidget(
             label: 'Button Color',
             color: welcomeSettings.welcomeButtonColor,
             onColorChanged: (c) => welcomeSettings.setWelcomeButtonColor(c),
           )),
           Expanded(
-              child: _CustomColorPicker(
+              child: ColorPickerWidget(
             label: 'Text Color',
             color: welcomeSettings.welcomeButtonTextColor,
             onColorChanged: (c) => welcomeSettings.setWelcomeButtonTextColor(c),
@@ -589,77 +583,6 @@ class _ImageButtonSettings extends StatelessWidget {
       icon: '🖼️',
       text: 'Choose Button Image',
       selectedFile: welcomeSettings.buttonImagePath,
-    );
-  }
-}
-
-class _CustomColorPicker extends StatelessWidget {
-  final String label;
-  final Color color;
-  final ValueChanged<Color> onColorChanged;
-
-  const _CustomColorPicker(
-      {required this.label, required this.color, required this.onColorChanged});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: Theme.of(context).textTheme.bodyMedium),
-        const SizedBox(height: 8),
-        GestureDetector(
-          onTap: () => _showColorPickerDialog(context),
-          child: Container(
-            height: 48,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppColors.inputBorder, width: 2),
-              color: Colors.white.withOpacity(0.8),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 30,
-                  height: 30,
-                  decoration: BoxDecoration(
-                    color: color,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey.shade400),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  '#${color.value.toRadixString(16).substring(2).toUpperCase()}',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  void _showColorPickerDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Select $label'),
-        content: SingleChildScrollView(
-          child: CustomColorPicker(
-            pickerColor: color,
-            onColorChanged: onColorChanged,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Done'),
-          ),
-        ],
-      ),
     );
   }
 }
