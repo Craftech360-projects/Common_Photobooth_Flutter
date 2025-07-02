@@ -1,21 +1,17 @@
-// ignore_for_file: unused_field
 import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 
 import 'package:camera/camera.dart';
-import 'package:camera_platform_interface/camera_platform_interface.dart';
-// NEW: Import the camera_macos package
 import 'package:camera_macos/camera_macos.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:photobooth_flutter/providers/face_capture_provider.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/providers/photobooth_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
 import 'package:provider/provider.dart';
-import 'package:path/path.dart' as path;
 
 class FaceCaptureScreen extends StatefulWidget {
   final bool isPreviewMode;
@@ -30,7 +26,6 @@ class FaceCaptureScreen extends StatefulWidget {
 }
 
 class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
-  // NEW: Use a dynamic controller to hold either CameraController or CameraMacOSController
   dynamic _controller;
   bool _cameraInitialized = false;
 
@@ -60,7 +55,9 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_isMacos) return; // macOS camera switching is handled differently if needed
+    if (_isMacos) {
+      return; // macOS camera switching is handled differently if needed
+    }
 
     final settings = context.read<FaceCaptureProvider>();
     final selectedIndex = settings.selectedCameraIndex;
@@ -199,6 +196,7 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
   Widget build(BuildContext context) {
     final settings = context.watch<FaceCaptureProvider>();
     final globalSettings = context.watch<GlobalSettingsProvider>();
+    final screenSize = MediaQuery.of(context).size; // Get screen size
 
     return Scaffold(
       body: Stack(
@@ -215,41 +213,81 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
           ),
           if (settings.showTitle)
             Positioned(
-              top: settings.titleTop,
-              left: settings.titleLeft,
-              right: settings.titleRight,
+              top: settings.titleTop * screenSize.height,
+              left: settings.titleLeft * screenSize.width,
+              right: 0,
               child: Text(
                 settings.titleText,
                 textAlign: settings.titleAlignment,
                 style: TextStyle(
                   fontSize: settings.titleFontSize,
                   fontWeight: settings.titleFontWeight,
-                  color: settings.titleColor,
+                  color: settings.titleColor.withOpacity(settings.titleOpacity),
                   height: settings.titleLineHeight,
-                ).copyWith(
-                  color: settings.titleColor
-                      .withValues(alpha: settings.titleOpacity),
                 ),
               ),
             ),
+          // Camera Preview
           Positioned(
-            top: settings.previewTop,
-            left: settings.previewLeft,
-            child: _buildCameraPreview(settings),
+            top: settings.previewTop * screenSize.height,
+            left: settings.previewLeft * screenSize.width,
+            child: _buildCameraPreview(settings, screenSize),
+          ),
+
+          Positioned(
+            top: settings.buttonTop * screenSize.height,
+            left: settings.buttonLeft * screenSize.width,
+            child: _buildCaptureButton(settings, screenSize),
           ),
           Positioned(
-            top: settings.buttonTop,
-            left: settings.buttonLeft,
-            child: _buildCaptureButton(settings),
+            top: 10,
+            right: 10,
+            child: GestureDetector(
+                onTap: () {
+                  Navigator.pushNamed(context, AppRoutes.faceCaptureSettings);
+                },
+                child: const Icon(
+                  Icons.star,
+                  color: Colors.transparent,
+                )),
           ),
+
+          // Camera switch button (only show if multiple cameras available)
+          if (!_isMacos && _cameras.length > 1)
+            Positioned(
+              bottom: 30,
+              right: 30,
+              child: GestureDetector(
+                onTap: () {
+                  final nextIndex = (_cameraIndex + 1) % _cameras.length;
+                  _switchCamera(nextIndex);
+                },
+                child: Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.6),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.cameraswitch,
+                    color: Colors.white,
+                    size: 30,
+                  ),
+                ),
+              ),
+            ),
+
           Positioned(
             bottom: 30,
             left: 30,
             child: GestureDetector(
               onTap: () {
                 _disposeCurrentCamera().then((_) {
-                  context.read<PhotoboothProvider>().clearFaceImage();
-                  Navigator.pop(context);
+                  if (mounted) {
+                    context.read<PhotoboothProvider>().clearFaceImage();
+                    Navigator.pop(context);
+                  }
                 });
               },
               child: Image.asset(
@@ -265,142 +303,78 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
     );
   }
 
-  Widget _buildCameraPreview(FaceCaptureProvider settings) {
-    if (widget.isPreviewMode) {
-      return Container(
-        width: settings.previewWidth,
-        height: settings.previewHeight,
-        decoration: BoxDecoration(
-          color: Colors.black38,
-          borderRadius: BorderRadius.circular(settings.previewBorderRadius),
-          border: settings.showPreviewBorder
-              ? Border.all(
-                  color: settings.previewBorderColor,
-                  width: settings.previewBorderWidth,
-                )
-              : null,
-        ),
-        child: const Center(
-          child: Icon(Icons.camera_alt, size: 50, color: Colors.white54),
-        ),
-      );
-    }
+  Widget _buildCameraPreview(FaceCaptureProvider settings, Size screenSize) {
+    final double finalWidth = settings.previewWidth * screenSize.width;
+    final double finalHeight = settings.previewHeight * screenSize.height;
 
-    if (!_cameraInitialized) {
+    if (widget.isPreviewMode ||
+        _controller == null ||
+        !_controller!.value.isInitialized) {
       return Container(
-        width: settings.previewWidth,
-        height: settings.previewHeight,
+        width: finalWidth,
+        height: finalHeight,
         decoration: BoxDecoration(
-          color: Colors.black,
-          borderRadius: BorderRadius.circular(settings.previewBorderRadius),
-        ),
+            color: Colors.black,
+            borderRadius: BorderRadius.circular(settings.previewBorderRadius)),
         child: Center(
             child:
                 CircularProgressIndicator(color: settings.previewBorderColor)),
       );
     }
 
-    Widget cameraView;
+    // Get the size of the container
+    final Size containerSize = Size(finalWidth, finalHeight);
 
-    // PLATFORM-SPECIFIC WIDGET RENDERING
-    if (_isMacos) {
-      cameraView = CameraMacOSView(
-        // FIX: Explicitly set the camera mode to photo.
-        cameraMode: CameraMacOSMode.photo,
-        deviceId: _selectedMacosCameraId,
-        fit: BoxFit.cover,
-        onCameraInizialized: (CameraMacOSController controller) {
-          if (mounted) {
-            setState(() {
-              _controller = controller;
-            });
-          }
-        },
-      );
-    } else {
-      if (_controller == null || !_controller!.value.isInitialized) {
-        return const Center(child: Text("Camera not initialized"));
-      }
-      final cameraAspectRatio = _controller!.value.aspectRatio;
-      cameraView = AspectRatio(
-        aspectRatio: settings.previewWidth / settings.previewHeight,
-        child: OverflowBox(
-          alignment: Alignment.center,
-          child: FittedBox(
-            fit: BoxFit.cover,
-            child: SizedBox(
-              width: settings.previewWidth,
-              height: settings.previewWidth / cameraAspectRatio,
-              child: CameraPreview(_controller!),
-            ),
-          ),
-        ),
-      );
+    // Get the camera's aspect ratio
+    final double cameraAspectRatio = _controller!.value.aspectRatio;
+
+    // Calculate the scale factor to cover the container
+    // This is the core of the fix
+    var scale = containerSize.aspectRatio * cameraAspectRatio;
+
+    // We need to inverse the scale if the camera is "taller" than the container
+    if (scale < 1) {
+      scale = 1 / scale;
     }
 
     return Container(
-      width: settings.previewWidth,
-      height: settings.previewHeight,
+      width: finalWidth,
+      height: finalHeight,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(settings.previewBorderRadius),
         border: settings.showPreviewBorder
             ? Border.all(
                 color: settings.previewBorderColor,
-                width: settings.previewBorderWidth,
-              )
+                width: settings.previewBorderWidth)
             : null,
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(settings.previewBorderRadius),
-        child: cameraView,
+        child: Transform.scale(
+          scale: scale,
+          child: Center(
+            child: CameraPreview(_controller!),
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buildCaptureButton(FaceCaptureProvider settings) {
+  Widget _buildCaptureButton(FaceCaptureProvider settings, Size screenSize) {
+    final double finalWidth = settings.buttonWidth * screenSize.width;
+    final double finalHeight = settings.buttonHeight * screenSize.height;
+
     if (settings.useImageButton && settings.buttonImagePath != null) {
       return GestureDetector(
         onTap: _takePicture,
         child: settings.isButtonImageAsset
-            ? Image.asset(
-                settings.buttonImagePath!,
-                fit: BoxFit.contain,
-                width: 585,
-                height: 150,
-              )
-            : Image.file(
-                File(settings.buttonImagePath!),
-                fit: BoxFit.contain,
-                width: 585,
-                height: 150,
-              ),
+            ? Image.asset(settings.buttonImagePath!,
+                fit: BoxFit.contain, width: finalWidth, height: finalHeight)
+            : Image.file(File(settings.buttonImagePath!),
+                fit: BoxFit.contain, width: finalWidth, height: finalHeight),
       );
     } else {
-      return ElevatedButton(
-        onPressed: _takePicture,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: settings.buttonColor,
-          foregroundColor: settings.buttonTextColor,
-          minimumSize: Size(settings.buttonWidth, settings.buttonHeight),
-          padding: settings.buttonPadding,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
-            side: settings.buttonHasBorder
-                ? BorderSide(
-                    color: settings.buttonBorderColor,
-                    width: settings.buttonBorderWidth,
-                  )
-                : BorderSide.none,
-          ),
-        ),
-        child: Text(
-          settings.buttonText,
-          style: TextStyle(
-            fontSize: settings.buttonFontSize,
-            fontWeight: settings.buttonFontWeight,
-          ),
-        ),
-      );
+      return const SizedBox();
     }
   }
 

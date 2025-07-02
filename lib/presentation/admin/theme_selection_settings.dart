@@ -1,5 +1,3 @@
-// lib/presentation/theme_selection_settings.dart
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
@@ -9,6 +7,7 @@ import 'package:photobooth_flutter/providers/theme_selection_provider.dart'
 import 'package:photobooth_flutter/widgets/custom_slider.dart';
 import 'package:photobooth_flutter/widgets/file_upload_area.dart';
 import 'package:photobooth_flutter/widgets/form_row.dart';
+import 'package:photobooth_flutter/widgets/input_decoration.dart';
 import 'package:photobooth_flutter/widgets/settings_group.dart';
 import 'package:photobooth_flutter/widgets/settings_header.dart';
 import 'package:provider/provider.dart';
@@ -27,12 +26,11 @@ class _ThemeSelectionSettingsScreenState
 
   @override
   Widget build(BuildContext context) {
-    // --- New Sidebar Layout ---
     double settingsPanelWidth = MediaQuery.of(context).size.width * 0.8;
     return Scaffold(
       body: Stack(
         children: [
-          const ThemeSelectionScreen(), // Full-screen preview
+          const ThemeSelectionScreen(),
           AnimatedPositioned(
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOutCubic,
@@ -46,7 +44,7 @@ class _ThemeSelectionSettingsScreenState
             top: 20,
             left: 20,
             child: FloatingActionButton.small(
-              heroTag: 'themeBack', // Unique tag
+              heroTag: 'themeBack',
               tooltip: 'Back',
               backgroundColor: AppColors.white.withOpacity(0.8),
               child: const Icon(Icons.arrow_back,
@@ -59,7 +57,7 @@ class _ThemeSelectionSettingsScreenState
             top: 20,
             right: _isPanelOpen ? settingsPanelWidth + 20 : 20,
             child: FloatingActionButton(
-              heroTag: 'themeToggle', // Unique tag
+              heroTag: 'themeToggle',
               tooltip: 'Toggle Settings',
               backgroundColor: AppColors.white,
               onPressed: () => setState(() => _isPanelOpen = !_isPanelOpen),
@@ -110,6 +108,8 @@ class _SettingsSection extends StatelessWidget {
                       SizedBox(height: 25),
                       _CarouselSettingsGroup(),
                       SizedBox(height: 25),
+                      _CarouselCardTransformGroup(),
+                      SizedBox(height: 25),
                       _ButtonSettingsGroup(),
                     ],
                   ),
@@ -150,7 +150,7 @@ class _TitleSettingsGroup extends StatelessWidget {
             const SizedBox(height: 15),
             TextFormField(
               initialValue: settings.titleText,
-              decoration: _inputDecoration(context, 'Enter title text'),
+              decoration: inputDecoration(context, 'Enter title text'),
               onChanged: (value) => settings.setTitleText(value),
             ),
             const SizedBox(height: 15),
@@ -270,8 +270,9 @@ class _CarouselSettingsGroup extends StatelessWidget {
                       child: SliderWithLabel(
                         label: 'Card Width',
                         value: settings.cardWidth,
-                        min: 200,
-                        max: 700,
+                        min: 0.1,
+                        max: 1.0,
+                        step: 0.01,
                         onChanged: (v) => settings.setCardWidth(v),
                       ),
                     ),
@@ -279,8 +280,9 @@ class _CarouselSettingsGroup extends StatelessWidget {
                       child: SliderWithLabel(
                         label: 'Card Height',
                         value: settings.cardHeight,
-                        min: 300,
-                        max: 900,
+                        min: 0.1,
+                        max: 1.0,
+                        step: 0.01,
                         onChanged: (v) => settings.setCardHeight(v),
                       ),
                     ),
@@ -292,6 +294,94 @@ class _CarouselSettingsGroup extends StatelessWidget {
                   min: 0,
                   max: 50,
                   onChanged: (v) => settings.setCardBorderRadius(v),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// lib/presentation/theme_selection_settings.dart
+
+class _CarouselCardTransformGroup extends StatelessWidget {
+  const _CarouselCardTransformGroup();
+
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.watch<ThemeSelectionProvider>();
+    return SettingsGroup(
+      icon: '✨',
+      title: 'Carousel Card Effects',
+      child: Column(
+        children: [
+          SettingsGroup(
+            isSubgroup: true,
+            icon: '🃏',
+            title: 'Left Card (Position 1)',
+            child: Column(
+              children: [
+                SliderWithLabel(
+                  label: 'Scale',
+                  value: settings.card1Scale,
+                  min: 0.5,
+                  max: 1.5,
+                  step: 0.01,
+                  onChanged: (v) =>
+                      settings.setCarouselCardTransforms(card1Scale: v),
+                ),
+                SliderWithLabel(
+                  label: 'X-Offset (Horizontal)',
+                  value: settings.card1XOffset,
+                  min: -300,
+                  max: 300,
+                  onChanged: (v) =>
+                      settings.setCarouselCardTransforms(card1XOffset: v),
+                ),
+                SliderWithLabel(
+                  label: 'Y-Offset (Vertical)',
+                  value: settings.card1YOffset,
+                  min: 0,
+                  max: 300,
+                  onChanged: (v) =>
+                      settings.setCarouselCardTransforms(card1YOffset: v),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 15),
+          SettingsGroup(
+            isSubgroup: true,
+            icon: '🃏',
+            title: 'Right Card (Position 2)',
+            child: Column(
+              children: [
+                SliderWithLabel(
+                  label: 'Scale',
+                  value: settings.card2Scale,
+                  min: 0.5,
+                  max: 1.5,
+                  step: 0.01,
+                  onChanged: (v) =>
+                      settings.setCarouselCardTransforms(card2Scale: v),
+                ),
+                SliderWithLabel(
+                  label: 'X-Offset (Horizontal)',
+                  value: settings.card2XOffset,
+                  min: -300,
+                  max: 300,
+                  onChanged: (v) =>
+                      settings.setCarouselCardTransforms(card2XOffset: v),
+                ),
+                SliderWithLabel(
+                  label: 'Y-Offset (Vertical)',
+                  value: settings.card2YOffset,
+                  min: 0,
+                  max: 300,
+                  onChanged: (v) =>
+                      settings.setCarouselCardTransforms(card2YOffset: v),
                 ),
               ],
             ),
@@ -347,7 +437,7 @@ class _ButtonSettingsGroup extends StatelessWidget {
                 child: SliderWithLabel(
                   label: 'Button Width',
                   value: settings.buttonWidth,
-                  min: 0.1,
+                  min: 0.05,
                   max: 1.0,
                   step: 0.01,
                   onChanged: (v) => settings.setButtonWidth(v),
@@ -357,7 +447,7 @@ class _ButtonSettingsGroup extends StatelessWidget {
                 child: SliderWithLabel(
                   label: 'Button Height',
                   value: settings.buttonHeight,
-                  min: 0.1,
+                  min: 0.02,
                   max: 1.0,
                   step: 0.01,
                   onChanged: (v) => settings.setButtonHeight(v),
@@ -373,35 +463,16 @@ class _ButtonSettingsGroup extends StatelessWidget {
             step: 0.01,
             onChanged: (v) => settings.setButtonBottom(v),
           ),
+          // SliderWithLabel(  =====> Add This
+          //   label: 'Button Border Radius',
+          //   value: settings.borderRadius,
+          //   min: 0.0,
+          //   max: 1.0,
+          //   step: 0.01,
+          //   onChanged: (v) => settings.setBorderRadius(v),
+          // ),
         ],
       ),
     );
   }
-}
-
-// --- HELPER METHODS ---
-
-InputDecoration _inputDecoration(BuildContext context, String hintText) {
-  final theme = Theme.of(context);
-  return InputDecoration(
-    hintText: hintText,
-    filled: true,
-    fillColor: Colors.white.withValues(alpha: 0.8),
-    hintStyle: theme.textTheme.bodyMedium
-        ?.copyWith(color: AppColors.labelText.withValues(alpha: 0.7)),
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: AppColors.inputBorder, width: 2),
-    ),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: AppColors.inputBorder, width: 2),
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10),
-      borderSide:
-          const BorderSide(color: AppColors.primaryGradientStart, width: 2),
-    ),
-    contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-  );
 }

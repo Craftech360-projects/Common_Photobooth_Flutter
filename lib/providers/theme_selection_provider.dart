@@ -32,38 +32,40 @@ class ThemeSelectionProvider extends ChangeNotifier {
         imagePath: 'assets/characters/supervillains.png'),
   ];
 
-  // --- Defaults updated to be percentage-based ---
   bool _showTitle = true;
   String _titleText = 'Set the scene';
   double _titleFontSize = 80.0;
   FontWeight _titleFontWeight = FontWeight.w700;
   Color _titleColor = AppColors.yellow;
-  double _titleTop = 0.26; // ~505px on 1920p
+  double _titleTop = 0.26;
 
-  // Carousel
-  double _carouselTop = 0.3; // ~570px on 1920p
-  double _carouselHeight = 0.41; // ~795px on 1920p
-  double _arrowSpacing = 0.09; // ~100px on 1080p
+  double _carouselTop = 0.3;
+  double _carouselHeight = 0.41;
+  double _arrowSpacing = 0.09;
 
-  // Cards
-  double _cardWidth = 0.5; // ~548px on 1080p
-  double _cardHeight = 0.33; // ~640px on 1920p
+  double _cardWidth = 0.5;
+  double _cardHeight = 0.33;
   double _cardBorderRadius = 0.0;
 
-  // Button
+  double _card1Scale = 0.9;
+  double _card1YOffset = 30;
+  double _card1XOffset = -80;
+
+  double _card2Scale = 0.9;
+  double _card2YOffset = 30;
+  double _card2XOffset = 120;
+
   bool _useImageButton = true;
   String? _buttonImagePath = 'assets/images/next_btn.png';
   bool _isButtonImageAsset = true;
-  double _buttonWidth = 0.54; // ~585px on 1080p
-  double _buttonHeight = 0.08; // ~150px on 1920p
-  double _buttonBottom = 0.2; // ~395px on 1920p
+  double _buttonWidth = 0.54;
+  double _buttonHeight = 0.08;
+  double _buttonBottom = 0.2;
 
-  // Background
   bool _showBackground = true;
   String? _backgroundImagePath = 'assets/images/common_bg.png';
   bool _isBackgroundImageAsset = true;
 
-  // --- Getters ---
   List<Theme> get themes => _themes;
   bool get showTitle => _showTitle;
   String get titleText => _titleText;
@@ -71,6 +73,14 @@ class ThemeSelectionProvider extends ChangeNotifier {
   FontWeight get titleFontWeight => _titleFontWeight;
   Color get titleColor => _titleColor;
   double get titleTop => _titleTop;
+
+  double get card1Scale => _card1Scale;
+  double get card1YOffset => _card1YOffset;
+  double get card1XOffset => _card1XOffset;
+  double get card2Scale => _card2Scale;
+  double get card2YOffset => _card2YOffset;
+  double get card2XOffset => _card2XOffset;
+
   double get carouselTop => _carouselTop;
   double get carouselHeight => _carouselHeight;
   double get arrowSpacing => _arrowSpacing;
@@ -94,7 +104,6 @@ class ThemeSelectionProvider extends ChangeNotifier {
     _isInitialized = true;
   }
 
-  // --- Setters ---
   void setShowTitle(bool value) {
     _showTitle = value;
     _saveAndNotify();
@@ -122,6 +131,23 @@ class ThemeSelectionProvider extends ChangeNotifier {
 
   void setTitleTop(double value) {
     _titleTop = value;
+    _saveAndNotify();
+  }
+
+  void setCarouselCardTransforms({
+    double? card1Scale,
+    double? card1YOffset,
+    double? card1XOffset,
+    double? card2Scale,
+    double? card2YOffset,
+    double? card2XOffset,
+  }) {
+    if (card1Scale != null) _card1Scale = card1Scale;
+    if (card1YOffset != null) _card1YOffset = card1YOffset;
+    if (card1XOffset != null) _card1XOffset = card1XOffset;
+    if (card2Scale != null) _card2Scale = card2Scale;
+    if (card2YOffset != null) _card2YOffset = card2YOffset;
+    if (card2XOffset != null) _card2XOffset = card2XOffset;
     _saveAndNotify();
   }
 
@@ -217,14 +243,12 @@ class ThemeSelectionProvider extends ChangeNotifier {
     _saveAndNotify();
   }
 
-  // --- Persistence ---
   void _saveAndNotify() {
     _saveSettings();
     notifyListeners();
   }
 
   Future<void> _saveSettings() async {
-    // FIX: Add a guard clause to prevent saving before initialization is complete.
     if (!_isInitialized) return;
 
     await _prefs.setDouble('theme_titleTop', _titleTop);
@@ -243,6 +267,13 @@ class ThemeSelectionProvider extends ChangeNotifier {
     await _prefs.setInt('theme_titleFontWeight', _titleFontWeight.index);
     await _prefs.setInt('theme_titleColor', _titleColor.value);
 
+    await _prefs.setDouble('theme_card1Scale', _card1Scale);
+    await _prefs.setDouble('theme_card1YOffset', _card1YOffset);
+    await _prefs.setDouble('theme_card1XOffset', _card1XOffset);
+    await _prefs.setDouble('theme_card2Scale', _card2Scale);
+    await _prefs.setDouble('theme_card2YOffset', _card2YOffset);
+    await _prefs.setDouble('theme_card2XOffset', _card2XOffset);
+
     await _prefs.setDouble('theme_cardBorderRadius', _cardBorderRadius);
     await _prefs.setBool('theme_use_image_button', _useImageButton);
     await _prefs.setString('theme_button_image_path', _buttonImagePath ?? '');
@@ -258,7 +289,6 @@ class ThemeSelectionProvider extends ChangeNotifier {
     const double refWidth = 1080.0;
     const double refHeight = 1920.0;
 
-    // Helper to convert old pixel values
     double toPercent(String key, double defaultValue, double reference) {
       double val = _prefs.getDouble(key) ?? defaultValue;
       return val > 1.0 ? val / reference : val;
@@ -270,6 +300,13 @@ class ThemeSelectionProvider extends ChangeNotifier {
     _titleFontWeight = FontWeight.values[
         _prefs.getInt('theme_titleFontWeight') ?? _titleFontWeight.index];
     _titleColor = Color(_prefs.getInt('theme_titleColor') ?? _titleColor.value);
+
+    _card1Scale = _prefs.getDouble('theme_card1Scale') ?? _card1Scale;
+    _card1YOffset = _prefs.getDouble('theme_card1YOffset') ?? _card1YOffset;
+    _card1XOffset = _prefs.getDouble('theme_card1XOffset') ?? _card1XOffset;
+    _card2Scale = _prefs.getDouble('theme_card2Scale') ?? _card2Scale;
+    _card2YOffset = _prefs.getDouble('theme_card2YOffset') ?? _card2YOffset;
+    _card2XOffset = _prefs.getDouble('theme_card2XOffset') ?? _card2XOffset;
 
     _titleTop = toPercent('theme_titleTop', _titleTop, refHeight);
     _carouselTop = toPercent('theme_carouselTop', _carouselTop, refHeight);

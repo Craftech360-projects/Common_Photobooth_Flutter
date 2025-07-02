@@ -1,3 +1,5 @@
+// lib/providers/face_capture_provider.dart
+
 import 'dart:convert';
 import 'dart:io';
 
@@ -11,63 +13,46 @@ class FaceCaptureProvider extends ChangeNotifier {
   late SharedPreferences _prefs;
   bool _isInitialized = false;
 
+  // --- All layout values are now percentages (0.0 to 1.0) ---
   // Title settings
   String _titleText = 'Strike a Pose';
   double _titleFontSize = 70.0;
   FontWeight _titleFontWeight = FontWeight.w600;
   Color _titleColor = AppColors.yellow;
-  double _titleTop = 488.0;
+  double _titleTop = 0.25; // 488px / 1920px
   double _titleLeft = 0.0;
-  double _titleRight = 0.0;
   bool _showTitle = true;
   double _titleLineHeight = 1.0;
   double _titleOpacity = 1.0;
   TextAlign _titleAlignment = TextAlign.center;
 
   // Camera preview settings
-  double _previewWidth = 685.0;
-  double _previewHeight = 816.0;
+  double _previewWidth = 0.63; // 685px / 1080px
+  double _previewHeight = 0.42; // 816px / 1920px
   double _previewBorderRadius = 5.0;
   Color _previewBorderColor = AppColors.white;
   double _previewBorderWidth = 2.0;
   bool _showPreviewBorder = true;
-  double _previewTop = 590.0;
-  double _previewLeft = 196.0;
-
-  // Windows camera settings
-  String _pictureFormat = 'jpeg';
-  final String _pictureQuality = 'high';
+  double _previewTop = 0.30; // 590px / 1920px
+  double _previewLeft = 0.18; // 196px / 1080px
 
   // Button settings
-  String _buttonText = 'Capture';
-  double _buttonFontSize = 18.0;
-  FontWeight _buttonFontWeight = FontWeight.w500;
-  Color _buttonColor = AppColors.white;
-  Color _buttonTextColor = AppColors.black;
-  double _buttonWidth = 585.0;
-  double _buttonHeight = 150.0;
-  double _buttonBorderRadius = 0.0;
-  double _buttonTop = 1455.0;
-  double _buttonLeft = 245.0;
-  EdgeInsets _buttonPadding = const EdgeInsets.all(8.0);
-  bool _buttonHasBorder = false;
-  Color _buttonBorderColor = AppColors.orange;
-  double _buttonBorderWidth = 2.0;
-
-  // Image button settings
   bool _useImageButton = true;
   String? _buttonImagePath = 'assets/images/capture_btn.png';
   bool _isButtonImageAsset = true;
-
+  double _buttonWidth = 0.54; // 585px / 1080px
+  double _buttonHeight = 0.078; // 150px / 1920px
+  double _buttonTop = 0.75; // 1455px / 1920px
+  double _buttonLeft = 0.22; // 245px / 1080px
+  
   // Background settings
   bool _showBackground = false;
   String? _backgroundImagePath;
   bool _isBackgroundImageAsset = true;
-
-  // Camera settings
+  
   int _selectedCameraIndex = 0;
 
-  // Getters
+  // --- Getters (no changes, they just return the private properties) ---
   String get titleText => _titleText;
   double get titleFontSize => _titleFontSize;
   FontWeight get titleFontWeight => _titleFontWeight;
@@ -78,8 +63,6 @@ class FaceCaptureProvider extends ChangeNotifier {
   TextAlign get titleAlignment => _titleAlignment;
   double get titleTop => _titleTop;
   double get titleLeft => _titleLeft;
-  double get titleRight => _titleRight;
-  EdgeInsets get buttonPadding => _buttonPadding;
   double get previewWidth => _previewWidth;
   double get previewHeight => _previewHeight;
   double get previewBorderRadius => _previewBorderRadius;
@@ -88,17 +71,8 @@ class FaceCaptureProvider extends ChangeNotifier {
   bool get showPreviewBorder => _showPreviewBorder;
   double get previewTop => _previewTop;
   double get previewLeft => _previewLeft;
-  String get buttonText => _buttonText;
-  double get buttonFontSize => _buttonFontSize;
-  FontWeight get buttonFontWeight => _buttonFontWeight;
-  Color get buttonColor => _buttonColor;
-  Color get buttonTextColor => _buttonTextColor;
   double get buttonWidth => _buttonWidth;
   double get buttonHeight => _buttonHeight;
-  double get buttonBorderRadius => _buttonBorderRadius;
-  bool get buttonHasBorder => _buttonHasBorder;
-  Color get buttonBorderColor => _buttonBorderColor;
-  double get buttonBorderWidth => _buttonBorderWidth;
   double get buttonTop => _buttonTop;
   double get buttonLeft => _buttonLeft;
   bool get useImageButton => _useImageButton;
@@ -107,198 +81,37 @@ class FaceCaptureProvider extends ChangeNotifier {
   bool get showBackground => _showBackground;
   String? get backgroundImagePath => _backgroundImagePath;
   bool get isBackgroundImageAsset => _isBackgroundImageAsset;
-  String get pictureFormat => _pictureFormat;
-  String get pictureQuality => _pictureQuality;
   int get selectedCameraIndex => _selectedCameraIndex;
 
-  // Setters
-  void setTitleText(String text) {
-    _titleText = text;
-    _saveAndNotify();
-  }
 
-  void setTitleFontSize(double size) {
-    _titleFontSize = size;
-    _saveAndNotify();
-  }
+  // --- Setters (no changes, they just update the private properties) ---
+  void setTitleText(String text) { _titleText = text; _saveAndNotify(); }
+  void setTitleFontSize(double size) { _titleFontSize = size; _saveAndNotify(); }
+  void setTitleFontWeight(FontWeight weight) { _titleFontWeight = weight; _saveAndNotify(); }
+  void setTitleColor(Color color) { _titleColor = color; _saveAndNotify(); }
+  void setTitleLineHeight(double height) { _titleLineHeight = height; _saveAndNotify(); }
+  void setTitleOpacity(double opacity) { _titleOpacity = opacity; _saveAndNotify(); }
+  void setTitleAlignment(TextAlign alignment) { _titleAlignment = alignment; _saveAndNotify(); }
+  void setTitleTop(double top) { _titleTop = top; _saveAndNotify(); }
+  void setTitleLeft(double left) { _titleLeft = left; _saveAndNotify(); }
+  void setPreviewTop(double top) { _previewTop = top; _saveAndNotify(); }
+  void setPreviewLeft(double left) { _previewLeft = left; _saveAndNotify(); }
+  void setButtonTop(double top) { _buttonTop = top; _saveAndNotify(); }
+  void setButtonLeft(double left) { _buttonLeft = left; _saveAndNotify(); }
+  void setShowTitle(bool show) { _showTitle = show; _saveAndNotify(); }
+  void setPreviewWidth(double width) { _previewWidth = width; _saveAndNotify(); }
+  void setPreviewHeight(double height) { _previewHeight = height; _saveAndNotify(); }
+  void setPreviewBorderRadius(double radius) { _previewBorderRadius = radius; _saveAndNotify(); }
+  void setPreviewBorderColor(Color color) { _previewBorderColor = color; _saveAndNotify(); }
+  void setPreviewBorderWidth(double width) { _previewBorderWidth = width; _saveAndNotify(); }
+  void setShowPreviewBorder(bool show) { _showPreviewBorder = show; _saveAndNotify(); }
+  void setButtonWidth(double width) { _buttonWidth = width; _saveAndNotify(); }
+  void setButtonHeight(double height) { _buttonHeight = height; _saveAndNotify(); }
+  void setUseImageButton(bool use) { _useImageButton = use; _saveAndNotify(); }
+  void setShowBackground(bool show) { _showBackground = show; _saveAndNotify(); }
+  void setSelectedCameraIndex(int index) { _selectedCameraIndex = index; _saveAndNotify(); }
 
-  void setTitleFontWeight(FontWeight weight) {
-    _titleFontWeight = weight;
-    _saveAndNotify();
-  }
-
-  void setPictureFormat(String format) {
-    _pictureFormat = format;
-    _saveAndNotify();
-  }
-
-  void setTitleColor(Color color) {
-    _titleColor = color;
-    _saveAndNotify();
-  }
-
-  void setTitleLineHeight(double height) {
-    _titleLineHeight = height;
-    _saveAndNotify();
-  }
-
-  void setTitleOpacity(double opacity) {
-    _titleOpacity = opacity;
-    _saveAndNotify();
-  }
-
-  void setTitleAlignment(TextAlign alignment) {
-    _titleAlignment = alignment;
-    _saveAndNotify();
-  }
-
-  void setTitleTop(double top) {
-    _titleTop = top;
-    _saveAndNotify();
-  }
-
-  void setTitleLeft(double left) {
-    _titleLeft = left;
-    _saveAndNotify();
-  }
-
-  void setTitleRight(double right) {
-    _titleRight = right;
-    _saveAndNotify();
-  }
-
-  void setPreviewTop(double top) {
-    _previewTop = top;
-    _saveAndNotify();
-  }
-
-  void setPreviewLeft(double left) {
-    _previewLeft = left;
-    _saveAndNotify();
-  }
-
-  void setButtonTop(double top) {
-    _buttonTop = top;
-    _saveAndNotify();
-  }
-
-  void setButtonLeft(double left) {
-    _buttonLeft = left;
-    _saveAndNotify();
-  }
-
-  void setButtonPadding(EdgeInsets padding) {
-    _buttonPadding = padding;
-    _saveAndNotify();
-  }
-
-  void setShowTitle(bool show) {
-    _showTitle = show;
-    _saveAndNotify();
-  }
-
-  void setPreviewWidth(double width) {
-    _previewWidth = width;
-    _saveAndNotify();
-  }
-
-  void setPreviewHeight(double height) {
-    _previewHeight = height;
-    _saveAndNotify();
-  }
-
-  void setPreviewBorderRadius(double radius) {
-    _previewBorderRadius = radius;
-    _saveAndNotify();
-  }
-
-  void setPreviewBorderColor(Color color) {
-    _previewBorderColor = color;
-    _saveAndNotify();
-  }
-
-  void setPreviewBorderWidth(double width) {
-    _previewBorderWidth = width;
-    _saveAndNotify();
-  }
-
-  void setShowPreviewBorder(bool show) {
-    _showPreviewBorder = show;
-    _saveAndNotify();
-  }
-
-  void setButtonText(String text) {
-    _buttonText = text;
-    _saveAndNotify();
-  }
-
-  void setButtonFontSize(double size) {
-    _buttonFontSize = size;
-    _saveAndNotify();
-  }
-
-  void setButtonFontWeight(FontWeight weight) {
-    _buttonFontWeight = weight;
-    _saveAndNotify();
-  }
-
-  void setButtonColor(Color color) {
-    _buttonColor = color;
-    _saveAndNotify();
-  }
-
-  void setButtonTextColor(Color color) {
-    _buttonTextColor = color;
-    _saveAndNotify();
-  }
-
-  void setButtonWidth(double width) {
-    _buttonWidth = width;
-    _saveAndNotify();
-  }
-
-  void setButtonHeight(double height) {
-    _buttonHeight = height;
-    _saveAndNotify();
-  }
-
-  void setButtonBorderRadius(double radius) {
-    _buttonBorderRadius = radius;
-    _saveAndNotify();
-  }
-
-  void setButtonHasBorder(bool hasBorder) {
-    _buttonHasBorder = hasBorder;
-    _saveAndNotify();
-  }
-
-  void setButtonBorderColor(Color color) {
-    _buttonBorderColor = color;
-    _saveAndNotify();
-  }
-
-  void setButtonBorderWidth(double width) {
-    _buttonBorderWidth = width;
-    _saveAndNotify();
-  }
-
-  void setUseImageButton(bool use) {
-    _useImageButton = use;
-    _saveAndNotify();
-  }
-
-  void setShowBackground(bool show) {
-    _showBackground = show;
-    _saveAndNotify();
-  }
-
-  void setSelectedCameraIndex(int index) {
-    _selectedCameraIndex = index;
-    _saveAndNotify();
-  }
-
-  Future<void> _setImage(String? sourcePath, bool isAsset,
-      Function(String?, bool) updateState) async {
+  Future<void> _setImage(String? sourcePath, bool isAsset, Function(String?, bool) updateState) async {
     if (sourcePath == null) {
       updateState(null, true);
     } else if (isAsset) {
@@ -306,8 +119,7 @@ class FaceCaptureProvider extends ChangeNotifier {
     } else {
       try {
         final appDir = await getApplicationDocumentsDirectory();
-        final fileName =
-            'capture_${DateTime.now().millisecondsSinceEpoch}${path.extension(sourcePath)}';
+        final fileName = 'capture_${DateTime.now().millisecondsSinceEpoch}${path.extension(sourcePath)}';
         final destinationPath = path.join(appDir.path, fileName);
         await File(sourcePath).copy(destinationPath);
         updateState(destinationPath, false);
@@ -326,8 +138,7 @@ class FaceCaptureProvider extends ChangeNotifier {
     });
   }
 
-  Future<void> setBackgroundImagePath(String? path,
-      {bool isAsset = true}) async {
+  Future<void> setBackgroundImagePath(String? path, {bool isAsset = true}) async {
     await _setImage(path, isAsset, (p, a) {
       _backgroundImagePath = p;
       _isBackgroundImageAsset = a;
@@ -346,143 +157,77 @@ class FaceCaptureProvider extends ChangeNotifier {
     _saveSettings();
     notifyListeners();
   }
-
+  
   Future<void> _loadSettings() async {
     final settingsJson = _prefs.getString('face_capture_settings');
-
     if (settingsJson != null) {
       final settings = jsonDecode(settingsJson) as Map<String, dynamic>;
 
-      _useImageButton = settings['useImageButton'] ?? _useImageButton;
-      _buttonImagePath = settings['buttonImagePath'] ??
-          _buttonImagePath; // FIX: Preserve default if null
-      _isButtonImageAsset =
-          settings['isButtonImageAsset'] ?? _isButtonImageAsset;
+      // Helper to convert old pixel values to new percentage values for migration
+      const double refWidth = 1080.0;
+      const double refHeight = 1920.0;
+      double toPercent(dynamic value, double defaultValue, double reference) {
+        if (value == null) return defaultValue;
+        double val = (value as num).toDouble();
+        // If value is > 1.0, it's likely an old pixel value, so convert it.
+        // Otherwise, it's already a percentage.
+        return val > 1.0 ? val / reference : val;
+      }
 
-      // ... Omitted for brevity: all other settings are loaded correctly
+      // Load all settings, applying the toPercent migration logic to layout values
       _titleText = settings['titleText'] ?? _titleText;
       _titleFontSize = settings['titleFontSize'] ?? _titleFontSize;
-      _titleFontWeight = FontWeight
-          .values[settings['titleFontWeight'] ?? _titleFontWeight.index];
+      _titleFontWeight = FontWeight.values[settings['titleFontWeight'] ?? _titleFontWeight.index];
       _titleColor = Color(settings['titleColor'] ?? _titleColor.value);
-      _titleTop = settings['titleTop'] ?? _titleTop;
-      _titleLeft = settings['titleLeft'] ?? _titleLeft;
-      _titleRight = settings['titleRight'] ?? _titleRight;
       _showTitle = settings['showTitle'] ?? _showTitle;
       _titleLineHeight = settings['titleLineHeight'] ?? _titleLineHeight;
       _titleOpacity = settings['titleOpacity'] ?? _titleOpacity;
       _titleAlignment = TextAlign.values[settings['titleAlignment'] ?? 2];
-      _previewWidth = settings['previewWidth'] ?? _previewWidth;
-      _previewHeight = settings['previewHeight'] ?? _previewHeight;
-      _previewBorderRadius =
-          settings['previewBorderRadius'] ?? _previewBorderRadius;
-      _previewBorderColor =
-          Color(settings['previewBorderColor'] ?? _previewBorderColor.value);
-      _previewBorderWidth =
-          settings['previewBorderWidth'] ?? _previewBorderWidth;
+      
+      _titleTop = toPercent(settings['titleTop'], _titleTop, refHeight);
+      _titleLeft = toPercent(settings['titleLeft'], _titleLeft, refWidth);
+
+      _previewWidth = toPercent(settings['previewWidth'], _previewWidth, refWidth);
+      _previewHeight = toPercent(settings['previewHeight'], _previewHeight, refHeight);
+      _previewBorderRadius = settings['previewBorderRadius'] ?? _previewBorderRadius;
+      _previewBorderColor = Color(settings['previewBorderColor'] ?? _previewBorderColor.value);
+      _previewBorderWidth = settings['previewBorderWidth'] ?? _previewBorderWidth;
       _showPreviewBorder = settings['showPreviewBorder'] ?? _showPreviewBorder;
-      _previewTop = settings['previewTop'] ?? _previewTop;
-      _previewLeft = settings['previewLeft'] ?? _previewLeft;
-      _buttonText = settings['buttonText'] ?? _buttonText;
-      _buttonFontSize = settings['buttonFontSize'] ?? _buttonFontSize;
-      _buttonFontWeight = FontWeight
-          .values[settings['buttonFontWeight'] ?? _buttonFontWeight.index];
-      _buttonColor = Color(settings['buttonColor'] ?? _buttonColor.value);
-      _buttonTextColor =
-          Color(settings['buttonTextColor'] ?? _buttonTextColor.value);
-      _buttonWidth = settings['buttonWidth'] ?? _buttonWidth;
-      _buttonHeight = settings['buttonHeight'] ?? _buttonHeight;
-      _buttonBorderRadius =
-          settings['buttonBorderRadius'] ?? _buttonBorderRadius;
-      _buttonTop = settings['buttonTop'] ?? _buttonTop;
-      _buttonLeft = settings['buttonLeft'] ?? _buttonLeft;
-      if (settings['buttonPadding'] is Map) {
-        final paddingMap = settings['buttonPadding'] as Map<String, dynamic>;
-        _buttonPadding = EdgeInsets.fromLTRB(
-          (paddingMap['left'] as num?)?.toDouble() ?? 16.0,
-          (paddingMap['top'] as num?)?.toDouble() ?? 8.0,
-          (paddingMap['right'] as num?)?.toDouble() ?? 16.0,
-          (paddingMap['bottom'] as num?)?.toDouble() ?? 8.0,
-        );
-      }
-      _buttonHasBorder = settings['buttonHasBorder'] ?? _buttonHasBorder;
-      _buttonBorderColor =
-          Color(settings['buttonBorderColor'] ?? _buttonBorderColor.value);
-      _buttonBorderWidth = settings['buttonBorderWidth'] ?? _buttonBorderWidth;
+      _previewTop = toPercent(settings['previewTop'], _previewTop, refHeight);
+      _previewLeft = toPercent(settings['previewLeft'], _previewLeft, refWidth);
+
+      _buttonWidth = toPercent(settings['buttonWidth'], _buttonWidth, refWidth);
+      _buttonHeight = toPercent(settings['buttonHeight'], _buttonHeight, refHeight);
+      _buttonTop = toPercent(settings['buttonTop'], _buttonTop, refHeight);
+      _buttonLeft = toPercent(settings['buttonLeft'], _buttonLeft, refWidth);
+
+      _useImageButton = settings['useImageButton'] ?? _useImageButton;
+      _buttonImagePath = settings['buttonImagePath'];
+      _isButtonImageAsset = settings['isButtonImageAsset'] ?? _isButtonImageAsset;
+      
       _showBackground = settings['showBackground'] ?? _showBackground;
       _backgroundImagePath = settings['backgroundImagePath'];
-      _isBackgroundImageAsset =
-          settings['isBackgroundImageAsset'] ?? _isBackgroundImageAsset;
-      _selectedCameraIndex =
-          settings['selectedCameraIndex'] ?? _selectedCameraIndex;
+      _isBackgroundImageAsset = settings['isBackgroundImageAsset'] ?? _isBackgroundImageAsset;
+      _selectedCameraIndex = settings['selectedCameraIndex'] ?? _selectedCameraIndex;
     }
-
     notifyListeners();
   }
 
-  // Save settings to SharedPreferences
   Future<void> _saveSettings() async {
     final prefs = await SharedPreferences.getInstance();
-
     final settings = {
-      // Title settings
-      'titleText': _titleText,
-      'titleFontSize': _titleFontSize,
-      'titleFontWeight': _titleFontWeight.index,
-      'titleColor': _titleColor.value,
-      'titleTop': _titleTop,
-      'titleLeft': _titleLeft,
-      'titleRight': _titleRight,
-      'showTitle': _showTitle,
-      'titleLineHeight': _titleLineHeight,
-      'titleOpacity': _titleOpacity,
-      'titleAlignment': _titleAlignment.index,
-
-      // Camera preview settings
-      'previewWidth': _previewWidth,
-      'previewHeight': _previewHeight,
-      'previewBorderRadius': _previewBorderRadius,
-      'previewBorderColor': _previewBorderColor.value,
-      'previewBorderWidth': _previewBorderWidth,
-      'showPreviewBorder': _showPreviewBorder,
-      'previewTop': _previewTop,
-      'previewLeft': _previewLeft,
-
-      // Button settings
-      'buttonText': _buttonText,
-      'buttonFontSize': _buttonFontSize,
-      'buttonFontWeight': _buttonFontWeight.index,
-      'buttonColor': _buttonColor.value,
-      'buttonTextColor': _buttonTextColor.value,
-      'buttonWidth': _buttonWidth,
-      'buttonHeight': _buttonHeight,
-      'buttonBorderRadius': _buttonBorderRadius,
-      'buttonPadding': {
-        'left': _buttonPadding.left,
-        'top': _buttonPadding.top,
-        'right': _buttonPadding.right,
-        'bottom': _buttonPadding.bottom,
-      },
-      'buttonTop': _buttonTop,
-      'buttonLeft': _buttonLeft,
-      'buttonHasBorder': _buttonHasBorder,
-      'buttonBorderColor': _buttonBorderColor.value,
-      'buttonBorderWidth': _buttonBorderWidth,
-
-      // Image button settings
-      'useImageButton': _useImageButton,
-      'buttonImagePath': _buttonImagePath,
-      'isButtonImageAsset': _isButtonImageAsset,
-
-      // Background settings
-      'showBackground': _showBackground,
-      'backgroundImagePath': _backgroundImagePath,
-      'isBackgroundImageAsset': _isBackgroundImageAsset,
-
-      // Camera settings
-      'selectedCameraIndex': _selectedCameraIndex,
+      // Save all properties as they are. They are now percentages.
+      'titleText': _titleText, 'titleFontSize': _titleFontSize, 'titleFontWeight': _titleFontWeight.index,
+      'titleColor': _titleColor.value, 'titleTop': _titleTop, 'titleLeft': _titleLeft, 'showTitle': _showTitle,
+      'titleLineHeight': _titleLineHeight, 'titleOpacity': _titleOpacity, 'titleAlignment': _titleAlignment.index,
+      'previewWidth': _previewWidth, 'previewHeight': _previewHeight, 'previewBorderRadius': _previewBorderRadius,
+      'previewBorderColor': _previewBorderColor.value, 'previewBorderWidth': _previewBorderWidth,
+      'showPreviewBorder': _showPreviewBorder, 'previewTop': _previewTop, 'previewLeft': _previewLeft,
+      'buttonWidth': _buttonWidth, 'buttonHeight': _buttonHeight, 'buttonTop': _buttonTop,
+      'buttonLeft': _buttonLeft, 'useImageButton': _useImageButton, 'buttonImagePath': _buttonImagePath,
+      'isButtonImageAsset': _isButtonImageAsset, 'showBackground': _showBackground, 'backgroundImagePath': _backgroundImagePath,
+      'isBackgroundImageAsset': _isBackgroundImageAsset, 'selectedCameraIndex': _selectedCameraIndex,
     };
-
     await prefs.setString('face_capture_settings', jsonEncode(settings));
   }
 }

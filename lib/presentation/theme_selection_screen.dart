@@ -126,6 +126,8 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> {
     return DecorationImage(image: provider, fit: BoxFit.cover);
   }
 
+  // lib/presentation/theme_selection_screen.dart
+
   Widget _buildThemeCarousel(
       BuildContext context,
       theme_provider.ThemeSelectionProvider settings,
@@ -144,19 +146,19 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> {
 
       switch (displayIndex) {
         case 0:
-          scale = 1.0;
+          scale = 1.05;
           yOffset = 0;
           xOffset = 0;
           break;
         case 1:
-          scale = 0.9;
-          yOffset = 30;
-          xOffset = -100;
+          scale = settings.card1Scale;
+          yOffset = settings.card1YOffset;
+          xOffset = settings.card1XOffset;
           break;
         case 2:
-          scale = 0.9;
-          yOffset = 30;
-          xOffset = 150;
+          scale = settings.card2Scale;
+          yOffset = settings.card2YOffset;
+          xOffset = settings.card2XOffset;
           break;
         default:
           scale = 0.8;
@@ -196,7 +198,7 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> {
         ),
         SizedBox(width: settings.arrowSpacing * screenSize.width),
         SizedBox(
-            width: settings.cardWidth * 1.8,
+            width: settings.cardWidth * screenSize.width * 1.8,
             height: settings.carouselHeight * screenSize.height,
             child: Stack(
                 alignment: Alignment.center, children: orderedStackChildren)),
@@ -223,6 +225,7 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
+        // FIX: Multiply by screen dimensions to get the correct pixel size
         width: settings.cardWidth * screenSize.width,
         height: settings.cardHeight * screenSize.height,
         decoration: BoxDecoration(
@@ -233,7 +236,7 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> {
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: AppColors.goldenYellow.withValues(alpha: 0.6),
+                    color: AppColors.goldenYellow.withOpacity(0.6),
                     blurRadius: 80,
                     spreadRadius: 12,
                   )

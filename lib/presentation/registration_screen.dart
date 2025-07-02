@@ -2,17 +2,16 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:photobooth_flutter/core/themes/app_colors.dart';
+import 'package:flutter/services.dart';
 import 'package:photobooth_flutter/providers/admin_watermark_provider.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/providers/photobooth_provider.dart';
 import 'package:photobooth_flutter/providers/registration_screen_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
 import 'package:photobooth_flutter/widgets/snackbar.dart';
-import 'package:photobooth_flutter/widgets/watermark_overlay.dart';
 import 'package:photobooth_flutter/widgets/virtual_keyboard.dart';
+import 'package:photobooth_flutter/widgets/watermark_overlay.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter/services.dart';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});
@@ -80,7 +79,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           IconButton(
             icon: const Icon(
               Icons.settings_rounded,
-              color: AppColors.lightWhite,
+              color: Colors.transparent,
               size: 32,
             ),
             onPressed: () {
@@ -92,15 +91,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       ),
       body: WatermarkOverlay(
         show: watermarkProvider.showWatermark,
-        // 1. Use a Column to separate content from the keyboard
         child: Column(
           children: [
-            // 2. Wrap the scrollable content in an Expanded widget
             Expanded(
               child: SingleChildScrollView(
                 child: SizedBox(
-                  // 3. Set the height of the content to be at least the screen height
-                  //    This ensures your Positioned widgets work correctly.
                   height: screenSize.height,
                   child: Stack(
                     children: [
