@@ -53,5 +53,9 @@ Application supports iTunes file sharing
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>This app needs camera access to take photos for the photobooth.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app needs microphone access, although it is not used for recording.</string>
 </dict>
 </plist>

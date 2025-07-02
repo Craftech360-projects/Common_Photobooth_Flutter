@@ -8,20 +8,20 @@ import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class GenderSelectionProvider extends ChangeNotifier {
-  double _titleLeft = 0.36; // ~395px on 1080p
-  double _titleTop = 0.41; // ~795px on 1920p
-  double _titleWidth = 0.28; // ~300px on 1080p
+  double _titleLeft = 0.36;
+  double _titleTop = 0.41;
+  double _titleWidth = 0.28;
 
-  double _imageWidth = 0.38; // ~410px on 1080p
-  double _imageHeight = 0.26; // ~495px on 1920p
-  double _imageSpacing = 40.0; // Spacing can remain in logical pixels
-  double _genderSelectionLeft = 0.09; // ~100px on 1080p
-  double _genderSelectionTop = 0.43; // ~830px on 1920p
+  double _imageWidth = 0.30;
+  double _imageHeight = 0.26;
+  double _imageSpacing = 0.0;
+  double _genderSelectionLeft = 0.18;
+  double _genderSelectionTop = 0.43;
 
-  double _buttonLeft = 0.22; // ~245px on 1080p
-  double _buttonBottom = 0.2; // ~380px on 1920p
-  double _buttonWidth = 0.54; // ~585px on 1080p
-  double _buttonHeight = 0.08; // ~150px on 1920p
+  double _buttonLeft = 0.22;
+  double _buttonBottom = 0.2;
+  double _buttonWidth = 0.54;
+  double _buttonHeight = 0.08;
 
   // Title settings
   String _titleText = '';

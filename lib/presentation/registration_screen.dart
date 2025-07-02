@@ -10,7 +10,9 @@ import 'package:photobooth_flutter/providers/registration_screen_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
 import 'package:photobooth_flutter/widgets/snackbar.dart';
 import 'package:photobooth_flutter/widgets/watermark_overlay.dart';
+import 'package:photobooth_flutter/widgets/virtual_keyboard.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});
@@ -22,6 +24,8 @@ class RegistrationScreen extends StatefulWidget {
 class _RegistrationScreenState extends State<RegistrationScreen> {
   final Map<String, TextEditingController> _controllers = {};
   final Map<String, FocusNode> _focusNodes = {};
+  bool _showKeyboard = false;
+  String? _activeFieldId;
 
   @override
   void initState() {
@@ -52,6 +56,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     }
     super.dispose();
   }
+// registration_screen.dart
 
   @override
   Widget build(BuildContext context) {
@@ -60,10 +65,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     final watermarkProvider = context.watch<AdminWatermarkProvider>();
     final screenSize = MediaQuery.of(context).size;
 
-    final textScale = min(screenSize.width / 1080.0, screenSize.height / 1920.0);
+    final textScale =
+        min(screenSize.width / 1080.0, screenSize.height / 1920.0);
 
     return Scaffold(
       extendBodyBehindAppBar: true,
+      // Ensure this is not set to false. Default is true, which is what we want.
+      // resizeToAvoidBottomInset: false,
       appBar: AppBar(
         elevation: 0,
         automaticallyImplyLeading: false,
@@ -84,137 +92,195 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       ),
       body: WatermarkOverlay(
         show: watermarkProvider.showWatermark,
-        child: Stack(
+        // 1. Use a Column to separate content from the keyboard
+        child: Column(
           children: [
-            Container(
-              width: double.infinity,
-              height: double.infinity,
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image:
-                      _getBackgroundImage(registrationSettings, globalSettings),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-           if (registrationSettings.showTitle)
-              Positioned(
-                left: registrationSettings.titleLeft * screenSize.width,
-                top: registrationSettings.titleTop * screenSize.height,
-                width: registrationSettings.titleWidth * screenSize.width,
-                child: Text(
-                  registrationSettings.titleText,
-                  style: TextStyle(
-                    fontSize: registrationSettings.titleFontSize * textScale,
-                    fontWeight: registrationSettings.titleFontWeight,
-                    color: registrationSettings.titleTextColor,
-                  ),
-                  textAlign: registrationSettings.titleTextAlign,
-                ),
-              ),
-          ...registrationSettings.textFields
-                .where((field) => field.isEnabled)
-                .map((field) => Positioned(
-                      left: field.left * screenSize.width,
-                      top: field.top * screenSize.height,
-                      width: field.width * screenSize.width,
-                      height: field.height * screenSize.height,
-                      child: TextFormField(
-                        controller: _controllers[field.id],
-                        focusNode: _focusNodes[field.id],
-                        maxLines: 1,
-                        textAlignVertical: TextAlignVertical.center, // Add this
-                        showCursor: true,
-                        style: TextStyle(
-                          color: field.textColor,
-                          fontSize: field.fontSize * textScale,
-                          fontWeight: field.fontWeight,
-                          fontStyle: field.isItalic
-                              ? FontStyle.italic
-                              : FontStyle.normal,
-                        ),
-                        decoration: InputDecoration(
-                          // isDense: true, // Add this
-                          contentPadding: EdgeInsets.zero, // And add this
-                          floatingLabelBehavior: FloatingLabelBehavior.never,
-                          labelText: field.label,
-                          hintText: field.hintText,
-                          labelStyle: TextStyle(
-                              fontSize: field.fontSize * textScale,
-                              color: field.labelColor),
-                          filled: false,
-                          fillColor: field.fillColor,
-                          border: field.hasBorder
-                              ? OutlineInputBorder(
-                                  borderRadius:
-                                      BorderRadius.circular(field.borderRadius),
-                                  borderSide: BorderSide(
-                                      color: field.borderColor,
-                                      width: field.borderWidth))
-                              : InputBorder.none,
-                          enabledBorder: field.hasBorder
-                              ? OutlineInputBorder(
-                                  borderRadius:
-                                      BorderRadius.circular(field.borderRadius),
-                                  borderSide: BorderSide(
-                                      color: field.borderColor,
-                                      width: field.borderWidth))
-                              : InputBorder.none,
-                          focusedBorder: field.hasBorder
-                              ? OutlineInputBorder(
-                                  borderRadius:
-                                      BorderRadius.circular(field.borderRadius),
-                                  borderSide: BorderSide(
-                                      color: field.borderColor,
-                                      width: field.borderWidth))
-                              : InputBorder.none,
+            // 2. Wrap the scrollable content in an Expanded widget
+            Expanded(
+              child: SingleChildScrollView(
+                child: SizedBox(
+                  // 3. Set the height of the content to be at least the screen height
+                  //    This ensures your Positioned widgets work correctly.
+                  height: screenSize.height,
+                  child: Stack(
+                    children: [
+                      Container(
+                        width: double.infinity,
+                        height: double.infinity,
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: _getBackgroundImage(
+                                registrationSettings, globalSettings),
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
-                    )),
-            Positioned(
-              left: registrationSettings.buttonLeft * screenSize.width,
-              bottom: registrationSettings.buttonBottom * screenSize.height,
-              child: registrationSettings.useImageButton
-                  ? _buildImageButton(registrationSettings, textScale)
-                  : _buildTextButton(registrationSettings, textScale),
-            ),
-            Positioned(
-              right: 0,
-              top: 0,
-              child: GestureDetector(
-                onTap: () => Navigator.pushNamed(
-                    context, AppRoutes.registrationScreenSettings),
-                child: Container(
-                  width: 50,
-                  height: 50,
-                  decoration: const BoxDecoration(color: Colors.transparent),
+
+                      if (registrationSettings.showTitle)
+                        Positioned(
+                          left:
+                              registrationSettings.titleLeft * screenSize.width,
+                          top:
+                              registrationSettings.titleTop * screenSize.height,
+                          width: registrationSettings.titleWidth *
+                              screenSize.width,
+                          child: Text(
+                            registrationSettings.titleText,
+                            style: TextStyle(
+                              fontSize: registrationSettings.titleFontSize *
+                                  textScale,
+                              fontWeight: registrationSettings.titleFontWeight,
+                              color: registrationSettings.titleTextColor,
+                            ),
+                            textAlign: registrationSettings.titleTextAlign,
+                          ),
+                        ),
+                      ...registrationSettings.textFields
+                          .where((field) => field.isEnabled)
+                          .map((field) => Positioned(
+                                left: field.left * screenSize.width,
+                                top: field.top * screenSize.height,
+                                width: field.width * screenSize.width,
+                                height: field.height * screenSize.height,
+                                child: TextFormField(
+                                  controller: _controllers[field.id],
+                                  focusNode: _focusNodes[field.id],
+                                  maxLines: 1,
+                                  textAlignVertical: TextAlignVertical.center,
+                                  showCursor: true,
+                                  readOnly: true,
+                                  onTap: () {
+                                    setState(() {
+                                      _showKeyboard = true;
+                                      _activeFieldId = field.id;
+                                    });
+                                    SystemChannels.textInput
+                                        .invokeMethod('TextInput.hide');
+                                  },
+                                  style: TextStyle(
+                                    color: field.textColor,
+                                    fontSize: field.fontSize * textScale,
+                                    fontWeight: field.fontWeight,
+                                    fontStyle: field.isItalic
+                                        ? FontStyle.italic
+                                        : FontStyle.normal,
+                                  ),
+                                  decoration: InputDecoration(
+                                    contentPadding: EdgeInsets.zero,
+                                    floatingLabelBehavior:
+                                        FloatingLabelBehavior.never,
+                                    labelText: field.label,
+                                    hintText: field.hintText,
+                                    labelStyle: TextStyle(
+                                        fontSize: field.fontSize * textScale,
+                                        color: field.labelColor),
+                                    filled: false,
+                                    fillColor: field.fillColor,
+                                    border: field.hasBorder
+                                        ? OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                                field.borderRadius),
+                                            borderSide: BorderSide(
+                                                color: field.borderColor,
+                                                width: field.borderWidth))
+                                        : InputBorder.none,
+                                    enabledBorder: field.hasBorder
+                                        ? OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                                field.borderRadius),
+                                            borderSide: BorderSide(
+                                                color: field.borderColor,
+                                                width: field.borderWidth))
+                                        : InputBorder.none,
+                                    focusedBorder: field.hasBorder
+                                        ? OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                                field.borderRadius),
+                                            borderSide: BorderSide(
+                                                color: field.borderColor,
+                                                width: field.borderWidth))
+                                        : InputBorder.none,
+                                  ),
+                                ),
+                              )),
+                      Positioned(
+                        left:
+                            registrationSettings.buttonLeft * screenSize.width,
+                        bottom: registrationSettings.buttonBottom *
+                            screenSize.height,
+                        child: registrationSettings.useImageButton
+                            ? _buildImageButton(registrationSettings, textScale)
+                            : _buildTextButton(registrationSettings, textScale),
+                      ),
+                      Positioned(
+                        right: 0,
+                        top: 0,
+                        child: GestureDetector(
+                          onTap: () => Navigator.pushNamed(
+                              context, AppRoutes.registrationScreenSettings),
+                          child: Container(
+                            width: 50,
+                            height: 50,
+                            decoration:
+                                const BoxDecoration(color: Colors.transparent),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 30,
+                        left: 30,
+                        child: GestureDetector(
+                          onTap: () {
+                            context
+                                .read<PhotoboothProvider>()
+                                .clearUserDetails();
+                            Navigator.pop(context);
+                          },
+                          child: Image.asset(
+                            'assets/images/back_btn.png',
+                            width: 120,
+                            height: 120,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
+                      // REMOVE THE VIRTUAL KEYBOARD FROM THE STACK
+                    ],
+                  ),
                 ),
               ),
             ),
-            // Bottom Right Back Button
-            Positioned(
-              bottom: 30,
-              left: 30,
-              child: GestureDetector(
-                onTap: () {
-                  context.read<PhotoboothProvider>().clearUserDetails();
-                  Navigator.pop(context);
+            // 4. Add the keyboard here, outside the Expanded and SingleChildScrollView
+            if (_showKeyboard)
+              VirtualKeyboard(
+                controller: _activeFieldId != null
+                    ? _controllers[_activeFieldId!]
+                    : null,
+                isVisible: _showKeyboard,
+                onClose: () {
+                  setState(() {
+                    _showKeyboard = false;
+                    _activeFieldId = null;
+                  });
+                  FocusScope.of(context).unfocus();
                 },
-                child: Image.asset(
-                  'assets/images/back_btn.png',
-                  width: 120, // Set desired width
-                  height: 120, // Set desired height
-                  fit: BoxFit.contain,
-                ),
+                onSubmit: () {
+                  setState(() {
+                    _showKeyboard = false;
+                    _activeFieldId = null;
+                  });
+                  FocusScope.of(context).unfocus();
+                },
+                submitButtonText: 'Done',
               ),
-            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildTextButton(RegistrationScreenProvider settings, double textScale) {
+  Widget _buildTextButton(
+      RegistrationScreenProvider settings, double textScale) {
     return Opacity(
       opacity: settings.buttonOpacity,
       child: ElevatedButton(
@@ -223,10 +289,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           backgroundColor: settings.submitButtonColor,
           foregroundColor: settings.submitButtonTextColor,
           padding: settings.buttonPadding,
-          minimumSize: Size(settings.buttonWidth * MediaQuery.of(context).size.width,
-                              settings.buttonHeight * MediaQuery.of(context).size.height),
+          minimumSize: Size(
+              settings.buttonWidth * MediaQuery.of(context).size.width,
+              settings.buttonHeight * MediaQuery.of(context).size.height),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(settings.buttonBorderRadius * textScale),
+            borderRadius:
+                BorderRadius.circular(settings.buttonBorderRadius * textScale),
             side: settings.buttonHasBorder
                 ? BorderSide(
                     color: settings.buttonBorderColor,
@@ -250,7 +318,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     );
   }
 
-  Widget _buildImageButton(RegistrationScreenProvider settings, double textScale) {
+  Widget _buildImageButton(
+      RegistrationScreenProvider settings, double textScale) {
     if (settings.buttonImagePath == null) {
       return _buildTextButton(settings, textScale);
     }
@@ -260,9 +329,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       child: GestureDetector(
         onTap: _handleSubmit,
         child: ClipRRect(
-        borderRadius: BorderRadius.circular(settings.buttonBorderRadius * textScale),
+          borderRadius:
+              BorderRadius.circular(settings.buttonBorderRadius * textScale),
           child: Container(
-           width: settings.buttonWidth * MediaQuery.of(context).size.width,
+            width: settings.buttonWidth * MediaQuery.of(context).size.width,
             height: settings.buttonHeight * MediaQuery.of(context).size.height,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(settings.buttonBorderRadius),

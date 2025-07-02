@@ -1,0 +1,9 @@
+* Create a requirements file for Claude specs/initial-requirements.md.
+* Then run /init
+* shift + tab tab will take to plan mode. Then enter the prompt like: Think hard about hot to implement all the requirements described in @specs/initial-requirements.md. Make a plan with all the proposed tasks and subtasks, focusing on the UI first,
+* If you want changes to the plan created give a prompt again. And after you get a satisfiable plan change to auto-accepts edit on and Tell claude to Save all the proposed tasks and subtasks to @plan.md.
+* To make sure claude always uses the plan as context, open the claude.md and Under Project Overview write: A complete plan has been written to @plan.md.
+* In case you open a new terminal you can pass claude.md and plan.md as context
+* After setting up plan you can run /compact which will help in saving tokens without losing the context.
+* For new project with auto-accepts edit on you can tell "Proceed with the plan. Stop at each step so I can review".
+* For linter warnings tell claude to Fix the linter warning in @app_theme.dart

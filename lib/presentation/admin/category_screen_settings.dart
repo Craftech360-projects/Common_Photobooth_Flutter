@@ -28,10 +28,7 @@ class _CategoryScreenSettingsState extends State<CategoryScreenSettings> {
     return Scaffold(
       body: Stack(
         children: [
-          // Full-screen preview
           const CategoriesScreen(),
-
-          // Sliding settings panel
           AnimatedPositioned(
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOutCubic,
@@ -41,13 +38,11 @@ class _CategoryScreenSettingsState extends State<CategoryScreenSettings> {
             width: settingsPanelWidth,
             child: const _SettingsSection(),
           ),
-
-          // Control Buttons
           Positioned(
             top: 20,
             left: 20,
             child: FloatingActionButton.small(
-              heroTag: 'categoryBack', // Unique tag
+              heroTag: 'categoryBack',
               tooltip: 'Back',
               backgroundColor: AppColors.white.withOpacity(0.8),
               child: const Icon(Icons.arrow_back,
@@ -113,11 +108,11 @@ class _SettingsSection extends StatelessWidget {
                       const SizedBox(height: 25),
                       const _SubCategoriesGroup(),
                       const SizedBox(height: 25),
-                      _LayoutSettingsGroup(), // New Group
+                      _LayoutSettingsGroup(),
                       const SizedBox(height: 25),
-                      _PackagingFieldSettingsGroup(), // New Group
+                      _PackagingFieldSettingsGroup(),
                       const SizedBox(height: 25),
-                      _ButtonSettingsGroup(), // New Group
+                      _ButtonSettingsGroup(),
                     ],
                   ),
                 ),
@@ -165,6 +160,42 @@ class _LayoutSettingsGroup extends StatelessWidget {
             step: 0.01,
             onChanged: (v) => provider.setArrowSpacing(v),
           ),
+          SliderWithLabel(
+            label: 'Top Spacing (%)',
+            value: provider.carouselTopSpacing,
+            min: 0.0,
+            max: 0.2,
+            step: 0.001,
+            onChanged: (v) => provider.setCarouselPositioning(topSpacing: v),
+          ),
+          const SizedBox(height: 15),
+          SettingsGroup(
+            isSubgroup: true,
+            icon: '📐',
+            title: 'Arrow Dimensions',
+            child: Column(
+              children: [
+                SliderWithLabel(
+                  label: 'Arrow Width (%)',
+                  value: provider.arrowWidth,
+                  min: 0.02,
+                  max: 0.15,
+                  step: 0.001,
+                  onChanged: (v) =>
+                      provider.setArrowDimensions(v, provider.arrowHeight),
+                ),
+                SliderWithLabel(
+                  label: 'Arrow Height (%)',
+                  value: provider.arrowHeight,
+                  min: 0.01,
+                  max: 0.1,
+                  step: 0.001,
+                  onChanged: (v) =>
+                      provider.setArrowDimensions(provider.arrowWidth, v),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -195,9 +226,66 @@ class _PackagingFieldSettingsGroup extends StatelessWidget {
             max: 48,
             onChanged: (v) => provider.setPackagingFieldStyle(fontSize: v),
           ),
-          // ... (Color pickers for text and border color)
-          //
-          //
+          const SizedBox(height: 15),
+          SliderWithLabel(
+            label: 'Field Height (%)',
+            value: provider.packagingFieldHeight,
+            min: 0.02,
+            max: 0.15,
+            step: 0.01,
+            onChanged: (v) => provider.setPackagingFieldStyle(height: v),
+          ),
+          const SizedBox(height: 15),
+          ColorPickerWidget(
+            label: "Text Color",
+            color: provider.packagingFieldTextColor,
+            onColorChanged: (color) =>
+                provider.setPackagingFieldStyle(textColor: color),
+          ),
+          const SizedBox(height: 15),
+          ColorPickerWidget(
+            label: "Border Color",
+            color: provider.packagingFieldBorderColor,
+            onColorChanged: (color) =>
+                provider.setPackagingFieldStyle(borderColor: color),
+          ),
+          const SizedBox(height: 15),
+          ColorPickerWidget(
+            label: "Focused Border Color",
+            color: provider.packagingFieldFocusedBorderColor,
+            onColorChanged: (color) =>
+                provider.setPackagingFieldStyle(focusedBorderColor: color),
+          ),
+          const SizedBox(height: 15),
+          ColorPickerWidget(
+            label: "Label Color",
+            color: provider.packagingFieldLabelColor,
+            onColorChanged: (color) =>
+                provider.setPackagingFieldStyle(labelColor: color),
+          ),
+          const SizedBox(height: 15),
+          SliderWithLabel(
+            label: 'Label Font Size',
+            value: provider.packagingFieldLabelSize,
+            min: 12,
+            max: 36,
+            onChanged: (v) => provider.setPackagingFieldStyle(labelSize: v),
+          ),
+          const SizedBox(height: 15),
+          TextFormField(
+            initialValue: provider.packagingFieldLabelText,
+            decoration: inputDecoration(context, 'Label Text'),
+            onChanged: (value) =>
+                provider.setPackagingFieldStyle(labelText: value),
+          ),
+          const SizedBox(height: 15),
+          SliderWithLabel(
+            label: 'Border Radius',
+            value: provider.packagingFieldBorderRadius,
+            min: 0,
+            max: 25,
+            onChanged: (v) => provider.setPackagingFieldStyle(borderRadius: v),
+          ),
           SettingsGroup(
             isSubgroup: true,
             icon: '📍',
@@ -234,13 +322,81 @@ class _PackagingFieldSettingsGroup extends StatelessWidget {
 class _ButtonSettingsGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // final provider = context.watch<CategorySettingsProvider>();
-    return const SettingsGroup(
+    final provider = context.watch<CategorySettingsProvider>();
+    return SettingsGroup(
       icon: '🔘',
       title: 'Next Button',
       child: Column(
         children: [
-          // ... (Sliders for button width, height, left, and bottom, all using percentages)
+          FileUploadArea(
+            onTap: () async {
+              final result =
+                  await FilePicker.platform.pickFiles(type: FileType.image);
+              if (result != null && result.files.single.path != null) {
+                provider.setNextButtonAsset(result.files.single.path!,
+                    isAsset: false);
+              }
+            },
+            icon: '🖼️',
+            text: 'Select Button Image',
+            selectedFile: provider.nextButtonAsset,
+          ),
+          const SizedBox(height: 15),
+          SettingsGroup(
+            isSubgroup: true,
+            icon: '📐',
+            title: 'Button Sizing',
+            child: Column(
+              children: [
+                SliderWithLabel(
+                  label: 'Button Width (%)',
+                  value: provider.buttonWidth,
+                  min: 0.1,
+                  max: 1.0,
+                  step: 0.01,
+                  onChanged: (v) =>
+                      provider.setButtonDimensions(v, provider.buttonHeight),
+                ),
+                SliderWithLabel(
+                  label: 'Button Height (%)',
+                  value: provider.buttonHeight,
+                  min: 0.02,
+                  max: 0.3,
+                  step: 0.01,
+                  onChanged: (v) =>
+                      provider.setButtonDimensions(provider.buttonWidth, v),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 15),
+          SettingsGroup(
+            isSubgroup: true,
+            icon: '📍',
+            title: 'Button Position',
+            child: Column(
+              children: [
+                SliderWithLabel(
+                  label: 'From Left (%)',
+                  value: provider.buttonLeft,
+                  min: 0.0,
+                  max: 1.0,
+                  step: 0.01,
+                  onChanged: (v) =>
+                      provider.setButtonPosition(v, provider.buttonBottom),
+                ),
+                SliderWithLabel(
+                  label: 'From Bottom (%)',
+                  value: provider.buttonBottom,
+                  min: 0.0,
+                  max: 1.0,
+                  step: 0.01,
+                  onChanged: (v) =>
+                      provider.setButtonPosition(provider.buttonLeft, v),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -392,6 +548,20 @@ class _MainCategoriesGroup extends StatelessWidget {
               context, provider, 'aiArtistry', 'AI Artistry Card'),
           const SizedBox(height: 15),
           _buildCardSettingsGroup(context, provider, 'swaplab', 'Swaplab Card'),
+          const SizedBox(height: 15),
+          SettingsGroup(
+            isSubgroup: true,
+            icon: '🎯',
+            title: 'Main Category Spacing',
+            child: SliderWithLabel(
+              label: 'Category Spacing (%)',
+              value: provider.mainCategorySpacing,
+              min: 0.01,
+              max: 0.15,
+              step: 0.001,
+              onChanged: (v) => provider.setMainCategorySpacing(v),
+            ),
+          ),
         ],
       ),
     );
@@ -443,7 +613,6 @@ Widget _buildCardSettingsGroup(BuildContext context,
     default:
       return const SizedBox.shrink();
   }
-  final textTheme = Theme.of(context).textTheme;
 
   return SettingsGroup(
     isSubgroup: true,
@@ -495,80 +664,6 @@ Widget _buildCardSettingsGroup(BuildContext context,
                       cardKey, settings.copyWith(height: value)),
                 ),
               ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 15),
-        SettingsGroup(
-          isSubgroup: true,
-          icon: '🎨',
-          title: 'Border & Glow',
-          child: Column(
-            children: [
-              SliderWithLabel(
-                label: 'Border Radius',
-                value: settings.borderRadius,
-                min: 0,
-                max: 100,
-                onChanged: (value) => provider.updateCardSettings(
-                    cardKey, settings.copyWith(borderRadius: value)),
-              ),
-              const SizedBox(height: 15),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('Show Border', style: textTheme.bodyLarge),
-                  Switch(
-                    value: settings.showBorder,
-                    onChanged: (value) => provider.updateCardSettings(
-                        cardKey, settings.copyWith(showBorder: value)),
-                  ),
-                ],
-              ),
-              if (settings.showBorder)
-                FormRow(
-                  children: [
-                    Expanded(
-                      flex: 2,
-                      child: SliderWithLabel(
-                        label: 'Border Width',
-                        value: settings.borderWidth,
-                        min: 1,
-                        max: 10,
-                        onChanged: (value) => provider.updateCardSettings(
-                            cardKey, settings.copyWith(borderWidth: value)),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 3,
-                      child: ColorPickerWidget(
-                        label: "Card Border Color",
-                        color: settings.borderColor,
-                        onColorChanged: (color) => provider.updateCardSettings(
-                            cardKey, settings.copyWith(borderColor: color)),
-                      ),
-                    ),
-                  ],
-                ),
-              const SizedBox(height: 15),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('Use Glow Effect', style: textTheme.bodyLarge),
-                  Switch(
-                    value: settings.useGlow,
-                    onChanged: (value) => provider.updateCardSettings(
-                        cardKey, settings.copyWith(useGlow: value)),
-                  ),
-                ],
-              ),
-              if (settings.useGlow)
-                ColorPickerWidget(
-                  label: "Card Glow Color",
-                  color: settings.glowColor,
-                  onColorChanged: (color) => provider.updateCardSettings(
-                      cardKey, settings.copyWith(glowColor: color)),
-                ),
             ],
           ),
         ),

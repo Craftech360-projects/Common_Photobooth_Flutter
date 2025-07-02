@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:photobooth_flutter/presentation/theme_selection_screen.dart';
 import 'package:photobooth_flutter/providers/category_provider.dart';
 import 'package:photobooth_flutter/providers/category_settings_provider.dart';
@@ -10,6 +11,7 @@ import 'package:photobooth_flutter/providers/photobooth_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
 import 'package:photobooth_flutter/routes/slide_right.dart';
 import 'package:photobooth_flutter/widgets/snackbar.dart';
+import 'package:photobooth_flutter/widgets/virtual_keyboard.dart';
 import 'package:provider/provider.dart';
 
 class CategoriesScreen extends StatefulWidget {
@@ -24,6 +26,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   int _currentSubCategoryIndex = 0;
   final TextEditingController _accessoriesController = TextEditingController();
   final FocusNode _accessoriesFocusNode = FocusNode();
+  bool _showKeyboard = false;
 
   @override
   void dispose() {
@@ -38,10 +41,15 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     final globalSettings = context.watch<GlobalSettingsProvider>();
     final screenSize = MediaQuery.of(context).size;
     final categoryProvider = context.watch<CategoryProvider>();
-
-    // Scale factor for fonts and non-stretching elements
     final textScale =
         min(screenSize.width / 1080.0, screenSize.height / 1920.0);
+
+    // This check is important because the text field is inside _buildSubCategoryView
+    final isPackagingSelected = _showSubCategories &&
+        context.read<CategoryProvider>().selectedMainCategory ==
+            MainCategory.aIArtistry &&
+        _currentSubCategoryIndex ==
+            2; // Assuming packaging is the 3rd sub-category (index 2)
 
     return Scaffold(
       body: Container(
@@ -50,72 +58,113 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
         decoration: BoxDecoration(
           image: _getBackgroundImage(settingsProvider, globalSettings),
         ),
-        child: Stack(
+        child: Column(
           children: [
-            if (settingsProvider.showTitle)
-              Positioned(
-                left: settingsProvider.titleLeft * screenSize.width,
-                top: settingsProvider.titleTop * screenSize.height,
-                width: settingsProvider.titleWidth * screenSize.width,
-                child: Text(
-                  settingsProvider.titleText,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: settingsProvider.titleFontSize * textScale,
-                    color: settingsProvider.titleColor,
-                    fontWeight: settingsProvider.titleFontWeight,
+            Expanded(
+              child: SingleChildScrollView(
+                child: SizedBox(
+                  height: screenSize.height,
+                  child: Stack(
+                    children: [
+                      if (settingsProvider.showTitle)
+                        Positioned(
+                          left: settingsProvider.titleLeft * screenSize.width,
+                          top: settingsProvider.titleTop * screenSize.height,
+                          width: settingsProvider.titleWidth * screenSize.width,
+                          child: Text(
+                            settingsProvider.titleText,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize:
+                                  settingsProvider.titleFontSize * textScale,
+                              color: settingsProvider.titleColor,
+                              fontWeight: settingsProvider.titleFontWeight,
+                            ),
+                          ),
+                        ),
+                      Center(
+                        child: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 500),
+                          transitionBuilder: (child, animation) {
+                            final slideAnimation = Tween<Offset>(
+                              begin: const Offset(0.0, 0.4),
+                              end: Offset.zero,
+                            ).animate(CurvedAnimation(
+                                parent: animation, curve: Curves.easeOut));
+                            return SlideTransition(
+                              position: slideAnimation,
+                              child: FadeTransition(
+                                opacity: animation,
+                                child: child,
+                              ),
+                            );
+                          },
+                          child: _showSubCategories
+                              ? _buildSubCategoryView(context,
+                                  key: const ValueKey('SubView'))
+                              : _buildMainCategoryView(context,
+                                  key: const ValueKey('MainView')),
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 20,
+                        left: 20,
+                        child: GestureDetector(
+                          onTap: () {
+                            if (_showKeyboard) {
+                              setState(() => _showKeyboard = false);
+                              _accessoriesFocusNode.unfocus();
+                              return;
+                            }
+                            if (_showSubCategories) {
+                              setState(() {
+                                _showSubCategories = false;
+                                _currentSubCategoryIndex = 0;
+                                categoryProvider.resetSelection();
+                              });
+                            } else {
+                              categoryProvider.resetSelection();
+                              Navigator.pop(context);
+                            }
+                          },
+                          child: Image.asset('assets/images/back_btn.png',
+                              width: 120, fit: BoxFit.contain),
+                        ),
+                      ),
+                      Positioned(
+                          top: 10,
+                          right: 10,
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.pushNamed(
+                                  context, AppRoutes.categoryScreenSettings);
+                            },
+                            child: Container(
+                              width: 50,
+                              height: 50,
+                              color: Colors.transparent,
+                            ),
+                          ))
+                    ],
                   ),
                 ),
               ),
-            Center(
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 500),
-                transitionBuilder: (child, animation) {
-                  final slideAnimation = Tween<Offset>(
-                    begin: const Offset(0.0, 0.4),
-                    end: Offset.zero,
-                  ).animate(CurvedAnimation(
-                      parent: animation, curve: Curves.easeOut));
-                  return SlideTransition(
-                    position: slideAnimation,
-                    child: FadeTransition(
-                      opacity: animation,
-                      child: child,
-                    ),
-                  );
-                },
-                child: _showSubCategories
-                    ? _buildSubCategoryView(context,
-                        key: const ValueKey('SubView'))
-                    : _buildMainCategoryView(context,
-                        key: const ValueKey('MainView')),
-              ),
             ),
-            // Bottom Right Back Button
-            Positioned(
-              bottom: 30,
-              left: 30,
-              child: GestureDetector(
-                onTap: () {
-                  if (_showSubCategories) {
-                    setState(() {
-                      _showSubCategories = false;
-                      _currentSubCategoryIndex = 0;
-                      categoryProvider.resetSelection();
-                    });
-                  } else {
-                    categoryProvider.resetSelection();
-                    Navigator.pop(context);
-                  }
+            // 5. Add the keyboard here
+            if (_showKeyboard && isPackagingSelected)
+              VirtualKeyboard(
+                controller: _accessoriesController,
+                isVisible: _showKeyboard,
+                onClose: () {
+                  setState(() => _showKeyboard = false);
+                  _accessoriesFocusNode.unfocus();
                 },
-                child: Image.asset(
-                  'assets/images/back_btn.png',
-                  width: 120,
-                  height: 120,
-                  fit: BoxFit.contain,
-                ),
+                onSubmit: () {
+                  setState(() => _showKeyboard = false);
+                  _accessoriesFocusNode.unfocus();
+                },
+                submitButtonText: 'Done',
               ),
-            ),
           ],
         ),
       ),
@@ -151,6 +200,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   Widget _buildMainCategoryView(BuildContext context, {Key? key}) {
     final settingsProvider = context.read<CategorySettingsProvider>();
     final flowProvider = context.read<CategoryProvider>();
+    final screenSize = MediaQuery.of(context).size;
 
     return Row(
       key: key,
@@ -164,7 +214,8 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
             setState(() => _showSubCategories = true);
           },
         ),
-        const SizedBox(width: 40),
+        SizedBox(
+            width: settingsProvider.mainCategorySpacing * screenSize.width),
         TappableCategoryCard(
           settings: settingsProvider.swaplabCard,
           provideFeedback: true,
@@ -224,18 +275,18 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
           xOffset = 0;
           break;
         case 1:
-          scale = 0.9;
-          yOffset = 30;
-          xOffset = -100;
+          scale = settingsProvider.carouselScale1;
+          yOffset = settingsProvider.carouselYOffset1 * screenSize.height;
+          xOffset = settingsProvider.carouselXOffset1 * screenSize.width;
           break;
         case 2:
-          scale = 0.9;
-          yOffset = 30;
-          xOffset = 140;
+          scale = settingsProvider.carouselScale2;
+          yOffset = settingsProvider.carouselYOffset2 * screenSize.height;
+          xOffset = settingsProvider.carouselXOffset2 * screenSize.width;
           break;
         default:
-          scale = 0.8;
-          yOffset = 60;
+          scale = settingsProvider.carouselScale3;
+          yOffset = settingsProvider.carouselYOffset3 * screenSize.height;
       }
 
       orderedStackChildren.add(
@@ -266,22 +317,28 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
         Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const SizedBox(height: 100),
+            SizedBox(
+                height:
+                    settingsProvider.carouselTopSpacing * screenSize.height),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 IconButton(
                   icon: Image.asset('assets/images/backward_arrow.png',
-                      width: 50, height: 50),
+                      width: settingsProvider.arrowWidth * screenSize.width,
+                      height: settingsProvider.arrowHeight * screenSize.height),
                   onPressed: () => setState(() => _currentSubCategoryIndex =
                       (_currentSubCategoryIndex + 1) % subCategories.length),
                 ),
                 SizedBox(
                     width: settingsProvider.arrowSpacing * screenSize.width),
                 SizedBox(
-                  width: settingsProvider.carouselWidth * screenSize.width,
-                  height: settingsProvider.carouselHeight * screenSize.height,
+                  width: settingsProvider.carouselWidth *
+                      screenSize.width, // Not able to change the width of card
+                  height: settingsProvider.carouselHeight *
+                      screenSize
+                          .height, // Not able to change the height of card
                   child: Stack(
                       alignment: Alignment.center,
                       children: orderedStackChildren),
@@ -290,7 +347,8 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                     width: settingsProvider.arrowSpacing * screenSize.width),
                 IconButton(
                   icon: Image.asset('assets/images/forward_arrow.png',
-                      width: 50, height: 50),
+                      width: settingsProvider.arrowWidth * screenSize.width,
+                      height: settingsProvider.arrowHeight * screenSize.height),
                   onPressed: () => setState(() => _currentSubCategoryIndex =
                       (_currentSubCategoryIndex - 1 + subCategories.length) %
                           subCategories.length),
@@ -298,31 +356,48 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
               ],
             ),
             if (isPackagingSelected)
-              Positioned(
-                left: settingsProvider.packagingFieldLeft * screenSize.width,
-                bottom:
-                    settingsProvider.packagingFieldBottom * screenSize.height,
-                width: settingsProvider.packagingFieldWidth * screenSize.width,
+              Container(
+                margin: EdgeInsets.only(
+                  top: 20,
+                  left: settingsProvider.packagingFieldLeft * screenSize.width,
+                  right: (1 -
+                          settingsProvider.packagingFieldLeft -
+                          settingsProvider.packagingFieldWidth) *
+                      screenSize.width,
+                ),
+                height:
+                    settingsProvider.packagingFieldHeight * screenSize.height,
                 child: TextField(
                   controller: _accessoriesController,
                   focusNode: _accessoriesFocusNode,
-                  readOnly: false,
+                  readOnly: true,
                   showCursor: true,
+                  onTap: () {
+                    setState(() {
+                      _showKeyboard = true;
+                    });
+                    SystemChannels.textInput.invokeMethod('TextInput.hide');
+                  },
                   style: TextStyle(
                       color: settingsProvider.packagingFieldTextColor,
                       fontSize: settingsProvider.packagingFieldFontSize),
                   decoration: InputDecoration(
-                    labelText: 'Enter Accessories (e.g., shoes, helmet)',
-                    labelStyle:
-                        const TextStyle(color: Colors.white70, fontSize: 24),
+                    labelText: settingsProvider.packagingFieldLabelText,
+                    labelStyle: TextStyle(
+                        color: settingsProvider.packagingFieldLabelColor,
+                        fontSize: settingsProvider.packagingFieldLabelSize),
                     enabledBorder: OutlineInputBorder(
                       borderSide: BorderSide(
                           color: settingsProvider.packagingFieldBorderColor),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(
+                          settingsProvider.packagingFieldBorderRadius),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.white),
-                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                          color: settingsProvider
+                              .packagingFieldFocusedBorderColor),
+                      borderRadius: BorderRadius.circular(
+                          settingsProvider.packagingFieldBorderRadius),
                     ),
                   ),
                 ),
@@ -333,7 +408,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
           left: settingsProvider.buttonLeft * screenSize.width,
           bottom: settingsProvider.buttonBottom * screenSize.height,
           child: _buildNextButton(context),
-        )
+        ),
       ],
     );
   }
@@ -368,10 +443,15 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
 
     return GestureDetector(
       onTap: onPressed,
-      child: Image.asset('assets/images/next_btn.png',
-          width: settingsProvider.buttonWidth * screenSize.width,
-          height: settingsProvider.buttonHeight * screenSize.height,
-          fit: BoxFit.contain),
+      child: settingsProvider.nextButtonIsAsset
+          ? Image.asset(settingsProvider.nextButtonAsset,
+              width: settingsProvider.buttonWidth * screenSize.width,
+              height: settingsProvider.buttonHeight * screenSize.height,
+              fit: BoxFit.contain)
+          : Image.file(File(settingsProvider.nextButtonAsset),
+              width: settingsProvider.buttonWidth * screenSize.width,
+              height: settingsProvider.buttonHeight * screenSize.height,
+              fit: BoxFit.contain),
     );
   }
 }
@@ -423,17 +503,9 @@ class _TappableCategoryCardState extends State<TappableCategoryCard> {
         duration: const Duration(milliseconds: 150),
         transform: Matrix4.identity()..scale(scale),
         transformAlignment: Alignment.center,
-        width: widget.settings.subCategoryWidth * screenSize.width,
-        height: widget.settings.subCategoryHeight * screenSize.height,
+        width: widget.settings.width * screenSize.width,
+        height: widget.settings.height * screenSize.height,
         decoration: BoxDecoration(
-          border: widget.settings.showBorder
-              ? Border.all(
-                  color: widget.isSelected
-                      ? widget.settings.borderColor
-                      : Colors.transparent,
-                  width: widget.settings.borderWidth,
-                )
-              : null,
           image: DecorationImage(
             image: widget.settings.isAsset
                 ? AssetImage(widget.settings.imagePath)
@@ -445,8 +517,8 @@ class _TappableCategoryCardState extends State<TappableCategoryCard> {
                   BoxShadow(
                     color: widget.settings.glowColor
                         .withValues(alpha: widget.settings.glowIntensity),
-                    blurRadius: 80,
-                    spreadRadius: 12,
+                    blurRadius: widget.settings.glowBlurRadius,
+                    spreadRadius: widget.settings.glowSpread,
                   )
                 ]
               : [],
