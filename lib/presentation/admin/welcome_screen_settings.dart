@@ -52,7 +52,7 @@ class _WelcomeScreenSettingsState extends State<WelcomeScreenSettings> {
               child: FloatingActionButton.small(
                 heroTag: 'backButtonWelcome', // Unique tag
                 tooltip: 'Back',
-                backgroundColor: Colors.white.withOpacity(0.8),
+                backgroundColor: AppColors.white.withOpacity(0.8),
                 child: const Icon(Icons.arrow_back, color: Colors.blue),
                 onPressed: () => Navigator.of(context).pop(),
               ),
@@ -65,7 +65,7 @@ class _WelcomeScreenSettingsState extends State<WelcomeScreenSettings> {
               child: FloatingActionButton(
                 heroTag: 'toggleButtonWelcome', // Unique tag
                 tooltip: 'Toggle Settings',
-                backgroundColor: Colors.white,
+                backgroundColor: AppColors.white,
                 onPressed: () {
                   setState(() {
                     _isPanelOpen = !_isPanelOpen;
@@ -96,9 +96,9 @@ class _SettingsSection extends StatelessWidget {
         borderRadius: BorderRadius.circular(20.0),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.5),
+            color: AppColors.white.withOpacity(0.1),
             borderRadius: BorderRadius.circular(20.0),
-            border: Border.all(color: Colors.white.withOpacity(0.2)),
+            border: Border.all(color: AppColors.white.withOpacity(0.2)),
           ),
           child: Column(
             children: [
@@ -139,9 +139,9 @@ class _SettingsHeader extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.8),
+        color: AppColors.white.withOpacity(0.8),
         border:
-            Border(bottom: BorderSide(color: Colors.black.withOpacity(0.1))),
+            Border(bottom: BorderSide(color: AppColors.black.withOpacity(0.1))),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

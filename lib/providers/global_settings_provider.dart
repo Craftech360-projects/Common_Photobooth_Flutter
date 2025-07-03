@@ -13,15 +13,12 @@ class GlobalSettingsProvider with ChangeNotifier {
   String? get comfyApiUrl => _comfyApiUrl;
 
   // Sharing settings
-  String _sharingMethod = 'QR Code'; // Default to QR Code
+  String _sharingMethod = 'QR Code';
   String get sharingMethod => _sharingMethod;
 
   // Add offline mode toggle
   bool _isOfflineMode = false;
   bool get isOfflineMode => _isOfflineMode;
-
-    String? _runpodApiUrl;
-  String? _runpodApiKey;
 
   // Add input/output directories for offline mode
   String? _inputDirectory;
@@ -37,8 +34,6 @@ class GlobalSettingsProvider with ChangeNotifier {
   double _borderRadius = 4.0;
 
   // Getters
-  String? get runpodApiUrl => _runpodApiUrl;
-  String? get runpodApiKey => _runpodApiKey;
   String? get backgroundImage => _backgroundImage;
   String? get backgroundImagePath => _backgroundImage;
   bool get isAssetImage => _isAssetImage;
@@ -97,9 +92,6 @@ class GlobalSettingsProvider with ChangeNotifier {
     _emailJsPublicKey = _prefs.getString('emailjs_public_key');
     _emailJsPrivateKey = _prefs.getString('emailjs_private_key');
 
-   _runpodApiUrl = _prefs.getString('runpod_api_url');
-    _runpodApiKey = _prefs.getString('runpod_api_key');
-
     // Load ComfyAPI settings
     _comfyApiUrl = _prefs.getString('comfy_api_url') ?? 'http://127.0.0.1:8188';
 
@@ -143,18 +135,6 @@ class GlobalSettingsProvider with ChangeNotifier {
   void setSharingMethod(String method) async {
     _sharingMethod = method;
     await _prefs.setString('sharing_method', method);
-    notifyListeners();
-  }
-
-  void setRunpodApiUrl(String url) async {
-    _runpodApiUrl = url;
-    await _prefs.setString('runpod_api_url', url);
-    notifyListeners();
-  }
-
-  void setRunpodApiKey(String key) async {
-    _runpodApiKey = key;
-    await _prefs.setString('runpod_api_key', key);
     notifyListeners();
   }
 
@@ -248,13 +228,9 @@ class GlobalSettingsProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // Set offline mode
-  // Set offline mode
   Future<void> setOfflineMode(bool isOffline) async {
     _isOfflineMode = isOffline;
     await _prefs.setBool('is_offline_mode', isOffline);
-
-    // Always initialize directories when switching to offline mode
     if (isOffline) {
       await _initializeOfflineDirectories();
     }
@@ -275,8 +251,6 @@ class GlobalSettingsProvider with ChangeNotifier {
     _emailJsTemplateId = null;
     _emailJsPublicKey = null;
     _emailJsPrivateKey = null;
-    _runpodApiUrl = null;
-    _runpodApiKey = null;
     _isOfflineMode = false;
     _inputDirectory = null;
     _outputDirectory = null;

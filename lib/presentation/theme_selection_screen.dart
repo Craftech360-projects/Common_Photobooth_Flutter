@@ -27,7 +27,6 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> {
     final globalSettings = context.read<GlobalSettingsProvider>();
     final screenSize = MediaQuery.of(context).size;
 
-    // Scale factor for fonts and other non-stretching elements
     final textScale =
         min(screenSize.width / 1080.0, screenSize.height / 1920.0);
 

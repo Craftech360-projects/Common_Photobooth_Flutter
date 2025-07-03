@@ -58,8 +58,15 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
     final outputSettings = context.watch<OutputScreenProvider>();
     final globalSettings = context.watch<GlobalSettingsProvider>();
     final watermarkProvider = context.watch<AdminWatermarkProvider>();
-    // NEW: Get PhotoboothProvider to check for an image in preview mode
     final photoboothProvider = context.watch<PhotoboothProvider>();
+
+    // In preview mode, use a placeholder image if no real image is available
+    final displayImageUrl = widget.isPreviewMode
+        ? (photoboothProvider.swappedImageUrl ?? 'assets/images/swap.png')
+        : (photoboothProvider.swappedImageUrl ??
+            photoboothProvider.capturedImageUrl);
+
+    final isPlaceholder = displayImageUrl?.startsWith('assets/') ?? true;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -68,17 +75,12 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
         elevation: 0,
         automaticallyImplyLeading: false,
         actions: [
-          if (!widget.isPreviewMode)
-            IconButton(
-              icon: const Icon(
-                Icons.settings_rounded,
-                color: AppColors.lightWhite,
-                size: 32,
-              ),
-              onPressed: () {
-                Navigator.pushNamed(context, AppRoutes.outputScreenSettings);
-              },
-            ),
+          IconButton(
+            icon: const Icon(Icons.settings_rounded,
+                color: Colors.transparent, size: 32),
+            onPressed: () =>
+                Navigator.pushNamed(context, AppRoutes.outputScreenSettings),
+          ),
         ],
       ),
       body: WatermarkOverlay(
@@ -92,271 +94,232 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
               fit: BoxFit.cover,
             ),
           ),
-          // UPDATED: This logic now decides whether to show the real content or placeholders in preview.
-          child: (widget.isPreviewMode &&
-                  photoboothProvider.capturedImageUrl == null)
-              ? _buildPreviewContent(outputSettings)
-              : _buildMainContent(),
+          child: _buildMainContent(
+              outputSettings,
+              displayImageUrl,
+              isPlaceholder,
+              globalSettings.sharingMethod,
+              photoboothProvider.email),
         ),
       ),
     );
   }
 
-  Widget _buildPreviewContent(OutputScreenProvider settings) {
-    return Stack(
-      children: [
-        if (settings.showTitle)
-          Positioned(
-            left: settings.titleLeft,
-            top: settings.titleTop,
-            width: settings.titleWidth,
-            child: Text(
-              settings.titleText,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: settings.titleFontSize,
-                color: settings.titleColor,
-                fontWeight: settings.titleFontWeight,
-              ),
-            ),
-          ),
-        Positioned(
-          left: settings.swaplabLeft,
-          top: settings.swaplabTop,
-          child: Container(
-            width: settings.swaplabImageWidth,
-            height: settings.swaplabImageHeight,
-            decoration: BoxDecoration(
-              color: Colors.grey[300],
-              border: Border.all(color: Colors.grey.shade600),
-              borderRadius: BorderRadius.circular(settings.imageBorderRadius),
-            ),
-            child: const Center(child: Text('Output Image Preview')),
-          ),
-        ),
-        Positioned(
-          left: settings.qrCodeLeft,
-          bottom: settings.qrCodeBottom,
-          child: QrImageView(
-              data: 'PREVIEW',
-              size: settings.qrCodeSize,
-              backgroundColor: Colors.white),
-        ),
-        Positioned(
-          left: settings.doneButtonLeft,
-          bottom: settings.doneButtonBottom,
-          child: _buildButton(
-            isDone: true,
-            settings: settings,
-            onPressed: () {},
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMainContent() {
-    return _isLoading
-        ? const Center(
-            child: CircularProgressIndicator(color: AppColors.goldenYellow))
-        : _errorMessage != null
-            ? Center(
-                child: Text(_errorMessage!,
-                    style: const TextStyle(color: Colors.red, fontSize: 18)))
-            : _buildSuccessContent(
-                context, context.watch<OutputScreenProvider>());
-  }
-
-  Widget _buildSuccessContent(
-      BuildContext context, OutputScreenProvider settings) {
-    final photoboothProvider = context.read<PhotoboothProvider>();
-    final globalSettings = context.read<GlobalSettingsProvider>();
-    final isSwaplabFlow = photoboothProvider.selectedTheme != null;
-    final imageUrl = photoboothProvider.swappedImageUrl ??
-        photoboothProvider.capturedImageUrl;
+  Widget _buildMainContent(OutputScreenProvider settings, String? imageUrl,
+      bool isPlaceholder, String sharingMethod, String? email) {
+    final screenSize = MediaQuery.of(context).size;
 
     return Stack(
       children: [
         if (settings.showTitle)
           Positioned(
-            left: settings.titleLeft,
-            top: settings.titleTop,
-            width: settings.titleWidth,
+            top: settings.titleTop * screenSize.height,
+            left: (screenSize.width * (1 - settings.titleWidth)) / 2,
+            width: settings.titleWidth * screenSize.width,
             child: Text(
               settings.titleText,
-              textAlign: TextAlign.center,
+              textAlign: settings.titleAlignment,
               style: TextStyle(
                 fontSize: settings.titleFontSize,
                 fontWeight: settings.titleFontWeight,
-                color: settings.titleColor,
+                color: settings.titleColor.withOpacity(settings.titleOpacity),
+                fontStyle: settings.isTitleItalic
+                    ? FontStyle.italic
+                    : FontStyle.normal,
               ),
             ),
           ),
+
+        // Unified Image Position
         Positioned(
-          left: isSwaplabFlow ? settings.swaplabLeft : settings.aiArtistryLeft,
-          top: isSwaplabFlow ? settings.swaplabTop : settings.aiArtistryTop,
-          width: isSwaplabFlow ? settings.swaplabImageWidth : null,
-          height: isSwaplabFlow ? settings.swaplabImageHeight : null,
+          top: settings.imageTop * screenSize.height,
+          left: settings.imageLeft * screenSize.width,
+          width: settings.imageWidth * screenSize.width,
+          height: settings.imageHeight * screenSize.height,
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(settings.imageBorderRadius),
               border: settings.showImageBorder
                   ? Border.all(
                       color: settings.imageBorderColor,
-                      width: settings.imageBorderWidth,
-                    )
+                      width: settings.imageBorderWidth)
                   : null,
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(settings.imageBorderRadius),
-              child: _buildOutputImage(imageUrl),
+              child: _buildOutputImage(imageUrl, isPlaceholder),
             ),
           ),
         ),
-        if (globalSettings.sharingMethod == 'QR Code')
+
+        // QR Code Section or Email Info
+        if (sharingMethod == 'QR Code')
           Positioned(
-            left: settings.qrCodeLeft,
-            bottom: settings.qrCodeBottom,
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                children: [
-                  QrImageView(
-                    data: imageUrl ?? 'No Image',
-                    version: QrVersions.auto,
-                    size: settings.qrCodeSize,
-                  ),
-                  // const Text(
-                  //   "Scan the QR code to download your image",
-                  //   style: TextStyle(
-                  //     fontSize: 28,
-                  //     color: AppColors.white,
-                  //   ),
-                  // ),
-                ],
-              ),
-            ),
+            left: settings.qrCodeSectionLeft * screenSize.width,
+            bottom: settings.qrCodeSectionBottom * screenSize.height,
+            child: _buildQrCodeSection(settings, imageUrl),
           )
         else
           Positioned(
-            left: settings.qrCodeLeft,
-            right: settings.qrCodeLeft,
-            bottom: settings.qrCodeBottom,
+            // Email Info
+            left: 0, right: 0,
+            bottom: settings.qrCodeSectionBottom * screenSize.height,
             child: Container(
               padding: const EdgeInsets.all(16),
-              margin: const EdgeInsets.symmetric(horizontal: 200),
+              margin: EdgeInsets.symmetric(horizontal: screenSize.width * 0.1),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.6),
-                borderRadius: BorderRadius.circular(12),
-              ),
+                  color: AppColors.black.withOpacity(0.6),
+                  borderRadius: BorderRadius.circular(12)),
               child: Text(
-                'Your generated image has been sent to\n${photoboothProvider.email}',
+                widget.isPreviewMode
+                    ? 'Your image will be sent via email.'
+                    : 'Your generated image has been sent to\n$email',
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
+                    color: AppColors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold),
               ),
             ),
           ),
+
+        // Done Button
         Positioned(
-          left: settings.doneButtonLeft,
-          bottom: settings.doneButtonBottom,
+          left: settings.doneButtonLeft * screenSize.width,
+          bottom: settings.doneButtonBottom * screenSize.height,
           child: _buildButton(
-            isDone: true,
-            settings: settings,
-            onPressed: () {
-              Provider.of<PhotoboothProvider>(context, listen: false)
-                  .clearUserData();
-              Navigator.of(context)
-                  .pushNamedAndRemoveUntil('/', (route) => false);
-            },
-          ),
+              settings: settings,
+              onPressed: () {
+                if (widget.isPreviewMode) return;
+                Provider.of<PhotoboothProvider>(context, listen: false)
+                    .clearUserData();
+                Navigator.of(context)
+                    .pushNamedAndRemoveUntil('/', (route) => false);
+              }),
         ),
       ],
     );
   }
 
-  Widget _buildButton({
-    required bool isDone,
-    required OutputScreenProvider settings,
-    required VoidCallback onPressed,
-  }) {
-    final useImage = settings.useDoneButtonImage;
-    final imagePath = settings.doneButtonImagePath;
-    final isAsset = settings.isDoneButtonImageAsset;
-    final text = settings.doneButtonText;
-    final width = settings.doneButtonWidth;
-    final height = settings.doneButtonHeight;
-
-    if (useImage && imagePath != null) {
-      return GestureDetector(
-        onTap: onPressed,
-        child: Container(
-          width: width,
-          height: height,
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: isAsset
-                  ? AssetImage(imagePath)
-                  : FileImage(File(imagePath)) as ImageProvider,
-              fit: BoxFit.contain,
-            ),
-          ),
-        ),
-      );
-    }
-    return ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        minimumSize: Size(width, height),
-      ),
-      child: Text(text),
+  Widget _buildQrCodeSection(OutputScreenProvider settings, String? imageUrl) {
+    final qrData =
+        widget.isPreviewMode ? 'https://example.com' : (imageUrl ?? 'No Image');
+    final qrWidget = QrImageView(
+      data: qrData,
+      version: QrVersions.auto,
+      size: settings.qrCodeSize,
+      backgroundColor: AppColors.white,
     );
+
+    if (!settings.showQrCodeText) {
+      return qrWidget;
+    }
+
+    final textWidget = Container(
+      constraints: BoxConstraints(maxWidth: settings.qrLabelWidth),
+      child: Text(
+        settings.qrCodeText,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontSize: settings.qrCodeTextFontSize,
+          fontWeight: settings.qrCodeTextFontWeight,
+          color: settings.qrCodeTextColor,
+        ),
+      ),
+    );
+
+    switch (settings.qrCodeLayout) {
+      case QrCodeLayout.qrLeftTextRight:
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: settings.qrCodeRowAlignment,
+          children: [qrWidget, const SizedBox(width: 16), textWidget],
+        );
+      case QrCodeLayout.qrRightTextLeft:
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: settings.qrCodeRowAlignment,
+          children: [textWidget, const SizedBox(width: 16), qrWidget],
+        );
+      case QrCodeLayout.qrBottomTextTop:
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: settings.qrCodeColumnAlignment,
+          children: [textWidget, const SizedBox(height: 8), qrWidget],
+        );
+      case QrCodeLayout.qrTopTextBottom:
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: settings.qrCodeColumnAlignment,
+          children: [qrWidget, const SizedBox(height: 8), textWidget],
+        );
+    }
   }
 
-  Widget _buildOutputImage(String? imageUrl) {
+  Widget _buildButton(
+      {required OutputScreenProvider settings,
+      required VoidCallback onPressed}) {
+    final screenSize = MediaQuery.of(context).size;
+    final width = settings.doneButtonWidth * screenSize.width;
+    final height = settings.doneButtonHeight * screenSize.height;
+
+    if (settings.useDoneButtonImage && settings.doneButtonImagePath != null) {
+      return GestureDetector(
+          onTap: onPressed,
+          child: Container(
+              width: width,
+              height: height,
+              decoration: BoxDecoration(
+                  image: DecorationImage(
+                      image: settings.isDoneButtonImageAsset
+                          ? AssetImage(settings.doneButtonImagePath!)
+                          : FileImage(File(settings.doneButtonImagePath!))
+                              as ImageProvider,
+                      fit: BoxFit.contain))));
+    }
+    return ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(minimumSize: Size(width, height)),
+        child: Text(settings.doneButtonText));
+  }
+
+  Widget _buildOutputImage(String? imageUrl, bool isPlaceholder) {
     if (imageUrl == null) {
       return const Center(
           child: Text('No image available',
-              style: TextStyle(color: Colors.white)));
+              style: TextStyle(color: AppColors.white)));
+    }
+    if (isPlaceholder) {
+      return Image.asset(imageUrl, fit: BoxFit.cover);
     }
     if (!imageUrl.startsWith('http')) {
       return Image.file(File.fromUri(Uri.file(imageUrl)), fit: BoxFit.cover);
     } else {
-      return Image.network(
-        imageUrl,
-        fit: BoxFit.cover,
-        loadingBuilder: (context, child, progress) => progress == null
-            ? child
-            : const Center(child: CircularProgressIndicator()),
-        errorBuilder: (context, error, stack) => const Center(
-            child: Text('Error loading image',
-                style: TextStyle(color: Colors.red))),
-      );
+      return Image.network(imageUrl,
+          fit: BoxFit.cover,
+          loadingBuilder: (context, child, progress) => progress == null
+              ? child
+              : const Center(child: CircularProgressIndicator()),
+          errorBuilder: (context, error, stack) => const Center(
+              child: Text('Error loading image',
+                  style: TextStyle(color: Colors.red))));
     }
   }
 
   ImageProvider _getBackgroundImage(
       OutputScreenProvider settings, GlobalSettingsProvider globalSettings) {
+    // ... this method remains the same
     String? path = settings.showBackground
         ? settings.backgroundImagePath
-        : globalSettings.backgroundImage;
+        : globalSettings.backgroundImagePath;
     bool isAsset = settings.showBackground
         ? settings.isBackgroundImageAsset
-        : globalSettings.isAssetImage;
-
+        : globalSettings.isBackgroundImageAsset;
     if (path != null) {
       return isAsset
           ? AssetImage(path)
           : FileImage(File(path)) as ImageProvider;
     }
-
     return const AssetImage('assets/images/common_bg.png');
   }
 }

@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
@@ -98,44 +96,41 @@ class _SettingsSection extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(0, 20, 20, 20),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20.0),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 1.0, sigmaY: 1.0),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.5),
-              borderRadius: BorderRadius.circular(20.0),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SettingsHeader(
-                  title: 'Registration Screen Settings',
-                  subtitle:
-                      'Customize the fields and appearance of the registration form',
-                ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(30),
-                    child: Column(
-                      children: [
-                        _GeneralSettingsGroup(),
-                        if (settings.showRegistrationScreen) ...[
-                          const SizedBox(height: 25),
-                          _TitleSettingsGroup(),
-                          const SizedBox(height: 25),
-                          _BackgroundSettingsGroup(),
-                          const SizedBox(height: 25),
-                          _TextFieldsSettingsGroup(),
-                          const SizedBox(height: 25),
-                          _ButtonSettingsGroup(),
-                        ]
-                      ],
-                    ),
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.white.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(20.0),
+            border: Border.all(color: AppColors.white.withValues(alpha: 0.2)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SettingsHeader(
+                title: 'Registration Screen Settings',
+                subtitle:
+                    'Customize the fields and appearance of the registration form',
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(30),
+                  child: Column(
+                    children: [
+                      _GeneralSettingsGroup(),
+                      if (settings.showRegistrationScreen) ...[
+                        const SizedBox(height: 25),
+                        _TitleSettingsGroup(),
+                        const SizedBox(height: 25),
+                        _BackgroundSettingsGroup(),
+                        const SizedBox(height: 25),
+                        _TextFieldsSettingsGroup(),
+                        const SizedBox(height: 25),
+                        _ButtonSettingsGroup(),
+                      ]
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

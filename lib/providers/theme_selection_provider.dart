@@ -41,9 +41,9 @@ class ThemeSelectionProvider extends ChangeNotifier {
 
   double _carouselTop = 0.3;
   double _carouselHeight = 0.41;
-  double _arrowSpacing = 0.09;
+  double _arrowSpacing = 0.08;
 
-  double _cardWidth = 0.5;
+  double _cardWidth = 0.25;
   double _cardHeight = 0.33;
   double _cardBorderRadius = 0.0;
 
@@ -58,9 +58,9 @@ class ThemeSelectionProvider extends ChangeNotifier {
   bool _useImageButton = true;
   String? _buttonImagePath = 'assets/images/next_btn.png';
   bool _isButtonImageAsset = true;
-  double _buttonWidth = 0.54;
+  double _buttonWidth = 0.45;
   double _buttonHeight = 0.08;
-  double _buttonBottom = 0.2;
+  double _buttonBottom = 0.17;
 
   bool _showBackground = true;
   String? _backgroundImagePath = 'assets/images/common_bg.png';
@@ -73,20 +73,18 @@ class ThemeSelectionProvider extends ChangeNotifier {
   FontWeight get titleFontWeight => _titleFontWeight;
   Color get titleColor => _titleColor;
   double get titleTop => _titleTop;
-
-  double get card1Scale => _card1Scale;
-  double get card1YOffset => _card1YOffset;
-  double get card1XOffset => _card1XOffset;
-  double get card2Scale => _card2Scale;
-  double get card2YOffset => _card2YOffset;
-  double get card2XOffset => _card2XOffset;
-
   double get carouselTop => _carouselTop;
   double get carouselHeight => _carouselHeight;
   double get arrowSpacing => _arrowSpacing;
   double get cardWidth => _cardWidth;
   double get cardHeight => _cardHeight;
   double get cardBorderRadius => _cardBorderRadius;
+  double get card1Scale => _card1Scale;
+  double get card1YOffset => _card1YOffset;
+  double get card1XOffset => _card1XOffset;
+  double get card2Scale => _card2Scale;
+  double get card2YOffset => _card2YOffset;
+  double get card2XOffset => _card2XOffset;
   bool get useImageButton => _useImageButton;
   String? get buttonImagePath => _buttonImagePath;
   bool get isButtonImageAsset => _isButtonImageAsset;
@@ -134,23 +132,6 @@ class ThemeSelectionProvider extends ChangeNotifier {
     _saveAndNotify();
   }
 
-  void setCarouselCardTransforms({
-    double? card1Scale,
-    double? card1YOffset,
-    double? card1XOffset,
-    double? card2Scale,
-    double? card2YOffset,
-    double? card2XOffset,
-  }) {
-    if (card1Scale != null) _card1Scale = card1Scale;
-    if (card1YOffset != null) _card1YOffset = card1YOffset;
-    if (card1XOffset != null) _card1XOffset = card1XOffset;
-    if (card2Scale != null) _card2Scale = card2Scale;
-    if (card2YOffset != null) _card2YOffset = card2YOffset;
-    if (card2XOffset != null) _card2XOffset = card2XOffset;
-    _saveAndNotify();
-  }
-
   void setCarouselTop(double value) {
     _carouselTop = value;
     _saveAndNotify();
@@ -178,6 +159,23 @@ class ThemeSelectionProvider extends ChangeNotifier {
 
   void setCardBorderRadius(double value) {
     _cardBorderRadius = value;
+    _saveAndNotify();
+  }
+
+  void setCarouselCardTransforms({
+    double? card1Scale,
+    double? card1YOffset,
+    double? card1XOffset,
+    double? card2Scale,
+    double? card2YOffset,
+    double? card2XOffset,
+  }) {
+    if (card1Scale != null) _card1Scale = card1Scale;
+    if (card1YOffset != null) _card1YOffset = card1YOffset;
+    if (card1XOffset != null) _card1XOffset = card1XOffset;
+    if (card2Scale != null) _card2Scale = card2Scale;
+    if (card2YOffset != null) _card2YOffset = card2YOffset;
+    if (card2XOffset != null) _card2XOffset = card2XOffset;
     _saveAndNotify();
   }
 
@@ -251,21 +249,19 @@ class ThemeSelectionProvider extends ChangeNotifier {
   Future<void> _saveSettings() async {
     if (!_isInitialized) return;
 
-    await _prefs.setDouble('theme_titleTop', _titleTop);
-    await _prefs.setDouble('theme_carouselTop', _carouselTop);
-    await _prefs.setDouble('theme_carouselHeight', _carouselHeight);
-    await _prefs.setDouble('theme_arrowSpacing', _arrowSpacing);
-    await _prefs.setDouble('theme_cardWidth', _cardWidth);
-    await _prefs.setDouble('theme_cardHeight', _cardHeight);
-    await _prefs.setDouble('theme_buttonWidth', _buttonWidth);
-    await _prefs.setDouble('theme_buttonHeight', _buttonHeight);
-    await _prefs.setDouble('theme_buttonBottom', _buttonBottom);
-
     await _prefs.setBool('theme_showTitle', _showTitle);
     await _prefs.setString('theme_titleText', _titleText);
     await _prefs.setDouble('theme_titleFontSize', _titleFontSize);
     await _prefs.setInt('theme_titleFontWeight', _titleFontWeight.index);
     await _prefs.setInt('theme_titleColor', _titleColor.value);
+    await _prefs.setDouble('theme_titleTop', _titleTop);
+
+    await _prefs.setDouble('theme_carouselTop', _carouselTop);
+    await _prefs.setDouble('theme_carouselHeight', _carouselHeight);
+    await _prefs.setDouble('theme_arrowSpacing', _arrowSpacing);
+    await _prefs.setDouble('theme_cardWidth', _cardWidth);
+    await _prefs.setDouble('theme_cardHeight', _cardHeight);
+    await _prefs.setDouble('theme_cardBorderRadius', _cardBorderRadius);
 
     await _prefs.setDouble('theme_card1Scale', _card1Scale);
     await _prefs.setDouble('theme_card1YOffset', _card1YOffset);
@@ -274,13 +270,20 @@ class ThemeSelectionProvider extends ChangeNotifier {
     await _prefs.setDouble('theme_card2YOffset', _card2YOffset);
     await _prefs.setDouble('theme_card2XOffset', _card2XOffset);
 
-    await _prefs.setDouble('theme_cardBorderRadius', _cardBorderRadius);
     await _prefs.setBool('theme_use_image_button', _useImageButton);
-    await _prefs.setString('theme_button_image_path', _buttonImagePath ?? '');
+    if (_buttonImagePath != null) {
+      await _prefs.setString('theme_button_image_path', _buttonImagePath!);
+    }
     await _prefs.setBool('theme_is_button_image_asset', _isButtonImageAsset);
+    await _prefs.setDouble('theme_buttonWidth', _buttonWidth);
+    await _prefs.setDouble('theme_buttonHeight', _buttonHeight);
+    await _prefs.setDouble('theme_buttonBottom', _buttonBottom);
+
     await _prefs.setBool('theme_show_background', _showBackground);
-    await _prefs.setString(
-        'theme_background_image_path', _backgroundImagePath ?? '');
+    if (_backgroundImagePath != null) {
+      await _prefs.setString(
+          'theme_background_image_path', _backgroundImagePath!);
+    }
     await _prefs.setBool(
         'theme_is_background_image_asset', _isBackgroundImageAsset);
   }
@@ -301,13 +304,6 @@ class ThemeSelectionProvider extends ChangeNotifier {
         _prefs.getInt('theme_titleFontWeight') ?? _titleFontWeight.index];
     _titleColor = Color(_prefs.getInt('theme_titleColor') ?? _titleColor.value);
 
-    _card1Scale = _prefs.getDouble('theme_card1Scale') ?? _card1Scale;
-    _card1YOffset = _prefs.getDouble('theme_card1YOffset') ?? _card1YOffset;
-    _card1XOffset = _prefs.getDouble('theme_card1XOffset') ?? _card1XOffset;
-    _card2Scale = _prefs.getDouble('theme_card2Scale') ?? _card2Scale;
-    _card2YOffset = _prefs.getDouble('theme_card2YOffset') ?? _card2YOffset;
-    _card2XOffset = _prefs.getDouble('theme_card2XOffset') ?? _card2XOffset;
-
     _titleTop = toPercent('theme_titleTop', _titleTop, refHeight);
     _carouselTop = toPercent('theme_carouselTop', _carouselTop, refHeight);
     _carouselHeight =
@@ -320,6 +316,14 @@ class ThemeSelectionProvider extends ChangeNotifier {
     _buttonBottom = toPercent('theme_buttonBottom', _buttonBottom, refHeight);
     _cardBorderRadius =
         _prefs.getDouble('theme_cardBorderRadius') ?? _cardBorderRadius;
+
+    _card1Scale = _prefs.getDouble('theme_card1Scale') ?? _card1Scale;
+    _card1YOffset = _prefs.getDouble('theme_card1YOffset') ?? _card1YOffset;
+    _card1XOffset = _prefs.getDouble('theme_card1XOffset') ?? _card1XOffset;
+    _card2Scale = _prefs.getDouble('theme_card2Scale') ?? _card2Scale;
+    _card2YOffset = _prefs.getDouble('theme_card2YOffset') ?? _card2YOffset;
+    _card2XOffset = _prefs.getDouble('theme_card2XOffset') ?? _card2XOffset;
+
     _useImageButton =
         _prefs.getBool('theme_use_image_button') ?? _useImageButton;
     _buttonImagePath =
@@ -328,11 +332,11 @@ class ThemeSelectionProvider extends ChangeNotifier {
         _prefs.getBool('theme_is_button_image_asset') ?? _isButtonImageAsset;
     _showBackground =
         _prefs.getBool('theme_show_background') ?? _showBackground;
-    _backgroundImagePath =
-        _prefs.getString('theme_background_image_path') ?? _backgroundImagePath;
+    _backgroundImagePath = _prefs.getString('theme_background_image_path');
     _isBackgroundImageAsset =
         _prefs.getBool('theme_is_background_image_asset') ??
             _isBackgroundImageAsset;
+
     notifyListeners();
   }
 }

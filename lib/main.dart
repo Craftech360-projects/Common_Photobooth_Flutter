@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:photobooth_flutter/core/themes/app_theme.dart';
 import 'package:photobooth_flutter/providers/admin_watermark_provider.dart';
@@ -22,6 +23,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   MediaKit.ensureInitialized();
+
+  await dotenv.load(fileName: ".env");
 
   final globalSettings = GlobalSettingsProvider();
   try {
@@ -48,9 +51,6 @@ void main() async {
   final authProvider = AuthProvider();
   await authProvider.init();
 
-  // final appFlowProvider = AppFlowProvider();  ====>  Commented out as per request
-  // await appFlowProvider.init();
-
   final welcomeSettings = WelcomeScreenProvider();
   await welcomeSettings.init();
 
@@ -59,6 +59,12 @@ void main() async {
 
   final genderSettings = GenderSelectionProvider();
   await genderSettings.init();
+
+  final categorySettingsProvider = CategorySettingsProvider();
+  await categorySettingsProvider.init();
+
+  final themeSelectionProvider = ThemeSelectionProvider();
+  await themeSelectionProvider.init();
 
   final faceCaptureProvider = FaceCaptureProvider();
   await faceCaptureProvider.init();
@@ -69,19 +75,15 @@ void main() async {
   final outputScreenProvider = OutputScreenProvider();
   await outputScreenProvider.init();
 
-  final categorySettingsProvider = CategorySettingsProvider();
-  await categorySettingsProvider.init();
-
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => PhotoboothProvider()),
-        ChangeNotifierProvider(create: (_) => ThemeSelectionProvider()),
         ChangeNotifierProvider.value(value: globalSettings),
         ChangeNotifierProvider.value(value: authProvider),
-        // ChangeNotifierProvider.value(value: appFlowProvider),
         ChangeNotifierProvider(create: (_) => CategoryProvider()),
         ChangeNotifierProvider.value(value: categorySettingsProvider),
+        ChangeNotifierProvider.value(value: themeSelectionProvider),
         ChangeNotifierProvider.value(value: welcomeSettings),
         ChangeNotifierProvider.value(value: registrationSettings),
         ChangeNotifierProvider.value(value: genderSettings),

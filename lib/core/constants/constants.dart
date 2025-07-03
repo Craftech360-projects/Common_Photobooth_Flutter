@@ -59,7 +59,6 @@ class Constants {
   static BorderRadius br16 = BorderRadius.circular(16);
   static BorderRadius br24 = BorderRadius.circular(24);
   static BorderRadius br32 = BorderRadius.circular(32);
-  
 
 // Input Border Constants
   static final inputBorder = OutlineInputBorder(

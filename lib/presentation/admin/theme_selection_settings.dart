@@ -86,9 +86,9 @@ class _SettingsSection extends StatelessWidget {
         borderRadius: BorderRadius.circular(20.0),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.5),
+            color: AppColors.white.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(20.0),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+            border: Border.all(color: AppColors.white.withValues(alpha: 0.2)),
           ),
           child: const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -303,8 +303,6 @@ class _CarouselSettingsGroup extends StatelessWidget {
     );
   }
 }
-
-// lib/presentation/theme_selection_settings.dart
 
 class _CarouselCardTransformGroup extends StatelessWidget {
   const _CarouselCardTransformGroup();

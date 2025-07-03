@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -87,8 +88,7 @@ class CategoryCardSettings {
       width: width ?? this.width,
       height: height ?? this.height,
       subCategoryWidth: subCategoryWidth ?? this.subCategoryWidth,
-      subCategoryHeight:
-          subCategoryHeight ?? this.subCategoryHeight,
+      subCategoryHeight: subCategoryHeight ?? this.subCategoryHeight,
       useGlow: useGlow ?? this.useGlow,
       glowColor: glowColor ?? this.glowColor,
       glowIntensity: glowIntensity ?? this.glowIntensity,
@@ -120,14 +120,14 @@ class CategorySettingsProvider extends ChangeNotifier {
   double _packagingFieldBottom = 0.31;
   double _packagingFieldWidth = 0.55;
   double _packagingFieldFontSize = 19.0;
-  Color _packagingFieldTextColor = Colors.white;
+  Color _packagingFieldTextColor = AppColors.white;
   Color _packagingFieldBorderColor = Colors.white54;
   double _packagingFieldHeight = 0.05;
   double _packagingFieldBorderRadius = 8.0;
   String _packagingFieldLabelText = 'Enter Accessories (e.g., shoes, helmet)';
   Color _packagingFieldLabelColor = Colors.white70;
   double _packagingFieldLabelSize = 19.0;
-  Color _packagingFieldFocusedBorderColor = Colors.white;
+  Color _packagingFieldFocusedBorderColor = AppColors.white;
 
   double _mainCategorySpacing = 0.037;
 

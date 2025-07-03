@@ -36,8 +36,6 @@ class _AdminScreenState extends State<AdminScreen> {
   final _emailJsTemplateIdController = TextEditingController();
   final _emailJsPublicKeyController = TextEditingController();
   final _emailJsPrivateKeyController = TextEditingController();
-  final _runpodApiUrlController = TextEditingController();
-  final _runpodApiKeyController = TextEditingController();
 
   @override
   void initState() {
@@ -51,12 +49,8 @@ class _AdminScreenState extends State<AdminScreen> {
       _emailJsTemplateIdController.text =
           globalSettings.emailJsTemplateId ?? '';
       _emailJsPublicKeyController.text = globalSettings.emailJsPublicKey ?? '';
-      // FIX: Initialize the private key controller
       _emailJsPrivateKeyController.text =
           globalSettings.emailJsPrivateKey ?? '';
-
-      _runpodApiUrlController.text = globalSettings.runpodApiUrl ?? '';
-      _runpodApiKeyController.text = globalSettings.runpodApiKey ?? '';
 
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final watermarkProvider =
@@ -72,10 +66,7 @@ class _AdminScreenState extends State<AdminScreen> {
     _emailJsServiceIdController.dispose();
     _emailJsTemplateIdController.dispose();
     _emailJsPublicKeyController.dispose();
-    // FIX: Dispose all controllers
     _emailJsPrivateKeyController.dispose();
-    _runpodApiUrlController.dispose();
-    _runpodApiKeyController.dispose();
     super.dispose();
   }
 
@@ -89,11 +80,11 @@ class _AdminScreenState extends State<AdminScreen> {
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text('Admin Dashboard',
-            style: textTheme.headlineMedium?.copyWith(color: Colors.white)),
+            style: textTheme.headlineMedium?.copyWith(color: AppColors.white)),
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: AppColors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -117,8 +108,6 @@ class _AdminScreenState extends State<AdminScreen> {
                 _GlobalSettingsSection(
                   supabaseUrlController: _supabaseUrlController,
                   supabaseAnonKeyController: _supabaseAnonKeyController,
-                  runpodApiUrlController: _runpodApiUrlController,
-                  runpodApiKeyController: _runpodApiKeyController,
                 ),
                 const Divider(height: 32, color: Colors.white54),
                 _buildSharingSettings(
@@ -309,8 +298,6 @@ class _AdminScreenState extends State<AdminScreen> {
               _emailJsTemplateIdController.text = '';
               _emailJsPublicKeyController.text = '';
               _emailJsPrivateKeyController.text = '';
-              _runpodApiKeyController.text = '';
-              _runpodApiUrlController.text = '';
 
               if (mounted) {
                 showSnackBar(context, 'All settings have been reset.');
@@ -331,14 +318,10 @@ class _AdminScreenState extends State<AdminScreen> {
 class _GlobalSettingsSection extends StatelessWidget {
   final TextEditingController supabaseUrlController;
   final TextEditingController supabaseAnonKeyController;
-  final TextEditingController runpodApiUrlController;
-  final TextEditingController runpodApiKeyController;
 
   const _GlobalSettingsSection({
     required this.supabaseUrlController,
     required this.supabaseAnonKeyController,
-    required this.runpodApiUrlController,
-    required this.runpodApiKeyController,
   });
 
   @override
@@ -397,27 +380,6 @@ class _GlobalSettingsSection extends StatelessWidget {
                   decoration: inputDecoration(context, 'Supabase Anon Key'),
                   onChanged: (value) =>
                       globalSettings.setSupabaseAnonKey(value),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 15),
-          SettingsGroup(
-            isSubgroup: true,
-            icon: '🚀',
-            title: 'RunPod Configuration',
-            child: Column(
-              children: [
-                TextFormField(
-                  controller: runpodApiUrlController,
-                  decoration: inputDecoration(context, 'RunPod API URL'),
-                  onChanged: (value) => globalSettings.setRunpodApiUrl(value),
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: runpodApiKeyController,
-                  decoration: inputDecoration(context, 'RunPod API Key'),
-                  onChanged: (value) => globalSettings.setRunpodApiKey(value),
                 ),
               ],
             ),
@@ -589,7 +551,7 @@ class _AdvancedSettingsSection extends StatelessWidget {
               icon: const Icon(Icons.refresh),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.red.withValues(alpha: 0.8),
-                foregroundColor: Colors.white,
+                foregroundColor: AppColors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
               onPressed: onReset,

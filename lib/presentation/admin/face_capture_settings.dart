@@ -1,5 +1,3 @@
-// lib/presentation/face_capture_settings.dart
-
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/presentation/face_capture_screen.dart';
@@ -29,10 +27,8 @@ class _FaceCaptureSettingsState extends State<FaceCaptureSettings> {
     return Scaffold(
       body: Stack(
         children: [
-          // Live camera preview as the background
           const FaceCaptureScreen(isPreviewMode: false),
 
-          // Sliding settings panel
           AnimatedPositioned(
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOutCubic,
@@ -43,7 +39,6 @@ class _FaceCaptureSettingsState extends State<FaceCaptureSettings> {
             child: const _SettingsSection(),
           ),
 
-          // Control Buttons
           Positioned(
             top: 20,
             left: 20,
@@ -78,7 +73,6 @@ class _FaceCaptureSettingsState extends State<FaceCaptureSettings> {
     );
   }
 }
-// lib/presentation/face_capture_settings.dart
 
 class _SettingsSection extends StatelessWidget {
   const _SettingsSection();
@@ -90,11 +84,10 @@ class _SettingsSection extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20.0),
         child: Container(
-          // Using a simple container, add blur via BackdropFilter if desired
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.85),
+            color: AppColors.white.withOpacity(0.1),
             borderRadius: BorderRadius.circular(20.0),
-            border: Border.all(color: Colors.white.withOpacity(0.2)),
+            border: Border.all(color: AppColors.white.withOpacity(0.2)),
           ),
           child: const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -148,7 +141,7 @@ class _TitleSettingsGroup extends StatelessWidget {
             const SizedBox(height: 15),
             TextFormField(
               initialValue: settings.titleText,
-              decoration: InputDecoration(labelText: 'Title Text'),
+              decoration: const InputDecoration(labelText: 'Title Text'),
               onChanged: (v) => settings.setTitleStyle(text: v),
             ),
             const SizedBox(height: 15),
@@ -340,7 +333,7 @@ class _ButtonSettingsGroup extends StatelessWidget {
               children: [
                 TextFormField(
                     initialValue: settings.buttonText,
-                    decoration: InputDecoration(labelText: 'Button Text'),
+                    decoration: const InputDecoration(labelText: 'Button Text'),
                     onChanged: (v) => settings.setButtonStyle(text: v)),
                 const SizedBox(height: 15),
                 FormRow(children: [

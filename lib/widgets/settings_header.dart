@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:photobooth_flutter/core/themes/app_colors.dart';
 
 class SettingsHeader extends StatelessWidget {
   final String title;
@@ -13,9 +14,9 @@ class SettingsHeader extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 25),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.8),
+        color: AppColors.white.withValues(alpha: 0.8),
         border: Border(
-            bottom: BorderSide(color: Colors.black.withValues(alpha: 0.1))),
+            bottom: BorderSide(color: AppColors.black.withValues(alpha: 0.1))),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

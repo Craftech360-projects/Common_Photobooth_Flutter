@@ -1,6 +1,5 @@
-// lib/presentation/loading_screen_settings.dart
-
 import 'dart:ui';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
@@ -32,7 +31,6 @@ class _LoadingScreenSettingsState extends State<LoadingScreenSettings> {
     return Scaffold(
       body: Stack(
         children: [
-          // The live preview now uses isPreviewMode to prevent errors
           const LoadingScreen(isPreviewMode: true),
           AnimatedPositioned(
             duration: const Duration(milliseconds: 300),
@@ -87,37 +85,34 @@ class _SettingsSection extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(0, 20, 20, 20),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20.0),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.6),
-              borderRadius: BorderRadius.circular(20.0),
-              border: Border.all(color: Colors.white.withOpacity(0.2)),
-            ),
-            child: const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SettingsHeader(
-                  title: 'Loading Screen Settings',
-                  subtitle: 'Customize the elements shown during processing',
-                ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.all(30),
-                    child: Column(
-                      children: [
-                        _LoaderSettingsGroup(),
-                        SizedBox(height: 25),
-                        _TitleSettingsGroup(),
-                        SizedBox(height: 25),
-                        _BackgroundSettingsGroup(),
-                      ],
-                    ),
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.white.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(20.0),
+            border: Border.all(color: AppColors.white.withOpacity(0.2)),
+          ),
+          child: const Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SettingsHeader(
+                title: 'Loading Screen Settings',
+                subtitle: 'Customize the elements shown during processing',
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.all(30),
+                  child: Column(
+                    children: [
+                      _LoaderSettingsGroup(),
+                      SizedBox(height: 25),
+                      _TitleSettingsGroup(),
+                      SizedBox(height: 25),
+                      _BackgroundSettingsGroup(),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

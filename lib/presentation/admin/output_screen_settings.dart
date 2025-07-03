@@ -1,77 +1,69 @@
-import 'dart:ui';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:photobooth_flutter/core/constants/constants.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/presentation/output_screen.dart';
 import 'package:photobooth_flutter/providers/output_screen_provider.dart';
+import 'package:photobooth_flutter/widgets/color_picker.dart';
+import 'package:photobooth_flutter/widgets/custom_dropdown.dart';
 import 'package:photobooth_flutter/widgets/custom_slider.dart';
 import 'package:photobooth_flutter/widgets/file_upload_area.dart';
 import 'package:photobooth_flutter/widgets/form_row.dart';
-import 'package:photobooth_flutter/widgets/color_picker.dart';
+import 'package:photobooth_flutter/widgets/input_decoration.dart';
 import 'package:photobooth_flutter/widgets/settings_group.dart';
 import 'package:photobooth_flutter/widgets/settings_header.dart';
-import 'package:photobooth_flutter/widgets/settings_preview.dart';
-import 'package:photobooth_flutter/widgets/toggle_btn_group.dart';
 import 'package:provider/provider.dart';
 
-class OutputScreenSettings extends StatelessWidget {
+class OutputScreenSettings extends StatefulWidget {
   const OutputScreenSettings({super.key});
-
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              AppColors.primaryGradientStart,
-              AppColors.primaryGradientEnd
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: const Row(
-          children: [
-            _PreviewSection(),
-            Expanded(child: _SettingsSection()),
-          ],
-        ),
-      ),
-    );
-  }
+  State<OutputScreenSettings> createState() => _OutputScreenSettingsState();
 }
 
-class _PreviewSection extends StatelessWidget {
-  const _PreviewSection();
+class _OutputScreenSettingsState extends State<OutputScreenSettings> {
+  bool _isPanelOpen = true;
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(12.0),
-      child: Stack(
+    double settingsPanelWidth = MediaQuery.of(context).size.width * 0.8;
+    return Scaffold(
+      body: Stack(
         children: [
-          const Center(
-            child: SettingsPreview(
-              width: 1080,
-              height: 1920,
-              child: SwappedFaceScreen(
-                isPreviewMode: true,
-              ),
-            ),
+          const SwappedFaceScreen(isPreviewMode: true),
+          AnimatedPositioned(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOutCubic,
+            right: _isPanelOpen ? 0 : -settingsPanelWidth,
+            top: 0,
+            bottom: 0,
+            width: settingsPanelWidth,
+            child: const _SettingsSection(),
           ),
           Positioned(
-            top: 0,
-            left: 0,
-            child: Material(
-              color: AppColors.white.withOpacity(0.9),
-              shape: const CircleBorder(),
-              elevation: 2.0,
-              child: IconButton(
-                icon: const Icon(Icons.arrow_back, color: AppColors.labelText),
-                onPressed: () => Navigator.of(context).pop(),
-                tooltip: 'Back',
-              ),
+            top: 20,
+            left: 20,
+            child: FloatingActionButton.small(
+              heroTag: 'outputBack',
+              tooltip: 'Back',
+              backgroundColor: AppColors.white.withOpacity(0.8),
+              child: const Icon(Icons.arrow_back,
+                  color: AppColors.primaryGradientEnd),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ),
+          AnimatedPositioned(
+            duration: const Duration(milliseconds: 300),
+            top: 20,
+            right: _isPanelOpen ? settingsPanelWidth + 20 : 20,
+            child: FloatingActionButton(
+              heroTag: 'outputToggle',
+              tooltip: 'Toggle Settings',
+              backgroundColor: AppColors.white,
+              onPressed: () => setState(() => _isPanelOpen = !_isPanelOpen),
+              child: Icon(
+                  _isPanelOpen
+                      ? Icons.arrow_forward_ios_rounded
+                      : Icons.arrow_back_ios_rounded,
+                  color: AppColors.primaryGradientEnd),
             ),
           ),
         ],
@@ -88,41 +80,36 @@ class _SettingsSection extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(0, 20, 20, 20),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20.0),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.85),
-              borderRadius: BorderRadius.circular(20.0),
-              border: Border.all(color: Colors.white.withOpacity(0.2)),
-            ),
-            child: const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SettingsHeader(
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.white.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(20.0),
+            border: Border.all(color: AppColors.white.withOpacity(0.2)),
+          ),
+          child: const Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SettingsHeader(
                   title: 'Output Screen Settings',
-                  subtitle: 'Customize the final output screen elements',
-                ),
-                Expanded(
+                  subtitle: 'Customize the final output screen elements'),
+              Expanded(
                   child: SingleChildScrollView(
-                    padding: EdgeInsets.all(30),
-                    child: Column(
-                      children: [
-                        _TitleSettingsGroup(),
-                        SizedBox(height: 25),
-                        _ImageSettingsGroup(),
-                        SizedBox(height: 25),
-                        _QrCodeSettingsGroup(),
-                        SizedBox(height: 25),
-                        _ButtonSettingsGroup(),
-                        SizedBox(height: 25),
-                        _BackgroundSettingsGroup(),
-                      ],
-                    ),
-                  ),
+                padding: EdgeInsets.all(30),
+                child: Column(
+                  children: [
+                    _TitleSettingsGroup(),
+                    SizedBox(height: 25),
+                    _ImageSettingsGroup(),
+                    SizedBox(height: 25),
+                    _QrCodeSettingsGroup(),
+                    SizedBox(height: 25),
+                    _ButtonSettingsGroup(),
+                    SizedBox(height: 25),
+                    _BackgroundSettingsGroup(),
+                  ],
                 ),
-              ],
-            ),
+              )),
+            ],
           ),
         ),
       ),
@@ -140,68 +127,75 @@ class _TitleSettingsGroup extends StatelessWidget {
       title: 'Title Settings',
       child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('Show Title', style: Theme.of(context).textTheme.bodyLarge),
-              Switch(
+          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+            Text('Show Title', style: Theme.of(context).textTheme.bodyLarge),
+            Switch(
                 value: settings.showTitle,
-                onChanged: (value) => settings.setShowTitle(value),
-              ),
-            ],
-          ),
+                onChanged: (v) => settings.setShowTitle(v)),
+          ]),
           if (settings.showTitle) ...[
             const SizedBox(height: 15),
             TextFormField(
-              initialValue: settings.titleText,
-              decoration: _inputDecoration(context, 'Title Text'),
-              onChanged: (value) => settings.setTitleText(value),
-            ),
+                initialValue: settings.titleText,
+                decoration: inputDecoration(context, 'Title Text'),
+                onChanged: (v) => settings.setTitleStyle(text: v)),
             const SizedBox(height: 15),
             SliderWithLabel(
-              label: 'Font Size',
-              value: settings.titleFontSize,
-              min: 16,
-              max: 80,
-              onChanged: (v) => settings.setTitleFontSize(v),
-            ),
-            CustomColorPicker(
-              label: 'Title Color',
-              pickerColor: settings.titleColor,
-              onColorChanged: (c) => settings.setTitleColor(c),
-            ),
+                label: 'Font Size',
+                value: settings.titleFontSize,
+                min: 16,
+                max: 120,
+                onChanged: (v) => settings.setTitleStyle(fontSize: v)),
+            SliderWithLabel(
+                label: 'Opacity',
+                value: settings.titleOpacity,
+                min: 0.0,
+                max: 1.0,
+                step: 0.01,
+                onChanged: (v) => settings.setTitleStyle(opacity: v)),
             const SizedBox(height: 15),
             SettingsGroup(
-              isSubgroup: true,
-              icon: '📍',
-              title: 'Positioning',
-              child: Column(
-                children: [
+                isSubgroup: true,
+                icon: '🎨',
+                title: 'Styling',
+                child: Column(children: [
+                  CustomDropdown<FontWeight>(
+                      label: 'Font Weight',
+                      value: settings.titleFontWeight,
+                      items: const {
+                        FontWeight.w300: 'Light',
+                        FontWeight.w400: 'Regular',
+                        FontWeight.w700: 'Bold'
+                      },
+                      onChanged: (v) => settings.setTitleStyle(fontWeight: v)),
+                  const SizedBox(height: 15),
+                  ColorPickerWidget(
+                      label: 'Title Color',
+                      color: settings.titleColor,
+                      onColorChanged: (c) => settings.setTitleStyle(color: c)),
+                ])),
+            const SizedBox(height: 15),
+            SettingsGroup(
+                isSubgroup: true,
+                icon: '📍',
+                title: 'Positioning',
+                child: Column(children: [
                   SliderWithLabel(
-                      label: 'From Top',
+                      label: 'From Top (%)',
                       value: settings.titleTop,
-                      min: 0,
-                      max: 1200,
-                      onChanged: (v) => settings.setTitlePosition(
-                          settings.titleLeft, v, settings.titleWidth)),
+                      min: 0.0,
+                      max: 1.0,
+                      step: 0.01,
+                      onChanged: (v) => settings.setTitlePosition(top: v)),
                   SliderWithLabel(
-                      label: 'From Left',
-                      value: settings.titleLeft,
-                      min: 0,
-                      max: 1080,
-                      onChanged: (v) => settings.setTitlePosition(
-                          v, settings.titleTop, settings.titleWidth)),
-                  SliderWithLabel(
-                      label: 'Width',
+                      label: 'Width (%)',
                       value: settings.titleWidth,
-                      min: 100,
-                      max: 1080,
-                      onChanged: (v) => settings.setTitlePosition(
-                          settings.titleLeft, settings.titleTop, v)),
-                ],
-              ),
-            ),
-          ],
+                      min: 0.1,
+                      max: 1.0,
+                      step: 0.01,
+                      onChanged: (v) => settings.setTitlePosition(width: v)),
+                ])),
+          ]
         ],
       ),
     );
@@ -214,133 +208,91 @@ class _ImageSettingsGroup extends StatelessWidget {
   Widget build(BuildContext context) {
     final settings = context.watch<OutputScreenProvider>();
     return SettingsGroup(
-      icon: '🖼️',
-      title: 'Image Settings',
-      child: Column(
-        children: [
+        icon: '🖼️',
+        title: 'Output Image Settings',
+        child: Column(children: [
           SettingsGroup(
-            isSubgroup: true,
-            icon: '🤖',
-            title: 'AI Artistry Image Position',
-            child: FormRow(
-              children: [
-                Expanded(
-                    child: SliderWithLabel(
-                        label: 'From Left',
-                        value: settings.aiArtistryLeft,
-                        min: 0,
-                        max: 800,
-                        onChanged: (v) => settings.setAiArtistryPosition(
-                            v, settings.aiArtistryTop))),
-                Expanded(
-                    child: SliderWithLabel(
-                        label: 'From Top',
-                        value: settings.aiArtistryTop,
-                        min: 0,
-                        max: 1800,
-                        onChanged: (v) => settings.setAiArtistryPosition(
-                            settings.aiArtistryLeft, v))),
-              ],
-            ),
-          ),
+              isSubgroup: true,
+              icon: '📐',
+              title: 'Sizing & Positioning',
+              child: Column(children: [
+                FormRow(children: [
+                  Expanded(
+                      child: SliderWithLabel(
+                          label: 'Width (%)',
+                          value: settings.imageWidth,
+                          min: 0.1,
+                          max: 1.0,
+                          step: 0.01,
+                          onChanged: (v) =>
+                              settings.setImageDimensions(width: v))),
+                  Expanded(
+                      child: SliderWithLabel(
+                          label: 'Height (%)',
+                          value: settings.imageHeight,
+                          min: 0.1,
+                          max: 1.0,
+                          step: 0.01,
+                          onChanged: (v) =>
+                              settings.setImageDimensions(height: v))),
+                ]),
+                FormRow(children: [
+                  Expanded(
+                      child: SliderWithLabel(
+                          label: 'From Left (%)',
+                          value: settings.imageLeft,
+                          min: 0.0,
+                          max: 1.0,
+                          step: 0.01,
+                          onChanged: (v) =>
+                              settings.setImagePosition(left: v))),
+                  Expanded(
+                      child: SliderWithLabel(
+                          label: 'From Top (%)',
+                          value: settings.imageTop,
+                          min: 0.0,
+                          max: 1.0,
+                          step: 0.01,
+                          onChanged: (v) => settings.setImagePosition(top: v))),
+                ]),
+              ])),
           const SizedBox(height: 15),
           SettingsGroup(
-            isSubgroup: true,
-            icon: '🎭',
-            title: 'Swaplab Image Position & Size',
-            child: Column(
-              children: [
-                FormRow(
-                  children: [
-                    Expanded(
-                        child: SliderWithLabel(
-                            label: 'From Left',
-                            value: settings.swaplabLeft,
-                            min: 0,
-                            max: 800,
-                            onChanged: (v) => settings.setSwaplabPosition(
-                                v, settings.swaplabTop))),
-                    Expanded(
-                        child: SliderWithLabel(
-                            label: 'From Top',
-                            value: settings.swaplabTop,
-                            min: 0,
-                            max: 1800,
-                            onChanged: (v) => settings.setSwaplabPosition(
-                                settings.swaplabLeft, v))),
-                  ],
-                ),
-                FormRow(
-                  children: [
-                    Expanded(
-                        child: SliderWithLabel(
-                            label: 'Width',
-                            value: settings.swaplabImageWidth,
-                            min: 100,
-                            max: 1080,
-                            onChanged: (v) =>
-                                settings.setSwaplabImageDimensions(
-                                    v, settings.swaplabImageHeight))),
-                    Expanded(
-                        child: SliderWithLabel(
-                            label: 'Height',
-                            value: settings.swaplabImageHeight,
-                            min: 100,
-                            max: 1620,
-                            onChanged: (v) =>
-                                settings.setSwaplabImageDimensions(
-                                    settings.swaplabImageWidth, v))),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 15),
-          // NEW: Image border and style settings
-          SettingsGroup(
-            isSubgroup: true,
-            icon: '🎨',
-            title: 'Image Border & Style',
-            child: Column(
-              children: [
+              isSubgroup: true,
+              icon: '🎨',
+              title: 'Border Style',
+              child: Column(children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Show Border',
-                        style: Theme.of(context).textTheme.bodyLarge),
-                    Switch(
-                      value: settings.showImageBorder,
-                      onChanged: (value) => settings.setShowImageBorder(value),
-                    ),
-                  ],
-                ),
-                if (settings.showImageBorder)
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Show Border',
+                          style: Theme.of(context).textTheme.bodyLarge),
+                      Switch(
+                          value: settings.showImageBorder,
+                          onChanged: (v) =>
+                              settings.setImageStyle(showBorder: v)),
+                    ]),
+                if (settings.showImageBorder) ...[
                   SliderWithLabel(
-                    label: 'Border Width',
-                    value: settings.imageBorderWidth,
-                    min: 1,
-                    max: 20,
-                    onChanged: (v) => settings.setImageBorderWidth(v),
-                  ),
-                if (settings.showImageBorder)
-                  CustomColorPicker(
-                    label: 'Border Color',
-                    pickerColor: settings.imageBorderColor,
-                    onColorChanged: (c) => settings.setImageBorderColor(c),
-                  ),
+                      label: 'Border Width',
+                      value: settings.imageBorderWidth,
+                      min: 1,
+                      max: 20,
+                      onChanged: (v) => settings.setImageStyle(borderWidth: v)),
+                  ColorPickerWidget(
+                      label: 'Border Color',
+                      color: settings.imageBorderColor,
+                      onColorChanged: (c) =>
+                          settings.setImageStyle(borderColor: c)),
+                ],
                 SliderWithLabel(
-                  label: 'Border Radius',
-                  value: settings.imageBorderRadius,
-                  min: 0,
-                  max: 100,
-                  onChanged: (v) => settings.setImageBorderRadius(v),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+                    label: 'Border Radius',
+                    value: settings.imageBorderRadius,
+                    min: 0,
+                    max: 100,
+                    onChanged: (v) => settings.setImageStyle(borderRadius: v)),
+              ])),
+        ]));
   }
 }
 
@@ -349,47 +301,140 @@ class _QrCodeSettingsGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final settings = context.watch<OutputScreenProvider>();
+    final isRow = settings.qrCodeLayout == QrCodeLayout.qrLeftTextRight ||
+        settings.qrCodeLayout == QrCodeLayout.qrRightTextLeft;
+
     return SettingsGroup(
-      icon: '📱',
-      title: 'QR Code Settings',
-      child: Column(
-        children: [
+        icon: '📱',
+        title: 'QR Code Section Settings',
+        child: Column(children: [
           SliderWithLabel(
-            label: 'QR Code Size',
-            value: settings.qrCodeSize,
-            min: 50,
-            max: 500,
-            onChanged: (v) => settings.setQrCodeSize(v),
-          ),
+              label: 'QR Code Size',
+              value: settings.qrCodeSize,
+              min: 50,
+              max: 500,
+              onChanged: (v) => settings.setQrCodeStyle(size: v)),
           const SizedBox(height: 15),
           SettingsGroup(
-            isSubgroup: true,
-            icon: '📍',
-            title: 'Positioning',
-            child: FormRow(
-              children: [
+              isSubgroup: true,
+              icon: '📍',
+              title: 'Positioning',
+              child: FormRow(children: [
                 Expanded(
                     child: SliderWithLabel(
-                        label: 'From Left',
-                        value: settings.qrCodeLeft,
-                        min: 0,
-                        max: 1000,
-                        onChanged: (v) => settings.setQrCodePosition(
-                            v, settings.qrCodeBottom))),
+                        label: 'From Left (%)',
+                        value: settings.qrCodeSectionLeft,
+                        min: 0.0,
+                        max: 1.0,
+                        step: 0.01,
+                        onChanged: (v) => settings.setQrCodePosition(left: v))),
                 Expanded(
                     child: SliderWithLabel(
-                        label: 'From Bottom',
-                        value: settings.qrCodeBottom,
-                        min: 0,
-                        max: 1000,
-                        onChanged: (v) => settings.setQrCodePosition(
-                            settings.qrCodeLeft, v))),
-              ],
-            ),
-          )
-        ],
-      ),
-    );
+                        label: 'From Bottom (%)',
+                        value: settings.qrCodeSectionBottom,
+                        min: 0.0,
+                        max: 1.0,
+                        step: 0.01,
+                        onChanged: (v) =>
+                            settings.setQrCodePosition(bottom: v))),
+              ])),
+          const SizedBox(height: 15),
+          SettingsGroup(
+              isSubgroup: true,
+              icon: '✍️',
+              title: 'Label Text',
+              child: Column(children: [
+                Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Show Label',
+                          style: Theme.of(context).textTheme.bodyLarge),
+                      Switch(
+                          value: settings.showQrCodeText,
+                          onChanged: (v) =>
+                              settings.setQrCodeStyle(showText: v)),
+                    ]),
+                if (settings.showQrCodeText) ...[
+                  const SizedBox(height: 15),
+                  CustomDropdown<QrCodeLayout>(
+                    label: 'Layout Style',
+                    value: settings.qrCodeLayout,
+                    items: const {
+                      QrCodeLayout.qrTopTextBottom: 'Text Below QR',
+                      QrCodeLayout.qrBottomTextTop: 'Text Above QR',
+                      QrCodeLayout.qrLeftTextRight: 'Text on Right',
+                      QrCodeLayout.qrRightTextLeft: 'Text on Left',
+                    },
+                    onChanged: (v) => settings.setQrCodeStyle(layout: v),
+                  ),
+                  const SizedBox(height: 15),
+                  if (isRow)
+                    CustomDropdown<CrossAxisAlignment>(
+                      label: 'Vertical Alignment',
+                      value: settings.qrCodeRowAlignment,
+                      items: const {
+                        CrossAxisAlignment.start: 'Top',
+                        CrossAxisAlignment.center: 'Center',
+                        CrossAxisAlignment.end: 'Bottom'
+                      },
+                      onChanged: (v) =>
+                          settings.setQrCodeStyle(rowAlignment: v),
+                    )
+                  else // is Column
+                    CustomDropdown<CrossAxisAlignment>(
+                      label: 'Horizontal Alignment',
+                      value: settings.qrCodeColumnAlignment,
+                      items: const {
+                        CrossAxisAlignment.start: 'Left',
+                        CrossAxisAlignment.center: 'Center',
+                        CrossAxisAlignment.end: 'Right'
+                      },
+                      onChanged: (v) =>
+                          settings.setQrCodeStyle(columnAlignment: v),
+                    ),
+                  const SizedBox(height: 15),
+                  TextFormField(
+                      initialValue: settings.qrCodeText,
+                      decoration: inputDecoration(context, 'QR Code Label'),
+                      onChanged: (v) => settings.setQrCodeStyle(text: v)),
+                  const SizedBox(height: 15),
+                  SliderWithLabel(
+                      label: 'Font Size',
+                      value: settings.qrCodeTextFontSize,
+                      min: 10,
+                      max: 40,
+                      onChanged: (v) =>
+                          settings.setQrCodeStyle(textFontSize: v)),
+                  CustomDropdown<FontWeight>(
+                    label: 'Font Weight',
+                    value: settings.qrCodeTextFontWeight,
+                    items: const {
+                      FontWeight.w100: 'Thin',
+                      FontWeight.w300: 'Light',
+                      FontWeight.w400: 'Regular',
+                      FontWeight.w500: 'Medium',
+                      FontWeight.w700: 'Bold',
+                      FontWeight.w900: 'Black',
+                    },
+                    onChanged: (v) =>
+                        settings.setQrCodeStyle(textFontWeight: (v)),
+                  ),
+                  Constants.h16,
+                  SliderWithLabel(
+                      label: 'Label Width',
+                      value: settings.qrLabelWidth,
+                      min: 10,
+                      max: 300,
+                      onChanged: (v) =>
+                          settings.setQrCodeStyle(qrLabelWidth: v)),
+                  ColorPickerWidget(
+                      label: 'Text Color',
+                      color: settings.qrCodeTextColor,
+                      onColorChanged: (c) =>
+                          settings.setQrCodeStyle(textColor: c)),
+                ]
+              ])),
+        ]));
   }
 }
 
@@ -397,81 +442,52 @@ class _ButtonSettingsGroup extends StatelessWidget {
   const _ButtonSettingsGroup();
   @override
   Widget build(BuildContext context) {
-    // UPDATED: Removed the logic for the download button.
     final settings = context.watch<OutputScreenProvider>();
     return SettingsGroup(
-      isSubgroup: true,
-      icon: '✅',
-      title: 'Home Button Settings',
-      child: Column(
-        children: [
-          ToggleButtonGroup(
-            options: const ['Text', 'Image'],
-            selectedIndex: settings.useDoneButtonImage ? 1 : 0,
-            onSelected: (i) => settings.setUseDoneButtonImage(i == 1),
-          ),
+        icon: '✅',
+        title: 'Home Button Settings',
+        child: Column(children: [
           const SizedBox(height: 15),
-          if (settings.useDoneButtonImage)
-            FileUploadArea(
-              onTap: () async {
-                final result =
-                    await FilePicker.platform.pickFiles(type: FileType.image);
-                if (result?.files.single.path != null) {
-                  settings.setDoneButtonImage(result!.files.single.path);
-                }
-              },
-              icon: '🖼️',
-              text: 'Choose Home Button Image',
-              selectedFile: settings.doneButtonImagePath,
-            )
-          else
-            TextFormField(
-              initialValue: settings.doneButtonText,
-              decoration: _inputDecoration(context, 'Home Button Text'),
-              onChanged: (v) => settings.setDoneButtonText(v),
-            ),
-          const SizedBox(height: 15),
-          FormRow(
-            children: [
-              Expanded(
-                  child: SliderWithLabel(
-                      label: 'Width',
-                      value: settings.doneButtonWidth,
-                      min: 100,
-                      max: 500,
-                      onChanged: (v) => settings.setDoneButtonWidth(v))),
-              Expanded(
-                  child: SliderWithLabel(
-                      label: 'Height',
-                      value: settings.doneButtonHeight,
-                      min: 50,
-                      max: 300,
-                      onChanged: (v) => settings.setDoneButtonHeight(v))),
-            ],
-          ),
-          FormRow(
-            children: [
-              Expanded(
-                  child: SliderWithLabel(
-                      label: 'From Left',
-                      value: settings.doneButtonLeft,
-                      min: 0,
-                      max: 1000,
-                      onChanged: (v) => settings.setDoneButtonPosition(
-                          v, settings.doneButtonBottom))),
-              Expanded(
-                  child: SliderWithLabel(
-                      label: 'From Bottom',
-                      value: settings.doneButtonBottom,
-                      min: 0,
-                      max: 1000,
-                      onChanged: (v) => settings.setDoneButtonPosition(
-                          settings.doneButtonLeft, v))),
-            ],
-          ),
-        ],
-      ),
-    );
+          FormRow(children: [
+            Expanded(
+                child: SliderWithLabel(
+                    label: 'Width (%)',
+                    value: settings.doneButtonWidth,
+                    min: 0.1,
+                    max: 1.0,
+                    step: 0.01,
+                    onChanged: (v) =>
+                        settings.setDoneButtonDimensions(width: v))),
+            Expanded(
+                child: SliderWithLabel(
+                    label: 'Height (%)',
+                    value: settings.doneButtonHeight,
+                    min: 0.02,
+                    max: 0.2,
+                    step: 0.01,
+                    onChanged: (v) =>
+                        settings.setDoneButtonDimensions(height: v))),
+          ]),
+          FormRow(children: [
+            Expanded(
+                child: SliderWithLabel(
+                    label: 'From Left (%)',
+                    value: settings.doneButtonLeft,
+                    min: 0.0,
+                    max: 1.0,
+                    step: 0.01,
+                    onChanged: (v) => settings.setDoneButtonPosition(left: v))),
+            Expanded(
+                child: SliderWithLabel(
+                    label: 'From Bottom (%)',
+                    value: settings.doneButtonBottom,
+                    min: 0.0,
+                    max: 1.0,
+                    step: 0.01,
+                    onChanged: (v) =>
+                        settings.setDoneButtonPosition(bottom: v))),
+          ]),
+        ]));
   }
 }
 
@@ -481,45 +497,18 @@ class _BackgroundSettingsGroup extends StatelessWidget {
   Widget build(BuildContext context) {
     final settings = context.watch<OutputScreenProvider>();
     return SettingsGroup(
-      icon: '🌌',
-      title: 'Background',
-      child: FileUploadArea(
-        onTap: () async {
-          final result =
-              await FilePicker.platform.pickFiles(type: FileType.image);
-          if (result?.files.single.path != null) {
-            settings.setBackgroundImage(result!.files.single.path);
-          }
-        },
-        icon: '📁',
-        text: 'Select Background Image',
-        selectedFile: settings.backgroundImagePath,
-      ),
-    );
+        icon: '🌌',
+        title: 'Background',
+        child: FileUploadArea(
+            onTap: () async {
+              final result =
+                  await FilePicker.platform.pickFiles(type: FileType.image);
+              if (result?.files.single.path != null) {
+                settings.setBackgroundImage(result!.files.single.path);
+              }
+            },
+            icon: '📁',
+            text: 'Select Background Image',
+            selectedFile: settings.backgroundImagePath));
   }
-}
-
-InputDecoration _inputDecoration(BuildContext context, String hintText) {
-  final theme = Theme.of(context);
-  return InputDecoration(
-    hintText: hintText,
-    filled: true,
-    fillColor: Colors.white.withOpacity(0.8),
-    hintStyle: theme.textTheme.bodyMedium
-        ?.copyWith(color: AppColors.labelText.withOpacity(0.7)),
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: AppColors.inputBorder, width: 2),
-    ),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: AppColors.inputBorder, width: 2),
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10),
-      borderSide:
-          const BorderSide(color: AppColors.primaryGradientStart, width: 2),
-    ),
-    contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-  );
 }

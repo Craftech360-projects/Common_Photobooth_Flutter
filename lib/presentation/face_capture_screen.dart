@@ -7,6 +7,7 @@ import 'package:camera_macos/camera_macos.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
+import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/providers/face_capture_provider.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/providers/photobooth_provider.dart';
@@ -248,12 +249,12 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
                   width: 60,
                   height: 60,
                   decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.6),
+                    color: AppColors.black.withValues(alpha: 0.6),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
                     Icons.cameraswitch,
-                    color: Colors.white,
+                    color: AppColors.white,
                     size: 30,
                   ),
                 ),
@@ -296,7 +297,7 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
         width: finalWidth,
         height: finalHeight,
         decoration: BoxDecoration(
-            color: Colors.black,
+            color: AppColors.black,
             borderRadius: BorderRadius.circular(settings.previewBorderRadius)),
         child: Center(
             child:

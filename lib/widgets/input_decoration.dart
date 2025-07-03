@@ -7,7 +7,7 @@ InputDecoration inputDecoration(BuildContext context, String hintText) {
   return InputDecoration(
     hintText: hintText,
     filled: true,
-    fillColor: Colors.white.withValues(alpha: 0.8),
+    fillColor: AppColors.white.withValues(alpha: 0.8),
     hintStyle: theme.textTheme.bodyMedium
         ?.copyWith(color: AppColors.black.withValues(alpha: 0.7)),
     border: OutlineInputBorder(

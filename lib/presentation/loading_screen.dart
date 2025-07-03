@@ -1,8 +1,11 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
+import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/providers/loading_screen_provider.dart';
 import 'package:photobooth_flutter/providers/photobooth_provider.dart';
@@ -115,7 +118,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
   }) async {
     final supabaseUrl = globalSettings.supabaseUrl;
     final supabaseAnonKey = globalSettings.supabaseAnonKey;
-    final runpodApiKey = globalSettings.runpodApiKey;
+    final runpodApiKey = dotenv.env['RUNPOD_API_KEY'];
 
     if (supabaseUrl == null || supabaseAnonKey == null) {
       _setErrorMessage('Supabase credentials not configured.');
@@ -123,17 +126,17 @@ class _LoadingScreenState extends State<LoadingScreen> {
     }
 
     if (runpodApiKey == null) {
-      _setErrorMessage('RunPod API Key not configured in Admin settings.');
+      _setErrorMessage('RunPod API Key not configured in .env file.');
       return;
     }
 
-    // UPDATED: Determine the correct RunPod endpoint
-    final String endpointUrl;
-    if (isSwaplab) {
-      endpointUrl = 'https://api.runpod.ai/v2/wck8exca4aup5b/runsync';
-    } else {
-      endpointUrl = globalSettings.runpodApiUrl ??
-          'https://api.runpod.ai/v2/tdme3jq4u7zg1s/runsync';
+    final String? endpointUrl = isSwaplab
+        ? dotenv.env['RUNPOD_SWAPLAB_URL']
+        : dotenv.env['RUNPOD_AI_ARTISTRY_URL'];
+
+    if (endpointUrl == null) {
+      _setErrorMessage('RunPod URL not configured in .env file.');
+      return;
     }
 
     if (!SupabaseService.instance.isInitialized) {
@@ -166,17 +169,12 @@ class _LoadingScreenState extends State<LoadingScreen> {
       workflow.updateSupabaseWatcherNode(uniqueId, nodeId: watcherNodeId);
       workflow.updateNoiseSeed(seed);
 
-      // UPDATED: New logic for Swaplab flow
       if (isSwaplab) {
-        // This call will now handle selecting a random image from Supabase
-        // and updating the 'characterimage' column in your table.
         await SupabaseService.instance.selectAndUpdateRandomCharacterImage(
           uniqueId: uniqueId,
           gender: provider.gender ?? 'male',
           themeName: provider.selectedTheme!.name,
         );
-        // REMOVED: The old logic that updated the workflow with a local file path.
-        // The new workflow now fetches this from the Supabase table directly.
       } else if (workflowFileName == 'packagingonline.json') {
         final gender = provider.gender ?? 'person';
         final accessories =
@@ -186,11 +184,11 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
       await RunPodService.triggerRunPodWorkflow(
         workflow: workflow.toMap(),
-        apiUrl: endpointUrl, // Use the conditional endpoint
+        apiUrl: endpointUrl,
         apiKey: runpodApiKey,
       );
 
-      print("Workflow sent to RunPod successfully: ${workflow.toJSON()}");
+      log("Workflow sent to RunPod successfully: ${workflow.toJSON()}");
 
       provider.setWorkflowSentTime(DateTime.now());
 
@@ -243,7 +241,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
     final screenSize = MediaQuery.of(context).size;
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppColors.white,
       body: Stack(
         alignment: Alignment.center,
         children: [
@@ -290,7 +288,11 @@ class _LoadingScreenState extends State<LoadingScreen> {
     Widget loader;
     if (settings.loaderAssetType == 'video') {
       if (_videoController == null) return const SizedBox.shrink();
-      loader = Video(controller: _videoController!, controls: NoVideoControls);
+      loader = Video(
+        controller: _videoController!,
+        controls: NoVideoControls,
+        fit: BoxFit.cover,
+      );
     } else {
       // 'gif'
       loader = settings.isLoaderAsset
@@ -344,7 +346,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
           const SizedBox(height: 20),
           const Text('An Error Occurred',
               style: TextStyle(
-                  color: Colors.white,
+                  color: AppColors.white,
                   fontSize: 28,
                   fontWeight: FontWeight.bold)),
           const SizedBox(height: 12),
