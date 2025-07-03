@@ -34,9 +34,6 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
   int _cameraIndex = 0;
   Future<void>? _initializeControllerFuture;
 
-  // macOS-specific properties
-  String? _selectedMacosCameraId;
-
   // NEW: Check the platform once
   final bool _isMacos = Platform.isMacOS;
 
@@ -70,50 +67,33 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
   }
 
   Future<void> _initializeCamera() async {
-    // PLATFORM-SPECIFIC INITIALIZATION
-    if (_isMacos) {
-      // For macOS, we just need to get the list of devices.
-      // The actual initialization happens within the CameraMacOSView widget.
-      List<CameraMacOSDevice> devices =
-          await CameraMacOS.instance.listDevices();
-      if (devices.isNotEmpty) {
-        if (mounted) {
-          setState(() {
-            _selectedMacosCameraId = devices.first.deviceId;
-            _cameraInitialized = true; // Ready to build the widget
-          });
-        }
+    try {
+      _cameras = await availableCameras();
+      if (_cameras.isEmpty) {
+        log('No available cameras found.');
+        return;
       }
-    } else {
-      // For other platforms (Windows, Android, iOS)
-      try {
-        _cameras = await availableCameras();
-        if (_cameras.isEmpty) {
-          log('No available cameras found.');
-          return;
-        }
-        final settings = context.read<FaceCaptureProvider>();
-        _cameraIndex = settings.selectedCameraIndex < _cameras.length
-            ? settings.selectedCameraIndex
-            : 0;
+      final settings = context.read<FaceCaptureProvider>();
+      _cameraIndex = settings.selectedCameraIndex < _cameras.length
+          ? settings.selectedCameraIndex
+          : 0;
 
-        _controller = CameraController(
-          _cameras[_cameraIndex],
-          ResolutionPreset.high,
-          enableAudio: false,
-        );
+      _controller = CameraController(
+        _cameras[_cameraIndex],
+        ResolutionPreset.high,
+        enableAudio: false,
+      );
 
-        _initializeControllerFuture = _controller?.initialize();
-        await _initializeControllerFuture;
+      _initializeControllerFuture = _controller?.initialize();
+      await _initializeControllerFuture;
 
-        if (mounted) {
-          setState(() {
-            _cameraInitialized = true;
-          });
-        }
-      } on CameraException catch (e) {
-        log('Failed to initialize camera: ${e.code}: ${e.description}');
+      if (mounted) {
+        setState(() {
+          _cameraInitialized = true;
+        });
       }
+    } on CameraException catch (e) {
+      log('Failed to initialize camera: ${e.code}: ${e.description}');
     }
   }
 
@@ -196,7 +176,7 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
   Widget build(BuildContext context) {
     final settings = context.watch<FaceCaptureProvider>();
     final globalSettings = context.watch<GlobalSettingsProvider>();
-    final screenSize = MediaQuery.of(context).size; // Get screen size
+    final screenSize = MediaQuery.of(context).size;
 
     return Scaffold(
       body: Stack(
@@ -215,7 +195,8 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
             Positioned(
               top: settings.titleTop * screenSize.height,
               left: settings.titleLeft * screenSize.width,
-              right: 0,
+              width: settings.titleWidth *
+                  screenSize.width, // Use width from provider
               child: Text(
                 settings.titleText,
                 textAlign: settings.titleAlignment,
@@ -224,16 +205,17 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
                   fontWeight: settings.titleFontWeight,
                   color: settings.titleColor.withOpacity(settings.titleOpacity),
                   height: settings.titleLineHeight,
+                  fontStyle: settings.isTitleItalic
+                      ? FontStyle.italic
+                      : FontStyle.normal, // Use italic style
                 ),
               ),
             ),
-          // Camera Preview
           Positioned(
             top: settings.previewTop * screenSize.height,
             left: settings.previewLeft * screenSize.width,
             child: _buildCameraPreview(settings, screenSize),
           ),
-
           Positioned(
             top: settings.buttonTop * screenSize.height,
             left: settings.buttonLeft * screenSize.width,
@@ -364,17 +346,41 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
     final double finalWidth = settings.buttonWidth * screenSize.width;
     final double finalHeight = settings.buttonHeight * screenSize.height;
 
-    if (settings.useImageButton && settings.buttonImagePath != null) {
-      return GestureDetector(
-        onTap: _takePicture,
-        child: settings.isButtonImageAsset
-            ? Image.asset(settings.buttonImagePath!,
-                fit: BoxFit.contain, width: finalWidth, height: finalHeight)
-            : Image.file(File(settings.buttonImagePath!),
-                fit: BoxFit.contain, width: finalWidth, height: finalHeight),
+    if (settings.useImageButton) {
+      if (settings.buttonImagePath == null) return const SizedBox();
+      return Opacity(
+        opacity: settings.buttonImageOpacity,
+        child: GestureDetector(
+          onTap: _takePicture,
+          child: settings.isButtonImageAsset
+              ? Image.asset(settings.buttonImagePath!,
+                  fit: BoxFit.contain, width: finalWidth, height: finalHeight)
+              : Image.file(File(settings.buttonImagePath!),
+                  fit: BoxFit.contain, width: finalWidth, height: finalHeight),
+        ),
       );
     } else {
-      return const SizedBox();
+      return SizedBox(
+        width: finalWidth,
+        height: finalHeight,
+        child: ElevatedButton(
+          onPressed: _takePicture,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: settings.buttonBackgroundColor,
+            foregroundColor: settings.buttonForegroundColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(settings.buttonBorderRadius),
+            ),
+          ),
+          child: Text(
+            settings.buttonText,
+            style: TextStyle(
+              fontSize: settings.buttonFontSize,
+              fontWeight: settings.buttonFontWeight,
+            ),
+          ),
+        ),
+      );
     }
   }
 

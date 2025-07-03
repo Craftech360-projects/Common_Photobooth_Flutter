@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/presentation/face_capture_screen.dart';
 import 'package:photobooth_flutter/providers/face_capture_provider.dart';
+import 'package:photobooth_flutter/widgets/color_picker.dart';
 import 'package:photobooth_flutter/widgets/custom_slider.dart';
 import 'package:photobooth_flutter/widgets/file_upload_area.dart';
 import 'package:photobooth_flutter/widgets/form_row.dart';
@@ -77,6 +78,7 @@ class _FaceCaptureSettingsState extends State<FaceCaptureSettings> {
     );
   }
 }
+// lib/presentation/face_capture_settings.dart
 
 class _SettingsSection extends StatelessWidget {
   const _SettingsSection();
@@ -88,8 +90,9 @@ class _SettingsSection extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20.0),
         child: Container(
+          // Using a simple container, add blur via BackdropFilter if desired
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.5),
+            color: Colors.white.withOpacity(0.85),
             borderRadius: BorderRadius.circular(20.0),
             border: Border.all(color: Colors.white.withOpacity(0.2)),
           ),
@@ -143,20 +146,56 @@ class _TitleSettingsGroup extends StatelessWidget {
           ),
           if (settings.showTitle) ...[
             const SizedBox(height: 15),
+            TextFormField(
+              initialValue: settings.titleText,
+              decoration: InputDecoration(labelText: 'Title Text'),
+              onChanged: (v) => settings.setTitleStyle(text: v),
+            ),
+            const SizedBox(height: 15),
             SliderWithLabel(
-                label: 'From Top (%)',
-                value: settings.titleTop,
+                label: 'Font Size',
+                value: settings.titleFontSize,
+                min: 16,
+                max: 120,
+                onChanged: (v) => settings.setTitleStyle(fontSize: v)),
+            SliderWithLabel(
+                label: 'Opacity',
+                value: settings.titleOpacity,
                 min: 0.0,
                 max: 1.0,
                 step: 0.01,
-                onChanged: (v) => settings.setTitleTop(v)),
-            SliderWithLabel(
-                label: 'From Left (%)',
-                value: settings.titleLeft,
-                min: 0.0,
-                max: 1.0,
-                step: 0.01,
-                onChanged: (v) => settings.setTitleLeft(v)),
+                onChanged: (v) => settings.setTitleStyle(opacity: v)),
+            const SizedBox(height: 15),
+            SettingsGroup(
+              isSubgroup: true,
+              icon: '📍',
+              title: 'Positioning',
+              child: Column(
+                children: [
+                  SliderWithLabel(
+                      label: 'From Top (%)',
+                      value: settings.titleTop,
+                      min: 0.0,
+                      max: 1.0,
+                      step: 0.01,
+                      onChanged: (v) => settings.setTitlePosition(top: v)),
+                  SliderWithLabel(
+                      label: 'From Left (%)',
+                      value: settings.titleLeft,
+                      min: 0.0,
+                      max: 1.0,
+                      step: 0.01,
+                      onChanged: (v) => settings.setTitlePosition(left: v)),
+                  SliderWithLabel(
+                      label: 'Width (%)',
+                      value: settings.titleWidth,
+                      min: 0.1,
+                      max: 1.0,
+                      step: 0.01,
+                      onChanged: (v) => settings.setTitlePosition(width: v)),
+                ],
+              ),
+            ),
           ]
         ],
       ),
@@ -172,46 +211,91 @@ class _CameraPreviewSettingsGroup extends StatelessWidget {
     return SettingsGroup(
       icon: '📷',
       title: 'Camera Preview Settings',
-      child: SettingsGroup(
-        isSubgroup: true,
-        icon: '📐',
-        title: 'Sizing & Positioning',
-        child: Column(
-          children: [
-            FormRow(children: [
-              Expanded(
-                  child: SliderWithLabel(
-                      label: 'Preview Width (%)',
-                      value: settings.previewWidth,
-                      min: 0.1,
-                      max: 1.0,
-                      step: 0.01,
-                      onChanged: (v) => settings.setPreviewWidth(v))),
-              Expanded(
-                  child: SliderWithLabel(
-                      label: 'Preview Height (%)',
-                      value: settings.previewHeight,
-                      min: 0.1,
-                      max: 1.0,
-                      step: 0.01,
-                      onChanged: (v) => settings.setPreviewHeight(v))),
-            ]),
-            SliderWithLabel(
-                label: 'From Top (%)',
-                value: settings.previewTop,
-                min: 0.0,
-                max: 1.0,
-                step: 0.01,
-                onChanged: (v) => settings.setPreviewTop(v)),
-            SliderWithLabel(
-                label: 'From Left (%)',
-                value: settings.previewLeft,
-                min: 0.0,
-                max: 1.0,
-                step: 0.01,
-                onChanged: (v) => settings.setPreviewLeft(v)),
-          ],
-        ),
+      child: Column(
+        children: [
+          SettingsGroup(
+            isSubgroup: true,
+            icon: '📐',
+            title: 'Sizing & Positioning',
+            child: Column(
+              children: [
+                FormRow(children: [
+                  Expanded(
+                      child: SliderWithLabel(
+                          label: 'Preview Width (%)',
+                          value: settings.previewWidth,
+                          min: 0.1,
+                          max: 1.0,
+                          step: 0.01,
+                          onChanged: (v) => settings.setPreviewDimensions(
+                              v, settings.previewHeight))),
+                  Expanded(
+                      child: SliderWithLabel(
+                          label: 'Preview Height (%)',
+                          value: settings.previewHeight,
+                          min: 0.1,
+                          max: 1.0,
+                          step: 0.01,
+                          onChanged: (v) => settings.setPreviewDimensions(
+                              settings.previewWidth, v))),
+                ]),
+                SliderWithLabel(
+                    label: 'From Top (%)',
+                    value: settings.previewTop,
+                    min: 0.0,
+                    max: 1.0,
+                    step: 0.01,
+                    onChanged: (v) =>
+                        settings.setPreviewPosition(settings.previewLeft, v)),
+                SliderWithLabel(
+                    label: 'From Left (%)',
+                    value: settings.previewLeft,
+                    min: 0.0,
+                    max: 1.0,
+                    step: 0.01,
+                    onChanged: (v) =>
+                        settings.setPreviewPosition(v, settings.previewTop)),
+              ],
+            ),
+          ),
+          const SizedBox(height: 15),
+          SettingsGroup(
+            isSubgroup: true,
+            icon: '🖼️',
+            title: 'Border Style',
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Show Border',
+                        style: Theme.of(context).textTheme.bodyLarge),
+                    Switch(
+                        value: settings.showPreviewBorder,
+                        onChanged: (v) =>
+                            settings.setPreviewStyle(showBorder: v)),
+                  ],
+                ),
+                if (settings.showPreviewBorder) ...[
+                  SliderWithLabel(
+                      label: 'Border Width',
+                      value: settings.previewBorderWidth,
+                      min: 1,
+                      max: 20,
+                      onChanged: (v) =>
+                          settings.setPreviewStyle(borderWidth: v)),
+                  SliderWithLabel(
+                      label: 'Border Radius',
+                      value: settings.previewBorderRadius,
+                      min: 0,
+                      max: 100,
+                      onChanged: (v) =>
+                          settings.setPreviewStyle(borderRadius: v)),
+                ],
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -232,14 +316,67 @@ class _ButtonSettingsGroup extends StatelessWidget {
             selectedIndex: settings.useImageButton ? 0 : 1,
             onSelected: (i) => settings.setUseImageButton(i == 0),
           ),
+          const SizedBox(height: 20),
           if (settings.useImageButton)
-            FileUploadArea(
-              onTap: () async {
-                // File picker logic
-              },
-              icon: '🖼️',
-              text: 'Choose Button Image',
-              selectedFile: settings.buttonImagePath,
+            Column(
+              children: [
+                FileUploadArea(
+                  onTap: () async {/* File picker logic */},
+                  icon: '🖼️',
+                  text: 'Choose Button Image',
+                  selectedFile: settings.buttonImagePath,
+                ),
+                SliderWithLabel(
+                    label: 'Opacity',
+                    value: settings.buttonImageOpacity,
+                    min: 0.0,
+                    max: 1.0,
+                    step: 0.01,
+                    onChanged: (v) => settings.setButtonStyle(imageOpacity: v)),
+              ],
+            )
+          else
+            Column(
+              children: [
+                TextFormField(
+                    initialValue: settings.buttonText,
+                    decoration: InputDecoration(labelText: 'Button Text'),
+                    onChanged: (v) => settings.setButtonStyle(text: v)),
+                const SizedBox(height: 15),
+                FormRow(children: [
+                  Expanded(
+                      child: SliderWithLabel(
+                          label: 'Font Size',
+                          value: settings.buttonFontSize,
+                          min: 12,
+                          max: 48,
+                          onChanged: (v) =>
+                              settings.setButtonStyle(fontSize: v))),
+                  Expanded(
+                      child: SliderWithLabel(
+                          label: 'Border Radius',
+                          value: settings.buttonBorderRadius,
+                          min: 0,
+                          max: 50,
+                          onChanged: (v) =>
+                              settings.setButtonStyle(borderRadius: v))),
+                ]),
+                const SizedBox(height: 15),
+                FormRow(children: [
+                  Expanded(
+                      child: ColorPickerWidget(
+                          label: 'Background',
+                          color: settings.buttonBackgroundColor,
+                          onColorChanged: (c) =>
+                              settings.setButtonStyle(backgroundColor: c))),
+                  Expanded(
+                      child: ColorPickerWidget(
+                          label: 'Text Color',
+                          color: settings.buttonForegroundColor,
+                          onColorChanged: (c) =>
+                              settings.setButtonStyle(foregroundColor: c))),
+                ]),
+              ],
             ),
           const SizedBox(height: 20),
           SettingsGroup(
@@ -256,7 +393,8 @@ class _ButtonSettingsGroup extends StatelessWidget {
                           min: 0.1,
                           max: 1.0,
                           step: 0.01,
-                          onChanged: (v) => settings.setButtonWidth(v))),
+                          onChanged: (v) => settings.setButtonDimensions(
+                              v, settings.buttonHeight))),
                   Expanded(
                       child: SliderWithLabel(
                           label: 'Button Height (%)',
@@ -264,7 +402,8 @@ class _ButtonSettingsGroup extends StatelessWidget {
                           min: 0.02,
                           max: 0.2,
                           step: 0.01,
-                          onChanged: (v) => settings.setButtonHeight(v))),
+                          onChanged: (v) => settings.setButtonDimensions(
+                              settings.buttonWidth, v))),
                 ]),
                 SliderWithLabel(
                     label: 'From Top (%)',
@@ -272,14 +411,16 @@ class _ButtonSettingsGroup extends StatelessWidget {
                     min: 0.0,
                     max: 1.0,
                     step: 0.01,
-                    onChanged: (v) => settings.setButtonTop(v)),
+                    onChanged: (v) =>
+                        settings.setButtonPosition(settings.buttonLeft, v)),
                 SliderWithLabel(
                     label: 'From Left (%)',
                     value: settings.buttonLeft,
                     min: 0.0,
                     max: 1.0,
                     step: 0.01,
-                    onChanged: (v) => settings.setButtonLeft(v)),
+                    onChanged: (v) =>
+                        settings.setButtonPosition(v, settings.buttonTop)),
               ],
             ),
           ),

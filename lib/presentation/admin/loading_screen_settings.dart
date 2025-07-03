@@ -1,78 +1,74 @@
 // lib/presentation/loading_screen_settings.dart
 
 import 'dart:ui';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:photobooth_flutter/presentation/loading_screen.dart';
 import 'package:photobooth_flutter/providers/loading_screen_provider.dart';
+import 'package:photobooth_flutter/widgets/color_picker.dart';
 import 'package:photobooth_flutter/widgets/custom_dropdown.dart';
 import 'package:photobooth_flutter/widgets/custom_slider.dart';
 import 'package:photobooth_flutter/widgets/file_upload_area.dart';
 import 'package:photobooth_flutter/widgets/form_row.dart';
-import 'package:photobooth_flutter/widgets/color_picker.dart';
+import 'package:photobooth_flutter/widgets/input_decoration.dart';
 import 'package:photobooth_flutter/widgets/settings_group.dart';
 import 'package:photobooth_flutter/widgets/settings_header.dart';
-import 'package:photobooth_flutter/widgets/settings_preview.dart';
 import 'package:provider/provider.dart';
 
-class LoadingScreenSettings extends StatelessWidget {
+class LoadingScreenSettings extends StatefulWidget {
   const LoadingScreenSettings({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              AppColors.primaryGradientStart,
-              AppColors.primaryGradientEnd
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: const Row(
-          children: [
-            _PreviewSection(),
-            Expanded(child: _SettingsSection()),
-          ],
-        ),
-      ),
-    );
-  }
+  State<LoadingScreenSettings> createState() => _LoadingScreenSettingsState();
 }
 
-// --- UI SECTIONS ---
-class _PreviewSection extends StatelessWidget {
-  const _PreviewSection();
+class _LoadingScreenSettingsState extends State<LoadingScreenSettings> {
+  bool _isPanelOpen = true;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(12.0),
-      child: Stack(
+    double settingsPanelWidth = MediaQuery.of(context).size.width * 0.8;
+    return Scaffold(
+      body: Stack(
         children: [
-          const Center(
-            child: SettingsPreview(
-              width: 1080,
-              height: 1920,
-              child: LoadingScreen(),
-            ),
+          // The live preview now uses isPreviewMode to prevent errors
+          const LoadingScreen(isPreviewMode: true),
+          AnimatedPositioned(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOutCubic,
+            right: _isPanelOpen ? 0 : -settingsPanelWidth,
+            top: 0,
+            bottom: 0,
+            width: settingsPanelWidth,
+            child: const _SettingsSection(),
           ),
           Positioned(
-            top: 0,
-            left: 0,
-            child: Material(
-              color: AppColors.white.withValues(alpha: 0.9),
-              shape: const CircleBorder(),
-              elevation: 2.0,
-              child: IconButton(
-                icon: const Icon(Icons.arrow_back, color: AppColors.labelText),
-                onPressed: () => Navigator.of(context).pop(),
-                tooltip: 'Back',
+            top: 20,
+            left: 20,
+            child: FloatingActionButton.small(
+              heroTag: 'loadingBack',
+              tooltip: 'Back',
+              backgroundColor: AppColors.white.withOpacity(0.8),
+              child: const Icon(Icons.arrow_back,
+                  color: AppColors.primaryGradientEnd),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ),
+          AnimatedPositioned(
+            duration: const Duration(milliseconds: 300),
+            top: 20,
+            right: _isPanelOpen ? settingsPanelWidth + 20 : 20,
+            child: FloatingActionButton(
+              heroTag: 'loadingToggle',
+              tooltip: 'Toggle Settings',
+              backgroundColor: AppColors.white,
+              onPressed: () => setState(() => _isPanelOpen = !_isPanelOpen),
+              child: Icon(
+                _isPanelOpen
+                    ? Icons.arrow_forward_ios_rounded
+                    : Icons.arrow_back_ios_rounded,
+                color: AppColors.primaryGradientEnd,
               ),
             ),
           ),
@@ -92,12 +88,12 @@ class _SettingsSection extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20.0),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
+          filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.85),
+              color: Colors.white.withOpacity(0.6),
               borderRadius: BorderRadius.circular(20.0),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+              border: Border.all(color: Colors.white.withOpacity(0.2)),
             ),
             child: const Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -111,9 +107,9 @@ class _SettingsSection extends StatelessWidget {
                     padding: EdgeInsets.all(30),
                     child: Column(
                       children: [
-                        _TitleSettingsGroup(),
-                        SizedBox(height: 25),
                         _LoaderSettingsGroup(),
+                        SizedBox(height: 25),
+                        _TitleSettingsGroup(),
                         SizedBox(height: 25),
                         _BackgroundSettingsGroup(),
                       ],
@@ -129,15 +125,101 @@ class _SettingsSection extends StatelessWidget {
   }
 }
 
-// --- SETTINGS WIDGETS ---
+class _LoaderSettingsGroup extends StatelessWidget {
+  const _LoaderSettingsGroup();
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.watch<LoadingScreenProvider>();
+    return SettingsGroup(
+      icon: '⏳',
+      title: 'Loader Asset',
+      child: Column(
+        children: [
+          FileUploadArea(
+            onTap: () async {
+              final result = await FilePicker.platform.pickFiles(
+                type: FileType.custom,
+                allowedExtensions: ['mp4', 'mov', 'gif'],
+              );
+              if (result?.files.single.path != null) {
+                settings.setLoaderAsset(result!.files.single.path);
+              }
+            },
+            icon: '📁',
+            text: 'Select Loader (.mp4, .gif)',
+            selectedFile: settings.loaderAssetPath,
+          ),
+          if (settings.loaderAssetType == 'video') ...[
+            const SizedBox(height: 15),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Display Fullscreen',
+                    style: Theme.of(context).textTheme.bodyLarge),
+                Switch(
+                    value: settings.loaderIsFullscreen,
+                    onChanged: (v) => settings.setLoaderStyle(isFullscreen: v)),
+              ],
+            ),
+          ],
+          if (!settings.loaderIsFullscreen ||
+              settings.loaderAssetType == 'gif') ...[
+            const SizedBox(height: 15),
+            SettingsGroup(
+              isSubgroup: true,
+              icon: '📐',
+              title: 'Sizing & Positioning',
+              child: Column(
+                children: [
+                  FormRow(children: [
+                    Expanded(
+                        child: SliderWithLabel(
+                            label: 'Width (%)',
+                            value: settings.loaderWidth,
+                            min: 0.1,
+                            max: 1.0,
+                            step: 0.01,
+                            onChanged: (v) =>
+                                settings.setLoaderDimensions(width: v))),
+                    Expanded(
+                        child: SliderWithLabel(
+                            label: 'Height (%)',
+                            value: settings.loaderHeight,
+                            min: 0.1,
+                            max: 1.0,
+                            step: 0.01,
+                            onChanged: (v) =>
+                                settings.setLoaderDimensions(height: v))),
+                  ]),
+                  SliderWithLabel(
+                      label: 'From Top (%)',
+                      value: settings.loaderTop,
+                      min: 0.0,
+                      max: 1.0,
+                      step: 0.01,
+                      onChanged: (v) => settings.setLoaderPosition(top: v)),
+                  SliderWithLabel(
+                      label: 'From Left (%)',
+                      value: settings.loaderLeft,
+                      min: 0.0,
+                      max: 1.0,
+                      step: 0.01,
+                      onChanged: (v) => settings.setLoaderPosition(left: v)),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
 
 class _TitleSettingsGroup extends StatelessWidget {
   const _TitleSettingsGroup();
   @override
   Widget build(BuildContext context) {
     final settings = context.watch<LoadingScreenProvider>();
-    final textTheme = Theme.of(context).textTheme;
-
     return SettingsGroup(
       icon: '✏️',
       title: 'Title Settings',
@@ -146,73 +228,50 @@ class _TitleSettingsGroup extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Show Title', style: textTheme.bodyLarge),
+              Text('Show Title', style: Theme.of(context).textTheme.bodyLarge),
               Switch(
-                value: settings.showTitle,
-                onChanged: (value) => settings.setShowTitle(value),
-              ),
+                  value: settings.showTitle,
+                  onChanged: (v) => settings.setTitleStyle(show: v)),
             ],
           ),
           if (settings.showTitle) ...[
             const SizedBox(height: 15),
             TextFormField(
-              initialValue: settings.titleText,
-              decoration: _inputDecoration(context, 'Title Text'),
-              onChanged: (value) => settings.setTitleText(value),
+                initialValue: settings.titleText,
+                decoration: inputDecoration(context, 'Title Text'),
+                onChanged: (v) => settings.setTitleStyle(text: v)),
+            const SizedBox(height: 15),
+            SliderWithLabel(
+                label: 'Font Size',
+                value: settings.titleFontSize,
+                min: 16,
+                max: 100,
+                onChanged: (v) => settings.setTitleStyle(fontSize: v)),
+            SliderWithLabel(
+                label: 'Opacity',
+                value: settings.titleOpacity,
+                min: 0.0,
+                max: 1.0,
+                step: 0.01,
+                onChanged: (v) => settings.setTitleStyle(opacity: v)),
+            const SizedBox(height: 15),
+            CustomDropdown<FontWeight>(
+              label: 'Font Weight',
+              value: settings.titleFontWeight,
+              items: const {
+                FontWeight.w300: 'Light',
+                FontWeight.w400: 'Regular',
+                FontWeight.w500: 'Medium',
+                FontWeight.w700: 'Bold',
+                FontWeight.w900: 'Black'
+              },
+              onChanged: (v) => settings.setTitleStyle(fontWeight: v),
             ),
             const SizedBox(height: 15),
-            FormRow(
-              children: [
-                Expanded(
-                  child: SliderWithLabel(
-                    label: 'Font Size',
-                    value: settings.titleFontSize,
-                    min: 16,
-                    max: 48,
-                    onChanged: (value) => settings.setTitleFontSize(value),
-                  ),
-                ),
-                Expanded(
-                  child: SliderWithLabel(
-                    label: 'Opacity',
-                    value: settings.titleOpacity,
-                    min: 0.1,
-                    max: 1.0,
-                    step: 0.1,
-                    onChanged: (value) => settings.setTitleOpacity(value),
-                  ),
-                )
-              ],
-            ),
-            const SizedBox(height: 15),
-            SettingsGroup(
-              isSubgroup: true,
-              icon: '🎨',
-              title: 'Styling',
-              child: Column(
-                children: [
-                  CustomDropdown<FontWeight>(
-                    label: 'Font Weight',
-                    value: settings.titleFontWeight,
-                    items: const {
-                      FontWeight.w100: 'Thin',
-                      FontWeight.w300: 'Light',
-                      FontWeight.w400: 'Regular',
-                      FontWeight.w500: 'Medium',
-                      FontWeight.w700: 'Bold',
-                      FontWeight.w900: 'Extra Bold',
-                    },
-                    onChanged: (value) => settings.setTitleFontWeight(value!),
-                  ),
-                  const SizedBox(height: 15),
-                  CustomColorPicker(
-                    label: 'Title Color',
-                    pickerColor: settings.titleColor,
-                    onColorChanged: (color) => settings.setTitleColor(color),
-                  ),
-                ],
-              ),
-            ),
+            ColorPickerWidget(
+                label: 'Title Color',
+                color: settings.titleColor,
+                onColorChanged: (c) => settings.setTitleStyle(color: c)),
             const SizedBox(height: 15),
             SettingsGroup(
               isSubgroup: true,
@@ -221,19 +280,19 @@ class _TitleSettingsGroup extends StatelessWidget {
               child: Column(
                 children: [
                   SliderWithLabel(
-                    label: 'From Top',
-                    value: settings.titleTop,
-                    min: 0,
-                    max: 1000,
-                    onChanged: (value) => settings.setTitleTop(value),
-                  ),
+                      label: 'From Top (%)',
+                      value: settings.titleTop,
+                      min: 0.0,
+                      max: 1.0,
+                      step: 0.01,
+                      onChanged: (v) => settings.setTitlePosition(top: v)),
                   SliderWithLabel(
-                    label: 'From Left',
-                    value: settings.titleLeft,
-                    min: 0,
-                    max: 500,
-                    onChanged: (value) => settings.setTitleLeft(value),
-                  ),
+                      label: 'Width (%)',
+                      value: settings.titleWidth,
+                      min: 0.1,
+                      max: 1.0,
+                      step: 0.01,
+                      onChanged: (v) => settings.setTitlePosition(width: v)),
                 ],
               ),
             ),
@@ -244,81 +303,11 @@ class _TitleSettingsGroup extends StatelessWidget {
   }
 }
 
-class _LoaderSettingsGroup extends StatelessWidget {
-  const _LoaderSettingsGroup();
-  @override
-  Widget build(BuildContext context) {
-    final settings = context.watch<LoadingScreenProvider>();
-    return SettingsGroup(
-      icon: '⏳',
-      title: 'Loader Settings',
-      child: Column(
-        children: [
-          SettingsGroup(
-            isSubgroup: true,
-            icon: '📐',
-            title: 'Sizing',
-            child: FormRow(
-              children: [
-                Expanded(
-                  child: SliderWithLabel(
-                    label: 'Loader Width',
-                    value: settings.loaderWidth,
-                    min: 50,
-                    max: 500,
-                    onChanged: (value) => settings.setLoaderWidth(value),
-                  ),
-                ),
-                Expanded(
-                  child: SliderWithLabel(
-                    label: 'Loader Height',
-                    value: settings.loaderHeight,
-                    min: 50,
-                    max: 500,
-                    onChanged: (value) => settings.setLoaderHeight(value),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 15),
-          SettingsGroup(
-            isSubgroup: true,
-            icon: '📍',
-            title: 'Positioning',
-            child: Column(
-              children: [
-                SliderWithLabel(
-                  label: 'From Top',
-                  value: settings.loaderTop,
-                  min: 0,
-                  max: 1000,
-                  onChanged: (value) => settings.setLoaderTop(value),
-                ),
-                SliderWithLabel(
-                  label: 'From Left',
-                  value: settings.loaderLeft,
-                  min: 0,
-                  max: 500,
-                  onChanged: (value) => settings.setLoaderLeft(value),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _BackgroundSettingsGroup extends StatelessWidget {
   const _BackgroundSettingsGroup();
-
   @override
   Widget build(BuildContext context) {
     final settings = context.watch<LoadingScreenProvider>();
-    final textTheme = Theme.of(context).textTheme;
-
     return SettingsGroup(
       icon: '🖼️',
       title: 'Background Settings',
@@ -327,11 +316,11 @@ class _BackgroundSettingsGroup extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Show Custom Background', style: textTheme.bodyLarge),
+              Text('Show Custom Background',
+                  style: Theme.of(context).textTheme.bodyLarge),
               Switch(
-                value: settings.showBackground,
-                onChanged: (value) => settings.setShowBackground(value),
-              ),
+                  value: settings.showBackground,
+                  onChanged: (v) => settings.setShowBackground(v)),
             ],
           ),
           if (settings.showBackground) ...[
@@ -340,8 +329,8 @@ class _BackgroundSettingsGroup extends StatelessWidget {
               onTap: () async {
                 final result =
                     await FilePicker.platform.pickFiles(type: FileType.image);
-                if (result != null && result.files.single.path != null) {
-                  settings.setBackgroundImage(result.files.single.path, false);
+                if (result?.files.single.path != null) {
+                  settings.setBackgroundImage(result!.files.single.path);
                 }
               },
               icon: '📁',
@@ -353,31 +342,4 @@ class _BackgroundSettingsGroup extends StatelessWidget {
       ),
     );
   }
-}
-
-// --- HELPER METHODS ---
-
-InputDecoration _inputDecoration(BuildContext context, String hintText) {
-  final theme = Theme.of(context);
-  return InputDecoration(
-    hintText: hintText,
-    filled: true,
-    fillColor: Colors.white.withValues(alpha: 0.8),
-    hintStyle: theme.textTheme.bodyMedium
-        ?.copyWith(color: AppColors.labelText.withValues(alpha: 0.7)),
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: AppColors.inputBorder, width: 2),
-    ),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: AppColors.inputBorder, width: 2),
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10),
-      borderSide:
-          const BorderSide(color: AppColors.primaryGradientStart, width: 2),
-    ),
-    contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-  );
 }

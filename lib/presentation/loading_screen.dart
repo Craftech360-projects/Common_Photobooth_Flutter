@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
+import 'package:photobooth_flutter/providers/loading_screen_provider.dart';
 import 'package:photobooth_flutter/providers/photobooth_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
 import 'package:photobooth_flutter/services/email_services.dart';
@@ -14,7 +15,8 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoadingScreen extends StatefulWidget {
-  const LoadingScreen({super.key});
+  final bool isPreviewMode;
+  const LoadingScreen({super.key, this.isPreviewMode = false});
 
   @override
   State<LoadingScreen> createState() => _LoadingScreenState();
@@ -22,20 +24,27 @@ class LoadingScreen extends StatefulWidget {
 
 class _LoadingScreenState extends State<LoadingScreen> {
   late final Player _player;
-  late final VideoController _videoController;
+  VideoController? _videoController;
   String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
     _player = Player();
-    _videoController = VideoController(_player);
-    _player.open(Media('asset://assets/videos/loading_bg.mp4'), play: true);
-    _player.setPlaylistMode(PlaylistMode.single);
+    final settings = context.read<LoadingScreenProvider>();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _processImage();
-    });
+    if (settings.loaderAssetType == 'video') {
+      _videoController = VideoController(_player);
+      final media = settings.isLoaderAsset
+          ? Media('asset://${settings.loaderAssetPath}')
+          : Media(settings.loaderAssetPath);
+      _player.open(media, play: true);
+      _player.setPlaylistMode(PlaylistMode.loop);
+    }
+
+    if (!widget.isPreviewMode) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _processImage());
+    }
   }
 
   @override
@@ -229,20 +238,103 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final settings = context.watch<LoadingScreenProvider>();
+    final globalSettings = context.watch<GlobalSettingsProvider>();
+    final screenSize = MediaQuery.of(context).size;
+
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Center(
-        child: _errorMessage != null
-            ? _buildErrorDisplay()
-            : Video(
-                controls: NoVideoControls,
-                controller: _videoController,
+      body: Stack(
+        alignment: Alignment.center,
+        children: [
+          // Background Image
+          if (settings.showBackground && settings.backgroundImagePath != null)
+            Container(
+              width: double.infinity,
+              height: double.infinity,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: _getBackgroundImage(settings, globalSettings),
+                  fit: BoxFit.cover,
+                ),
               ),
+            ),
+
+          // Loader Asset
+          if (_errorMessage == null) _buildLoaderWidget(settings, screenSize),
+
+          // Title
+          if (settings.showTitle)
+            Positioned(
+              top: settings.titleTop * screenSize.height,
+              width: settings.titleWidth * screenSize.width,
+              child: Text(
+                settings.titleText,
+                textAlign: settings.titleAlignment,
+                style: TextStyle(
+                  fontSize: settings.titleFontSize,
+                  fontWeight: settings.titleFontWeight,
+                  color: settings.titleColor.withOpacity(settings.titleOpacity),
+                ),
+              ),
+            ),
+
+          // Error Message Overlay
+          if (_errorMessage != null) _buildErrorDisplay(),
+        ],
       ),
     );
   }
 
+  Widget _buildLoaderWidget(LoadingScreenProvider settings, Size screenSize) {
+    Widget loader;
+    if (settings.loaderAssetType == 'video') {
+      if (_videoController == null) return const SizedBox.shrink();
+      loader = Video(controller: _videoController!, controls: NoVideoControls);
+    } else {
+      // 'gif'
+      loader = settings.isLoaderAsset
+          ? Image.asset(settings.loaderAssetPath)
+          : Image.file(File(settings.loaderAssetPath));
+    }
+
+    if (settings.loaderAssetType == 'video' && settings.loaderIsFullscreen) {
+      return SizedBox.expand(child: loader);
+    }
+
+    return Positioned(
+      top: settings.loaderTop * screenSize.height,
+      left: settings.loaderLeft * screenSize.width,
+      width: settings.loaderWidth * screenSize.width,
+      height: settings.loaderHeight * screenSize.height,
+      child: loader,
+    );
+  }
+
+  ImageProvider _getBackgroundImage(
+      LoadingScreenProvider settings, GlobalSettingsProvider globalSettings) {
+    // This method remains the same
+    if (settings.showBackground && settings.backgroundImagePath != null) {
+      if (settings.isBackgroundImageAsset) {
+        return AssetImage(settings.backgroundImagePath!);
+      } else {
+        return FileImage(File(settings.backgroundImagePath!));
+      }
+    } else {
+      if (globalSettings.backgroundImagePath != null) {
+        if (globalSettings.isBackgroundImageAsset) {
+          return AssetImage(globalSettings.backgroundImagePath!);
+        } else {
+          return FileImage(File(globalSettings.backgroundImagePath!));
+        }
+      } else {
+        return const AssetImage('assets/images/common_bg.png');
+      }
+    }
+  }
+
   Widget _buildErrorDisplay() {
+    // This method remains the same
     return Padding(
       padding: const EdgeInsets.all(32.0),
       child: Column(
@@ -250,17 +342,15 @@ class _LoadingScreenState extends State<LoadingScreen> {
         children: [
           const Icon(Icons.error, color: Colors.red, size: 60),
           const SizedBox(height: 20),
-          const Text(
-            'An Error Occurred',
-            style: TextStyle(
-                color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
-          ),
+          const Text('An Error Occurred',
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold)),
           const SizedBox(height: 12),
-          Text(
-            _errorMessage!,
-            textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.white70, fontSize: 18),
-          ),
+          Text(_errorMessage!,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.white70, fontSize: 18)),
         ],
       ),
     );
