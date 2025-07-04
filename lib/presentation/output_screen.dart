@@ -193,8 +193,8 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
                 if (widget.isPreviewMode) return;
                 Provider.of<PhotoboothProvider>(context, listen: false)
                     .clearUserData();
-                Navigator.of(context)
-                    .pushNamedAndRemoveUntil('/', (route) => false);
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                    AppRoutes.welcomeScreen, (route) => false);
               }),
         ),
       ],

@@ -1,4 +1,4 @@
-import 'dart:convert'; // Import for utf8 decoding
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
@@ -101,19 +101,19 @@ class _AuthScreenState extends State<AuthScreen> {
 
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings, color: AppColors.white),
-            onPressed: () {
-              Navigator.pushNamed(context, AppRoutes.adminScreen);
-            },
-          ),
-        ],
-      ),
+      // appBar: AppBar(
+      //   automaticallyImplyLeading: false,
+      //   backgroundColor: Colors.transparent,
+      //   elevation: 0,
+      //   actions: [
+      //     IconButton(
+      //       icon: const Icon(Icons.settings, color: AppColors.white),
+      //       onPressed: () {
+      //         Navigator.pushNamed(context, AppRoutes.adminScreen);
+      //       },
+      //     ),
+      //   ],
+      // ),
       body: Container(
         width: double.infinity,
         height: double.infinity,
@@ -320,33 +320,33 @@ class _AuthScreenState extends State<AuthScreen> {
                                   ),
                           ),
                         ),
-                        Constants.h8,
-                        RichText(
-                          text: TextSpan(
-                            children: [
-                              const TextSpan(
-                                text: "Checkout application from here: ",
-                                style: TextStyle(color: AppColors.black),
-                              ),
-                              WidgetSpan(
-                                alignment: PlaceholderAlignment.middle,
-                                child: InkWell(
-                                  onTap: () {
-                                    Navigator.pushNamed(
-                                        context, AppRoutes.welcomeScreen);
-                                  },
-                                  child: const Text(
-                                    "Click Here",
-                                    style: TextStyle(
-                                      color: Colors.blue,
-                                      decoration: TextDecoration.none,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
+                        // Constants.h8,
+                        // RichText(
+                        //   text: TextSpan(
+                        //     children: [
+                        //       const TextSpan(
+                        //         text: "Checkout application from here: ",
+                        //         style: TextStyle(color: AppColors.black),
+                        //       ),
+                        //       WidgetSpan(
+                        //         alignment: PlaceholderAlignment.middle,
+                        //         child: InkWell(
+                        //           onTap: () {
+                        //             Navigator.pushNamed(
+                        //                 context, AppRoutes.welcomeScreen);
+                        //           },
+                        //           child: const Text(
+                        //             "Click Here",
+                        //             style: TextStyle(
+                        //               color: Colors.blue,
+                        //               decoration: TextDecoration.none,
+                        //             ),
+                        //           ),
+                        //         ),
+                        //       ),
+                        //     ],
+                        //   ),
+                        // )
                       ],
                     ),
                   ),

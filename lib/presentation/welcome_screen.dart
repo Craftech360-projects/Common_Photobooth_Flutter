@@ -35,7 +35,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     // This is used for font sizes and non-stretching elements
     const refWidth = 1080.0;
     const refHeight = 1920.0;
-    final textScale = min(screenSize.width / refWidth, screenSize.height / refHeight);
+    final textScale =
+        min(screenSize.width / refWidth, screenSize.height / refHeight);
 
     return Scaffold(
       body: WatermarkOverlay(
@@ -105,37 +106,38 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
   // Button build methods now only need textScale for fonts and border radius
   Widget _buildTextButton(WelcomeScreenProvider settings, double textScale) {
-      return Opacity(
-          opacity: settings.buttonOpacity,
-          child: ElevatedButton(
-              onPressed: () =>
-                  Navigator.pushNamed(context, AppRoutes.participantDetails),
-              style: ElevatedButton.styleFrom(
-                  backgroundColor: settings.welcomeButtonColor,
-                  foregroundColor: settings.welcomeButtonTextColor,
-                  minimumSize: Size(settings.buttonWidth, settings.buttonHeight),
-                  padding: EdgeInsets.symmetric(
-                      vertical: settings.buttonPaddingVertical,
-                      horizontal: settings.buttonPaddingHorizontal,
-                  ),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(settings.buttonBorderRadius * textScale),
-                  ),
-              ),
-              child: Text(
-                  settings.welcomeButtonText,
-                  style: TextStyle(
-                      fontSize: settings.buttonTextFontSize * textScale,
-                      fontWeight: settings.buttonTextFontWeight,
-                      color: settings.welcomeButtonTextColor
-                          .withOpacity(settings.buttonTextOpacity),
-                      fontStyle:
-                          settings.buttonTextItalic ? FontStyle.italic : FontStyle.normal,
-                      height: settings.buttonTextLineHeight,
-                  ),
-              ),
+    return Opacity(
+      opacity: settings.buttonOpacity,
+      child: ElevatedButton(
+        onPressed: () =>
+            Navigator.pushNamed(context, AppRoutes.participantDetails),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: settings.welcomeButtonColor,
+          foregroundColor: settings.welcomeButtonTextColor,
+          minimumSize: Size(settings.buttonWidth, settings.buttonHeight),
+          padding: EdgeInsets.symmetric(
+            vertical: settings.buttonPaddingVertical,
+            horizontal: settings.buttonPaddingHorizontal,
           ),
-      );
+          shape: RoundedRectangleBorder(
+            borderRadius:
+                BorderRadius.circular(settings.buttonBorderRadius * textScale),
+          ),
+        ),
+        child: Text(
+          settings.welcomeButtonText,
+          style: TextStyle(
+            fontSize: settings.buttonTextFontSize * textScale,
+            fontWeight: settings.buttonTextFontWeight,
+            color: settings.welcomeButtonTextColor
+                .withOpacity(settings.buttonTextOpacity),
+            fontStyle:
+                settings.buttonTextItalic ? FontStyle.italic : FontStyle.normal,
+            height: settings.buttonTextLineHeight,
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildImageButton(WelcomeScreenProvider settings, double textScale) {
@@ -143,28 +145,30 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       return _buildTextButton(settings, textScale);
     }
     return Opacity(
-        opacity: settings.buttonOpacity,
-        child: GestureDetector(
-            onTap: () => Navigator.pushNamed(context, AppRoutes.participantDetails),
-            child: ClipRRect(
-                borderRadius: BorderRadius.circular(settings.buttonBorderRadius * textScale),
-                child: SizedBox(
-                    width: settings.buttonWidth,
-                    height: settings.buttonHeight,
-                    child: Image(
-                        image: settings.isButtonImageAsset
-                            ? AssetImage(settings.buttonImagePath!)
-                            : FileImage(File(settings.buttonImagePath!)) as ImageProvider,
-                        fit: BoxFit.contain,
-                        opacity: AlwaysStoppedAnimation(settings.buttonImageOpacity),
-                    ),
-                ),
+      opacity: settings.buttonOpacity,
+      child: GestureDetector(
+        onTap: () => Navigator.pushNamed(context, AppRoutes.participantDetails),
+        child: ClipRRect(
+          borderRadius:
+              BorderRadius.circular(settings.buttonBorderRadius * textScale),
+          child: SizedBox(
+            width: settings.buttonWidth,
+            height: settings.buttonHeight,
+            child: Image(
+              image: settings.isButtonImageAsset
+                  ? AssetImage(settings.buttonImagePath!)
+                  : FileImage(File(settings.buttonImagePath!)) as ImageProvider,
+              fit: BoxFit.contain,
+              opacity: AlwaysStoppedAnimation(settings.buttonImageOpacity),
             ),
+          ),
         ),
+      ),
     );
   }
 
-  ImageProvider _getBackgroundImage(WelcomeScreenProvider welcomeSettings, GlobalSettingsProvider globalSettings) {
+  ImageProvider _getBackgroundImage(WelcomeScreenProvider welcomeSettings,
+      GlobalSettingsProvider globalSettings) {
     if (welcomeSettings.welcomeScreenBackground != null) {
       return welcomeSettings.isWelcomeScreenBackgroundAsset
           ? AssetImage(welcomeSettings.welcomeScreenBackground!)
