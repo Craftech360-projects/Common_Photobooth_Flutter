@@ -30,12 +30,16 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
   dynamic _controller;
   bool _cameraInitialized = false;
 
-  // Standard camera properties
+  // For camera plugin (Windows/other)
   List<CameraDescription> _cameras = <CameraDescription>[];
   int _cameraIndex = 0;
+
+  // For camera_macos plugin
+  List<CameraMacOSDevice> _macOsCameras = <CameraMacOSDevice>[];
+
   Future<void>? _initializeControllerFuture;
 
-  // NEW: Check the platform once
+  // Check the platform once
   final bool _isMacos = Platform.isMacOS;
 
   @override
@@ -53,66 +57,92 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_isMacos) {
-      return; // macOS camera switching is handled differently if needed
-    }
-
     final settings = context.read<FaceCaptureProvider>();
     final selectedIndex = settings.selectedCameraIndex;
+    final maxCameras = _isMacos ? _macOsCameras.length : _cameras.length;
 
     if (_cameraInitialized &&
-        selectedIndex < _cameras.length &&
+        selectedIndex < maxCameras &&
         selectedIndex != _cameraIndex) {
       _switchCamera(selectedIndex);
     }
   }
 
   Future<void> _initializeCamera() async {
-    try {
-      _cameras = await availableCameras();
-      if (_cameras.isEmpty) {
-        log('No available cameras found.');
-        return;
+    if (_isMacos) {
+      // ---- macOS SPECIFIC INITIALIZATION ----
+      try {
+        _macOsCameras = await CameraMacOS.instance.listDevices();
+        if (_macOsCameras.isEmpty) {
+          log('No available cameras found on macOS.');
+          return;
+        }
+        final settings = context.read<FaceCaptureProvider>();
+        _cameraIndex = settings.selectedCameraIndex < _macOsCameras.length
+            ? settings.selectedCameraIndex
+            : 0;
+
+        // The controller is initialized by the CameraMacOSView widget.
+        // We just need to trigger a rebuild to show the view.
+        if (mounted) {
+          setState(() {});
+        }
+      } catch (e) {
+        log('Failed to list macOS cameras: $e');
       }
-      final settings = context.read<FaceCaptureProvider>();
-      _cameraIndex = settings.selectedCameraIndex < _cameras.length
-          ? settings.selectedCameraIndex
-          : 0;
+    } else {
+      // ---- STANDARD INITIALIZATION (for Windows, etc.) ----
+      try {
+        _cameras = await availableCameras();
+        if (_cameras.isEmpty) {
+          log('No available cameras found.');
+          return;
+        }
+        final settings = context.read<FaceCaptureProvider>();
+        _cameraIndex = settings.selectedCameraIndex < _cameras.length
+            ? settings.selectedCameraIndex
+            : 0;
 
-      _controller = CameraController(
-        _cameras[_cameraIndex],
-        ResolutionPreset.high,
-        enableAudio: false,
-      );
+        _controller = CameraController(
+          _cameras[_cameraIndex],
+          ResolutionPreset.high,
+          enableAudio: false,
+        );
 
-      _initializeControllerFuture = _controller?.initialize();
-      await _initializeControllerFuture;
+        _initializeControllerFuture = _controller?.initialize();
+        await _initializeControllerFuture;
 
-      if (mounted) {
-        setState(() {
-          _cameraInitialized = true;
-        });
+        if (mounted) {
+          setState(() {
+            _cameraInitialized = true;
+          });
+        }
+      } on CameraException catch (e) {
+        log('Failed to initialize camera: ${e.code}: ${e.description}');
       }
-    } on CameraException catch (e) {
-      log('Failed to initialize camera: ${e.code}: ${e.description}');
     }
   }
 
   Future<void> _switchCamera(int specificIndex) async {
-    if (_isMacos || _cameras.isEmpty) return;
     await _disposeCurrentCamera();
+
     setState(() {
       _cameraIndex = specificIndex;
     });
+
     final settings = context.read<FaceCaptureProvider>();
     settings.setSelectedCameraIndex(_cameraIndex);
-    await _initializeCamera();
+
+    // For macOS, rebuilding the widget with the new index is enough.
+    // For other platforms, we need to re-initialize the controller.
+    if (!_isMacos) {
+      await _initializeCamera();
+    }
   }
 
   Future<void> _disposeCurrentCamera() async {
     if (_controller != null) {
       if (_isMacos) {
-        // macOS controller has a different lifecycle managed by its widget
         await (_controller as CameraMacOSController?)?.destroy();
       } else {
         await (_controller as CameraController?)?.dispose();
@@ -138,13 +168,11 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
       if (_isMacos) {
         CameraMacOSFile? file =
             await (_controller as CameraMacOSController).takePicture();
-        // FIX: Add a null check for file.bytes before using it.
         if (file != null && file.bytes != null) {
           final Directory tempDir = await getTemporaryDirectory();
           final String fileName =
               'photobooth_${DateTime.now().millisecondsSinceEpoch}.jpg';
           picturePath = path.join(tempDir.path, fileName);
-          // Use the non-nullable `file.bytes!` after the check.
           await File(picturePath).writeAsBytes(file.bytes!);
         }
       } else {
@@ -178,6 +206,7 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
     final settings = context.watch<FaceCaptureProvider>();
     final globalSettings = context.watch<GlobalSettingsProvider>();
     final screenSize = MediaQuery.of(context).size;
+    final maxCameras = _isMacos ? _macOsCameras.length : _cameras.length;
 
     return Scaffold(
       body: Stack(
@@ -196,8 +225,7 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
             Positioned(
               top: settings.titleTop * screenSize.height,
               left: settings.titleLeft * screenSize.width,
-              width: settings.titleWidth *
-                  screenSize.width, // Use width from provider
+              width: settings.titleWidth * screenSize.width,
               child: Text(
                 settings.titleText,
                 textAlign: settings.titleAlignment,
@@ -208,7 +236,7 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
                   height: settings.titleLineHeight,
                   fontStyle: settings.isTitleItalic
                       ? FontStyle.italic
-                      : FontStyle.normal, // Use italic style
+                      : FontStyle.normal,
                 ),
               ),
             ),
@@ -234,22 +262,20 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
                   color: Colors.transparent,
                 )),
           ),
-
-          // Camera switch button (only show if multiple cameras available)
-          if (!_isMacos && _cameras.length > 1)
+          if (maxCameras > 1)
             Positioned(
               bottom: 30,
               right: 30,
               child: GestureDetector(
                 onTap: () {
-                  final nextIndex = (_cameraIndex + 1) % _cameras.length;
+                  final nextIndex = (_cameraIndex + 1) % maxCameras;
                   _switchCamera(nextIndex);
                 },
                 child: Container(
                   width: 60,
                   height: 60,
                   decoration: BoxDecoration(
-                    color: AppColors.black.withValues(alpha: 0.6),
+                    color: AppColors.black.withOpacity(0.6),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
@@ -260,7 +286,6 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
                 ),
               ),
             ),
-
           Positioned(
             bottom: 30,
             left: 30,
@@ -290,57 +315,95 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
     final double finalWidth = settings.previewWidth * screenSize.width;
     final double finalHeight = settings.previewHeight * screenSize.height;
 
-    if (widget.isPreviewMode ||
-        _controller == null ||
-        !_controller!.value.isInitialized) {
+    if (widget.isPreviewMode) {
       return Container(
         width: finalWidth,
         height: finalHeight,
         decoration: BoxDecoration(
             color: AppColors.black,
             borderRadius: BorderRadius.circular(settings.previewBorderRadius)),
-        child: Center(
-            child:
-                CircularProgressIndicator(color: settings.previewBorderColor)),
       );
     }
 
-    // Get the size of the container
-    final Size containerSize = Size(finalWidth, finalHeight);
-
-    // Get the camera's aspect ratio
-    final double cameraAspectRatio = _controller!.value.aspectRatio;
-
-    // Calculate the scale factor to cover the container
-    // This is the core of the fix
-    var scale = containerSize.aspectRatio * cameraAspectRatio;
-
-    // We need to inverse the scale if the camera is "taller" than the container
-    if (scale < 1) {
-      scale = 1 / scale;
-    }
-
-    return Container(
-      width: finalWidth,
-      height: finalHeight,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(settings.previewBorderRadius),
-        border: settings.showPreviewBorder
-            ? Border.all(
-                color: settings.previewBorderColor,
-                width: settings.previewBorderWidth)
-            : null,
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(settings.previewBorderRadius),
-        child: Transform.scale(
-          scale: scale,
-          child: Center(
-            child: CameraPreview(_controller!),
+    if (_isMacos) {
+      // ---- RENDER MACOS PREVIEW ----
+      if (_macOsCameras.isEmpty) {
+        return Container(
+            width: finalWidth,
+            height: finalHeight,
+            decoration: BoxDecoration(
+                color: AppColors.black,
+                borderRadius:
+                    BorderRadius.circular(settings.previewBorderRadius)),
+            child: Center(
+                child: Text("No cameras found",
+                    style: TextStyle(color: Colors.white))));
+      }
+      return Container(
+        width: finalWidth,
+        height: finalHeight,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(settings.previewBorderRadius),
+          border: settings.showPreviewBorder
+              ? Border.all(
+                  color: settings.previewBorderColor,
+                  width: settings.previewBorderWidth)
+              : null,
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(settings.previewBorderRadius),
+          child: CameraMacOSView(
+            cameraMode: CameraMacOSMode.photo,
+            deviceId: _macOsCameras[_cameraIndex].deviceId,
+            onCameraInizialized: (CameraMacOSController controller) {
+              setState(() {
+                _controller = controller;
+                _cameraInitialized = true;
+              });
+            },
           ),
         ),
-      ),
-    );
+      );
+    } else {
+      // ---- RENDER STANDARD PREVIEW ----
+      if (_controller == null ||
+          !_controller!.value.isInitialized ||
+          !_cameraInitialized) {
+        return Container(
+          width: finalWidth,
+          height: finalHeight,
+          decoration: BoxDecoration(
+              color: AppColors.black,
+              borderRadius: BorderRadius.circular(settings.previewBorderRadius)),
+          child: Center(
+              child:
+                  CircularProgressIndicator(color: settings.previewBorderColor)),
+        );
+      }
+
+      var scale = finalWidth / finalHeight * _controller!.value.aspectRatio;
+      if (scale < 1) scale = 1 / scale;
+
+      return Container(
+        width: finalWidth,
+        height: finalHeight,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(settings.previewBorderRadius),
+          border: settings.showPreviewBorder
+              ? Border.all(
+                  color: settings.previewBorderColor,
+                  width: settings.previewBorderWidth)
+              : null,
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(settings.previewBorderRadius),
+          child: Transform.scale(
+            scale: scale,
+            child: Center(child: CameraPreview(_controller!)),
+          ),
+        ),
+      );
+    }
   }
 
   Widget _buildCaptureButton(FaceCaptureProvider settings, Size screenSize) {

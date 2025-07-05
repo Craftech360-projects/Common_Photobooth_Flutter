@@ -190,7 +190,6 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
           child: _buildButton(
               settings: settings,
               onPressed: () {
-                if (widget.isPreviewMode) return;
                 Provider.of<PhotoboothProvider>(context, listen: false)
                     .clearUserData();
                 Navigator.of(context).pushNamedAndRemoveUntil(
