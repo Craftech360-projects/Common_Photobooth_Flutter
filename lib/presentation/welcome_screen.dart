@@ -110,7 +110,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       opacity: settings.buttonOpacity,
       child: ElevatedButton(
         onPressed: () =>
-            Navigator.pushNamed(context, AppRoutes.participantDetails),
+            Navigator.pushNamed(context, AppRoutes.genderSelection),
         style: ElevatedButton.styleFrom(
           backgroundColor: settings.welcomeButtonColor,
           foregroundColor: settings.welcomeButtonTextColor,
@@ -147,7 +147,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     return Opacity(
       opacity: settings.buttonOpacity,
       child: GestureDetector(
-        onTap: () => Navigator.pushNamed(context, AppRoutes.participantDetails),
+        onTap: () => Navigator.pushNamed(context, AppRoutes.genderSelection),
         child: ClipRRect(
           borderRadius:
               BorderRadius.circular(settings.buttonBorderRadius * textScale),
