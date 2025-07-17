@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:photobooth_flutter/services/license_service.dart';
 
 class SupabaseService {
   static SupabaseService? _instance;
@@ -30,6 +31,8 @@ class SupabaseService {
         url: url,
         anonKey: anonKey,
       );
+      print("URL: $url");
+      print("ANON KEY: $anonKey");
       _client = Supabase.instance.client;
       _isInitialized = true;
       debugPrint('Supabase initialized successfully');
@@ -78,8 +81,7 @@ class SupabaseService {
   }
 
   Future<String?> uploadUserFaceImage(File imageFile) async {
-    return uploadImage(imageFile, null,
-        bucket: 'inputimages', prefix: 'face_');
+    return uploadImage(imageFile, null, bucket: 'inputimages', prefix: 'face_');
   }
 
   Future<String?> storeParticipantDetails({
@@ -93,11 +95,21 @@ class SupabaseService {
     }
 
     try {
-      final result = await _client.from('inputimagetable').insert({
+      // Get authenticated user ID and event ID from license service
+      final userId = await LicenseService.instance.getUserId();
+      final eventId = await LicenseService.instance.getEventId();
+
+      if (userId == null || eventId == null) {
+        throw Exception('User not authenticated or event ID not found');
+      }
+
+      final result = await _client.from('event_output_images').insert({
         'name': name,
         'email': email,
         'gender': gender,
         'image_url': imageUrl,
+        'userId': userId,
+        'eventId': eventId,
         'created_at': DateTime.now().toIso8601String(),
       }).select();
 
@@ -128,21 +140,23 @@ class SupabaseService {
       // Select a random number from 1 to 4
       final randomNumber = Random().nextInt(4) + 1;
       final imageName = '$characterPrefix$randomNumber.png';
-      
+
       final fullPathInBucket = '$genderFolder/$themeFolderName/$imageName';
-      
-      debugPrint('Selecting character image from Supabase path: $fullPathInBucket');
+
+      debugPrint(
+          'Selecting character image from Supabase path: $fullPathInBucket');
 
       // Get the public URL of the random character image
-      final publicUrl = _client.storage.from('themes').getPublicUrl(fullPathInBucket);
+      final publicUrl =
+          _client.storage.from('themes').getPublicUrl(fullPathInBucket);
 
       // Update the 'characterimage' column in the table for the user's row
       await _client
-          .from('inputimagetable')
-          .update({'characterimage': publicUrl})
-          .eq('unique_id', uniqueId);
+          .from('event_output_images')
+          .update({'characterimage': publicUrl}).eq('unique_id', uniqueId);
 
-      debugPrint('Successfully updated characterimage for unique_id: $uniqueId');
+      debugPrint(
+          'Successfully updated characterimage for unique_id: $uniqueId');
     } on Exception catch (e) {
       debugPrint('Error updating character image in Supabase: $e');
       rethrow;
@@ -157,7 +171,7 @@ class SupabaseService {
 
     try {
       final response = await _client
-          .from('inputimagetable')
+          .from('event_output_images')
           .select('output')
           .eq('unique_id', participantId)
           .single();
@@ -202,8 +216,7 @@ class SupabaseService {
     try {
       await _client
           .from('events')
-          .update({'is_license_activated': true})
-          .eq('id', eventId);
+          .update({'is_license_activated': true}).eq('id', eventId);
 
       return true;
     } on Exception catch (e) {
@@ -220,13 +233,13 @@ class SupabaseService {
 
     try {
       final response = await _client
-          .from('credits')
+          .from('user_credits')
           .select('credits_left')
           .eq('user_id', userId)
           .single();
 
       if (response.isNotEmpty && response['credits_left'] != null) {
-        return response['credits_left'] as int;
+        return int.parse(response['credits_left'] as String);
       }
 
       return null;
@@ -251,9 +264,8 @@ class SupabaseService {
 
       // Decrement by 1
       await _client
-          .from('credits')
-          .update({'credits_left': currentCredits - 1})
-          .eq('user_id', userId);
+          .from('user_credits')
+          .update({'credits_left': (currentCredits - 1).toString()}).eq('user_id', userId);
 
       return true;
     } on Exception catch (e) {

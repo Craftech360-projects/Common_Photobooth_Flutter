@@ -1,14 +1,8 @@
 {
   "5": {
     "inputs": {
-      "width": [
-        "216",
-        1
-      ],
-      "height": [
-        "216",
-        2
-      ],
+      "width": ["216", 1],
+      "height": ["216", 2],
       "batch_size": 1
     },
     "class_type": "EmptyLatentImage",
@@ -18,14 +12,8 @@
   },
   "6": {
     "inputs": {
-      "text": [
-        "270",
-        0
-      ],
-      "clip": [
-        "219",
-        1
-      ]
+      "text": ["270", 0],
+      "clip": ["219", 1]
     },
     "class_type": "CLIPTextEncode",
     "_meta": {
@@ -34,26 +22,11 @@
   },
   "13": {
     "inputs": {
-      "noise": [
-        "25",
-        0
-      ],
-      "guider": [
-        "22",
-        0
-      ],
-      "sampler": [
-        "16",
-        0
-      ],
-      "sigmas": [
-        "17",
-        0
-      ],
-      "latent_image": [
-        "5",
-        0
-      ]
+      "noise": ["25", 0],
+      "guider": ["22", 0],
+      "sampler": ["16", 0],
+      "sigmas": ["17", 0],
+      "latent_image": ["5", 0]
     },
     "class_type": "SamplerCustomAdvanced",
     "_meta": {
@@ -74,10 +47,7 @@
       "scheduler": "simple",
       "steps": 12,
       "denoise": 1,
-      "model": [
-        "61",
-        0
-      ]
+      "model": ["61", 0]
     },
     "class_type": "BasicScheduler",
     "_meta": {
@@ -86,14 +56,8 @@
   },
   "22": {
     "inputs": {
-      "model": [
-        "61",
-        0
-      ],
-      "conditioning": [
-        "60",
-        0
-      ]
+      "model": ["61", 0],
+      "conditioning": ["60", 0]
     },
     "class_type": "BasicGuider",
     "_meta": {
@@ -112,10 +76,7 @@
   "60": {
     "inputs": {
       "guidance": 3,
-      "conditioning": [
-        "6",
-        0
-      ]
+      "conditioning": ["6", 0]
     },
     "class_type": "FluxGuidance",
     "_meta": {
@@ -126,18 +87,9 @@
     "inputs": {
       "max_shift": 1.1500000000000001,
       "base_shift": 0.5000000000000001,
-      "width": [
-        "216",
-        1
-      ],
-      "height": [
-        "216",
-        2
-      ],
-      "model": [
-        "227",
-        0
-      ]
+      "width": ["216", 1],
+      "height": ["216", 2],
+      "model": ["227", 0]
     },
     "class_type": "ModelSamplingFlux",
     "_meta": {
@@ -146,14 +98,8 @@
   },
   "147": {
     "inputs": {
-      "samples": [
-        "13",
-        0
-      ],
-      "vae": [
-        "228",
-        2
-      ]
+      "samples": ["13", 0],
+      "vae": ["228", 2]
     },
     "class_type": "VAEDecode",
     "_meta": {
@@ -162,10 +108,7 @@
   },
   "148": {
     "inputs": {
-      "images": [
-        "147",
-        0
-      ]
+      "images": ["147", 0]
     },
     "class_type": "PreviewImage",
     "_meta": {
@@ -186,14 +129,8 @@
       "lora_name": "diffusion_pytorch_model.safetensors",
       "strength_model": 1.0000000000000002,
       "strength_clip": 1.0000000000000002,
-      "model": [
-        "257",
-        0
-      ],
-      "clip": [
-        "257",
-        1
-      ]
+      "model": ["257", 0],
+      "clip": ["257", 1]
     },
     "class_type": "LoraLoader",
     "_meta": {
@@ -230,26 +167,11 @@
       "weight": 0.8000000000000002,
       "start_at": 0,
       "end_at": 1,
-      "model": [
-        "219",
-        0
-      ],
-      "pulid_flux": [
-        "223",
-        0
-      ],
-      "eva_clip": [
-        "224",
-        0
-      ],
-      "face_analysis": [
-        "225",
-        0
-      ],
-      "image": [
-        "283",
-        0
-      ]
+      "model": ["219", 0],
+      "pulid_flux": ["223", 0],
+      "eva_clip": ["224", 0],
+      "face_analysis": ["225", 0],
+      "image": ["283", 0]
     },
     "class_type": "ApplyPulidFlux",
     "_meta": {
@@ -276,14 +198,8 @@
       "do_sample": true,
       "output_mask_select": "",
       "seed": 653959525333125,
-      "image": [
-        "256",
-        0
-      ],
-      "florence2_model": [
-        "282",
-        0
-      ]
+      "image": ["256", 0],
+      "florence2_model": ["282", 0]
     },
     "class_type": "Florence2Run",
     "_meta": {
@@ -294,10 +210,7 @@
     "inputs": {
       "upscale_method": "lanczos",
       "megapixels": 1.0000000000000002,
-      "image": [
-        "281",
-        0
-      ]
+      "image": ["281", 0]
     },
     "class_type": "ImageScaleToTotalPixels",
     "_meta": {
@@ -309,14 +222,8 @@
       "lora_name": "pixar-animation-flux.safetensors",
       "strength_model": 0.8000000000000002,
       "strength_clip": 1.0000000000000002,
-      "model": [
-        "228",
-        0
-      ],
-      "clip": [
-        "228",
-        1
-      ]
+      "model": ["228", 0],
+      "clip": ["228", 1]
     },
     "class_type": "LoraLoader",
     "_meta": {
@@ -327,10 +234,7 @@
     "inputs": {
       "index": "0",
       "batch": false,
-      "data": [
-        "237",
-        3
-      ]
+      "data": ["237", 3]
     },
     "class_type": "Florence2toCoordinates",
     "_meta": {
@@ -341,22 +245,10 @@
     "inputs": {
       "keep_model_loaded": true,
       "individual_objects": false,
-      "sam2_model": [
-        "263",
-        0
-      ],
-      "image": [
-        "256",
-        0
-      ],
-      "coordinates_positive": [
-        "261",
-        0
-      ],
-      "bboxes": [
-        "261",
-        1
-      ]
+      "sam2_model": ["263", 0],
+      "image": ["256", 0],
+      "coordinates_positive": ["261", 0],
+      "bboxes": ["261", 1]
     },
     "class_type": "Sam2Segmentation",
     "_meta": {
@@ -382,14 +274,8 @@
       "padding_top": 64,
       "padding_bottom": 64,
       "return_list": false,
-      "image": [
-        "256",
-        0
-      ],
-      "mask": [
-        "262",
-        0
-      ]
+      "image": ["256", 0],
+      "mask": ["262", 0]
     },
     "class_type": "Bounded Image Crop with Mask",
     "_meta": {
@@ -407,14 +293,8 @@
       "do_sample": true,
       "output_mask_select": "",
       "seed": 918338609741451,
-      "image": [
-        "281",
-        0
-      ],
-      "florence2_model": [
-        "282",
-        0
-      ]
+      "image": ["281", 0],
+      "florence2_model": ["282", 0]
     },
     "class_type": "Florence2Run",
     "_meta": {
@@ -425,10 +305,7 @@
     "inputs": {
       "text": "Create a Pixar-style animated poster featuring the input image as a cute, expressive character. Use soft, colorful lighting, smooth textures, big bright eyes, and a slightly exaggerated, cartoony design. The background should be whimsical and vibrant, capturing a warm, adventurous, and heartwarming mood, like a scene from a Pixar movie. [caption]",
       "old": "[caption]",
-      "new": [
-        "268",
-        2
-      ]
+      "new": ["268", 2]
     },
     "class_type": "Replace Text _O",
     "_meta": {
@@ -438,14 +315,8 @@
   "277": {
     "inputs": {
       "size": "custom",
-      "custom_width": [
-        "278",
-        0
-      ],
-      "custom_height": [
-        "278",
-        1
-      ],
+      "custom_width": ["278", 0],
+      "custom_height": ["278", 1],
       "color": "#fff"
     },
     "class_type": "LayerUtility: ColorImage V2",
@@ -455,10 +326,7 @@
   },
   "278": {
     "inputs": {
-      "image": [
-        "283",
-        0
-      ]
+      "image": ["283", 0]
     },
     "class_type": "easy imageSize",
     "_meta": {
@@ -470,14 +338,8 @@
       "invert_mask": true,
       "blend_mode": "normal",
       "opacity": 100,
-      "background_image": [
-        "277",
-        0
-      ],
-      "layer_image": [
-        "283",
-        0
-      ]
+      "background_image": ["277", 0],
+      "layer_image": ["283", 0]
     },
     "class_type": "LayerUtility: ImageBlend V2",
     "_meta": {
@@ -497,9 +359,9 @@
   },
   "283": {
     "inputs": {
-      "supabase_url": "https://kdkkutcmxtsfrqzbxmox.supabase.co",
-      "supabase_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtka2t1dGNteHRzZnJxemJ4bW94Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0OTU1NzM3NCwiZXhwIjoyMDY1MTMzMzc0fQ.aAMtFygC6smIHh9c132dWBZGqru_MtzLocboPW1epXU",
-      "table_name": "inputimagetable",
+      "supabase_url": "https://ozkbnimjuhaweigscdby.supabase.co",
+      "supabase_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im96a2JuaW1qdWhhd2VpZ3NjZGJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEyODc4NDYsImV4cCI6MjA2Njg2Mzg0Nn0.C4OgN-JEBX9ZqnRDXU9XmGnED2pCh3kI82GrHPXtq8U",
+      "table_name": "event_output_images",
       "image_column": "image_url",
       "id_column": "unique_id",
       "unique_id": "4c678108-c1ca-458e-90b1-1ca81e620282"
@@ -511,21 +373,15 @@
   },
   "284": {
     "inputs": {
-      "unique_id": [
-        "283",
-        2
-      ],
-      "supabase_url": "https://kdkkutcmxtsfrqzbxmox.supabase.co",
-      "supabase_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtka2t1dGNteHRzZnJxemJ4bW94Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0OTU1NzM3NCwiZXhwIjoyMDY1MTMzMzc0fQ.aAMtFygC6smIHh9c132dWBZGqru_MtzLocboPW1epXU",
+      "unique_id": ["283", 2],
+      "supabase_url": "https://ozkbnimjuhaweigscdby.supabase.co",
+      "supabase_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im96a2JuaW1qdWhhd2VpZ3NjZGJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEyODc4NDYsImV4cCI6MjA2Njg2Mzg0Nn0.C4OgN-JEBX9ZqnRDXU9XmGnED2pCh3kI82GrHPXtq8U",
       "bucket": "outputimages",
       "base_file_name": "image",
-      "table_name": "inputimagetable",
+      "table_name": "event_output_images",
       "unique_id_column": "unique_id",
       "table_column": "output",
-      "image": [
-        "147",
-        0
-      ]
+      "image": ["147", 0]
     },
     "class_type": "SupabaseImageUploader",
     "_meta": {

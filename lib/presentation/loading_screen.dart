@@ -218,8 +218,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
       provider.setWorkflowSentTime(DateTime.now());
 
       int attempts = 0;
-      const maxAttempts = 150;
-      const pollDelay = Duration(seconds: 2);
+      const maxAttempts = 160;
+      const pollDelay = Duration(seconds: 3);
 
       while (attempts < maxAttempts) {
         final supabaseImageUrl =
