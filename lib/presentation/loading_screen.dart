@@ -6,11 +6,13 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
+import 'package:photobooth_flutter/providers/admin_watermark_provider.dart';
 import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/providers/loading_screen_provider.dart';
 import 'package:photobooth_flutter/providers/photobooth_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
 import 'package:photobooth_flutter/services/email_services.dart';
+import 'package:photobooth_flutter/services/license_service.dart';
 import 'package:photobooth_flutter/services/runpod_service.dart';
 import 'package:photobooth_flutter/services/supabase_service.dart';
 import 'package:photobooth_flutter/workflows/workflow.dart';
@@ -69,6 +71,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
     final provider = Provider.of<PhotoboothProvider>(context, listen: false);
     final globalSettings =
         Provider.of<GlobalSettingsProvider>(context, listen: false);
+    final watermarkProvider = 
+        Provider.of<AdminWatermarkProvider>(context, listen: false);
 
     if (provider.faceImagePath == null) {
       _setErrorMessage('No face image captured');
@@ -78,6 +82,24 @@ class _LoadingScreenState extends State<LoadingScreen> {
     if (!await imageFile.exists()) {
       _setErrorMessage('Image file not found');
       return;
+    }
+
+    // Check credits before processing
+    final userId = await LicenseService.instance.getUserId();
+    if (userId != null) {
+      final creditsLeft = await SupabaseService.instance.getUserCreditsLeft(userId);
+      if (creditsLeft == null || creditsLeft <= 0) {
+        _setErrorMessage('You don\'t have any credits left to continue with generating images. Please use a different license key.');
+        watermarkProvider.setShowWatermark(true);
+        // Navigate back to welcome screen after showing error
+        await Future.delayed(const Duration(seconds: 3));
+        if (mounted) {
+          Provider.of<PhotoboothProvider>(context, listen: false).clearUserData();
+          Navigator.of(context).pushNamedAndRemoveUntil(
+              AppRoutes.welcomeScreen, (route) => false);
+        }
+        return;
+      }
     }
 
     final seed = DateTime.now().millisecondsSinceEpoch;
@@ -116,6 +138,9 @@ class _LoadingScreenState extends State<LoadingScreen> {
     required String watcherNodeId,
     required bool isSwaplab,
   }) async {
+    final watermarkProvider = 
+        Provider.of<AdminWatermarkProvider>(context, listen: false);
+    final userId = await LicenseService.instance.getUserId();
     final supabaseUrl = globalSettings.supabaseUrl;
     final supabaseAnonKey = globalSettings.supabaseAnonKey;
     final runpodApiKey = dotenv.env['RUNPOD_API_KEY'];
@@ -207,6 +232,20 @@ class _LoadingScreenState extends State<LoadingScreen> {
           debugPrint('Found new image in Supabase: $supabaseImageUrl');
           provider.setSwappedImage(supabaseImageUrl);
           provider.setCapturedImageUrl(supabaseImageUrl);
+
+          // Decrement credits after successful image generation
+          if (userId != null) {
+            await SupabaseService.instance.decrementUserCredits(userId);
+            // Update local credits count
+            final updatedCredits = await SupabaseService.instance.getUserCreditsLeft(userId);
+            if (updatedCredits != null) {
+              await LicenseService.instance.setCreditsLeft(updatedCredits);
+              // Show watermark if credits are exhausted
+              if (updatedCredits <= 0) {
+                watermarkProvider.setShowWatermark(true);
+              }
+            }
+          }
 
           if (globalSettings.sharingMethod == 'Email') {
             await EmailService.sendEmail(

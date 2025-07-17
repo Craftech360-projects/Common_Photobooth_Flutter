@@ -71,6 +71,7 @@ class LicenseService {
       return LicenseVerificationResult(
         isValid: true,
         message: 'License verified successfully',
+        eventId: payload['eventId'],
       );
     } on Exception catch (e) {
       debugPrint("[LicenseService] FAILED: An unexpected error occurred: $e");
@@ -123,6 +124,14 @@ class LicenseService {
       // Store new values
       await _secureStorage.write(
           key: 'license_expiration', value: expirationTimestamp.toString());
+      if (payload['eventId'] != null) {
+        await _secureStorage.write(
+            key: 'event_id', value: payload['eventId']);
+      }
+      if (payload['userId'] != null) {
+        await _secureStorage.write(
+            key: 'user_id', value: payload['userId']);
+      }
       if (payload['start_date_time'] != null) {
         await _secureStorage.write(
             key: 'photobooth_start_time', value: payload['start_date_time']);
@@ -179,15 +188,76 @@ class LicenseService {
   Future<void> logout() async {
     await _secureStorage.deleteAll();
   }
+
+  // Getter methods for stored license data
+  Future<String?> getEventId() async {
+    return await _secureStorage.read(key: 'event_id');
+  }
+
+  Future<String?> getUserId() async {
+    return await _secureStorage.read(key: 'user_id');
+  }
+
+  Future<String?> getPhotoboothStartTime() async {
+    return await _secureStorage.read(key: 'photobooth_start_time');
+  }
+
+  Future<String?> getPhotoboothThemes() async {
+    return await _secureStorage.read(key: 'photobooth_themes');
+  }
+
+  Future<String?> getPhotoboothBuilds() async {
+    return await _secureStorage.read(key: 'photobooth_builds');
+  }
+
+  Future<String?> getPhotoboothMode() async {
+    return await _secureStorage.read(key: 'photobooth_mode');
+  }
+
+  Future<String?> getLicenseIssuedAt() async {
+    return await _secureStorage.read(key: 'license_issued_at');
+  }
+
+  Future<Map<String, String?>> getAllLicenseData() async {
+    return {
+      'event_id': await getEventId(),
+      'user_id': await getUserId(),
+      'photobooth_start_time': await getPhotoboothStartTime(),
+      'photobooth_themes': await getPhotoboothThemes(),
+      'photobooth_builds': await getPhotoboothBuilds(),
+      'photobooth_mode': await getPhotoboothMode(),
+      'license_issued_at': await getLicenseIssuedAt(),
+      'license_expiration': await _secureStorage.read(key: 'license_expiration'),
+      'credits_left': await _secureStorage.read(key: 'credits_left'),
+    };
+  }
+
+  // Store credits left
+  Future<void> setCreditsLeft(int credits) async {
+    await _secureStorage.write(key: 'credits_left', value: credits.toString());
+  }
+
+  // Get credits left
+  Future<int?> getCreditsLeft() async {
+    final creditsStr = await _secureStorage.read(key: 'credits_left');
+    if (creditsStr != null) {
+      return int.tryParse(creditsStr);
+    }
+    return null;
+  }
 }
 
 class LicenseVerificationResult {
   final bool isValid;
   final String message;
+  final String? eventId;
+  final int? creditsLeft;
 
   LicenseVerificationResult({
     required this.isValid,
     required this.message,
+    this.eventId,
+    this.creditsLeft,
   });
 }
 

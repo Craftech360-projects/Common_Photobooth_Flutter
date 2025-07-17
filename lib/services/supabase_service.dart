@@ -172,4 +172,93 @@ class SupabaseService {
       return null;
     }
   }
+
+  // Check if license is already activated for the event
+  Future<bool> checkLicenseActivation(String eventId) async {
+    if (!_isInitialized) {
+      throw Exception('Supabase not initialized');
+    }
+
+    try {
+      final response = await _client
+          .from('events')
+          .select('is_license_activated')
+          .eq('id', eventId)
+          .single();
+
+      return response['is_license_activated'] == true;
+    } on Exception catch (e) {
+      debugPrint('Error checking license activation: $e');
+      return false;
+    }
+  }
+
+  // Activate license for the event
+  Future<bool> activateLicense(String eventId) async {
+    if (!_isInitialized) {
+      throw Exception('Supabase not initialized');
+    }
+
+    try {
+      await _client
+          .from('events')
+          .update({'is_license_activated': true})
+          .eq('id', eventId);
+
+      return true;
+    } on Exception catch (e) {
+      debugPrint('Error activating license: $e');
+      return false;
+    }
+  }
+
+  // Get current credits for the user from credits table
+  Future<int?> getUserCreditsLeft(String userId) async {
+    if (!_isInitialized) {
+      throw Exception('Supabase not initialized');
+    }
+
+    try {
+      final response = await _client
+          .from('credits')
+          .select('credits_left')
+          .eq('user_id', userId)
+          .single();
+
+      if (response.isNotEmpty && response['credits_left'] != null) {
+        return response['credits_left'] as int;
+      }
+
+      return null;
+    } on Exception catch (e) {
+      debugPrint('Error getting user credits left: $e');
+      return null;
+    }
+  }
+
+  // Decrement credits for the user
+  Future<bool> decrementUserCredits(String userId) async {
+    if (!_isInitialized) {
+      throw Exception('Supabase not initialized');
+    }
+
+    try {
+      // First get current credits
+      final currentCredits = await getUserCreditsLeft(userId);
+      if (currentCredits == null || currentCredits <= 0) {
+        return false;
+      }
+
+      // Decrement by 1
+      await _client
+          .from('credits')
+          .update({'credits_left': currentCredits - 1})
+          .eq('user_id', userId);
+
+      return true;
+    } on Exception catch (e) {
+      debugPrint('Error decrementing user credits: $e');
+      return false;
+    }
+  }
 }

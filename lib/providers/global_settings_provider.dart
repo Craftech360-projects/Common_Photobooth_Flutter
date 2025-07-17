@@ -48,8 +48,8 @@ class GlobalSettingsProvider with ChangeNotifier {
   }
 
   // Add these properties
-  String? _supabaseUrl;
-  String? _supabaseAnonKey;
+  String? _supabaseUrl = 'https://ozkbnimjuhaweigscdby.supabase.co';
+  String? _supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im96a2JuaW1qdWhhd2VpZ3NjZGJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEyODc4NDYsImV4cCI6MjA2Njg2Mzg0Nn0.C4OgN-JEBX9ZqnRDXU9XmGnED2pCh3kI82GrHPXtq8U';
   String? _emailJsServiceId;
   String? _emailJsTemplateId;
   String? _emailJsPublicKey;
@@ -82,9 +82,8 @@ class GlobalSettingsProvider with ChangeNotifier {
     _buttonSpacing = _prefs.getDouble('button_spacing') ?? 40.0;
     _borderRadius = _prefs.getDouble('border_radius') ?? 4.0;
 
-    // Load Supabase settings
-    _supabaseUrl = _prefs.getString('supabase_url');
-    _supabaseAnonKey = _prefs.getString('supabase_anon_key');
+    // Load Supabase settings - now using constants
+    // _supabaseUrl and _supabaseAnonKey are set as constants in the class
 
     // Load EmailJS settings
     _emailJsServiceId = _prefs.getString('emailjs_service_id');
@@ -185,18 +184,7 @@ class GlobalSettingsProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // Add these methods
-  void setSupabaseUrl(String url) async {
-    _supabaseUrl = url;
-    await _prefs.setString('supabase_url', url);
-    notifyListeners();
-  }
-
-  void setSupabaseAnonKey(String key) async {
-    _supabaseAnonKey = key;
-    await _prefs.setString('supabase_anon_key', key);
-    notifyListeners();
-  }
+  // Supabase setters removed - using constant values
 
   void setEmailJsServiceId(String serviceId) async {
     _emailJsServiceId = serviceId;
@@ -245,8 +233,9 @@ class GlobalSettingsProvider with ChangeNotifier {
     _fieldSpacing = 20.0;
     _buttonSpacing = 40.0;
     _borderRadius = 4.0;
-    _supabaseUrl = null;
-    _supabaseAnonKey = null;
+    // Supabase values remain constant
+    _supabaseUrl = 'https://ozkbnimjuhaweigscdby.supabase.co';
+    _supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im96a2JuaW1qdWhhd2VpZ3NjZGJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEyODc4NDYsImV4cCI6MjA2Njg2Mzg0Nn0.C4OgN-JEBX9ZqnRDXU9XmGnED2pCh3kI82GrHPXtq8U';
     _emailJsServiceId = null;
     _emailJsTemplateId = null;
     _emailJsPublicKey = null;

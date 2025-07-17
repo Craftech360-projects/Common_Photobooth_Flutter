@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/providers/admin_watermark_provider.dart';
+import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/services/auth_service.dart';
 import 'package:photobooth_flutter/services/license_service.dart';
+import 'package:photobooth_flutter/services/supabase_service.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -83,7 +85,40 @@ class AuthProvider extends ChangeNotifier {
     try {
       final result = await LicenseService.instance.verifyLicense(certificate);
 
-      if (result.isValid) {
+      if (result.isValid && result.eventId != null) {
+        // Initialize Supabase if needed
+        if (_context != null) {
+          final globalSettings = Provider.of<GlobalSettingsProvider>(
+            _context!,
+            listen: false,
+          );
+          
+          if (!SupabaseService.instance.isInitialized) {
+            await SupabaseService.instance.initialize(
+              url: globalSettings.supabaseUrl!,
+              anonKey: globalSettings.supabaseAnonKey!,
+            );
+          }
+        }
+
+        // Check if license is already activated
+        final isAlreadyActivated = await SupabaseService.instance
+            .checkLicenseActivation(result.eventId!);
+        
+        if (isAlreadyActivated) {
+          _error = 'This license has already been used';
+          return false;
+        }
+
+        // Activate the license
+        final activated = await SupabaseService.instance
+            .activateLicense(result.eventId!);
+        
+        if (!activated) {
+          _error = 'Failed to activate license';
+          return false;
+        }
+
         _isAuthenticated = true;
         _updateWatermarkVisibility();
       } else {

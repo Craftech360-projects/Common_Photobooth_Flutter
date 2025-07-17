@@ -30,8 +30,6 @@ class AdminScreen extends StatefulWidget {
 }
 
 class _AdminScreenState extends State<AdminScreen> {
-  final _supabaseUrlController = TextEditingController();
-  final _supabaseAnonKeyController = TextEditingController();
   final _emailJsServiceIdController = TextEditingController();
   final _emailJsTemplateIdController = TextEditingController();
   final _emailJsPublicKeyController = TextEditingController();
@@ -43,8 +41,6 @@ class _AdminScreenState extends State<AdminScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final globalSettings =
           Provider.of<GlobalSettingsProvider>(context, listen: false);
-      _supabaseUrlController.text = globalSettings.supabaseUrl ?? '';
-      _supabaseAnonKeyController.text = globalSettings.supabaseAnonKey ?? '';
       _emailJsServiceIdController.text = globalSettings.emailJsServiceId ?? '';
       _emailJsTemplateIdController.text =
           globalSettings.emailJsTemplateId ?? '';
@@ -61,8 +57,6 @@ class _AdminScreenState extends State<AdminScreen> {
 
   @override
   void dispose() {
-    _supabaseUrlController.dispose();
-    _supabaseAnonKeyController.dispose();
     _emailJsServiceIdController.dispose();
     _emailJsTemplateIdController.dispose();
     _emailJsPublicKeyController.dispose();
@@ -105,10 +99,7 @@ class _AdminScreenState extends State<AdminScreen> {
             padding: const EdgeInsets.fromLTRB(30, kToolbarHeight + 60, 30, 30),
             child: Column(
               children: [
-                _GlobalSettingsSection(
-                  supabaseUrlController: _supabaseUrlController,
-                  supabaseAnonKeyController: _supabaseAnonKeyController,
-                ),
+                const _GlobalSettingsSection(),
                 const Divider(height: 32, color: Colors.white54),
                 _buildSharingSettings(
                   context,
@@ -292,8 +283,6 @@ class _AdminScreenState extends State<AdminScreen> {
               await Provider.of<OutputScreenProvider>(context, listen: false)
                   .init();
 
-              _supabaseUrlController.text = '';
-              _supabaseAnonKeyController.text = '';
               _emailJsServiceIdController.text = '';
               _emailJsTemplateIdController.text = '';
               _emailJsPublicKeyController.text = '';
@@ -316,13 +305,7 @@ class _AdminScreenState extends State<AdminScreen> {
 }
 
 class _GlobalSettingsSection extends StatelessWidget {
-  final TextEditingController supabaseUrlController;
-  final TextEditingController supabaseAnonKeyController;
-
-  const _GlobalSettingsSection({
-    required this.supabaseUrlController,
-    required this.supabaseAnonKeyController,
-  });
+  const _GlobalSettingsSection();
 
   @override
   Widget build(BuildContext context) {
@@ -357,31 +340,6 @@ class _GlobalSettingsSection extends StatelessWidget {
               icon: '📁',
               text: 'Choose Background Image',
               selectedFile: globalSettings.backgroundImage,
-            ),
-          ),
-          const SizedBox(height: 15),
-          SettingsGroup(
-            isSubgroup: true,
-            icon: '🔑',
-            title: 'Supabase Configuration',
-            child: Column(
-              children: [
-                TextFormField(
-                  controller: supabaseUrlController,
-                  decoration: inputDecoration(
-                    context,
-                    'Supabase Project URL',
-                  ),
-                  onChanged: (value) => globalSettings.setSupabaseUrl(value),
-                ),
-                Constants.h16,
-                TextFormField(
-                  controller: supabaseAnonKeyController,
-                  decoration: inputDecoration(context, 'Supabase Anon Key'),
-                  onChanged: (value) =>
-                      globalSettings.setSupabaseAnonKey(value),
-                ),
-              ],
             ),
           ),
         ],

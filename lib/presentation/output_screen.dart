@@ -7,6 +7,7 @@ import 'package:photobooth_flutter/providers/global_settings_provider.dart';
 import 'package:photobooth_flutter/providers/output_screen_provider.dart';
 import 'package:photobooth_flutter/providers/photobooth_provider.dart';
 import 'package:photobooth_flutter/routes/routes.dart';
+import 'package:photobooth_flutter/services/license_service.dart';
 import 'package:photobooth_flutter/widgets/watermark_overlay.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -20,36 +21,35 @@ class SwappedFaceScreen extends StatefulWidget {
 }
 
 class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
-  bool _isLoading = true;
-  String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
     if (!widget.isPreviewMode) {
       _processImage();
-    } else {
-      setState(() => _isLoading = false);
+      _checkCreditsAndShowWatermark();
+    }
+  }
+
+  Future<void> _checkCreditsAndShowWatermark() async {
+    final watermarkProvider = 
+        Provider.of<AdminWatermarkProvider>(context, listen: false);
+    
+    // Check current credits
+    final creditsLeft = await LicenseService.instance.getCreditsLeft();
+    if (creditsLeft != null && creditsLeft <= 0) {
+      watermarkProvider.setShowWatermark(true);
     }
   }
 
   Future<void> _processImage() async {
     try {
       final provider = Provider.of<PhotoboothProvider>(context, listen: false);
-      if (provider.capturedImageUrl != null) {
-        setState(() => _isLoading = false);
-        return;
+      if (provider.capturedImageUrl == null) {
+        debugPrint('No image URL available');
       }
-      setState(() {
-        _isLoading = false;
-        _errorMessage = 'No image URL available';
-      });
     } on Exception catch (e) {
       debugPrint('Error processing image: $e');
-      setState(() {
-        _isLoading = false;
-        _errorMessage = 'Failed to process image: $e';
-      });
     }
   }
 
