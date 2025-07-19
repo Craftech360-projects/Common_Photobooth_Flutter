@@ -239,7 +239,7 @@ class SupabaseService {
           .single();
 
       if (response.isNotEmpty && response['credits_left'] != null) {
-        return int.parse(response['credits_left'] as String);
+        return response['credits_left'] as int;
       }
 
       return null;
@@ -265,7 +265,7 @@ class SupabaseService {
       // Decrement by 1
       await _client
           .from('user_credits')
-          .update({'credits_left': (currentCredits - 1).toString()}).eq('user_id', userId);
+          .update({'credits_left': currentCredits - 1}).eq('user_id', userId);
 
       return true;
     } on Exception catch (e) {
