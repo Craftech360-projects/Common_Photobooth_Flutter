@@ -154,7 +154,7 @@ class _AdminScreenState extends State<AdminScreen> {
           children: [
             Container(
               decoration: BoxDecoration(
-                color: AppColors.darkGrey.withOpacity(0.1),
+                color: AppColors.darkGrey.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: RadioListTile<String>(
@@ -176,7 +176,7 @@ class _AdminScreenState extends State<AdminScreen> {
             Constants.h16,
             Container(
               decoration: BoxDecoration(
-                color: AppColors.darkGrey.withOpacity(0.1),
+                color: AppColors.darkGrey.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: RadioListTile<String>(
@@ -442,13 +442,14 @@ class _ScreenSettingItem extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.darkGrey.withOpacity(0.1),
+          color: AppColors.darkGrey.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.darkGrey.withOpacity(0.2)),
+          border: Border.all(color: AppColors.darkGrey.withValues(alpha: 0.2)),
         ),
         child: Row(
           children: [
-            Icon(icon, size: 32, color: AppColors.darkGrey.withOpacity(0.8)),
+            Icon(icon,
+                size: 32, color: AppColors.darkGrey.withValues(alpha: 0.8)),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
@@ -459,12 +460,12 @@ class _ScreenSettingItem extends StatelessWidget {
                           ?.copyWith(color: AppColors.darkGrey)),
                   Text(subtitle,
                       style: textTheme.bodySmall?.copyWith(
-                          color: AppColors.darkGrey.withOpacity(0.7))),
+                          color: AppColors.darkGrey.withValues(alpha: 0.7))),
                 ],
               ),
             ),
             Icon(Icons.arrow_forward_ios,
-                color: AppColors.darkGrey.withOpacity(0.8)),
+                color: AppColors.darkGrey.withValues(alpha: 0.8)),
           ],
         ),
       ),

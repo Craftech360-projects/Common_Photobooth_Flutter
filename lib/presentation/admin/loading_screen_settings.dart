@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
@@ -47,7 +45,7 @@ class _LoadingScreenSettingsState extends State<LoadingScreenSettings> {
             child: FloatingActionButton.small(
               heroTag: 'loadingBack',
               tooltip: 'Back',
-              backgroundColor: AppColors.white.withOpacity(0.8),
+              backgroundColor: AppColors.white.withValues(alpha: 0.8),
               child: const Icon(Icons.arrow_back,
                   color: AppColors.primaryGradientEnd),
               onPressed: () => Navigator.of(context).pop(),
@@ -87,9 +85,9 @@ class _SettingsSection extends StatelessWidget {
         borderRadius: BorderRadius.circular(20.0),
         child: Container(
           decoration: BoxDecoration(
-            color: AppColors.white.withOpacity(0.1),
+            color: AppColors.white.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(20.0),
-            border: Border.all(color: AppColors.white.withOpacity(0.2)),
+            border: Border.all(color: AppColors.white.withValues(alpha: 0.2)),
           ),
           child: const Column(
             crossAxisAlignment: CrossAxisAlignment.start,

@@ -52,7 +52,7 @@ class _RegistrationScreenSettingsState
             child: FloatingActionButton.small(
               heroTag: 'registrationBack', // Unique tag
               tooltip: 'Back',
-              backgroundColor: AppColors.white.withOpacity(0.8),
+              backgroundColor: AppColors.white.withValues(alpha: 0.8),
               child: const Icon(Icons.arrow_back,
                   color: AppColors.primaryGradientEnd),
               onPressed: () => Navigator.of(context).pop(),

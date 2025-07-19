@@ -71,7 +71,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
     final provider = Provider.of<PhotoboothProvider>(context, listen: false);
     final globalSettings =
         Provider.of<GlobalSettingsProvider>(context, listen: false);
-    final watermarkProvider = 
+    final watermarkProvider =
         Provider.of<AdminWatermarkProvider>(context, listen: false);
 
     if (provider.faceImagePath == null) {
@@ -87,14 +87,17 @@ class _LoadingScreenState extends State<LoadingScreen> {
     // Check credits before processing
     final userId = await LicenseService.instance.getUserId();
     if (userId != null) {
-      final creditsLeft = await SupabaseService.instance.getUserCreditsLeft(userId);
+      final creditsLeft =
+          await SupabaseService.instance.getUserCreditsLeft(userId);
       if (creditsLeft == null || creditsLeft <= 0) {
-        _setErrorMessage('You don\'t have any credits left to continue with generating images. Please use a different license key.');
+        _setErrorMessage(
+            'You don\'t have any credits left to continue with generating images. Please use a different license key.');
         watermarkProvider.setShowWatermark(true);
         // Navigate back to welcome screen after showing error
         await Future.delayed(const Duration(seconds: 3));
         if (mounted) {
-          Provider.of<PhotoboothProvider>(context, listen: false).clearUserData();
+          Provider.of<PhotoboothProvider>(context, listen: false)
+              .clearUserData();
           Navigator.of(context).pushNamedAndRemoveUntil(
               AppRoutes.welcomeScreen, (route) => false);
         }
@@ -138,7 +141,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
     required String watcherNodeId,
     required bool isSwaplab,
   }) async {
-    final watermarkProvider = 
+    final watermarkProvider =
         Provider.of<AdminWatermarkProvider>(context, listen: false);
     final userId = await LicenseService.instance.getUserId();
     final supabaseUrl = globalSettings.supabaseUrl;
@@ -237,7 +240,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
           if (userId != null) {
             await SupabaseService.instance.decrementUserCredits(userId);
             // Update local credits count
-            final updatedCredits = await SupabaseService.instance.getUserCreditsLeft(userId);
+            final updatedCredits =
+                await SupabaseService.instance.getUserCreditsLeft(userId);
             if (updatedCredits != null) {
               await LicenseService.instance.setCreditsLeft(updatedCredits);
               // Show watermark if credits are exhausted
@@ -311,7 +315,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
                 style: TextStyle(
                   fontSize: settings.titleFontSize,
                   fontWeight: settings.titleFontWeight,
-                  color: settings.titleColor.withOpacity(settings.titleOpacity),
+                  color: settings.titleColor
+                      .withValues(alpha: settings.titleOpacity),
                 ),
               ),
             ),

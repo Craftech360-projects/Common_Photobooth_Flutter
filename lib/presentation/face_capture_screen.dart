@@ -232,7 +232,8 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
                 style: TextStyle(
                   fontSize: settings.titleFontSize,
                   fontWeight: settings.titleFontWeight,
-                  color: settings.titleColor.withOpacity(settings.titleOpacity),
+                  color: settings.titleColor
+                      .withValues(alpha: settings.titleOpacity),
                   height: settings.titleLineHeight,
                   fontStyle: settings.isTitleItalic
                       ? FontStyle.italic
@@ -275,7 +276,7 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
                   width: 60,
                   height: 60,
                   decoration: BoxDecoration(
-                    color: AppColors.black.withOpacity(0.6),
+                    color: AppColors.black.withValues(alpha: 0.6),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
@@ -335,7 +336,7 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
                 color: AppColors.black,
                 borderRadius:
                     BorderRadius.circular(settings.previewBorderRadius)),
-            child: Center(
+            child: const Center(
                 child: Text("No cameras found",
                     style: TextStyle(color: Colors.white))));
       }
@@ -374,10 +375,11 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
           height: finalHeight,
           decoration: BoxDecoration(
               color: AppColors.black,
-              borderRadius: BorderRadius.circular(settings.previewBorderRadius)),
+              borderRadius:
+                  BorderRadius.circular(settings.previewBorderRadius)),
           child: Center(
-              child:
-                  CircularProgressIndicator(color: settings.previewBorderColor)),
+              child: CircularProgressIndicator(
+                  color: settings.previewBorderColor)),
         );
       }
 

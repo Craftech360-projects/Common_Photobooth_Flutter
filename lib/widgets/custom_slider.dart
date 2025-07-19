@@ -147,7 +147,7 @@ class _SliderWithLabelState extends State<SliderWithLabel> {
             trackHeight: 6.0,
             thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10.0),
             thumbColor: AppColors.primaryGradientStart,
-            overlayColor: AppColors.primaryGradientStart.withOpacity(0.2),
+            overlayColor: AppColors.primaryGradientStart.withValues(alpha: 0.2),
           ),
           child: Slider(
             value: widget.value.clamp(widget.min, widget.max),

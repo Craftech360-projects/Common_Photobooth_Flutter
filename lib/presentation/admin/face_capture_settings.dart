@@ -28,7 +28,6 @@ class _FaceCaptureSettingsState extends State<FaceCaptureSettings> {
       body: Stack(
         children: [
           const FaceCaptureScreen(isPreviewMode: false),
-
           AnimatedPositioned(
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOutCubic,
@@ -38,14 +37,13 @@ class _FaceCaptureSettingsState extends State<FaceCaptureSettings> {
             width: settingsPanelWidth,
             child: const _SettingsSection(),
           ),
-
           Positioned(
             top: 20,
             left: 20,
             child: FloatingActionButton.small(
               heroTag: 'faceCaptureBack',
               tooltip: 'Back',
-              backgroundColor: AppColors.white.withOpacity(0.8),
+              backgroundColor: AppColors.white.withValues(alpha: 0.8),
               child: const Icon(Icons.arrow_back,
                   color: AppColors.primaryGradientEnd),
               onPressed: () => Navigator.of(context).pop(),
@@ -85,9 +83,9 @@ class _SettingsSection extends StatelessWidget {
         borderRadius: BorderRadius.circular(20.0),
         child: Container(
           decoration: BoxDecoration(
-            color: AppColors.white.withOpacity(0.1),
+            color: AppColors.white.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(20.0),
-            border: Border.all(color: AppColors.white.withOpacity(0.2)),
+            border: Border.all(color: AppColors.white.withValues(alpha: 0.2)),
           ),
           child: const Column(
             crossAxisAlignment: CrossAxisAlignment.start,

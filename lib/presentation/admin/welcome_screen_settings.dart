@@ -52,7 +52,7 @@ class _WelcomeScreenSettingsState extends State<WelcomeScreenSettings> {
               child: FloatingActionButton.small(
                 heroTag: 'backButtonWelcome', // Unique tag
                 tooltip: 'Back',
-                backgroundColor: AppColors.white.withOpacity(0.8),
+                backgroundColor: AppColors.white.withValues(alpha: 0.8),
                 child: const Icon(Icons.arrow_back, color: Colors.blue),
                 onPressed: () => Navigator.of(context).pop(),
               ),
@@ -96,9 +96,9 @@ class _SettingsSection extends StatelessWidget {
         borderRadius: BorderRadius.circular(20.0),
         child: Container(
           decoration: BoxDecoration(
-            color: AppColors.white.withOpacity(0.1),
+            color: AppColors.white.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(20.0),
-            border: Border.all(color: AppColors.white.withOpacity(0.2)),
+            border: Border.all(color: AppColors.white.withValues(alpha: 0.2)),
           ),
           child: Column(
             children: [
@@ -139,9 +139,9 @@ class _SettingsHeader extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.white.withOpacity(0.8),
-        border:
-            Border(bottom: BorderSide(color: AppColors.black.withOpacity(0.1))),
+        color: AppColors.white.withValues(alpha: 0.8),
+        border: Border(
+            bottom: BorderSide(color: AppColors.black.withValues(alpha: 0.1))),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -174,7 +174,8 @@ class _GeneralSettingsGroup extends StatelessWidget {
               showSnackBar(context,
                   value ? 'Welcome screen enabled' : 'Welcome screen disabled');
             },
-            activeTrackColor: AppColors.primaryGradientStart.withOpacity(0.7),
+            activeTrackColor:
+                AppColors.primaryGradientStart.withValues(alpha: 0.7),
             activeColor: AppColors.primaryGradientEnd,
           ),
         ],
@@ -305,7 +306,7 @@ class _TextStylingGroup extends StatelessWidget {
                 value: welcomeSettings.welcomeMessageItalic,
                 onChanged: (v) => welcomeSettings.setWelcomeMessageItalic(v),
                 activeTrackColor:
-                    AppColors.primaryGradientStart.withOpacity(0.7),
+                    AppColors.primaryGradientStart.withValues(alpha: 0.7),
                 activeColor: AppColors.primaryGradientEnd,
               ),
             ],

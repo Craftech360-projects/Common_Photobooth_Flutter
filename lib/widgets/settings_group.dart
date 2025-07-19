@@ -21,15 +21,15 @@ class SettingsGroup extends StatelessWidget {
       padding: const EdgeInsets.all(25),
       decoration: BoxDecoration(
         color: isSubgroup
-            ? AppColors.white.withOpacity(0.5)
-            : AppColors.white.withOpacity(0.7),
+            ? AppColors.white.withValues(alpha: 0.5)
+            : AppColors.white.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: AppColors.black.withOpacity(0.05)),
+        border: Border.all(color: AppColors.black.withValues(alpha: 0.05)),
         boxShadow: isSubgroup
             ? []
             : [
                 BoxShadow(
-                  color: AppColors.black.withOpacity(0.05),
+                  color: AppColors.black.withValues(alpha: 0.05),
                   blurRadius: 15,
                   offset: const Offset(0, 4),
                 )

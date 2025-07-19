@@ -21,7 +21,6 @@ class SwappedFaceScreen extends StatefulWidget {
 }
 
 class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
-
   @override
   void initState() {
     super.initState();
@@ -32,9 +31,9 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
   }
 
   Future<void> _checkCreditsAndShowWatermark() async {
-    final watermarkProvider = 
+    final watermarkProvider =
         Provider.of<AdminWatermarkProvider>(context, listen: false);
-    
+
     // Check current credits
     final creditsLeft = await LicenseService.instance.getCreditsLeft();
     if (creditsLeft != null && creditsLeft <= 0) {
@@ -122,7 +121,8 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
               style: TextStyle(
                 fontSize: settings.titleFontSize,
                 fontWeight: settings.titleFontWeight,
-                color: settings.titleColor.withOpacity(settings.titleOpacity),
+                color: settings.titleColor
+                    .withValues(alpha: settings.titleOpacity),
                 fontStyle: settings.isTitleItalic
                     ? FontStyle.italic
                     : FontStyle.normal,
@@ -168,7 +168,7 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
               padding: const EdgeInsets.all(16),
               margin: EdgeInsets.symmetric(horizontal: screenSize.width * 0.1),
               decoration: BoxDecoration(
-                  color: AppColors.black.withOpacity(0.6),
+                  color: AppColors.black.withValues(alpha: 0.6),
                   borderRadius: BorderRadius.circular(12)),
               child: Text(
                 widget.isPreviewMode

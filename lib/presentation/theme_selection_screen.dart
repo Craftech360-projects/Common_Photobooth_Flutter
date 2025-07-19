@@ -235,7 +235,7 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> {
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: AppColors.goldenYellow.withOpacity(0.6),
+                    color: AppColors.goldenYellow.withValues(alpha: 0.6),
                     blurRadius: 80,
                     spreadRadius: 12,
                   )

@@ -44,7 +44,7 @@ class _OutputScreenSettingsState extends State<OutputScreenSettings> {
             child: FloatingActionButton.small(
               heroTag: 'outputBack',
               tooltip: 'Back',
-              backgroundColor: AppColors.white.withOpacity(0.8),
+              backgroundColor: AppColors.white.withValues(alpha: 0.8),
               child: const Icon(Icons.arrow_back,
                   color: AppColors.primaryGradientEnd),
               onPressed: () => Navigator.of(context).pop(),
@@ -82,9 +82,9 @@ class _SettingsSection extends StatelessWidget {
         borderRadius: BorderRadius.circular(20.0),
         child: Container(
           decoration: BoxDecoration(
-            color: AppColors.white.withOpacity(0.1),
+            color: AppColors.white.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(20.0),
-            border: Border.all(color: AppColors.white.withOpacity(0.2)),
+            border: Border.all(color: AppColors.white.withValues(alpha: 0.2)),
           ),
           child: const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
