@@ -49,7 +49,7 @@ class _VirtualKeyboardState extends State<VirtualKeyboard>
     '5': '%',
     '6': '.',
     '7': '&',
-    '8': '*',
+    '8': ',',
     '9': '(',
     '0': ')',
   };

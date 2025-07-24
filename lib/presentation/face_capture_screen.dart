@@ -273,15 +273,15 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
                   _switchCamera(nextIndex);
                 },
                 child: Container(
-                  width: 60,
-                  height: 60,
+                  width: 50,
+                  height: 50,
                   decoration: BoxDecoration(
-                    color: AppColors.black.withValues(alpha: 0.6),
+                    color: AppColors.white.withValues(alpha: 0.8),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
                     Icons.cameraswitch,
-                    color: AppColors.white,
+                    color: AppColors.black,
                     size: 30,
                   ),
                 ),

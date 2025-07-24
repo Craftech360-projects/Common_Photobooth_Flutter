@@ -221,7 +221,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
       provider.setWorkflowSentTime(DateTime.now());
 
       int attempts = 0;
-      const maxAttempts = 160;
+      const maxAttempts = 200;
       const pollDelay = Duration(seconds: 3);
 
       while (attempts < maxAttempts) {

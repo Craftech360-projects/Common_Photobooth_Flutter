@@ -15,10 +15,10 @@ class FaceCaptureProvider extends ChangeNotifier {
 
   // --- Title settings ---
   String _titleText = 'Strike a Pose';
-  double _titleFontSize = 70.0;
+  double _titleFontSize = 55.0;
   FontWeight _titleFontWeight = FontWeight.w600;
   Color _titleColor = AppColors.yellow;
-  double _titleTop = 0.25;
+  double _titleTop = 0.20;
   double _titleLeft = 0.0;
   double _titleWidth = 1.0; // New
   bool _showTitle = true;

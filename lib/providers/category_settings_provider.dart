@@ -20,7 +20,7 @@ class CategoryCardSettings {
   CategoryCardSettings({
     required this.imagePath,
     this.isAsset = true,
-    this.width = 0.38,
+    this.width = 0.30,
     this.height = 0.26,
     this.subCategoryWidth = 0.46,
     this.subCategoryHeight = 0.31,
@@ -43,7 +43,7 @@ class CategoryCardSettings {
     return CategoryCardSettings(
       imagePath: json['imagePath'],
       isAsset: json['isAsset'] ?? true,
-      width: toPercent(json['width'], 0.38, refWidth),
+      width: toPercent(json['width'], 0.30, refWidth),
       height: toPercent(json['height'], 0.26, refHeight),
       subCategoryWidth: toPercent(json['subCategoryWidth'], 0.46, refWidth),
       subCategoryHeight: toPercent(json['subCategoryHeight'], 0.31, refHeight),
@@ -129,7 +129,7 @@ class CategorySettingsProvider extends ChangeNotifier {
   double _packagingFieldLabelSize = 19.0;
   Color _packagingFieldFocusedBorderColor = AppColors.white;
 
-  double _mainCategorySpacing = 0.037;
+  double _mainCategorySpacing = 0.01;
 
   double _carouselTopSpacing = 0.0;
   double _carouselScale1 = 0.9;

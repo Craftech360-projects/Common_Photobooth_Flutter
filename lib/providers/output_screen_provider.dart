@@ -1,5 +1,3 @@
-// lib/providers/output_screen_provider.dart
-
 import 'dart:convert';
 import 'dart:io';
 
@@ -34,27 +32,27 @@ class OutputScreenProvider extends ChangeNotifier {
 
   // --- Unified Output Image ---
   double _imageTop = 0.25;
-  double _imageLeft = 0.1;
-  double _imageWidth = 0.8;
-  double _imageHeight = 0.5;
-  bool _showImageBorder = true;
-  double _imageBorderRadius = 15.0;
-  double _imageBorderWidth = 5.0;
+  double _imageLeft = 0.28;
+  double _imageWidth = 0.45;
+  double _imageHeight = 0.50;
+  bool _showImageBorder = false;
+  double _imageBorderRadius = 8.0;
+  double _imageBorderWidth = 1.0;
   Color _imageBorderColor = AppColors.white;
 
   // --- QR Code & Text ---
-  double _qrCodeSize = 200.0;
-  double _qrCodeSectionLeft = 0.37;
-  double _qrCodeSectionBottom = 0.05;
+  double _qrCodeSize = 134.50;
+  double _qrCodeSectionLeft = 0.24;
+  double _qrCodeSectionBottom = 0.10;
   bool _showQrCodeText = true;
   String _qrCodeText = 'Scan to download your image!';
   double _qrCodeTextFontSize = 18.0;
-  double _qrLabelWidth = 100.0;
-  Color _qrCodeTextColor = AppColors.black;
-  FontWeight _qrCodeTextFontWeight = FontWeight.w500;
+  double _qrLabelWidth = 300.0;
+  Color _qrCodeTextColor = AppColors.white;
+  FontWeight _qrCodeTextFontWeight = FontWeight.bold;
   QrCodeLayout _qrCodeLayout = QrCodeLayout.qrLeftTextRight;
   CrossAxisAlignment _qrCodeRowAlignment = CrossAxisAlignment.center;
-  CrossAxisAlignment _qrCodeColumnAlignment = CrossAxisAlignment.center;
+  CrossAxisAlignment _qrCodeColumnAlignment = CrossAxisAlignment.start;
 
   // --- "Done" Button ---
   bool _useDoneButtonImage = true;
@@ -63,8 +61,8 @@ class OutputScreenProvider extends ChangeNotifier {
   String _doneButtonText = 'Done';
   double _doneButtonWidth = 0.32;
   double _doneButtonHeight = 0.09;
-  double _doneButtonLeft = 0.34;
-  double _doneButtonBottom = 0.05;
+  double _doneButtonLeft = 0.43;
+  double _doneButtonBottom = 0.010;
 
   // --- Background ---
   String? _backgroundImagePath = 'assets/images/common_bg.png';
