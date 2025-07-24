@@ -129,7 +129,7 @@ class CategorySettingsProvider extends ChangeNotifier {
   double _packagingFieldLabelSize = 19.0;
   Color _packagingFieldFocusedBorderColor = AppColors.white;
 
-  double _mainCategorySpacing = 0.01;
+  double _mainCategorySpacing = 0.04;
 
   double _carouselTopSpacing = 0.0;
   double _carouselScale1 = 0.9;

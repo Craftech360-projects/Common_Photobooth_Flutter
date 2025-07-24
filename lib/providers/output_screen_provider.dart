@@ -27,23 +27,23 @@ class OutputScreenProvider extends ChangeNotifier {
   double _titleOpacity = 1.0;
   bool _isTitleItalic = false;
   TextAlign _titleAlignment = TextAlign.center;
-  double _titleTop = 0.1;
+  double _titleTop = 0.20;
   double _titleWidth = 1.0;
 
   // --- Unified Output Image ---
-  double _imageTop = 0.25;
-  double _imageLeft = 0.28;
-  double _imageWidth = 0.45;
-  double _imageHeight = 0.50;
+  double _imageTop = 0.26;
+  double _imageLeft = 0.18;
+  double _imageWidth = 0.64;
+  double _imageHeight = 0.48;
   bool _showImageBorder = false;
   double _imageBorderRadius = 8.0;
   double _imageBorderWidth = 1.0;
   Color _imageBorderColor = AppColors.white;
 
   // --- QR Code & Text ---
-  double _qrCodeSize = 134.50;
-  double _qrCodeSectionLeft = 0.24;
-  double _qrCodeSectionBottom = 0.10;
+  double _qrCodeSize = 146.0;
+  double _qrCodeSectionLeft = 0.30;
+  double _qrCodeSectionBottom = 0.16;
   bool _showQrCodeText = true;
   String _qrCodeText = 'Scan to download your image!';
   double _qrCodeTextFontSize = 18.0;
@@ -51,18 +51,18 @@ class OutputScreenProvider extends ChangeNotifier {
   Color _qrCodeTextColor = AppColors.white;
   FontWeight _qrCodeTextFontWeight = FontWeight.bold;
   QrCodeLayout _qrCodeLayout = QrCodeLayout.qrLeftTextRight;
-  CrossAxisAlignment _qrCodeRowAlignment = CrossAxisAlignment.center;
-  CrossAxisAlignment _qrCodeColumnAlignment = CrossAxisAlignment.start;
+  CrossAxisAlignment _qrCodeRowAlignment = CrossAxisAlignment.start;
+  CrossAxisAlignment _qrCodeColumnAlignment = CrossAxisAlignment.center;
 
   // --- "Done" Button ---
   bool _useDoneButtonImage = true;
   String? _doneButtonImagePath = 'assets/images/home_btn.png';
   bool _isDoneButtonImageAsset = true;
   String _doneButtonText = 'Done';
-  double _doneButtonWidth = 0.32;
+  double _doneButtonWidth = 0.24;
   double _doneButtonHeight = 0.09;
-  double _doneButtonLeft = 0.43;
-  double _doneButtonBottom = 0.010;
+  double _doneButtonLeft = 0.45;
+  double _doneButtonBottom = 0.15;
 
   // --- Background ---
   String? _backgroundImagePath = 'assets/images/common_bg.png';

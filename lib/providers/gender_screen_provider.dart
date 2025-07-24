@@ -14,7 +14,7 @@ class GenderSelectionProvider extends ChangeNotifier {
 
   double _imageWidth = 0.30;
   double _imageHeight = 0.26;
-  double _imageSpacing = 0.0;
+  double _imageSpacing = 40.00;
   double _genderSelectionLeft = 0.18;
   double _genderSelectionTop = 0.43;
 
