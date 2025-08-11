@@ -1,8 +1,8 @@
-import 'dart:io';
+// import 'dart:io'; // Commented out for web compatibility
 
 import 'package:flutter/material.dart';
-import 'package:path/path.dart' as path;
-import 'package:path_provider/path_provider.dart';
+// import 'package:path/path.dart' as path; // Commented out for web compatibility
+// import 'package:path_provider/path_provider.dart'; // Commented out for web compatibility
 import 'package:shared_preferences/shared_preferences.dart';
 
 class GlobalSettingsProvider with ChangeNotifier {
@@ -69,14 +69,14 @@ class GlobalSettingsProvider with ChangeNotifier {
 
     _sharingMethod = _prefs.getString('sharing_method') ?? 'QR Code';
 
-    // Verify background image file exists if it's not an asset
-    if (_backgroundImage != null && !_isAssetImage) {
-      final file = File(_backgroundImage!);
-      if (!file.existsSync()) {
-        _backgroundImage = null;
-        await _prefs.remove('background_image');
-      }
-    }
+    // File existence checks commented out for web compatibility
+    // if (_backgroundImage != null && !_isAssetImage) {
+    //   final file = File(_backgroundImage!);
+    //   if (!file.existsSync()) {
+    //     _backgroundImage = null;
+    //     await _prefs.remove('background_image');
+    //   }
+    // }
 
     _fieldSpacing = _prefs.getDouble('field_spacing') ?? 20.0;
     _buttonSpacing = _prefs.getDouble('button_spacing') ?? 40.0;
@@ -114,17 +114,17 @@ class GlobalSettingsProvider with ChangeNotifier {
     _inputDirectory = "C:\\storage\\input";
     _outputDirectory = "C:\\storage\\output";
 
-    // Create directories if they don't exist
-    final inputDir = Directory(_inputDirectory!);
-    final outputDir = Directory(_outputDirectory!);
+    // Directory operations commented out for web compatibility
+    // final inputDir = Directory(_inputDirectory!);
+    // final outputDir = Directory(_outputDirectory!);
 
-    if (!await inputDir.exists()) {
-      await inputDir.create(recursive: true);
-    }
+    // if (!await inputDir.exists()) {
+    //   await inputDir.create(recursive: true);
+    // }
 
-    if (!await outputDir.exists()) {
-      await outputDir.create(recursive: true);
-    }
+    // if (!await outputDir.exists()) {
+    //   await outputDir.create(recursive: true);
+    // }
 
     // Save to preferences
     await _prefs.setString('input_directory', _inputDirectory!);
@@ -144,21 +144,25 @@ class GlobalSettingsProvider with ChangeNotifier {
       _backgroundImage = sourcePath;
       _isAssetImage = true;
     } else {
-      // For file images, copy to app documents directory
-      final appDir = await getApplicationDocumentsDirectory();
-      final fileName =
-          'global_background_${DateTime.now().millisecondsSinceEpoch}${path.extension(sourcePath)}';
-      final destinationPath = path.join(appDir.path, fileName);
+      // File copying operations commented out for web compatibility
+      // final appDir = await getApplicationDocumentsDirectory();
+      // final fileName =
+      //     'global_background_${DateTime.now().millisecondsSinceEpoch}${path.extension(sourcePath)}';
+      // final destinationPath = path.join(appDir.path, fileName);
 
-      try {
-        final sourceFile = File(sourcePath);
-        await sourceFile.copy(destinationPath);
-        _backgroundImage = destinationPath;
-        _isAssetImage = false;
-      } on Exception catch (e) {
-        debugPrint('Error copying background image: $e');
-        return;
-      }
+      // try {
+      //   final sourceFile = File(sourcePath);
+      //   await sourceFile.copy(destinationPath);
+      //   _backgroundImage = destinationPath;
+      //   _isAssetImage = false;
+      // } on Exception catch (e) {
+      //   debugPrint('Error copying background image: $e');
+      //   return;
+      // }
+      
+      // For web, just use the source path directly
+      _backgroundImage = sourcePath;
+      _isAssetImage = false;
     }
 
     await _prefs.setString('background_image', _backgroundImage!);

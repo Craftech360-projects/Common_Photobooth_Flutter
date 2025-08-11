@@ -1,5 +1,3 @@
-import 'dart:developer';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -78,11 +76,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
       _setErrorMessage('No face image captured');
       return;
     }
-    final imageFile = File(provider.faceImagePath!);
-    if (!await imageFile.exists()) {
-      _setErrorMessage('Image file not found');
-      return;
-    }
+    // On web, we can't check file existence like on native platforms
+    // The path is actually a blob URL or data URL from the camera plugin
 
     // Check credits before processing
     final userId = await LicenseService.instance.getUserId();
@@ -122,7 +117,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
     }
 
     await _processOnlineFlow(
-      imageFile: imageFile,
+      imagePath: provider.faceImagePath!,
       provider: provider,
       globalSettings: globalSettings,
       seed: seed,
@@ -133,7 +128,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
   }
 
   Future<void> _processOnlineFlow({
-    required File imageFile,
+    required String imagePath,
     required PhotoboothProvider provider,
     required GlobalSettingsProvider globalSettings,
     required int seed,
@@ -176,7 +171,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
     try {
       final faceImageUrl =
-          await SupabaseService.instance.uploadUserFaceImage(imageFile);
+          await SupabaseService.instance.uploadUserFaceImageFromPath(imagePath);
       if (faceImageUrl == null) {
         _setErrorMessage('Failed to upload face image.');
         return;
@@ -216,7 +211,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
         apiKey: runpodApiKey,
       );
 
-      log("Workflow sent to RunPod successfully: ${workflow.toJSON()}");
+      // log("Workflow sent to RunPod successfully: ${workflow.toJSON()}");
 
       provider.setWorkflowSentTime(DateTime.now());
 
@@ -232,7 +227,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
         );
 
         if (supabaseImageUrl != null) {
-          debugPrint('Found new image in Supabase: $supabaseImageUrl');
           provider.setSwappedImage(supabaseImageUrl);
           provider.setCapturedImageUrl(supabaseImageUrl);
 
@@ -341,7 +335,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
       // 'gif'
       loader = settings.isLoaderAsset
           ? Image.asset(settings.loaderAssetPath)
-          : Image.file(File(settings.loaderAssetPath));
+          : Image.network(settings.loaderAssetPath);
     }
 
     if (settings.loaderAssetType == 'video' && settings.loaderIsFullscreen) {
@@ -364,14 +358,14 @@ class _LoadingScreenState extends State<LoadingScreen> {
       if (settings.isBackgroundImageAsset) {
         return AssetImage(settings.backgroundImagePath!);
       } else {
-        return FileImage(File(settings.backgroundImagePath!));
+        return NetworkImage(settings.backgroundImagePath!);
       }
     } else {
       if (globalSettings.backgroundImagePath != null) {
         if (globalSettings.isBackgroundImageAsset) {
           return AssetImage(globalSettings.backgroundImagePath!);
         } else {
-          return FileImage(File(globalSettings.backgroundImagePath!));
+          return NetworkImage(globalSettings.backgroundImagePath!);
         }
       } else {
         return const AssetImage('assets/images/common_bg.png');

@@ -1,9 +1,9 @@
 import 'dart:convert';
-import 'dart:io';
+// import 'dart:io'; // Commented out for web compatibility
 
 import 'package:flutter/material.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
+// import 'package:path/path.dart' as p; // Commented out for web compatibility
+// import 'package:path_provider/path_provider.dart'; // Commented out for web compatibility
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -237,13 +237,14 @@ class OutputScreenProvider extends ChangeNotifier {
       updateState(null, true);
     } else {
       try {
-        final appDir = await getApplicationDocumentsDirectory();
-        final fileName =
-            'output_${DateTime.now().millisecondsSinceEpoch}${p.extension(sourcePath)}';
-        final destinationPath = p.join(appDir.path, fileName);
-        await File(sourcePath).copy(destinationPath);
-        updateState(destinationPath, false);
-      } catch (e) {
+        // File operations commented out for web compatibility
+        // final appDir = await getApplicationDocumentsDirectory();
+        // final fileName =
+        //     'output_${DateTime.now().millisecondsSinceEpoch}${p.extension(sourcePath)}';
+        // final destinationPath = p.join(appDir.path, fileName);
+        // await File(sourcePath).copy(destinationPath);
+        updateState(sourcePath, false); // Just use the source path directly
+      } on Exception catch (e) {
         debugPrint('Error copying file: $e');
         return;
       }

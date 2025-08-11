@@ -1,11 +1,11 @@
 // lib/providers/registration_screen_provider.dart
 
 import 'dart:convert';
-import 'dart:io';
+// import 'dart:io'; // Commented out for web compatibility
 
 import 'package:flutter/material.dart';
-import 'package:path/path.dart' as path;
-import 'package:path_provider/path_provider.dart';
+// import 'package:path/path.dart' as path; // Commented out for web compatibility
+// import 'package:path_provider/path_provider.dart'; // Commented out for web compatibility
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -393,14 +393,14 @@ class RegistrationScreenProvider extends ChangeNotifier {
       );
     }
 
-    // Verify button image file exists if it's not an asset
-    if (_buttonImagePath != null && !_isButtonImageAsset) {
-      final file = File(_buttonImagePath!);
-      if (!file.existsSync()) {
-        _buttonImagePath = null;
-        await _prefs.remove('registration_button_image_path');
-      }
-    }
+    // File existence checks commented out for web compatibility
+    // if (_buttonImagePath != null && !_isButtonImageAsset) {
+    //   final file = File(_buttonImagePath!);
+    //   if (!file.existsSync()) {
+    //     _buttonImagePath = null;
+    //     await _prefs.remove('registration_button_image_path');
+    //   }
+    // }
 
     // Load background settings
     _registrationScreenBackground =
@@ -410,15 +410,15 @@ class RegistrationScreenProvider extends ChangeNotifier {
         _prefs.getBool('registration_is_screen_background_asset') ??
             _isRegistrationScreenBackgroundAsset;
 
-    // Verify background image file exists if it's not an asset
-    if (_registrationScreenBackground != null &&
-        !_isRegistrationScreenBackgroundAsset) {
-      final file = File(_registrationScreenBackground!);
-      if (!file.existsSync()) {
-        _registrationScreenBackground = null;
-        await _prefs.remove('registration_screen_background');
-      }
-    }
+    // File existence checks commented out for web compatibility
+    // if (_registrationScreenBackground != null &&
+    //     !_isRegistrationScreenBackgroundAsset) {
+    //   final file = File(_registrationScreenBackground!);
+    //   if (!file.existsSync()) {
+    //     _registrationScreenBackground = null;
+    //     await _prefs.remove('registration_screen_background');
+    //   }
+    // }
 
     notifyListeners();
   }
@@ -747,21 +747,25 @@ class RegistrationScreenProvider extends ChangeNotifier {
       _buttonImagePath = sourcePath;
       _isButtonImageAsset = true;
     } else {
-      // For file images, copy to app documents directory
-      final appDir = await getApplicationDocumentsDirectory();
-      final fileName =
-          'registration_button_${DateTime.now().millisecondsSinceEpoch}${path.extension(sourcePath)}';
-      final destinationPath = path.join(appDir.path, fileName);
+      // File copying operations commented out for web compatibility
+      // final appDir = await getApplicationDocumentsDirectory();
+      // final fileName =
+      //     'registration_button_${DateTime.now().millisecondsSinceEpoch}${path.extension(sourcePath)}';
+      // final destinationPath = path.join(appDir.path, fileName);
 
-      try {
-        final sourceFile = File(sourcePath);
-        await sourceFile.copy(destinationPath);
-        _buttonImagePath = destinationPath;
-        _isButtonImageAsset = false;
-      } on Exception catch (e) {
-        debugPrint('Error copying button image: $e');
-        return;
-      }
+      // try {
+      //   final sourceFile = File(sourcePath);
+      //   await sourceFile.copy(destinationPath);
+      //   _buttonImagePath = destinationPath;
+      //   _isButtonImageAsset = false;
+      // } on Exception catch (e) {
+      //   debugPrint('Error copying button image: $e');
+      //   return;
+      // }
+      
+      // For web, just use the source path directly
+      _buttonImagePath = sourcePath;
+      _isButtonImageAsset = false;
     }
 
     await _prefs.setString('registration_button_image_path', _buttonImagePath!);
@@ -787,21 +791,25 @@ class RegistrationScreenProvider extends ChangeNotifier {
       _registrationScreenBackground = sourcePath;
       _isRegistrationScreenBackgroundAsset = true;
     } else {
-      // For file images, copy to app documents directory
-      final appDir = await getApplicationDocumentsDirectory();
-      final fileName =
-          'registration_background_${DateTime.now().millisecondsSinceEpoch}${path.extension(sourcePath)}';
-      final destinationPath = path.join(appDir.path, fileName);
+      // File copying operations commented out for web compatibility
+      // final appDir = await getApplicationDocumentsDirectory();
+      // final fileName =
+      //     'registration_background_${DateTime.now().millisecondsSinceEpoch}${path.extension(sourcePath)}';
+      // final destinationPath = path.join(appDir.path, fileName);
 
-      try {
-        final sourceFile = File(sourcePath);
-        await sourceFile.copy(destinationPath);
-        _registrationScreenBackground = destinationPath;
-        _isRegistrationScreenBackgroundAsset = false;
-      } on Exception catch (e) {
-        debugPrint('Error copying background image: $e');
-        return;
-      }
+      // try {
+      //   final sourceFile = File(sourcePath);
+      //   await sourceFile.copy(destinationPath);
+      //   _registrationScreenBackground = destinationPath;
+      //   _isRegistrationScreenBackgroundAsset = false;
+      // } on Exception catch (e) {
+      //   debugPrint('Error copying background image: $e');
+      //   return;
+      // }
+      
+      // For web, just use the source path directly
+      _registrationScreenBackground = sourcePath;
+      _isRegistrationScreenBackgroundAsset = false;
     }
 
     await _prefs.setString(

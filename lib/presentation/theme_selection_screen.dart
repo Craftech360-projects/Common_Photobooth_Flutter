@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -117,7 +116,7 @@ class _ThemeSelectionScreenState extends State<ThemeSelectionScreen> {
     }
 
     if (path != null && path.isNotEmpty) {
-      provider = isAsset ? AssetImage(path) : FileImage(File(path));
+      provider = isAsset ? AssetImage(path) : NetworkImage(path);
     } else {
       provider = const AssetImage('assets/images/common_bg.png');
     }

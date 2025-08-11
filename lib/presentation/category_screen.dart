@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -186,7 +185,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     }
 
     if (path != null && path.isNotEmpty) {
-      provider = isAsset ? AssetImage(path) : FileImage(File(path));
+      provider = isAsset ? AssetImage(path) : NetworkImage(path);
     } else {
       provider = const AssetImage('assets/images/common_bg.png');
     }
@@ -448,7 +447,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
               width: settingsProvider.buttonWidth * screenSize.width,
               height: settingsProvider.buttonHeight * screenSize.height,
               fit: BoxFit.contain)
-          : Image.file(File(settingsProvider.nextButtonAsset),
+          : Image.network(settingsProvider.nextButtonAsset,
               width: settingsProvider.buttonWidth * screenSize.width,
               height: settingsProvider.buttonHeight * screenSize.height,
               fit: BoxFit.contain),
@@ -509,7 +508,7 @@ class _TappableCategoryCardState extends State<TappableCategoryCard> {
           image: DecorationImage(
             image: widget.settings.isAsset
                 ? AssetImage(widget.settings.imagePath)
-                : FileImage(File(widget.settings.imagePath)) as ImageProvider,
+                : NetworkImage(widget.settings.imagePath) as ImageProvider,
             fit: BoxFit.contain,
           ),
           boxShadow: widget.isSelected && widget.settings.useGlow

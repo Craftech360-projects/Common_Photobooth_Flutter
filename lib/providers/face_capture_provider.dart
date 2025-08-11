@@ -1,11 +1,11 @@
 // lib/providers/face_capture_provider.dart
 
 import 'dart:convert';
-import 'dart:io';
+// import 'dart:io'; // Commented out for web compatibility
 
 import 'package:flutter/material.dart';
-import 'package:path/path.dart' as path;
-import 'package:path_provider/path_provider.dart';
+// import 'package:path/path.dart' as path; // Commented out for web compatibility
+// import 'package:path_provider/path_provider.dart'; // Commented out for web compatibility
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -109,9 +109,14 @@ class FaceCaptureProvider extends ChangeNotifier {
 
   // --- Setters ---
   void setTitleStyle({
-    String? text, double? fontSize, FontWeight? fontWeight,
-    Color? color, double? lineHeight, double? opacity,
-    TextAlign? alignment, bool? isItalic,
+    String? text,
+    double? fontSize,
+    FontWeight? fontWeight,
+    Color? color,
+    double? lineHeight,
+    double? opacity,
+    TextAlign? alignment,
+    bool? isItalic,
   }) {
     if (text != null) _titleText = text;
     if (fontSize != null) _titleFontSize = fontSize;
@@ -131,10 +136,11 @@ class FaceCaptureProvider extends ChangeNotifier {
     _saveAndNotify();
   }
 
-  void setPreviewStyle({
-    bool? showBorder, double? borderWidth,
-    Color? borderColor, double? borderRadius
-  }) {
+  void setPreviewStyle(
+      {bool? showBorder,
+      double? borderWidth,
+      Color? borderColor,
+      double? borderRadius}) {
     if (showBorder != null) _showPreviewBorder = showBorder;
     if (borderWidth != null) _previewBorderWidth = borderWidth;
     if (borderColor != null) _previewBorderColor = borderColor;
@@ -144,8 +150,12 @@ class FaceCaptureProvider extends ChangeNotifier {
 
   void setButtonStyle({
     // Text Button
-    String? text, Color? backgroundColor, Color? foregroundColor,
-    double? fontSize, FontWeight? fontWeight, double? borderRadius,
+    String? text,
+    Color? backgroundColor,
+    Color? foregroundColor,
+    double? fontSize,
+    FontWeight? fontWeight,
+    double? borderRadius,
     // Image Button
     double? imageOpacity,
   }) {
@@ -159,21 +169,100 @@ class FaceCaptureProvider extends ChangeNotifier {
     _saveAndNotify();
   }
 
-  void setPreviewPosition(double left, double top) { _previewLeft = left; _previewTop = top; _saveAndNotify(); }
-  void setButtonPosition(double left, double top) { _buttonLeft = left; _buttonTop = top; _saveAndNotify(); }
-  void setShowTitle(bool show) { _showTitle = show; _saveAndNotify(); }
-  void setPreviewDimensions(double width, double height) { _previewWidth = width; _previewHeight = height; _saveAndNotify(); }
-  void setButtonDimensions(double width, double height) { _buttonWidth = width; _buttonHeight = height; _saveAndNotify(); }
-  void setUseImageButton(bool use) { _useImageButton = use; _saveAndNotify(); }
-  void setShowBackground(bool show) { _showBackground = show; _saveAndNotify(); }
-  void setSelectedCameraIndex(int index) { _selectedCameraIndex = index; _saveAndNotify(); }
-  
-  Future<void> setButtonImagePath(String? path, {bool isAsset = true}) async { await _setImage(path, isAsset, (p, a) { _buttonImagePath = p; _isButtonImageAsset = a; }); }
-  Future<void> setBackgroundImagePath(String? path, {bool isAsset = true}) async { await _setImage(path, isAsset, (p, a) { _backgroundImagePath = p; _isBackgroundImageAsset = a; }); }
+  void setPreviewPosition(double left, double top) {
+    _previewLeft = left;
+    _previewTop = top;
+    _saveAndNotify();
+  }
 
-  Future<void> _setImage(String? sourcePath, bool isAsset, Function(String?, bool) updateState) async { if (sourcePath == null) { updateState(null, true); } else if (isAsset) { updateState(sourcePath, true); } else { try { final appDir = await getApplicationDocumentsDirectory(); final fileName = 'capture_${DateTime.now().millisecondsSinceEpoch}${path.extension(sourcePath)}'; final destinationPath = path.join(appDir.path, fileName); await File(sourcePath).copy(destinationPath); updateState(destinationPath, false); } on Exception catch (e) { debugPrint('Error copying image: $e'); return; } } _saveAndNotify(); }
-  Future<void> init() async { if (_isInitialized) return; _prefs = await SharedPreferences.getInstance(); await _loadSettings(); _isInitialized = true; }
-  void _saveAndNotify() { if (!_isInitialized) return; _saveSettings(); notifyListeners(); }
+  void setButtonPosition(double left, double top) {
+    _buttonLeft = left;
+    _buttonTop = top;
+    _saveAndNotify();
+  }
+
+  void setShowTitle(bool show) {
+    _showTitle = show;
+    _saveAndNotify();
+  }
+
+  void setPreviewDimensions(double width, double height) {
+    _previewWidth = width;
+    _previewHeight = height;
+    _saveAndNotify();
+  }
+
+  void setButtonDimensions(double width, double height) {
+    _buttonWidth = width;
+    _buttonHeight = height;
+    _saveAndNotify();
+  }
+
+  void setUseImageButton(bool use) {
+    _useImageButton = use;
+    _saveAndNotify();
+  }
+
+  void setShowBackground(bool show) {
+    _showBackground = show;
+    _saveAndNotify();
+  }
+
+  void setSelectedCameraIndex(int index) {
+    _selectedCameraIndex = index;
+    _saveAndNotify();
+  }
+
+  Future<void> setButtonImagePath(String? path, {bool isAsset = true}) async {
+    await _setImage(path, isAsset, (p, a) {
+      _buttonImagePath = p;
+      _isButtonImageAsset = a;
+    });
+  }
+
+  Future<void> setBackgroundImagePath(String? path,
+      {bool isAsset = true}) async {
+    await _setImage(path, isAsset, (p, a) {
+      _backgroundImagePath = p;
+      _isBackgroundImageAsset = a;
+    });
+  }
+
+  Future<void> _setImage(String? sourcePath, bool isAsset,
+      Function(String?, bool) updateState) async {
+    if (sourcePath == null) {
+      updateState(null, true);
+    } else if (isAsset) {
+      updateState(sourcePath, true);
+    } else {
+      try {
+        // File operations commented out for web compatibility
+        // final appDir = await getApplicationDocumentsDirectory();
+        // final fileName =
+        //     'capture_${DateTime.now().millisecondsSinceEpoch}${path.extension(sourcePath)}';
+        // final destinationPath = path.join(appDir.path, fileName);
+        // await File(sourcePath).copy(destinationPath);
+        updateState(sourcePath, false); // Just use the source path directly
+      } on Exception catch (e) {
+        debugPrint('Error copying image: $e');
+        return;
+      }
+    }
+    _saveAndNotify();
+  }
+
+  Future<void> init() async {
+    if (_isInitialized) return;
+    _prefs = await SharedPreferences.getInstance();
+    await _loadSettings();
+    _isInitialized = true;
+  }
+
+  void _saveAndNotify() {
+    if (!_isInitialized) return;
+    _saveSettings();
+    notifyListeners();
+  }
 
   Future<void> _loadSettings() async {
     final settingsJson = _prefs.getString('face_capture_settings');
@@ -181,12 +270,17 @@ class FaceCaptureProvider extends ChangeNotifier {
       final settings = jsonDecode(settingsJson) as Map<String, dynamic>;
       const double refWidth = 1080.0;
       const double refHeight = 1920.0;
-      double toPercent(dynamic value, double defaultValue, double reference) { if (value == null) return defaultValue; double val = (value as num).toDouble(); return val > 1.0 ? val / reference : val; }
+      double toPercent(dynamic value, double defaultValue, double reference) {
+        if (value == null) return defaultValue;
+        double val = (value as num).toDouble();
+        return val > 1.0 ? val / reference : val;
+      }
 
       // Title
       _titleText = settings['titleText'] ?? _titleText;
       _titleFontSize = settings['titleFontSize'] ?? _titleFontSize;
-      _titleFontWeight = FontWeight.values[settings['titleFontWeight'] ?? _titleFontWeight.index];
+      _titleFontWeight = FontWeight
+          .values[settings['titleFontWeight'] ?? _titleFontWeight.index];
       _titleColor = Color(settings['titleColor'] ?? _titleColor.value);
       _showTitle = settings['showTitle'] ?? _showTitle;
       _titleLineHeight = settings['titleLineHeight'] ?? _titleLineHeight;
@@ -198,36 +292,50 @@ class FaceCaptureProvider extends ChangeNotifier {
       _titleWidth = toPercent(settings['titleWidth'], _titleWidth, refWidth);
 
       // Preview
-      _previewWidth = toPercent(settings['previewWidth'], _previewWidth, refWidth);
-      _previewHeight = toPercent(settings['previewHeight'], _previewHeight, refHeight);
-      _previewBorderRadius = settings['previewBorderRadius'] ?? _previewBorderRadius;
-      _previewBorderColor = Color(settings['previewBorderColor'] ?? _previewBorderColor.value);
-      _previewBorderWidth = settings['previewBorderWidth'] ?? _previewBorderWidth;
+      _previewWidth =
+          toPercent(settings['previewWidth'], _previewWidth, refWidth);
+      _previewHeight =
+          toPercent(settings['previewHeight'], _previewHeight, refHeight);
+      _previewBorderRadius =
+          settings['previewBorderRadius'] ?? _previewBorderRadius;
+      _previewBorderColor =
+          Color(settings['previewBorderColor'] ?? _previewBorderColor.value);
+      _previewBorderWidth =
+          settings['previewBorderWidth'] ?? _previewBorderWidth;
       _showPreviewBorder = settings['showPreviewBorder'] ?? _showPreviewBorder;
       _previewTop = toPercent(settings['previewTop'], _previewTop, refHeight);
       _previewLeft = toPercent(settings['previewLeft'], _previewLeft, refWidth);
 
       // Button
       _buttonWidth = toPercent(settings['buttonWidth'], _buttonWidth, refWidth);
-      _buttonHeight = toPercent(settings['buttonHeight'], _buttonHeight, refHeight);
+      _buttonHeight =
+          toPercent(settings['buttonHeight'], _buttonHeight, refHeight);
       _buttonTop = toPercent(settings['buttonTop'], _buttonTop, refHeight);
       _buttonLeft = toPercent(settings['buttonLeft'], _buttonLeft, refWidth);
       _useImageButton = settings['useImageButton'] ?? _useImageButton;
       _buttonImagePath = settings['buttonImagePath'];
-      _isButtonImageAsset = settings['isButtonImageAsset'] ?? _isButtonImageAsset;
-      _buttonImageOpacity = settings['buttonImageOpacity'] ?? _buttonImageOpacity;
+      _isButtonImageAsset =
+          settings['isButtonImageAsset'] ?? _isButtonImageAsset;
+      _buttonImageOpacity =
+          settings['buttonImageOpacity'] ?? _buttonImageOpacity;
       _buttonText = settings['buttonText'] ?? _buttonText;
-      _buttonBackgroundColor = Color(settings['buttonBackgroundColor'] ?? _buttonBackgroundColor.value);
-      _buttonForegroundColor = Color(settings['buttonForegroundColor'] ?? _buttonForegroundColor.value);
+      _buttonBackgroundColor = Color(
+          settings['buttonBackgroundColor'] ?? _buttonBackgroundColor.value);
+      _buttonForegroundColor = Color(
+          settings['buttonForegroundColor'] ?? _buttonForegroundColor.value);
       _buttonFontSize = settings['buttonFontSize'] ?? _buttonFontSize;
-      _buttonFontWeight = FontWeight.values[settings['buttonFontWeight'] ?? _buttonFontWeight.index];
-      _buttonBorderRadius = settings['buttonBorderRadius'] ?? _buttonBorderRadius;
+      _buttonFontWeight = FontWeight
+          .values[settings['buttonFontWeight'] ?? _buttonFontWeight.index];
+      _buttonBorderRadius =
+          settings['buttonBorderRadius'] ?? _buttonBorderRadius;
 
       // Other
       _showBackground = settings['showBackground'] ?? _showBackground;
       _backgroundImagePath = settings['backgroundImagePath'];
-      _isBackgroundImageAsset = settings['isBackgroundImageAsset'] ?? _isBackgroundImageAsset;
-      _selectedCameraIndex = settings['selectedCameraIndex'] ?? _selectedCameraIndex;
+      _isBackgroundImageAsset =
+          settings['isBackgroundImageAsset'] ?? _isBackgroundImageAsset;
+      _selectedCameraIndex =
+          settings['selectedCameraIndex'] ?? _selectedCameraIndex;
     }
     notifyListeners();
   }
@@ -236,23 +344,36 @@ class FaceCaptureProvider extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     final settings = {
       // Title
-      'titleText': _titleText, 'titleFontSize': _titleFontSize, 'titleFontWeight': _titleFontWeight.index,
-      'titleColor': _titleColor.value, 'titleTop': _titleTop, 'titleLeft': _titleLeft, 'titleWidth': _titleWidth,
-      'showTitle': _showTitle, 'titleLineHeight': _titleLineHeight, 'titleOpacity': _titleOpacity, 
+      'titleText': _titleText, 'titleFontSize': _titleFontSize,
+      'titleFontWeight': _titleFontWeight.index,
+      'titleColor': _titleColor.value, 'titleTop': _titleTop,
+      'titleLeft': _titleLeft, 'titleWidth': _titleWidth,
+      'showTitle': _showTitle, 'titleLineHeight': _titleLineHeight,
+      'titleOpacity': _titleOpacity,
       'titleAlignment': _titleAlignment.index, 'isTitleItalic': _isTitleItalic,
       // Preview
-      'previewWidth': _previewWidth, 'previewHeight': _previewHeight, 'previewBorderRadius': _previewBorderRadius,
-      'previewBorderColor': _previewBorderColor.value, 'previewBorderWidth': _previewBorderWidth,
-      'showPreviewBorder': _showPreviewBorder, 'previewTop': _previewTop, 'previewLeft': _previewLeft,
+      'previewWidth': _previewWidth, 'previewHeight': _previewHeight,
+      'previewBorderRadius': _previewBorderRadius,
+      'previewBorderColor': _previewBorderColor.value,
+      'previewBorderWidth': _previewBorderWidth,
+      'showPreviewBorder': _showPreviewBorder, 'previewTop': _previewTop,
+      'previewLeft': _previewLeft,
       // Button
-      'buttonWidth': _buttonWidth, 'buttonHeight': _buttonHeight, 'buttonTop': _buttonTop, 'buttonLeft': _buttonLeft,
-      'useImageButton': _useImageButton, 'buttonImagePath': _buttonImagePath, 'isButtonImageAsset': _isButtonImageAsset,
-      'buttonImageOpacity': _buttonImageOpacity, 'buttonText': _buttonText, 'buttonBackgroundColor': _buttonBackgroundColor.value,
-      'buttonForegroundColor': _buttonForegroundColor.value, 'buttonFontSize': _buttonFontSize, 'buttonFontWeight': _buttonFontWeight.index,
+      'buttonWidth': _buttonWidth, 'buttonHeight': _buttonHeight,
+      'buttonTop': _buttonTop, 'buttonLeft': _buttonLeft,
+      'useImageButton': _useImageButton, 'buttonImagePath': _buttonImagePath,
+      'isButtonImageAsset': _isButtonImageAsset,
+      'buttonImageOpacity': _buttonImageOpacity, 'buttonText': _buttonText,
+      'buttonBackgroundColor': _buttonBackgroundColor.value,
+      'buttonForegroundColor': _buttonForegroundColor.value,
+      'buttonFontSize': _buttonFontSize,
+      'buttonFontWeight': _buttonFontWeight.index,
       'buttonBorderRadius': _buttonBorderRadius,
       // Other
-      'showBackground': _showBackground, 'backgroundImagePath': _backgroundImagePath,
-      'isBackgroundImageAsset': _isBackgroundImageAsset, 'selectedCameraIndex': _selectedCameraIndex,
+      'showBackground': _showBackground,
+      'backgroundImagePath': _backgroundImagePath,
+      'isBackgroundImageAsset': _isBackgroundImageAsset,
+      'selectedCameraIndex': _selectedCameraIndex,
     };
     await prefs.setString('face_capture_settings', jsonEncode(settings));
   }

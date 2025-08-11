@@ -538,8 +538,9 @@ class CategorySettingsProvider extends ChangeNotifier {
     if (labelText != null) _packagingFieldLabelText = labelText;
     if (labelColor != null) _packagingFieldLabelColor = labelColor;
     if (labelSize != null) _packagingFieldLabelSize = labelSize;
-    if (focusedBorderColor != null)
+    if (focusedBorderColor != null) {
       _packagingFieldFocusedBorderColor = focusedBorderColor;
+    }
     _saveSettings();
     notifyListeners();
   }

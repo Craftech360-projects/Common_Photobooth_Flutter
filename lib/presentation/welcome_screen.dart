@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -157,7 +156,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
             child: Image(
               image: settings.isButtonImageAsset
                   ? AssetImage(settings.buttonImagePath!)
-                  : FileImage(File(settings.buttonImagePath!)) as ImageProvider,
+                  : NetworkImage(settings.buttonImagePath!) as ImageProvider,
               fit: BoxFit.contain,
               opacity: AlwaysStoppedAnimation(settings.buttonImageOpacity),
             ),
@@ -172,12 +171,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     if (welcomeSettings.welcomeScreenBackground != null) {
       return welcomeSettings.isWelcomeScreenBackgroundAsset
           ? AssetImage(welcomeSettings.welcomeScreenBackground!)
-          : FileImage(File(welcomeSettings.welcomeScreenBackground!));
+          : NetworkImage(welcomeSettings.welcomeScreenBackground!);
     }
     if (globalSettings.backgroundImage != null) {
       return globalSettings.isAssetImage
           ? AssetImage(globalSettings.backgroundImage!)
-          : FileImage(File(globalSettings.backgroundImage!));
+          : NetworkImage(globalSettings.backgroundImage!);
     }
     return const AssetImage('assets/images/background.jpg');
   }

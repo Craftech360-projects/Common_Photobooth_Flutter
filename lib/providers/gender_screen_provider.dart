@@ -1,9 +1,9 @@
 import 'dart:convert';
-import 'dart:io';
+// import 'dart:io'; // Commented out for web compatibility
 
 import 'package:flutter/material.dart';
-import 'package:path/path.dart' as path;
-import 'package:path_provider/path_provider.dart';
+// import 'package:path/path.dart' as path; // Commented out for web compatibility
+// import 'package:path_provider/path_provider.dart'; // Commented out for web compatibility
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -195,12 +195,13 @@ class GenderSelectionProvider extends ChangeNotifier {
       updateState(sourcePath, true);
     } else {
       try {
-        final appDir = await getApplicationDocumentsDirectory();
-        final fileName =
-            'gender_${DateTime.now().millisecondsSinceEpoch}${path.extension(sourcePath)}';
-        final destinationPath = path.join(appDir.path, fileName);
-        await File(sourcePath).copy(destinationPath);
-        updateState(destinationPath, false);
+        // File operations commented out for web compatibility
+        // final appDir = await getApplicationDocumentsDirectory();
+        // final fileName =
+        //     'gender_${DateTime.now().millisecondsSinceEpoch}${path.extension(sourcePath)}';
+        // final destinationPath = path.join(appDir.path, fileName);
+        // await File(sourcePath).copy(destinationPath);
+        updateState(sourcePath, false); // Just use the source path directly
       } on Exception catch (e) {
         debugPrint('Error copying image: $e');
         return;
@@ -344,20 +345,23 @@ class GenderSelectionProvider extends ChangeNotifier {
     _saveSettings();
   }
 
-  // Add this method to validate file paths before using them
+  // File accessibility checks commented out for web compatibility
   Future<bool> _isFileAccessible(String? filePath) async {
     if (filePath == null) return false;
 
     // For asset paths, we can't check directly
     if (filePath.startsWith('assets/')) return true;
 
-    try {
-      final file = File(filePath);
-      return await file.exists();
-    } on Exception catch (e) {
-      debugPrint('Error checking file accessibility: $e');
-      return false;
-    }
+    // For web, assume all paths are accessible
+    return true;
+    
+    // try {
+    //   final file = File(filePath);
+    //   return await file.exists();
+    // } on Exception catch (e) {
+    //   debugPrint('Error checking file accessibility: $e');
+    //   return false;
+    // }
   }
 
   // Initialize provider from SharedPreferences

@@ -1,10 +1,10 @@
-import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:path/path.dart' as path;
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:http/http.dart' as http;
 import 'package:photobooth_flutter/services/license_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SupabaseService {
   static SupabaseService? _instance;
@@ -31,8 +31,7 @@ class SupabaseService {
         url: url,
         anonKey: anonKey,
       );
-      print("URL: $url");
-      print("ANON KEY: $anonKey");
+
       _client = Supabase.instance.client;
       _isInitialized = true;
       debugPrint('Supabase initialized successfully');
@@ -43,20 +42,19 @@ class SupabaseService {
   }
 
   // Upload image to Supabase storage
-  Future<String?> uploadImage(File imageFile, String? userId,
-      {String bucket = 'outputimages', String prefix = 'face_'}) async {
+  Future<String?> uploadImageBytes(Uint8List imageBytes, String? userId,
+      {String bucket = 'outputimages', String prefix = 'face_', String extension = '.jpg'}) async {
     if (!_isInitialized) {
       throw Exception('Supabase not initialized');
     }
 
     try {
-      final fileExt = path.extension(imageFile.path);
       final fileName =
-          '$prefix${userId ?? DateTime.now().millisecondsSinceEpoch.toString()}_${DateTime.now().millisecondsSinceEpoch}$fileExt';
+          '$prefix${userId ?? DateTime.now().millisecondsSinceEpoch.toString()}_${DateTime.now().millisecondsSinceEpoch}$extension';
 
       await _client.storage.from(bucket).uploadBinary(
             fileName,
-            imageFile.readAsBytesSync(),
+            imageBytes,
             fileOptions: const FileOptions(
               cacheControl: '3600',
               upsert: true,
@@ -66,8 +64,8 @@ class SupabaseService {
       final imageUrl = _client.storage.from(bucket).getPublicUrl(fileName);
       return imageUrl;
     } on StorageException catch (e) {
-      debugPrint(
-          'Storage Exception uploading image: ${e.message}, Status: ${e.statusCode}');
+      // debugPrint(
+      //     'Storage Exception uploading image: ${e.message}, Status: ${e.statusCode}');
       if (e.statusCode == 403 &&
           e.message.contains('row-level security policy')) {
         debugPrint(
@@ -80,8 +78,19 @@ class SupabaseService {
     }
   }
 
-  Future<String?> uploadUserFaceImage(File imageFile) async {
-    return uploadImage(imageFile, null, bucket: 'inputimages', prefix: 'face_');
+  Future<String?> uploadUserFaceImageFromPath(String imagePath) async {
+    try {
+      // For web, imagePath is a blob URL or data URL from camera
+      // We need to fetch the data from this URL
+      final response = await http.get(Uri.parse(imagePath));
+      if (response.statusCode == 200) {
+        return uploadImageBytes(response.bodyBytes, null, bucket: 'inputimages', prefix: 'face_');
+      }
+      return null;
+    } catch (e) {
+      debugPrint('Error uploading user face image: $e');
+      return null;
+    }
   }
 
   Future<String?> storeParticipantDetails({
@@ -143,8 +152,8 @@ class SupabaseService {
 
       final fullPathInBucket = '$genderFolder/$themeFolderName/$imageName';
 
-      debugPrint(
-          'Selecting character image from Supabase path: $fullPathInBucket');
+      // debugPrint(
+      //     'Selecting character image from Supabase path: $fullPathInBucket');
 
       // Get the public URL of the random character image
       final publicUrl =
@@ -155,8 +164,8 @@ class SupabaseService {
           .from('event_output_images')
           .update({'characterimage': publicUrl}).eq('unique_id', uniqueId);
 
-      debugPrint(
-          'Successfully updated characterimage for unique_id: $uniqueId');
+      // debugPrint(
+      //     'Successfully updated characterimage for unique_id: $uniqueId');
     } on Exception catch (e) {
       debugPrint('Error updating character image in Supabase: $e');
       rethrow;

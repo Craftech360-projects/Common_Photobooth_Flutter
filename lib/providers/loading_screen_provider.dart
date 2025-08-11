@@ -1,11 +1,11 @@
 // lib/providers/loading_screen_provider.dart
 
 import 'dart:convert';
-import 'dart:io';
+// import 'dart:io'; // Commented out for web compatibility
 
 import 'package:flutter/material.dart';
-import 'package:path/path.dart' as path;
-import 'package:path_provider/path_provider.dart';
+// import 'package:path/path.dart' as path; // Commented out for web compatibility
+// import 'package:path_provider/path_provider.dart'; // Commented out for web compatibility
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -66,8 +66,12 @@ class LoadingScreenProvider extends ChangeNotifier {
 
   // --- Setters ---
   void setTitleStyle({
-    bool? show, String? text, double? fontSize,
-    FontWeight? fontWeight, Color? color, double? opacity,
+    bool? show,
+    String? text,
+    double? fontSize,
+    FontWeight? fontWeight,
+    Color? color,
+    double? opacity,
     TextAlign? alignment,
   }) {
     if (show != null) _showTitle = show;
@@ -105,9 +109,9 @@ class LoadingScreenProvider extends ChangeNotifier {
 
   Future<void> setLoaderAsset(String? sourcePath) async {
     if (sourcePath == null) return;
-    final extension = path.extension(sourcePath).toLowerCase();
+    final extension = sourcePath.substring(sourcePath.lastIndexOf('.')).toLowerCase();
     final type = (extension == '.mp4' || extension == '.mov') ? 'video' : 'gif';
-    
+
     await _setFile(sourcePath, false, (p, a) {
       _loaderAssetPath = p!;
       _isLoaderAsset = a;
@@ -115,26 +119,53 @@ class LoadingScreenProvider extends ChangeNotifier {
     });
   }
 
-  void setShowBackground(bool show) { _showBackground = show; _saveAndNotify(); }
-  Future<void> setBackgroundImage(String? path) async { await _setFile(path, false, (p, a) { _backgroundImagePath = p; _isBackgroundImageAsset = a; }); }
+  void setShowBackground(bool show) {
+    _showBackground = show;
+    _saveAndNotify();
+  }
 
-  Future<void> _setFile(String? sourcePath, bool isAsset, Function(String?, bool) updateState) async {
-    if (sourcePath == null) { updateState(null, true); }
-    else if (isAsset) { updateState(sourcePath, true); }
-    else {
+  Future<void> setBackgroundImage(String? path) async {
+    await _setFile(path, false, (p, a) {
+      _backgroundImagePath = p;
+      _isBackgroundImageAsset = a;
+    });
+  }
+
+  Future<void> _setFile(String? sourcePath, bool isAsset,
+      Function(String?, bool) updateState) async {
+    if (sourcePath == null) {
+      updateState(null, true);
+    } else if (isAsset) {
+      updateState(sourcePath, true);
+    } else {
       try {
-        final appDir = await getApplicationDocumentsDirectory();
-        final fileName = 'loading_${DateTime.now().millisecondsSinceEpoch}${path.extension(sourcePath)}';
-        final destinationPath = path.join(appDir.path, fileName);
-        await File(sourcePath).copy(destinationPath);
-        updateState(destinationPath, false);
-      } on Exception catch (e) { debugPrint('Error copying file: $e'); return; }
+        // File operations commented out for web compatibility
+        // final appDir = await getApplicationDocumentsDirectory();
+        // final fileName =
+        //     'loading_${DateTime.now().millisecondsSinceEpoch}${path.extension(sourcePath)}';
+        // final destinationPath = path.join(appDir.path, fileName);
+        // await File(sourcePath).copy(destinationPath);
+        updateState(sourcePath, false); // Just use the source path directly
+      } on Exception catch (e) {
+        debugPrint('Error copying file: $e');
+        return;
+      }
     }
     _saveAndNotify();
   }
 
-  Future<void> init() async { if (_isInitialized) return; _prefs = await SharedPreferences.getInstance(); await _loadSettings(); _isInitialized = true; }
-  void _saveAndNotify() { if (!_isInitialized) return; _saveSettings(); notifyListeners(); }
+  Future<void> init() async {
+    if (_isInitialized) return;
+    _prefs = await SharedPreferences.getInstance();
+    await _loadSettings();
+    _isInitialized = true;
+  }
+
+  void _saveAndNotify() {
+    if (!_isInitialized) return;
+    _saveSettings();
+    notifyListeners();
+  }
 
   Future<void> _loadSettings() async {
     final jsonString = _prefs.getString('loading_screen_settings_v2');
@@ -144,17 +175,20 @@ class LoadingScreenProvider extends ChangeNotifier {
       _showTitle = settings['showTitle'] ?? _showTitle;
       _titleText = settings['titleText'] ?? _titleText;
       _titleFontSize = settings['titleFontSize'] ?? _titleFontSize;
-      _titleFontWeight = FontWeight.values[settings['titleFontWeight'] ?? _titleFontWeight.index];
+      _titleFontWeight = FontWeight
+          .values[settings['titleFontWeight'] ?? _titleFontWeight.index];
       _titleColor = Color(settings['titleColor'] ?? _titleColor.value);
       _titleOpacity = settings['titleOpacity'] ?? _titleOpacity;
       _titleTop = settings['titleTop'] ?? _titleTop;
       _titleWidth = settings['titleWidth'] ?? _titleWidth;
-      _titleAlignment = TextAlign.values[settings['titleAlignment'] ?? _titleAlignment.index];
+      _titleAlignment =
+          TextAlign.values[settings['titleAlignment'] ?? _titleAlignment.index];
       // Loader
       _loaderAssetPath = settings['loaderAssetPath'] ?? _loaderAssetPath;
       _isLoaderAsset = settings['isLoaderAsset'] ?? _isLoaderAsset;
       _loaderAssetType = settings['loaderAssetType'] ?? _loaderAssetType;
-      _loaderIsFullscreen = settings['loaderIsFullscreen'] ?? _loaderIsFullscreen;
+      _loaderIsFullscreen =
+          settings['loaderIsFullscreen'] ?? _loaderIsFullscreen;
       _loaderWidth = settings['loaderWidth'] ?? _loaderWidth;
       _loaderHeight = settings['loaderHeight'] ?? _loaderHeight;
       _loaderTop = settings['loaderTop'] ?? _loaderTop;
@@ -162,7 +196,8 @@ class LoadingScreenProvider extends ChangeNotifier {
       // Background
       _showBackground = settings['showBackground'] ?? _showBackground;
       _backgroundImagePath = settings['backgroundImagePath'];
-      _isBackgroundImageAsset = settings['isBackgroundImageAsset'] ?? _isBackgroundImageAsset;
+      _isBackgroundImageAsset =
+          settings['isBackgroundImageAsset'] ?? _isBackgroundImageAsset;
     }
     notifyListeners();
   }
@@ -170,17 +205,22 @@ class LoadingScreenProvider extends ChangeNotifier {
   Future<void> _saveSettings() async {
     final settings = {
       // Title
-      'showTitle': _showTitle, 'titleText': _titleText, 'titleFontSize': _titleFontSize,
-      'titleFontWeight': _titleFontWeight.index, 'titleColor': _titleColor.value,
-      'titleOpacity': _titleOpacity, 'titleTop': _titleTop, 'titleWidth': _titleWidth,
+      'showTitle': _showTitle, 'titleText': _titleText,
+      'titleFontSize': _titleFontSize,
+      'titleFontWeight': _titleFontWeight.index,
+      'titleColor': _titleColor.value,
+      'titleOpacity': _titleOpacity, 'titleTop': _titleTop,
+      'titleWidth': _titleWidth,
       'titleAlignment': _titleAlignment.index,
       // Loader
       'loaderAssetPath': _loaderAssetPath, 'isLoaderAsset': _isLoaderAsset,
-      'loaderAssetType': _loaderAssetType, 'loaderIsFullscreen': _loaderIsFullscreen,
+      'loaderAssetType': _loaderAssetType,
+      'loaderIsFullscreen': _loaderIsFullscreen,
       'loaderWidth': _loaderWidth, 'loaderHeight': _loaderHeight,
       'loaderTop': _loaderTop, 'loaderLeft': _loaderLeft,
       // Background
-      'showBackground': _showBackground, 'backgroundImagePath': _backgroundImagePath,
+      'showBackground': _showBackground,
+      'backgroundImagePath': _backgroundImagePath,
       'isBackgroundImageAsset': _isBackgroundImageAsset,
     };
     await _prefs.setString('loading_screen_settings_v2', jsonEncode(settings));

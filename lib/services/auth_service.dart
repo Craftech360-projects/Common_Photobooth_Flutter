@@ -30,7 +30,6 @@ class AuthService {
   }) async {
     _apiUrl = apiUrl;
     _isInitialized = true;
-    debugPrint('Auth service initialized with URL: $_apiUrl');
 
     // Check if we have a stored authentication
     await _loadAuthState();

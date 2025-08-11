@@ -13,8 +13,8 @@ class EmailService {
     required String? privateKey,
   }) async {
     // NEW: Log the attempt before sending
-    debugPrint(
-        'Attempting to send email via EmailJS to: $toEmail with template: $templateId');
+    // debugPrint(
+    //     'Attempting to send email via EmailJS to: $toEmail with template: $templateId');
 
     if (serviceId == null ||
         templateId == null ||
@@ -41,7 +41,7 @@ class EmailService {
 
       // NEW: Log the exact payload being sent (excluding private key for security)
       final sanitizedData = Map.from(data)..remove('accessToken');
-      debugPrint('Sending payload: ${json.encode(sanitizedData)}');
+      // debugPrint('Sending payload: ${json.encode(sanitizedData)}');
 
       final response = await http.post(
         url,
@@ -53,8 +53,8 @@ class EmailService {
 
       if (response.statusCode == 200) {
         // UPDATED: More detailed success log
-        debugPrint(
-            'Email sent successfully to $toEmail. Response: ${response.body}');
+        // debugPrint(
+        //     'Email sent successfully to $toEmail. Response: ${response.body}');
       } else {
         // UPDATED: More detailed failure log
         debugPrint(

@@ -18,7 +18,7 @@ class LicenseService {
   LicenseService._internal();
 
   Future<LicenseVerificationResult> verifyLicense(String certificate) async {
-    debugPrint("[LicenseService] Starting license verification...");
+
     try {
       final parts = certificate.split('.');
       if (parts.length != 3) {
@@ -29,19 +29,19 @@ class LicenseService {
       }
 
       // Verify Signature
-      debugPrint("[LicenseService] Verifying signature...");
+      // debugPrint("[LicenseService] Verifying signature...");
       final signatureValid = _verifySignature(parts[0], parts[1], parts[2]);
       if (!signatureValid) {
         debugPrint("[LicenseService] FAILED: Invalid certificate signature.");
         return LicenseVerificationResult(
             isValid: false, message: 'Invalid certificate signature');
       }
-      debugPrint("[LicenseService] Signature is valid.");
+      // debugPrint("[LicenseService] Signature is valid.");
 
       // Decode Payload
       final payload = json
           .decode(utf8.decode(base64Url.decode(base64Url.normalize(parts[1]))));
-      debugPrint("[LicenseService] Decoded Payload: $payload");
+      // debugPrint("[LicenseService] Decoded Payload: $payload");
 
       // Check Expiration
       final expirationString = payload['end_date_time'];
@@ -53,21 +53,21 @@ class LicenseService {
       }
 
       final expiration = DateTime.parse(expirationString);
-      debugPrint("[LicenseService] License expires at (UTC): $expiration");
+      // debugPrint("[LicenseService] License expires at (UTC): $expiration");
 
       final currentTime = await _getSecureTime();
-      debugPrint("[LicenseService] Current time (UTC): $currentTime");
+      // debugPrint("[LicenseService] Current time (UTC): $currentTime");
 
       if (currentTime.isAfter(expiration)) {
         debugPrint("[LicenseService] FAILED: License has expired.");
         return LicenseVerificationResult(
             isValid: false, message: 'License has expired');
       }
-      debugPrint("[LicenseService] License is not expired.");
+      // debugPrint("[LicenseService] License is not expired.");
 
       // If all checks pass
       await _storeLicenseData(payload, expiration.millisecondsSinceEpoch);
-      debugPrint("[LicenseService] SUCCESS: License verified and data stored.");
+      // debugPrint("[LicenseService] SUCCESS: License verified and data stored.");
       return LicenseVerificationResult(
         isValid: true,
         message: 'License verified successfully',
@@ -90,9 +90,7 @@ class LicenseService {
 
     // Added logging for easier debugging
     if (calculatedSignature != receivedSignature) {
-      debugPrint("Signature Mismatch:");
-      debugPrint("  Calculated: $calculatedSignature");
-      debugPrint("  Received:   $receivedSignature");
+      debugPrint("Signature Mismatch: Calculated: $calculatedSignature, Received: $receivedSignature");
       return false;
     }
     return true;

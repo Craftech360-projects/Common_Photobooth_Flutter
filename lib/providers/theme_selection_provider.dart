@@ -1,8 +1,8 @@
-import 'dart:io';
+// import 'dart:io'; // Commented out for web compatibility
 
 import 'package:flutter/material.dart';
-import 'package:path/path.dart' as path;
-import 'package:path_provider/path_provider.dart';
+// import 'package:path/path.dart' as path; // Commented out for web compatibility
+// import 'package:path_provider/path_provider.dart'; // Commented out for web compatibility
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -227,12 +227,13 @@ class ThemeSelectionProvider extends ChangeNotifier {
       updateState(sourcePath, true);
     } else {
       try {
-        final appDir = await getApplicationDocumentsDirectory();
-        final fileName =
-            'theme_${DateTime.now().millisecondsSinceEpoch}${path.extension(sourcePath)}';
-        final destinationPath = path.join(appDir.path, fileName);
-        await File(sourcePath).copy(destinationPath);
-        updateState(destinationPath, false);
+        // File operations commented out for web compatibility
+        // final appDir = await getApplicationDocumentsDirectory();
+        // final fileName =
+        //     'theme_${DateTime.now().millisecondsSinceEpoch}${path.extension(sourcePath)}';
+        // final destinationPath = path.join(appDir.path, fileName);
+        // await File(sourcePath).copy(destinationPath);
+        updateState(sourcePath, false); // Just use the source path directly
       } on Exception catch (e) {
         debugPrint('Error copying image: $e');
         return;

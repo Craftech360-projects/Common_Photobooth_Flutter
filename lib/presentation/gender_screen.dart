@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -199,7 +198,7 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
           image: DecorationImage(
             image: isAsset
                 ? AssetImage(imagePath)
-                : FileImage(File(imagePath)) as ImageProvider,
+                : NetworkImage(imagePath) as ImageProvider,
             fit: BoxFit.contain,
           ),
           boxShadow: isSelected &&
@@ -238,7 +237,7 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
               image: DecorationImage(
                 image: settings.isButtonImageAsset
                     ? AssetImage(settings.buttonImagePath!)
-                    : FileImage(File(settings.buttonImagePath!))
+                    : NetworkImage(settings.buttonImagePath!)
                         as ImageProvider,
                 fit: BoxFit.contain,
               ),
@@ -285,7 +284,7 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
       if (settings.isBackgroundImageAsset) {
         return AssetImage(settings.backgroundImagePath!);
       } else {
-        return FileImage(File(settings.backgroundImagePath!));
+        return NetworkImage(settings.backgroundImagePath!);
       }
     }
 
@@ -293,7 +292,7 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
       if (globalSettings.isAssetImage) {
         return AssetImage(globalSettings.backgroundImage!);
       } else {
-        return FileImage(File(globalSettings.backgroundImage!));
+        return NetworkImage(globalSettings.backgroundImage!);
       }
     }
     return const AssetImage('assets/images/common_bg.png');

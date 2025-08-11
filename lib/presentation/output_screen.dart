@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
@@ -272,7 +271,7 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
                   image: DecorationImage(
                       image: settings.isDoneButtonImageAsset
                           ? AssetImage(settings.doneButtonImagePath!)
-                          : FileImage(File(settings.doneButtonImagePath!))
+                          : NetworkImage(settings.doneButtonImagePath!)
                               as ImageProvider,
                       fit: BoxFit.contain))));
     }
@@ -291,18 +290,14 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
     if (isPlaceholder) {
       return Image.asset(imageUrl, fit: BoxFit.cover);
     }
-    if (!imageUrl.startsWith('http')) {
-      return Image.file(File.fromUri(Uri.file(imageUrl)), fit: BoxFit.cover);
-    } else {
-      return Image.network(imageUrl,
-          fit: BoxFit.cover,
-          loadingBuilder: (context, child, progress) => progress == null
-              ? child
-              : const Center(child: CircularProgressIndicator()),
-          errorBuilder: (context, error, stack) => const Center(
-              child: Text('Error loading image',
-                  style: TextStyle(color: Colors.red))));
-    }
+    return Image.network(imageUrl,
+        fit: BoxFit.cover,
+        loadingBuilder: (context, child, progress) => progress == null
+            ? child
+            : const Center(child: CircularProgressIndicator()),
+        errorBuilder: (context, error, stack) => const Center(
+            child: Text('Error loading image',
+                style: TextStyle(color: Colors.red))));
   }
 
   ImageProvider _getBackgroundImage(
@@ -317,7 +312,7 @@ class _SwappedFaceScreenState extends State<SwappedFaceScreen> {
     if (path != null) {
       return isAsset
           ? AssetImage(path)
-          : FileImage(File(path)) as ImageProvider;
+          : NetworkImage(path) as ImageProvider;
     }
     return const AssetImage('assets/images/common_bg.png');
   }

@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -334,7 +333,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               image: DecorationImage(
                 image: settings.isButtonImageAsset
                     ? AssetImage(settings.buttonImagePath!)
-                    : FileImage(File(settings.buttonImagePath!))
+                    : NetworkImage(settings.buttonImagePath!)
                         as ImageProvider,
                 fit: BoxFit.contain,
               ),
@@ -424,15 +423,15 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       if (registrationSettings.isRegistrationScreenBackgroundAsset) {
         return AssetImage(registrationSettings.registrationScreenBackground!);
       } else {
-        return FileImage(
-            File(registrationSettings.registrationScreenBackground!));
+        return NetworkImage(
+            registrationSettings.registrationScreenBackground!);
       }
     }
     if (globalSettings.backgroundImage != null) {
       if (globalSettings.isAssetImage) {
         return AssetImage(globalSettings.backgroundImage!);
       } else {
-        return FileImage(File(globalSettings.backgroundImage!));
+        return NetworkImage(globalSettings.backgroundImage!);
       }
     }
     return const AssetImage('assets/images/common_bg.png');

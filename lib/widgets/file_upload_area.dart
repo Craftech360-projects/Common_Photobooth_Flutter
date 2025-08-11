@@ -1,7 +1,5 @@
 // lib/widgets/file_upload_area.dart
 
-import 'dart:io';
-
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:photobooth_flutter/core/themes/app_colors.dart';
@@ -24,7 +22,7 @@ class FileUploadArea extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final fileName = selectedFile != null
-        ? File(selectedFile!).path.split(Platform.pathSeparator).last
+        ? selectedFile!.split('/').last
         : null;
 
     return GestureDetector(
